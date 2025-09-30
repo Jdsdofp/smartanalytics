@@ -169,13 +169,6 @@ O projeto utiliza breakpoints do Tailwind CSS:
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## 👤 Autor
-
-**Jaderson Moreira**
-
-- GitHub: [@jadersonmoreira](https://github.com/jadersonmoreira)
-
-## 🙏 Agradecimentos
 
 - [React Team](https://react.dev/)
 - [Tailwind Labs](https://tailwindcss.com/)
