@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Cores Primary */
+  /* Cores Primary (padrão - podem ser sobrescritas dinamicamente) */
   --color-primary-50: #f0f9ff;
   --color-primary-100: #e0f2fe;
   --color-primary-200: #bae6fd;
@@ -42,3 +42,223 @@
 }
 
 @variant dark (&:is(.dark *));
+
+/* Variáveis CSS customizadas para tema dinâmico da empresa */
+:root {
+  /* Essas variáveis serão definidas via JavaScript pelo useCompany hook */
+  --color-primary: #0ea5e9;
+  --color-primary-dark: #0284c7;
+  --color-accent: #f97316;
+  --color-font-title: #ffffff;
+  --color-font-subtitle: #ffffff;
+  --color-menu-background: #0ea5e9;
+  --color-logo-background: #0ea5e9;
+  --color-footer-background: #0ea5e9;
+}
+
+/* Classes utilitárias para usar as cores da empresa */
+.bg-company-primary {
+  background-color: var(--color-primary);
+}
+
+.text-company-primary {
+  color: var(--color-primary);
+}
+
+.border-company-primary {
+  border-color: var(--color-primary);
+}
+
+.hover\:bg-company-primary:hover {
+  background-color: var(--color-primary);
+}
+
+.bg-company-primary-dark {
+  background-color: var(--color-primary-dark);
+}
+
+.text-company-primary-dark {
+  color: var(--color-primary-dark);
+}
+
+.bg-company-accent {
+  background-color: var(--color-accent);
+}
+
+.text-company-accent {
+  color: var(--color-accent);
+}
+
+/* Classes para textos do tema */
+.text-company-title {
+  color: var(--color-font-title);
+}
+
+.text-company-subtitle {
+  color: var(--color-font-subtitle);
+}
+
+/* Estilos para loading spinner com cor da empresa */
+.spinner-company {
+  border-color: var(--color-primary);
+  border-top-color: transparent;
+}
+
+/* Animação de loading */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-company {
+  animation: spin 1s linear infinite;
+}
+
+/* Botão customizado com cor da empresa */
+.btn-company {
+  background-color: var(--color-primary);
+  color: var(--color-font-title);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-company:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-company:active {
+  transform: translateY(0);
+}
+
+.btn-company:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Card com border da cor da empresa */
+.card-company {
+  border: 2px solid var(--color-primary);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.2s;
+}
+
+.card-company:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Badge com cor da empresa */
+.badge-company {
+  background-color: var(--color-primary);
+  color: var(--color-font-title);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Scroll bar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-dark);
+}
+
+/* Dark mode para scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+/* Gradiente com cor da empresa */
+.gradient-company {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
+}
+
+/* Input com foco na cor da empresa */
+.input-company:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  ring: 2px;
+  ring-color: var(--color-primary);
+  ring-opacity: 0.5;
+}
+
+/* Link com cor da empresa */
+.link-company {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.link-company:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+/* Divisor com cor da empresa */
+.divider-company {
+  height: 2px;
+  background-color: var(--color-primary);
+  opacity: 0.2;
+}
+
+/* Alert com cor da empresa */
+.alert-company {
+  background-color: color-mix(in srgb, var(--color-primary) 10%, white);
+  border-left: 4px solid var(--color-primary);
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* Animação de fade in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Animação de slide in */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}

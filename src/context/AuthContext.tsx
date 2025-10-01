@@ -1,16 +1,25 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import axios from 'axios'
 
 interface User {
   id: string
   name: string
   email: string
+  login: string
+  role: string
+  type: string
+  active: boolean
+  timeZone: string
+  companyId: number
+  companyName: string
+  webKey: string
 }
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<void>
+  // register: (name: string, email: string, password: string) => Promise<void>
   logout: () => void
   isLoading: boolean
 }
@@ -21,76 +30,93 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Verifica se há usuário salvo no localStorage ao iniciar
+  // Verifica se há usuário salvo ao iniciar
   useEffect(() => {
-    const savedUser = localStorage.getItem('user')
-    if (savedUser) {
+    const savedUser = sessionStorage.getItem('user')
+    const savedwebKey = sessionStorage.getItem('webKey')
+    
+    if (savedUser && savedwebKey) {
       setUser(JSON.parse(savedUser))
     }
     setIsLoading(false)
   }, [])
 
-  const login = async (email: string, password: string) => {
-    // Simula uma chamada à API
-    // Substitua isso pela sua chamada real à API
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Validação básica (substitua pela validação real)
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    const foundUser = users.find((u: any) => u.email === email && u.password === password)
-    
-    if (!foundUser) {
-      throw new Error('Email ou senha incorretos')
-    }
+  const login = async (username: string, password: string) => {
+    try {
+      const options = {
+        method: 'post',
+        url: 'https://smartmachine.smartxhub.cloud/unified-auth',
+        headers: {
+          'Accept': '*/*',
+          'User-Agent': 'Flashpost',
+          'Content-Type': 'application/json'
+        },
+        data: {
+          login: username,
+          password: password
+        }
+      }
 
-    const userData = {
-      id: foundUser.id,
-      name: foundUser.name,
-      email: foundUser.email
+      const response = await axios.request(options)
+      
+      // Verifica se o login foi bem-sucedido
+      if (!response.data.success || response.data.authentication.status !== 'authenticated') {
+        throw new Error('Falha na autenticação')
+      }
+
+      const authData = response.data.authentication
+      const companyData = response.data.company
+      const profile = authData.user_profile
+
+      // Extrai os dados do usuário
+      const userData = {
+        id: profile.id.toString(),
+        name: profile.firstName && profile.lastName 
+          ? `${profile.firstName} ${profile.lastName}`.trim() 
+          : profile.userName || profile.login,
+        email: profile.email,
+        login: profile.login,
+        role: profile.role,
+        type: profile.type,
+        active: profile.active,
+        timeZone: profile.timeZone,
+        companyId: response.data.company_id,
+        companyName: companyData.details.full_name,
+        webKey: authData.web_key.key
+      }
+
+      setUser(userData)
+      sessionStorage.setItem('user', JSON.stringify(userData))
+      sessionStorage.setItem('webKey', authData.web_key.key)
+      sessionStorage.setItem('companyData', JSON.stringify(companyData))
+      sessionStorage.setItem('theme', JSON.stringify(response.data.theme))
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.message || 
+          'Erro ao fazer login. Verifique suas credenciais.'
+        )
+      }
+      throw new Error('Erro ao conectar com o servidor')
     }
-    
-    setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
   }
 
-  const register = async (name: string, email: string, password: string) => {
-    // Simula uma chamada à API
-    await new Promise(resolve => setTimeout(resolve, 1000))
+  // const register = async (name: string, email: string, password: string) => {
+  //   // Se você tiver um endpoint de registro, implemente aqui
+  //   // Por enquanto, mantendo a lógica de fallback
+  //   await new Promise(resolve => setTimeout(resolve, 1000))
     
-    // Validação básica
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    
-    if (users.some((u: any) => u.email === email)) {
-      throw new Error('Email já cadastrado')
-    }
-
-    const newUser = {
-      id: Date.now().toString(),
-      name,
-      email,
-      password // Em produção, NUNCA salve senhas sem criptografia!
-    }
-    
-    users.push(newUser)
-    localStorage.setItem('users', JSON.stringify(users))
-    
-    const userData = {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email
-    }
-    
-    setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
-  }
+  //   throw new Error('Funcionalidade de registro não implementada. Entre em contato com o administrador.')
+  // }
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('user')
+    sessionStorage.removeItem('user')
+    sessionStorage.removeItem('webKey')
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

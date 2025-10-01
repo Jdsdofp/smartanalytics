@@ -17,6 +17,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline'
+import { useAuth } from '../../context/AuthContext'
+import { useCompany } from '../hooks/useCompany'
 
 interface MenuItemProps {
   icon: React.ComponentType<{ className?: string }>
@@ -32,6 +34,7 @@ function MenuItem({ icon: Icon, label, active, badge, onClick, children, collaps
   const [isOpen, setIsOpen] = useState(false)
   const [showPopover, setShowPopover] = useState(false)
   const [popoverPosition, setPopoverPosition] = useState({ top: 100, left: 0 })
+  const { primaryColor } = useCompany()
 
   const hasChildren = children && children.length > 0
 
@@ -64,9 +67,13 @@ function MenuItem({ icon: Icon, label, active, badge, onClick, children, collaps
           className={`w-full flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-4 py-3 rounded-lg
                      transition-colors group relative
                      ${active
-              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 cursor-pointer'
+              ? 'text-gray-700 dark:text-gray-300 cursor-pointer'
               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer'
             }`}
+          style={active ? {
+            backgroundColor: `${primaryColor}15`,
+            color: primaryColor
+          } : undefined}
         >
           <div className={`flex items-center ${collapsed ? '' : 'gap-3'}`}>
             <Icon className="w-5 h-5 flex-shrink-0" />
@@ -172,7 +179,6 @@ function MenuItem({ icon: Icon, label, active, badge, onClick, children, collaps
               {children.map((child, index) => (
                 <div key={index} className="relative">
                   <div className="absolute left-4 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-gray-300 dark:border-gray-600 rounded-bl-lg" />
-                  {/* Linha em L arredondada */}
 
                   {/* Linha vertical conectando aos próximos itens (exceto o último) */}
                   {index < children.length - 1 && (
@@ -184,13 +190,11 @@ function MenuItem({ icon: Icon, label, active, badge, onClick, children, collaps
              text-gray-700 dark:text-gray-300
              transition-colors text-left
              before:absolute before:inset-0 before:left-8 before:right-2 before:rounded-lg 
-             before:bg-transparent hover:before:bg-gray-100 dark:hover:before:bg-gray-700 before:-z-10 cursor-pointer"
+             before:bg-transparent hover:before:bg-gray-100 dark:hover:before:bg-gray-700 before:-z-10 "
                   >
                     <child.icon className="w-4 h-4 flex-shrink-0 relative z-10" />
                     <span className="text-sm relative z-10">{child.label}</span>
                   </button>
-
-
                 </div>
               ))}
             </div>
@@ -208,6 +212,8 @@ interface MenuProps {
 
 function Menu({ isOpen = true, onClose }: MenuProps) {
   const [collapsed, setCollapsed] = useState(false)
+  const { logout, user } = useAuth()
+  const { company, primaryColor } = useCompany()
 
   useEffect(() => {
     const handleResize = () => {
@@ -286,8 +292,11 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           <div className="h-16 flex items-center justify-between px-4 border-b 
                          border-gray-200 dark:border-gray-800 flex-shrink-0">
             {!collapsed && (
-              <h2 className="text-lg font-bold text-blue-600 dark:text-blue-400 truncate">
-                Menu
+              <h2 
+                className="text-lg font-bold truncate"
+                style={{ color: primaryColor || '#0ea5e9' }}
+              >
+                {company?.full_name || 'Menu'}
               </h2>
             )}
 
@@ -298,11 +307,12 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
                 title={collapsed ? 'Expandir menu' : 'Recolher menu'}
                 className="hidden lg:block p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800
                          transition-colors flex-shrink-0"
+                style={{ color: primaryColor || '#0ea5e9' }}
               >
                 {collapsed ? (
-                  <ChevronRightIcon className="w-5 h-5 text-blue-600" />
+                  <ChevronRightIcon className="w-5 h-5" />
                 ) : (
-                  <ChevronLeftIcon className="w-5 h-5 text-blue-600" />
+                  <ChevronLeftIcon className="w-5 h-5" />
                 )}
               </button>
 
@@ -316,6 +326,30 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
               </button>
             </div>
           </div>
+
+          {/* User Info - apenas quando expandido */}
+          {!collapsed && (
+            <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: primaryColor || '#0ea5e9' }}
+                >
+                  <span className="text-white font-semibold text-sm">
+                    {user?.name?.split(' ').map(n => n.charAt(0).toUpperCase()).join('').slice(0, 2) || 'U'}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    {user?.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Menu Items */}
           <nav className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-2">
@@ -331,7 +365,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           {/* Footer */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0">
             <button
-              onClick={() => alert('Logout')}
+              onClick={logout}
               title={collapsed ? 'Sair' : undefined}
               className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-lg
                        text-red-600 dark:text-red-400

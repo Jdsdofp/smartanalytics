@@ -10,7 +10,7 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { register, user } = useAuth()
+  const {  user } = useAuth() //register,
   const navigate = useNavigate()
 
       // Redireciona se já estiver autenticado
@@ -37,7 +37,7 @@ export default function Register() {
     setIsLoading(true)
 
     try {
-      await register(name, email, password)
+      // await register(name, email, password)
       navigate('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer cadastro')
