@@ -1,11 +1,15 @@
 // src/components/layout/Header.tsx
-import ThemeToggle from '../ThemeToggle'
+import ThemeToggle from '../ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
+
 
 interface HeaderProps {
   onMenuClick?: () => void
 }
 
 function Header({ onMenuClick }: HeaderProps) {
+  const { user } = useAuth()
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800
                        bg-white dark:bg-gray-900 shadow-sm">
@@ -35,12 +39,12 @@ function Header({ onMenuClick }: HeaderProps) {
 
           {/* Logo + Nome */}
           <div className="flex items-center gap-3">
-            <img 
-              src="/logo_smartxanalytics.png" 
-              alt="Smart Analytics Logo" 
-              className="h-15 w-15 object-contain"
+            <img
+              src="/logo10.png"
+              alt="Smart Analytics Logo"
+              className="h-20 w-20 object-contain"
             />
-            <h1 className="text-xl font-bold text-primary-600 dark:text-primary-400">
+            <h1 className="text-xl font-bold text-primary-600 dark:text-primary-400 max-[400px]:hidden">
               Smart Analytics
             </h1>
           </div>
@@ -88,11 +92,16 @@ function Header({ onMenuClick }: HeaderProps) {
 
           {/* User Avatar */}
           <button className="flex items-center gap-2 p-2 rounded-lg
-                           hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                     hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">JM</span>
+              <span className="text-white font-semibold text-sm">
+                {user?.name
+                  ? user.name.split(' ').map(n => n.charAt(0).toUpperCase()).join('')
+                  : ''}
+              </span>
             </div>
           </button>
+
         </div>
       </div>
     </header>
