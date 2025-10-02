@@ -9,6 +9,7 @@ import {
   BriefcaseIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface ChartData {
   name: string;
@@ -48,13 +49,14 @@ interface DepartmentScore {
 
 export default function PeopleComponent() {
   const { darkMode } = useTheme();
+  const { t } = useTranslation();
 
-  // Dados simulados baseados no Grafana
+ // Dados simulados baseados no Grafana
   const complianceMetrics: ComplianceMetric[] = [
     { metrica: 'CONFORMIDADE_GERAL', valor: 87.5, unidade: '%' },
     { metrica: 'PAUSAS_ADEQUADAS', valor: 92.3, unidade: '%' },
-    { metrica: 'VIOLACOES_JORNADA', valor: 3, unidade: 'funcionários' },
-    { metrica: 'ALERTAS_CRITICOS', valor: 7, unidade: 'ocorrências' }
+    { metrica: 'VIOLACOES_JORNADA', valor: 3, unidade: t('people.employees') },
+    { metrica: 'ALERTAS_CRITICOS', valor: 7, unidade: t('people.occurrences') }
   ];
 
   const workTimeData: ChartData[] = [
@@ -69,26 +71,26 @@ export default function PeopleComponent() {
   ];
 
   const departmentScores: DepartmentScore[] = [
-    { department: 'TI', totalEmployees: 25, avgScore: 89.5, status: 'EXCELENTE 🟢', compliant: 23, critical: 0 },
-    { department: 'Operações', totalEmployees: 45, avgScore: 78.2, status: 'BOM 🟡', compliant: 38, critical: 2 },
-    { department: 'Logística', totalEmployees: 32, avgScore: 72.8, status: 'REGULAR 🟠', compliant: 25, critical: 4 },
-    { department: 'Produção', totalEmployees: 58, avgScore: 65.3, status: 'REGULAR 🟠', compliant: 42, critical: 8 }
+    { department: 'TI', totalEmployees: 25, avgScore: 89.5, status: t('people.status.excellent'), compliant: 23, critical: 0 },
+    { department: 'Operações', totalEmployees: 45, avgScore: 78.2, status: t('people.status.good'), compliant: 38, critical: 2 },
+    { department: 'Logística', totalEmployees: 32, avgScore: 72.8, status: t('people.status.regular'), compliant: 25, critical: 4 },
+    { department: 'Produção', totalEmployees: 58, avgScore: 65.3, status: t('people.status.regular'), compliant: 42, critical: 8 }
   ];
 
   const employeeScores: EmployeeScore[] = [
-    { name: 'João Silva', department: 'TI', score: 95, status: 'EXCELENTE 🟢', workHours: 8.2 },
-    { name: 'Maria Santos', department: 'Operações', score: 88, status: 'EXCELENTE 🟢', workHours: 7.9 },
-    { name: 'Pedro Costa', department: 'TI', score: 86, status: 'EXCELENTE 🟢', workHours: 8.1 },
-    { name: 'Ana Lima', department: 'Logística', score: 75, status: 'BOM 🟡', workHours: 8.5 },
-    { name: 'Carlos Souza', department: 'Produção', score: 68, status: 'REGULAR 🟠', workHours: 8.8 },
-    { name: 'Juliana Alves', department: 'Operações', score: 82, status: 'BOM 🟡', workHours: 8.0 }
+    { name: 'João Silva', department: 'TI', score: 95, status: t('people.status.excellent'), workHours: 8.2 },
+    { name: 'Maria Santos', department: 'Operações', score: 88, status: t('people.status.excellent'), workHours: 7.9 },
+    { name: 'Pedro Costa', department: 'TI', score: 86, status: t('people.status.excellent'), workHours: 8.1 },
+    { name: 'Ana Lima', department: 'Logística', score: 75, status: t('people.status.good'), workHours: 8.5 },
+    { name: 'Carlos Souza', department: 'Produção', score: 68, status: t('people.status.regular'), workHours: 8.8 },
+    { name: 'Juliana Alves', department: 'Operações', score: 82, status: t('people.status.good'), workHours: 8.0 }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">
-          Gestão de Pessoas - NR36
+          {t('people.title')}
         </h1>
 
         {/* Métricas de Conformidade */}
@@ -101,30 +103,30 @@ export default function PeopleComponent() {
         {/* Cards de Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard
-            title="EM TRABALHO"
+            title={t('people.stats.working')}
             value="45.2h"
-            subtitle="Tempo total"
+            subtitle={t('people.stats.totalTime')}
             icon={BriefcaseIcon}
             color="bg-green-500"
           />
           <StatCard
-            title="EM PAUSA"
+            title={t('people.stats.onBreak')}
             value="8.3h"
-            subtitle="Tempo total"
+            subtitle={t('people.stats.totalTime')}
             icon={ClockIcon}
             color="bg-red-500"
           />
           <StatCard
-            title="MÉDIA DIF."
+            title={t('people.stats.avgDifference')}
             value="-12 min"
-            subtitle="Planejado vs Real"
+            subtitle={t('people.stats.plannedVsActual')}
             icon={ChartBarIcon}
             color="bg-blue-500"
           />
           <StatCard
-            title="ATIVOS"
+            title={t('people.stats.active')}
             value="156"
-            subtitle="Funcionários"
+            subtitle={t('people.employees')}
             icon={UserGroupIcon}
             color="bg-purple-500"
           />
@@ -134,26 +136,26 @@ export default function PeopleComponent() {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <UserGroupIcon className="w-6 h-6" />
-            Visão por Funcionário
+            {t('people.employeeView')}
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Tempo Total por Funcionário */}
-            <ChartCard title="Tempo total de trabalho por funcionário 📊">
+            <ChartCard title={t('people.charts.totalWorkTime')}>
               <HorizontalBarChart data={workTimeData} darkMode={darkMode} />
             </ChartCard>
 
             {/* Tabela de Média de Horas */}
-            <ChartCard title="Média de horas trabalhadas por funcionário 🧮">
+            <ChartCard title={t('people.charts.avgWorkHours')}>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700">
                       <th className="text-left py-2 px-3 text-gray-700 dark:text-gray-300">
-                        Funcionário
+                        {t('people.employee')}
                       </th>
                       <th className="text-right py-2 px-3 text-gray-700 dark:text-gray-300">
-                        Média (h)
+                        {t('people.averageHours')}
                       </th>
                     </tr>
                   </thead>
@@ -181,19 +183,19 @@ export default function PeopleComponent() {
         {/* Tabelas de Score */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Score Departamental */}
-          <ChartCard title="Score Departamental 🚩">
+          <ChartCard title={t('people.charts.departmentScore')}>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
                     <th className="text-left py-2 px-3 text-gray-700 dark:text-gray-300">
-                      Departamento
+                      {t('people.department')}
                     </th>
                     <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">
-                      Score
+                      {t('people.score')}
                     </th>
                     <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">
-                      Status
+                      {t('people.status')}
                     </th>
                   </tr>
                 </thead>
@@ -206,7 +208,7 @@ export default function PeopleComponent() {
                       <td className="py-3 px-3 text-gray-900 dark:text-gray-100">
                         <div className="font-medium">{dept.department}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {dept.totalEmployees} funcionários
+                          {dept.totalEmployees} {t('people.employees')}
                         </div>
                       </td>
                       <td className="py-3 px-3 text-center">
@@ -240,19 +242,19 @@ export default function PeopleComponent() {
           </ChartCard>
 
           {/* Score Total */}
-          <ChartCard title="Score Total 🕐">
+          <ChartCard title={t('people.charts.totalScore')}>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
                     <th className="text-left py-2 px-3 text-gray-700 dark:text-gray-300">
-                      Funcionário
+                      {t('people.employee')}
                     </th>
                     <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">
-                      Score
+                      {t('people.score')}
                     </th>
                     <th className="text-center py-2 px-3 text-gray-700 dark:text-gray-300">
-                      Status
+                      {t('people.status')}
                     </th>
                   </tr>
                 </thead>
@@ -265,7 +267,7 @@ export default function PeopleComponent() {
                       <td className="py-3 px-3 text-gray-900 dark:text-gray-100">
                         <div className="font-medium">{employee.name}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {employee.department} • {employee.workHours}h/dia
+                          {employee.department} • {employee.workHours}h/{t('people.day')}
                         </div>
                       </td>
                       <td className="py-3 px-3 text-center">
@@ -297,6 +299,8 @@ export default function PeopleComponent() {
 }
 
 function ComplianceCard({ metric }: { metric: ComplianceMetric }) {
+  const { t } = useTranslation();
+
   const getColor = () => {
     if (metric.metrica === 'CONFORMIDADE_GERAL' || metric.metrica === 'PAUSAS_ADEQUADAS') {
       return metric.valor >= 80 ? 'bg-green-500' : metric.valor >= 60 ? 'bg-yellow-500' : 'bg-red-500';
@@ -313,6 +317,16 @@ function ComplianceCard({ metric }: { metric: ComplianceMetric }) {
 
   const Icon = getIcon();
 
+  const getMetricName = (metricKey: string) => {
+    const metricMap: { [key: string]: string } = {
+      'CONFORMIDADE_GERAL': t('people.metrics.overallCompliance'),
+      'PAUSAS_ADEQUADAS': t('people.metrics.adequateBreaks'),
+      'VIOLACOES_JORNADA': t('people.metrics.workdayViolations'),
+      'ALERTAS_CRITICOS': t('people.metrics.criticalAlerts')
+    };
+    return metricMap[metricKey] || metricKey.replace(/_/g, ' ');
+  };
+
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-800 p-4">
       <div className="flex items-center justify-between mb-2">
@@ -321,7 +335,7 @@ function ComplianceCard({ metric }: { metric: ComplianceMetric }) {
         </div>
       </div>
       <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-        {metric.metrica.replace(/_/g, ' ')}
+        {getMetricName(metric.metrica)}
       </p>
       <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
         {metric.valor} {metric.unidade}

@@ -23,7 +23,7 @@ import {
   HomeModernIcon,
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../context/AuthContext'
-import { useCompany } from '../hooks/useCompany'
+import { useCompany } from '../../hooks/useCompany'
 import { useNavigate } from 'react-router-dom'
 
 interface MenuItemProps {

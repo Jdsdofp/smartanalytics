@@ -1,0 +1,155 @@
+{
+  "header": {
+    "toggleMenu": "Toggle menu",
+    "logoAlt": "Logo",
+    "searchPlaceholder": "Search...",
+    "notifications": "Notifications",
+    "userInitialsFallback": "U",
+    "myProfile": "My Profile",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "navbar": {
+    "dashboard": "Dashboard",
+    "analytics": "Analytics",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+   "home": {
+    "welcome": "Welcome, {{name}}!",
+    "yourProfile": "Your Profile",
+    "email": "Email",
+    "login": "Login",
+    "type": "Type",
+    "company": "Company",
+    "name": "Name",
+    "city": "City",
+    "state": "State",
+    "status": "Status",
+    "account": "Account",
+    "active": " ✓ Active",
+    "inactive": " ✗ Inactive",
+    "timezone": "Timezone",
+    "id": "ID",
+    "module": "Module {{number}}",
+    "moduleContent": "Module content under development",
+    "access": "Access",
+    "technicalInfo": "Technical Information",
+    "companyId": "Company ID",
+    "webKey": "WebKey",
+    "address": "Address"
+  },
+  "login": {
+    "logoAlt": "Smart Analytics Logo",
+    "subtitle": "Sign in to access your account",
+    "email": "Email",
+    "emailPlaceholder": "Username",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "loginButton": "Sign In",
+    "loggingIn": "Signing in...",
+    "error": "Error signing in",
+    "copyright": "© 2025 Smart Analytics. All rights reserved."
+  },
+  "assets": {
+    "title": "Asset Management Dashboard",
+    "stats": {
+      "totalAssets": "Total Assets",
+      "totalCategories": "Total Categories",
+      "totalInvestment": "Total Investment",
+      "misplacedItems": "Misplaced Items",
+      "maintenanceDue": "Maintenance Due",
+      "serialCompletion": "Serial Completion"
+    },
+    "ageDistribution": {
+      "0_3Months": "Assets 0-3 Months",
+      "3_12Months": "Assets 3-12 Months",
+      "1_2Years": "Assets 1-2 Years",
+      "over2Years": "Assets Over 2 Years"
+    },
+    "charts": {
+      "assetsByDepartment": "Assets by Department",
+      "averagePurchaseCost": "Average Purchase Cost by Category",
+      "assetsByCostCenter": "Assets by Cost Center",
+      "investmentByCostCenter": "Investment by Cost Center",
+      "assetsByCategory": "Assets by Category",
+      "assetsByGroup": "Assets by Group",
+      "assetDisposition": "Asset Disposition",
+      "averageCycleCount": "Average Cycle Count by Category"
+    },
+    "departments": {
+      "it": "IT Department",
+      "operations": "Operations",
+      "finance": "Finance",
+      "hr": "HR",
+      "marketing": "Marketing",
+      "sales": "Sales",
+      "rd": "R&D"
+    },
+    "categories": {
+      "computers": "Computers",
+      "furniture": "Furniture",
+      "appliances": "Appliances",
+      "vehicles": "Vehicles",
+      "equipment": "Equipment",
+      "tools": "Tools"
+    },
+    "costCenters": {
+      "engineering": "Engineering",
+      "operations": "Operations",
+      "administration": "Administration",
+      "customerService": "Customer Service",
+      "logistics": "Logistics"
+    },
+    "groups": {
+      "groupA": "Group A",
+      "groupB": "Group B",
+      "groupC": "Group C",
+      "groupD": "Group D",
+      "groupE": "Group E"
+    },
+    "disposition": {
+      "active": "Active",
+      "disposed": "Disposed",
+      "maintenance": "In Maintenance",
+      "retired": "Retired"
+    }
+  },
+  "people": {
+    "title": "People Management - NR36",
+    "employeeView": "Employee View",
+    "department": "Department",
+    "employee": "Employee",
+    "employees": "employees",
+    "occurrences": "occurrences",
+    "score": "Score",
+    "status": "Status",
+    "averageHours": "Average (h)",
+    "day": "day",
+    "stats": {
+      "working": "WORKING",
+      "onBreak": "ON BREAK",
+      "avgDifference": "AVG DIFF.",
+      "active": "ACTIVE",
+      "totalTime": "Total time",
+      "plannedVsActual": "Planned vs Actual"
+    },
+    "metrics": {
+      "overallCompliance": "Overall Compliance",
+      "adequateBreaks": "Adequate Breaks",
+      "workdayViolations": "Workday Violations",
+      "criticalAlerts": "Critical Alerts"
+    },
+    "charts": {
+      "totalWorkTime": "Total work time per employee 📊",
+      "avgWorkHours": "Average work hours per employee 🧮",
+      "departmentScore": "Department Score 🚩",
+      "totalScore": "Total Score 🕐"
+    },
+    "status": {
+      "excellent": "EXCELLENT 🟢",
+      "good": "GOOD 🟡",
+      "regular": "REGULAR 🟠"
+    }
+  }
+}

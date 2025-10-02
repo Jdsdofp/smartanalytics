@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { ChartBarIcon, CubeIcon, BanknotesIcon, ExclamationTriangleIcon, WrenchScrewdriverIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface ChartData {
   name: string;
@@ -38,6 +39,8 @@ interface BarChartProps {
 }
 
 export default function Assets() {
+  const { t } = useTranslation();
+
   // Dados simulados baseados no dashboard do Grafana
   const statsData = {
     totalAssets: 1234,
@@ -53,105 +56,107 @@ export default function Assets() {
   };
 
   const departmentData = [
-    { name: 'IT Department', value: 245 },
-    { name: 'Operations', value: 198 },
-    { name: 'Finance', value: 156 },
-    { name: 'HR', value: 123 },
-    { name: 'Marketing', value: 98 },
-    { name: 'Sales', value: 187 },
-    { name: 'R&D', value: 227 }
+    { name: t('assets.departments.it'), value: 245 },
+    { name: t('assets.departments.operations'), value: 198 },
+    { name: t('assets.departments.finance'), value: 156 },
+    { name: t('assets.departments.hr'), value: 123 },
+    { name: t('assets.departments.marketing'), value: 98 },
+    { name: t('assets.departments.sales'), value: 187 },
+    { name: t('assets.departments.rd'), value: 227 }
   ];
 
   const categoryData = [
-    { name: 'Computers', value: 320 },
-    { name: 'Furniture', value: 280 },
-    { name: 'Appliances', value: 210 },
-    { name: 'Vehicles', value: 145 },
-    { name: 'Equipment', value: 189 },
-    { name: 'Tools', value: 90 }
+    { name: t('assets.categories.computers'), value: 320 },
+    { name: t('assets.categories.furniture'), value: 280 },
+    { name: t('assets.categories.appliances'), value: 210 },
+    { name: t('assets.categories.vehicles'), value: 145 },
+    { name: t('assets.categories.equipment'), value: 189 },
+    { name: t('assets.categories.tools'), value: 90 }
   ];
 
   const categoryInvestment = [
-    { name: 'Computers', value: 450000 },
-    { name: 'Vehicles', value: 380000 },
-    { name: 'Equipment', value: 320000 },
-    { name: 'Furniture', value: 280000 },
-    { name: 'Appliances', value: 210000 },
-    { name: 'Tools', value: 150000 }
+    { name: t('assets.categories.computers'), value: 450000 },
+    { name: t('assets.categories.vehicles'), value: 380000 },
+    { name: t('assets.categories.equipment'), value: 320000 },
+    { name: t('assets.categories.furniture'), value: 280000 },
+    { name: t('assets.categories.appliances'), value: 210000 },
+    { name: t('assets.categories.tools'), value: 150000 }
   ];
 
   const costCenterData = [
-    { name: 'Engineering', value: 312 },
-    { name: 'Operations', value: 245 },
-    { name: 'Administration', value: 198 },
-    { name: 'Customer Service', value: 167 },
-    { name: 'Logistics', value: 145 }
+    { name: t('assets.costCenters.engineering'), value: 312 },
+    { name: t('assets.costCenters.operations'), value: 245 },
+    { name: t('assets.costCenters.administration'), value: 198 },
+    { name: t('assets.costCenters.customerService'), value: 167 },
+    { name: t('assets.costCenters.logistics'), value: 145 }
   ];
 
   const groupData = [
-    { name: 'Group A', value: 234 },
-    { name: 'Group B', value: 198 },
-    { name: 'Group C', value: 167 },
-    { name: 'Group D', value: 145 },
-    { name: 'Group E', value: 123 }
+    { name: t('assets.groups.groupA'), value: 234 },
+    { name: t('assets.groups.groupB'), value: 198 },
+    { name: t('assets.groups.groupC'), value: 167 },
+    { name: t('assets.groups.groupD'), value: 145 },
+    { name: t('assets.groups.groupE'), value: 123 }
   ];
 
   const dispositionData = [
-    { name: 'Active', value: 1020 },
-    { name: 'Disposed', value: 98 },
-    { name: 'In Maintenance', value: 67 },
-    { name: 'Retired', value: 49 }
+    { name: t('assets.disposition.active'), value: 1020 },
+    { name: t('assets.disposition.disposed'), value: 98 },
+    { name: t('assets.disposition.maintenance'), value: 67 },
+    { name: t('assets.disposition.retired'), value: 49 }
   ];
 
   const cycleCountData = [
-    { name: 'Computers', value: 24 },
-    { name: 'Equipment', value: 18 },
-    { name: 'Furniture', value: 15 },
-    { name: 'Appliances', value: 12 },
-    { name: 'Tools', value: 9 }
+    { name: t('assets.categories.computers'), value: 24 },
+    { name: t('assets.categories.equipment'), value: 18 },
+    { name: t('assets.categories.furniture'), value: 15 },
+    { name: t('assets.categories.appliances'), value: 12 },
+    { name: t('assets.categories.tools'), value: 9 }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Asset Management Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+          {t('assets.title')}
+        </h1>
         
         {/* Stats Cards Row 1 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
           <StatCard
-            title="Total Assets"
+            title={t('assets.stats.totalAssets')}
             value={statsData.totalAssets}
             icon={CubeIcon}
             color="bg-blue-500"
           />
           <StatCard
-            title="Total Categories"
+            title={t('assets.stats.totalCategories')}
             value={statsData.totalCategories}
             icon={ChartBarIcon}
             color="bg-green-500"
           />
           <StatCard
-            title="Total Investment"
+            title={t('assets.stats.totalInvestment')}
             value={`$${(statsData.totalInvestment / 1000000).toFixed(2)}M`}
             icon={BanknotesIcon}
             color="bg-purple-500"
           />
           <StatCard
-            title="Misplaced Items"
+            title={t('assets.stats.misplacedItems')}
             value={statsData.misplacedItems}
             icon={ExclamationTriangleIcon}
             color="bg-orange-500"
             warning={statsData.misplacedItems > 10}
           />
           <StatCard
-            title="Maintenance Due"
+            title={t('assets.stats.maintenanceDue')}
             value={statsData.maintenanceDue}
             icon={WrenchScrewdriverIcon}
             color="bg-red-500"
             warning={statsData.maintenanceDue > 20}
           />
           <StatCard
-            title="Serial Completion"
+            title={t('assets.stats.serialCompletion')}
             value={`${statsData.serialCompletion}%`}
             icon={CheckCircleIcon}
             color="bg-teal-500"
@@ -160,43 +165,55 @@ export default function Assets() {
 
         {/* Stats Cards Row 2 - Age Distribution */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <AgeStatCard title="Assets 0-3 Months" value={statsData.age0_3Months} />
-          <AgeStatCard title="Assets 3-12 Months" value={statsData.age3_12Months} />
-          <AgeStatCard title="Assets 1-2 Years" value={statsData.age1_2Years} />
-          <AgeStatCard title="Assets Over 2 Years" value={statsData.ageOver2Years} />
+          <AgeStatCard 
+            title={t('assets.ageDistribution.0_3Months')} 
+            value={statsData.age0_3Months} 
+          />
+          <AgeStatCard 
+            title={t('assets.ageDistribution.3_12Months')} 
+            value={statsData.age3_12Months} 
+          />
+          <AgeStatCard 
+            title={t('assets.ageDistribution.1_2Years')} 
+            value={statsData.age1_2Years} 
+          />
+          <AgeStatCard 
+            title={t('assets.ageDistribution.over2Years')} 
+            value={statsData.ageOver2Years} 
+          />
         </div>
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartCard title="Assets by Department">
+          <ChartCard title={t('assets.charts.assetsByDepartment')}>
             <PieChart data={departmentData} chartId="dept-chart" />
           </ChartCard>
           
-          <ChartCard title="Average Purchase Cost by Category">
+          <ChartCard title={t('assets.charts.averagePurchaseCost')}>
             <BarChart data={categoryInvestment} chartId="investment-chart" />
           </ChartCard>
           
-          <ChartCard title="Assets by Cost Center">
+          <ChartCard title={t('assets.charts.assetsByCostCenter')}>
             <PieChart data={costCenterData} chartId="cost-center-chart" />
           </ChartCard>
           
-          <ChartCard title="Investment by Cost Center">
+          <ChartCard title={t('assets.charts.investmentByCostCenter')}>
             <BarChart data={categoryInvestment} chartId="cost-investment-chart" />
           </ChartCard>
           
-          <ChartCard title="Assets by Category">
+          <ChartCard title={t('assets.charts.assetsByCategory')}>
             <PieChart data={categoryData} chartId="category-chart" />
           </ChartCard>
           
-          <ChartCard title="Assets by Group">
+          <ChartCard title={t('assets.charts.assetsByGroup')}>
             <BarChart data={groupData} chartId="group-chart" isHorizontal={false} />
           </ChartCard>
           
-          <ChartCard title="Asset Disposition">
+          <ChartCard title={t('assets.charts.assetDisposition')}>
             <PieChart data={dispositionData} chartId="disposition-chart" />
           </ChartCard>
           
-          <ChartCard title="Average Cycle Count by Category">
+          <ChartCard title={t('assets.charts.averageCycleCount')}>
             <BarChart data={cycleCountData} chartId="cycle-chart" />
           </ChartCard>
         </div>
@@ -321,7 +338,7 @@ function PieChart({ data }: PieChartProps) {
         chartInstanceRef.current = null;
       }
     };
-  }, [data, darkMode]); // Adiciona darkMode como dependência
+  }, [data, darkMode]);
 
   return <div ref={chartRef} style={{ width: '100%', height: '300px' }} />;
 }

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -10,6 +11,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false)
   const { login, user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   // Redireciona se já estiver autenticado
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function Login() {
       await login(email, password)
       navigate('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao fazer login')
+      setError(err instanceof Error ? err.message : t('login.error'))
     } finally {
       setIsLoading(false)
     }
@@ -50,7 +52,7 @@ export default function Login() {
             <div className="flex justify-center">
               <img 
                 src="/logo10.png" 
-                alt="Smart Analytics Logo" 
+                alt={t('login.logoAlt')} 
                 className="h-20 w-auto"
               />
             </div>
@@ -59,7 +61,7 @@ export default function Login() {
                 Smart Analytics
               </h1>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Faça login para acessar sua conta
+                {t('login.subtitle')}
               </p>
             </div>
           </div>
@@ -74,7 +76,7 @@ export default function Login() {
             <div className="space-y-5">
               <div>
                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Email
+                  {t('login.email')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -96,14 +98,14 @@ export default function Login() {
                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                              transition duration-200
                              disabled:opacity-50 disabled:cursor-not-allowed"
-                    placeholder="Usuário"
+                    placeholder={t('login.emailPlaceholder')}
                   />
                 </div>
               </div>
              
               <div>
                 <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Senha
+                  {t('login.password')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -124,7 +126,7 @@ export default function Login() {
                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                              transition duration-200
                              disabled:opacity-50 disabled:cursor-not-allowed"
-                    placeholder="••••••••"
+                    placeholder={t('login.passwordPlaceholder')}
                   />
                 </div>
               </div>
@@ -147,10 +149,10 @@ export default function Login() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Entrando...
+                  {t('login.loggingIn')}
                 </>
               ) : (
-                'Entrar'
+                t('login.loginButton')
               )}
             </button>
           </form>
@@ -158,7 +160,7 @@ export default function Login() {
           {/* Footer */}
           <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              © 2025 Smart Analytics. Todos os direitos reservados.
+              {t('login.copyright')}
             </p>
           </div>
         </div>

@@ -1,0 +1,156 @@
+{
+  "header": {
+    "toggleMenu": "Alternar menu",
+    "logoAlt": "Logo",
+    "searchPlaceholder": "Buscar...",
+    "notifications": "Notificações",
+    "userInitialsFallback": "U",
+    "myProfile": "Meu Perfil",
+    "settings": "Configurações",
+    "logout": "Sair"
+  },
+  "navbar": {
+    "dashboard": "Dashboard",
+    "analytics": "Analytics",
+    "reports": "Relatórios",
+    "settings": "Configurações"
+  },
+  "home": {
+    "welcome": "Bem-vindo, {{name}}!",
+    "yourProfile": "Seu Perfil",
+    "email": "Email",
+    "login": "Login",
+    "type": "Tipo",
+    "company": "Empresa",
+    "name": "Nome",
+    "city": "Cidade",
+    "state": "Estado",
+    "status": "Status",
+    "account": "Conta",
+    "active": " ✓ Ativa",
+    "inactive": " ✗ Inativa",
+    "timezone": "Fuso",
+    "id": "ID",
+    "module": "Módulo {{number}}",
+    "moduleContent": "Conteúdo do módulo em desenvolvimento",
+    "access": "Acessar",
+    "technicalInfo": "Informações Técnicas",
+    "companyId": "Company ID",
+    "webKey": "WebKey",
+    "address": "Endereço"
+  },
+  "login": {
+    "logoAlt": "Smart Analytics Logo",
+    "subtitle": "Faça login para acessar sua conta",
+    "email": "Email",
+    "emailPlaceholder": "Usuário",
+    "password": "Senha",
+    "passwordPlaceholder": "••••••••",
+    "loginButton": "Entrar",
+    "loggingIn": "Entrando...",
+    "error": "Erro ao fazer login",
+    "copyright": "© 2025 Smart Analytics. Todos os direitos reservados."
+  },
+   "assets": {
+    "title": "Dashboard de Gestão de Ativos",
+    "stats": {
+      "totalAssets": "Total de Ativos",
+      "totalCategories": "Total de Categorias",
+      "totalInvestment": "Investimento Total",
+      "misplacedItems": "Itens Deslocados",
+      "maintenanceDue": "Manutenção Devida",
+      "serialCompletion": "Completude Serial"
+    },
+    "ageDistribution": {
+      "0_3Months": "Ativos 0-3 Meses",
+      "3_12Months": "Ativos 3-12 Meses",
+      "1_2Years": "Ativos 1-2 Anos",
+      "over2Years": "Ativos Acima de 2 Anos"
+    },
+    "charts": {
+      "assetsByDepartment": "Ativos por Departamento",
+      "averagePurchaseCost": "Custo Médio de Aquisição por Categoria",
+      "assetsByCostCenter": "Ativos por Centro de Custo",
+      "investmentByCostCenter": "Investimento por Centro de Custo",
+      "assetsByCategory": "Ativos por Categoria",
+      "assetsByGroup": "Ativos por Grupo",
+      "assetDisposition": "Disposição de Ativos",
+      "averageCycleCount": "Contagem Média de Ciclo por Categoria"
+    },
+    "departments": {
+      "it": "Departamento de TI",
+      "operations": "Operações",
+      "finance": "Finanças",
+      "hr": "RH",
+      "marketing": "Marketing",
+      "sales": "Vendas",
+      "rd": "P&D"
+    },
+    "categories": {
+      "computers": "Computadores",
+      "furniture": "Mobiliário",
+      "appliances": "Eletrodomésticos",
+      "vehicles": "Veículos",
+      "equipment": "Equipamentos",
+      "tools": "Ferramentas"
+    },
+    "costCenters": {
+      "engineering": "Engenharia",
+      "operations": "Operações",
+      "administration": "Administração",
+      "customerService": "Atendimento ao Cliente",
+      "logistics": "Logística"
+    },
+    "groups": {
+      "groupA": "Grupo A",
+      "groupB": "Grupo B",
+      "groupC": "Grupo C",
+      "groupD": "Grupo D",
+      "groupE": "Grupo E"
+    },
+    "disposition": {
+      "active": "Ativo",
+      "disposed": "Descartado",
+      "maintenance": "Em Manutenção",
+      "retired": "Retirado"
+    }
+  },
+  "people": {
+    "title": "Gestão de Pessoas - NR36",
+    "employeeView": "Visão por Funcionário",
+    "department": "Departamento",
+    "employee": "Funcionário",
+    "employees": "funcionários",
+    "occurrences": "ocorrências",
+    "score": "Score",
+    "status": "Status",
+    "averageHours": "Média (h)",
+    "day": "dia",
+    "stats": {
+      "working": "EM TRABALHO",
+      "onBreak": "EM PAUSA",
+      "avgDifference": "MÉDIA DIF.",
+      "active": "ATIVOS",
+      "totalTime": "Tempo total",
+      "plannedVsActual": "Planejado vs Real"
+    }
+  },
+  "metrics": {
+      "overallCompliance": "Conformidade Geral",
+      "adequateBreaks": "Pausas Adequadas",
+      "workdayViolations": "Violações de Jornada",
+      "criticalAlerts": "Alertas Críticos"
+    },
+    "charts": {
+      "totalWorkTime": "Tempo total de trabalho por funcionário 📊",
+      "avgWorkHours": "Média de horas trabalhadas por funcionário 🧮",
+      "departmentScore": "Score Departamental 🚩",
+      "totalScore": "Score Total 🕐"
+    },
+    "status": {
+      "excellent": "EXCELENTE 🟢",
+      "good": "BOM 🟡",
+      "regular": "REGULAR 🟠"
+    }
+
+}

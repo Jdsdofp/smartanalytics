@@ -1,11 +1,12 @@
 // src/App.tsx
-import { Routes, Route } from 'react-router-dom'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import PrivateRoute from './components/PrivateRoute'
-import Home from './pages/Home'
-import Assets from './pages/Analytics/Assets'
-import People from './pages/Analytics/Peoples'
+import { Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import PrivateRoute from './components/PrivateRoute';
+import Home from './pages/Home';
+import Assets from './pages/Analytics/Assets';
+import People from './pages/Analytics/Peoples';
+import "./i18n"; // Importa a configuração do i18n
 
 
 

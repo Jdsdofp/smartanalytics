@@ -5,7 +5,8 @@ import {
   DocumentTextIcon,
   Cog6ToothIcon,
 } from '@heroicons/react/24/outline'
-import { useCompany } from '../hooks/useCompany'
+import { useCompany } from '../../hooks/useCompany'
+import { useTranslation } from 'react-i18next'
 
 interface NavItem {
   label: string
@@ -20,12 +21,13 @@ interface NavbarProps {
 
 function Navbar({ items }: NavbarProps) {
   const { primaryColor } = useCompany()
+  const { t } = useTranslation()
 
   const defaultItems: NavItem[] = [
-    { label: 'Dashboard', icon: HomeIcon, active: true },
-    { label: 'Analytics', icon: ChartBarIcon },
-    { label: 'Relatórios', icon: DocumentTextIcon },
-    { label: 'Configurações', icon: Cog6ToothIcon },
+    { label: t('navbar.dashboard'), icon: HomeIcon, active: true },
+    { label: t('navbar.analytics'), icon: ChartBarIcon },
+    { label: t('navbar.reports'), icon: DocumentTextIcon },
+    { label: t('navbar.settings'), icon: Cog6ToothIcon },
   ]
 
   const navItems = items || defaultItems
