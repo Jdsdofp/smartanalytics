@@ -37,6 +37,29 @@ interface Theme {
   }
 }
 
+// Função auxiliar para verificar se a cor é branca ou muito clara
+const isWhiteOrVeryLight = (color: string): boolean => {
+  if (!color) return false
+  
+  const hex = color.replace('#', '').toUpperCase()
+  const r = parseInt(hex.substring(0, 2), 16)
+  const g = parseInt(hex.substring(2, 4), 16)
+  const b = parseInt(hex.substring(4, 6), 16)
+  
+  // Considera branco se todos os valores RGB forem >= 250
+  return r >= 250 && g >= 250 && b >= 250
+}
+
+// Função para escurecer uma cor
+const darkenColor = (color: string, percent: number): string => {
+  const hex = color.replace('#', '')
+  const r = Math.max(0, parseInt(hex.substring(0, 2), 16) - (255 * percent / 100))
+  const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - (255 * percent / 100))
+  const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - (255 * percent / 100))
+  
+  return `#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`
+}
+
 export function useCompany() {
   const [companyData, setCompanyData] = useState<CompanyDetails | null>(null)
   const [theme, setTheme] = useState<Theme | null>(null)
@@ -59,16 +82,42 @@ export function useCompany() {
   // Aplica as variáveis CSS do tema
   useEffect(() => {
     if (theme?.css_variables) {
-      Object.entries(theme.css_variables).forEach(([key, value]) => {
-        if (value) {
-          document.documentElement.style.setProperty(key, value)
+      const primaryColor = theme.css_variables['--color-primary']
+      const fontTitleColor = theme.css_variables['--color-font-title']
+      
+      // Verifica se a cor primária é branca
+      if (isWhiteOrVeryLight(primaryColor) && fontTitleColor) {
+        console.log('🎨 Cor primária detectada como branca. Usando cor do título como primária.')
+        
+        // Aplica a cor do título como primária
+        document.documentElement.style.setProperty('--color-primary', fontTitleColor)
+        
+        // Gera uma versão mais escura para primary-dark
+        const darkenedColor = darkenColor(fontTitleColor, 20)
+        document.documentElement.style.setProperty('--color-primary-dark', darkenedColor)
+        
+        // Aplica as outras variáveis normalmente
+        Object.entries(theme.css_variables).forEach(([key, value]) => {
+          if (key !== '--color-primary' && key !== '--color-primary-dark' && value) {
+            document.documentElement.style.setProperty(key, value)
+          }
+        })
+        
+        // Gera variações de cor baseadas na cor do título
+        generateColorVariations(fontTitleColor)
+      } else {
+        // Aplica normalmente se não for branca
+        Object.entries(theme.css_variables).forEach(([key, value]) => {
+          if (value) {
+            document.documentElement.style.setProperty(key, value)
+          }
+        })
+        
+        // Gera variações da cor primária original
+        if (theme?.colors.primary) {
+          generateColorVariations(theme.colors.primary)
         }
-      })
-    }
-
-    // Se tiver cor primária, gera variações automáticas
-    if (theme?.colors.primary) {
-      generateColorVariations(theme.colors.primary)
+      }
     }
   }, [theme])
 
@@ -130,6 +179,7 @@ export function useCompany() {
         const factor = 1 + shade.adjust
         color = rgbToHex(rgb.r * factor, rgb.g * factor, rgb.b * factor)
       }
+
       document.documentElement.style.setProperty(`--color-primary-${shade.name}`, color)
     })
   }

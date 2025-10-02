@@ -112,7 +112,7 @@ export default function Home() {
                       <p className="text-gray-600 dark:text-gray-400">
                         Conteúdo do módulo em desenvolvimento
                       </p>
-                      <button className="mt-4 btn-company w-full">
+                      <button className="text-white dark:text-gray-100 mt-4 btn-company w-full">
                         Acessar
                       </button>
                     </div>

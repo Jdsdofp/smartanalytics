@@ -1,3 +1,5 @@
+/* src/index.css */
+
 @import "tailwindcss";
 
 @theme {
@@ -54,6 +56,26 @@
   --color-menu-background: #0ea5e9;
   --color-logo-background: #0ea5e9;
   --color-footer-background: #0ea5e9;
+}
+
+/* Adicione esta regra após as variáveis :root */
+
+/* Regra para quando a cor primária for branca (#FFFFFF ou variações) */
+:root:has([data-primary-white]) {
+  --color-primary: var(--color-font-title);
+  --color-primary-dark: color-mix(in srgb, var(--color-font-title) 80%, black);
+}
+
+/* Ou uma abordagem mais direta usando @supports e comparação de cores */
+@supports (background: color-mix(in srgb, white, black)) {
+  :root {
+    /* Detecta se primary é muito claro (próximo ao branco) e ajusta */
+    --color-primary-computed: color-mix(
+      in srgb,
+      var(--color-primary) 100%,
+      transparent
+    );
+  }
 }
 
 /* Classes utilitárias para usar as cores da empresa */
@@ -118,7 +140,7 @@
 /* Botão customizado com cor da empresa */
 .btn-company {
   background-color: var(--color-primary);
-  color: var(--color-font-title);
+  /* color: var(--color-font-title); */
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   font-weight: 600;
