@@ -9,7 +9,7 @@ interface HeaderProps {
 
 function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth()
-  const { company, logo, primaryColor } = useCompany()
+  const { company, logo } = useCompany()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800
@@ -107,8 +107,8 @@ function Header({ onMenuClick }: HeaderProps) {
                        hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: primaryColor || '#0ea5e9' }}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-company-primary"
+                // style={{ backgroundColor: primaryColor || '#0ea5e9' }}
               >
                 <span className="text-white font-semibold text-sm">
                   {user?.name

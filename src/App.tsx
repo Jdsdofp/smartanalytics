@@ -29,7 +29,7 @@ function App() {
       />
       
       <Route
-        path="/analytics/assets"
+        path="/MN0400_011"
         element={
           <PrivateRoute>
             <Assets />
@@ -37,7 +37,7 @@ function App() {
         }
       />
 
-      <Route path="/analytics/people" element={
+      <Route path="/MN0400_111" element={
         <PrivateRoute>
           <People/>
         </PrivateRoute>
