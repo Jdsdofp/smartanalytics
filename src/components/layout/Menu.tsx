@@ -336,8 +336,8 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
       children: [
         { icon: DocumentTextIcon, label: 'ISO 55000 Standards', path: '/MN0400_010', children: [
           { icon: ChartBarIcon, label: 'ISO 55000 Compliance Overview', path: '/MN0400_011' },
-          { icon: TableCellsIcon, label: 'ISO 55001 Requirements Status', path: '/MN0400_012', disabled: true },
-          { icon: DocumentChartBarIcon, label: 'Asset Management System Maturity', path: '/MN0400_013', disabled: true },
+          { icon: TableCellsIcon, label: 'ISO 55001 Requirements Status', path: '/MN0400_012', disabled: false },
+          { icon: DocumentChartBarIcon, label: 'Asset Management System Maturity', path: '/MN0400_013', disabled: false },
           { icon: DocumentTextIcon, label: 'ISO 55002 Gap Analysis', path: '/MN0400_014', disabled: true },
           { icon: DocumentTextIcon, label: 'Strategic Asset Management Plan', path: '/MN0400_015', disabled: true }
         ]},
