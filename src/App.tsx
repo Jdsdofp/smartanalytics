@@ -9,6 +9,9 @@ import People from './pages/Analytics/Peoples';
 import MN0400_013 from './pages/Analytics/Assets/MN0400_013';
 import MN0400_12 from './pages/Analytics/Assets/MN0400_12';
 import "./i18n"; // Importa a configuração do i18n
+import MN0400_411 from './pages/Analytics/Certificates/MN0400_411';
+import MN0400_412 from './pages/Analytics/Certificates/MN0400_412';
+import MN0400_413 from './pages/Analytics/Certificates/MN0400_413';
 
 
 
@@ -42,21 +45,41 @@ function App() {
 
       <Route path="/MN0400_111" element={
         <PrivateRoute>
-          <People/>
+          <People />
         </PrivateRoute>
       } />
 
       <Route path="/MN0400_013" element={
         <PrivateRoute>
-          <MN0400_013/>
+          <MN0400_013 />
         </PrivateRoute>
       } />
 
       <Route path="/MN0400_012" element={
         <PrivateRoute>
-          <MN0400_12/>
+          <MN0400_12 />
         </PrivateRoute>
       } />
+
+      <Route path="/MN0400_411" element={
+        <PrivateRoute>
+          <MN0400_411 />
+        </PrivateRoute>
+      } />
+
+      <Route path="/MN0400_412" element={
+        <PrivateRoute>
+          <MN0400_412 />
+        </PrivateRoute>
+      } />
+
+      <Route path="/MN0400_413" element={
+        <PrivateRoute>
+          <MN0400_413 />
+        </PrivateRoute>
+      } />
+
+
     </Routes>
   )
 }
