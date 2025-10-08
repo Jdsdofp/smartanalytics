@@ -1,6 +1,9 @@
 // src/hooks/useCertificateData.ts
-import { useQuery } from '@apollo/react-hooks';
-import { gql } from 'graphql-tag';
+
+import { useQuery } from '@apollo/client/react';
+import { gql } from '@apollo/client';
+
+
 
 // Query para analytics de certificados
 const GET_CERTIFICATE_ANALYTICS = gql`
@@ -94,11 +97,11 @@ export function useCertificateData() {
   const { data: deptData, loading: deptLoading } = useQuery(GET_CERTIFICATES_BY_DEPARTMENT);
 
   return {
-    analytics: analyticsData?.certificateAnalytics,
+    analytics: analyticsData?.certificateAnalytics || {},
     statusData: statusData?.certificatesByStatus || [],
     brandsData: brandsData?.topBrandsWithCertificates || [],
     riskData: riskData?.companiesByRisk || [],
-    trendsData: trendsData?.certificateIssuanceTrends,
+    trendsData: trendsData?.certificateIssuanceTrends || {},
     deptData: deptData?.certificatesByDepartment || [],
     loading: analyticsLoading || statusLoading || brandsLoading || riskLoading || trendsLoading || deptLoading,
   };
