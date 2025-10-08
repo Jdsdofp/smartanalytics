@@ -12,13 +12,17 @@ import "./i18n"; // Importa a configuração do i18n
 import MN0400_411 from './pages/Analytics/Certificates/MN0400_411';
 import MN0400_412 from './pages/Analytics/Certificates/MN0400_412';
 import MN0400_413 from './pages/Analytics/Certificates/MN0400_413';
+import { useCompany } from './hooks/useCompany';
+import { ApolloProvider } from '@apollo/client/react';
+import { createApolloClient } from './graphql/client';
 
 
 
 
 
 function App() {
-
+const { company } = useCompany();
+const client = createApolloClient(company?.company_id || 0, "afr1");
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -63,7 +67,9 @@ function App() {
 
       <Route path="/MN0400_411" element={
         <PrivateRoute>
-          <MN0400_411 />
+          <ApolloProvider client={client }>
+              <MN0400_411 />
+          </ApolloProvider>
         </PrivateRoute>
       } />
 
