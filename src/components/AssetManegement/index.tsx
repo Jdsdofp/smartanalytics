@@ -1,10 +1,20 @@
 import { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { useTheme } from '../../context/ThemeContext';
+import { useCertificateData } from '../../hooks/useCertificateData'; 
 
 
 export default function AssetManagement() {
   const { darkMode } = useTheme();
+    const { 
+    analytics, 
+    statusData, 
+    brandsData, 
+    riskData, 
+    trendsData, 
+    deptData,
+    loading 
+  } = useCertificateData();
   const pieChartRef = useRef(null);
   const barChartRef = useRef(null);
   const donutChartRef = useRef(null);
@@ -18,6 +28,110 @@ export default function AssetManagement() {
     border: darkMode ? '#374151' : '#e5e7eb',
     gridLine: darkMode ? '#374151' : '#e5e7eb'
   });
+
+   // Atualizar gráfico de PIE com dados reais
+  useEffect(() => {
+    if (pieChartRef.current && statusData.length > 0) {
+      const pieChart = echarts.init(pieChartRef.current);
+      const pieOption = {
+        // ... configurações ...
+        series: [{
+          type: 'pie',
+          radius: ['40%', '70%'],
+          data: statusData.map(item => ({
+            value: parseFloat(item.percentage),
+            name: item.status,
+            itemStyle: { color: item.color }
+          }))
+        }]
+      };
+      pieChart.setOption(pieOption);
+    }
+  }, [statusData, darkMode]);
+
+  // Atualizar gráfico de BARRAS com dados reais
+  useEffect(() => {
+    if (barChartRef.current && brandsData.length > 0) {
+      const barChart = echarts.init(barChartRef.current);
+      const barOption = {
+        // ... configurações ...
+        yAxis: {
+          type: 'category',
+          data: brandsData.map(b => b.brand).reverse()
+        },
+        series: [{
+          type: 'bar',
+          data: brandsData.map(b => b.count).reverse()
+        }]
+      };
+      barChart.setOption(barOption);
+    }
+  }, [brandsData, darkMode]);
+
+  // Atualizar gráfico DONUT com dados reais
+  useEffect(() => {
+    if (donutChartRef.current && riskData.length > 0) {
+      const donutChart = echarts.init(donutChartRef.current);
+      const donutOption = {
+        // ... configurações ...
+        series: [{
+          type: 'pie',
+          radius: ['40%', '70%'],
+          data: riskData.map(item => ({
+            value: item.count,
+            name: item.riskLevel,
+            itemStyle: { color: item.color }
+          }))
+        }]
+      };
+      donutChart.setOption(donutOption);
+    }
+  }, [riskData, darkMode]);
+
+  // Atualizar gráfico de TENDÊNCIAS com dados reais
+  useEffect(() => {
+    if (trendChartRef.current && trendsData) {
+      const trendChart = echarts.init(trendChartRef.current);
+      const trendOption = {
+        // ... configurações ...
+        xAxis: {
+          type: 'category',
+          data: trendsData.companies
+        },
+        series: [
+          {
+            name: '7-Day Trend',
+            type: 'bar',
+            data: trendsData.trend7Days,
+            itemStyle: { color: '#F2495C' }
+          },
+          {
+            name: '30-Day Trend',
+            type: 'bar',
+            data: trendsData.trend30Days,
+            itemStyle: { color: '#FF9830' }
+          },
+          {
+            name: '90-Day Trend',
+            type: 'bar',
+            data: trendsData.trend90Days,
+            itemStyle: { color: '#5794F2' }
+          }
+        ]
+      };
+      trendChart.setOption(trendOption);
+    }
+  }, [trendsData, darkMode]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+
 
   useEffect(() => {
     const colors = getColors();
@@ -323,7 +437,7 @@ export default function AssetManagement() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
           <div className="bg-green-500 dark:bg-green-600 rounded-lg p-4 text-white shadow-lg transition-colors">
             <div className="text-sm opacity-90 mb-1">Total Certificates</div>
-            <div className="text-3xl font-bold">1,245</div>
+          <div className="text-3xl font-bold">{analytics?.totalCertificates?.toLocaleString()}</div>
           </div>
           
           <div className="bg-orange-500 dark:bg-orange-600 rounded-lg p-4 text-white shadow-lg transition-colors">
