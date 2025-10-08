@@ -14,7 +14,7 @@ export const createApolloClient = (company_id: number, user: string) => {
   });
 
   const httpLink = new HttpLink({
-    uri: 'https://api-graphql-ogkj.onrender.com/graphql',
+    uri: 'http://localhost:4000/graphql',
   });
 
   return new ApolloClient({
