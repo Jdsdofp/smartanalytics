@@ -125,7 +125,7 @@ export default function CertificateReportGrid() {
       });
 
       const response = await fetch(
-        `http://localhost:3306/api/dashboard/certificates/reports/${companyId}?${params}`
+        `https://api-dashboards-u1oh.onrender.com/api/dashboard/certificates/reports/${companyId}?${params}`
       );
       
       if (!response.ok) {
