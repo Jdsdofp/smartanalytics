@@ -6,6 +6,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
+import CertificateReportGrid from './Reports/reportMN0400_411';
 
 // import '../../../fullcalendar-custom.css';
 
@@ -772,7 +773,7 @@ export default function PredictiveCertificateAnalysis() {
       <div className="mb-6">
         <div className="border-b border-slate-200">
           <nav className="flex space-x-8">
-            {['overview', 'risk-analysis', 'trends', 'calendar'].map(tab => (
+            {['overview', 'risk-analysis', 'trends', 'calendar', 'report'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -1044,6 +1045,7 @@ export default function PredictiveCertificateAnalysis() {
               )}
             </div>
 
+
             <div className="calendar-container">
               <FullCalendar
                 ref={calendarRef}
@@ -1218,6 +1220,15 @@ export default function PredictiveCertificateAnalysis() {
           </div>
         </div>
       )}
+
+
+      {activeTab === 'report' && (
+        <div className="mb-4">
+          <CertificateReportGrid />
+        </div>
+      )
+
+      }
 
       <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-lg font-semibold text-slate-800 mb-4">Quick Statistics</h3>
