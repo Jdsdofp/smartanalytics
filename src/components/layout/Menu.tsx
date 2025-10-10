@@ -22,6 +22,8 @@ import {
   ShieldExclamationIcon,
   DocumentCheckIcon,
   ClockIcon,
+  ArchiveBoxIcon,
+  HomeModernIcon,
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../context/AuthContext'
 import { useCompany } from '../../hooks/useCompany'
@@ -491,7 +493,54 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
         ]
       }
       ]
-    }
+    },
+    {
+      icon: TruckIcon, label: 'Logistics Analytics', path: '/MN0400_005', hidden: false,
+      children: [
+        {
+          icon: ArchiveBoxIcon, label: 'Inventory Management', path: '/MN0400_310', children: [
+            { icon: ChartBarIcon, label: 'Inventory Health Score', path: '/MN0400_311', disabled: true, hidden: true },
+            { icon: MapPinIcon, label: 'Stock Distribution by Location', path: '/MN0400_312', disabled: false, hidden: false },
+            { icon: ChartBarIcon, label: 'Inventory Turnover Ratio', path: '/MN0400_313', disabled: true, hidden: true },
+            { icon: ChartBarIcon, label: 'Stock-out & Overstock Analysis', path: '/MN0400_314', disabled: true, hidden: true },
+            { icon: DocumentTextIcon, label: 'Days of Inventory on Hand', path: '/MN0400_315', disabled: true, hidden: true },
+            { icon: DocumentTextIcon, label: 'ABC Analysis', path: '/MN0400_316', disabled: true, hidden: true }
+          ]
+        },
+        {
+          icon: DocumentChartBarIcon, label: 'Supply Chain Performance', path: '/MN0400_320', hidden: true, children: [
+            { icon: ChartPieIcon, label: 'Supply Chain Cost Analysis', path: '/MN0400_321', disabled: true },
+            { icon: TableCellsIcon, label: 'Supplier Performance Scorecard', path: '/MN0400_322', disabled: true },
+            { icon: ChartBarIcon, label: 'Lead Time Analysis', path: '/MN0400_323', disabled: true },
+            { icon: DocumentTextIcon, label: 'Perfect Order Rate', path: '/MN0400_324', disabled: true },
+            { icon: DocumentTextIcon, label: 'Order Fulfillment Cycle Time', path: '/MN0400_325', disabled: true }
+          ]
+        },
+        {
+          icon: TruckIcon, label: 'Transportation & Distribution', path: '/MN0400_330', hidden: true, children: [
+            { icon: ChartBarIcon, label: 'Transportation Cost per Unit', path: '/MN0400_331', disabled: true },
+            { icon: ChartBarIcon, label: 'Fleet Utilization', path: '/MN0400_332', disabled: true },
+            { icon: ChartBarIcon, label: 'On-Time Delivery Performance', path: '/MN0400_333', disabled: true },
+            { icon: DocumentTextIcon, label: 'Route Optimization Analysis', path: '/MN0400_334', disabled: true }
+          ]
+        },
+        {
+          icon: HomeModernIcon, label: 'Warehouse Operations', path: '/MN0400_340', hidden: true, children: [
+            { icon: ChartBarIcon, label: 'Warehouse Space Utilization', path: '/MN0400_341', disabled: true },
+            { icon: ChartBarIcon, label: 'Picking & Packing Efficiency', path: '/MN0400_342', disabled: true },
+            { icon: ChartBarIcon, label: 'Dock Door Utilization', path: '/MN0400_343', disabled: true },
+            { icon: DocumentTextIcon, label: 'Warehouse Productivity Metrics', path: '/MN0400_344', disabled: true }
+          ]
+        },
+        {
+          icon: ChartPieIcon, label: 'Demand Planning', path: '/MN0400_350', hidden: true, children: [
+            { icon: ChartBarIcon, label: 'Demand Forecast Accuracy', path: '/MN0400_351', disabled: true },
+            { icon: ChartBarIcon, label: 'Seasonal Demand Patterns', path: '/MN0400_352', disabled: true },
+            { icon: DocumentTextIcon, label: 'Forecast vs Actual Analysis', path: '/MN0400_353', disabled: true }
+          ]
+        }
+      ]
+    },
   ]
 
 

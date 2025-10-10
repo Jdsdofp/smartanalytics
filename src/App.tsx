@@ -12,6 +12,7 @@ import MN0400_411 from './pages/Analytics/Certificates/MN0400_411';
 import MN0400_412 from './pages/Analytics/Certificates/MN0400_412';
 import MN0400_413 from './pages/Analytics/Certificates/MN0400_413';
 import "./i18n";
+import MN0400_312 from './pages/Analytics/Locations/MN0400_312';
 
 function App() {
 
@@ -94,6 +95,12 @@ function App() {
           </PrivateRoute>
         }
       />
+
+      <Route path='/MN0400_312' element={
+        <PrivateRoute>
+          <MN0400_312 />
+        </PrivateRoute>
+      } />
     </Routes>
 
   );
