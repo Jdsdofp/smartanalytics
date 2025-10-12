@@ -22,6 +22,9 @@ import {
   ShieldExclamationIcon,
   DocumentCheckIcon,
   ClockIcon,
+  ArchiveBoxIcon,
+  HomeModernIcon,
+  ServerIcon,
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../context/AuthContext'
 import { useCompany } from '../../hooks/useCompany'
@@ -404,8 +407,51 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
       ]
     },
     {
-      icon: BuildingOfficeIcon, label: 'Infrastructure Analytics', path: '/MN0400_004', hidden: true,
-      children: []
+      icon: BuildingOfficeIcon, label: 'Infrastructure Analytics', path: '/MN0400_004', hidden: false,
+      children: [
+        {
+          icon: ServerIcon, label: 'Site Survey', path: '/MN0400_210', children: [
+            { icon: ChartBarIcon, label: 'Device Logs & Monitoring', path: '/MN0400_211', disabled: false },
+            { icon: ChartBarIcon, label: 'Overall Equipment Effectiveness', path: '/MN0400_212', disabled: true, hidden: true },
+            // { icon: ChartBarIcon, label: 'Uptime & Availability', path: '/MN0400_213', disabled: true },
+            // { icon: DocumentTextIcon, label: 'Mean Time Between Failures', path: '/MN0400_214', disabled: true },
+            // { icon: DocumentTextIcon, label: 'Mean Time To Repair', path: '/MN0400_215', disabled: true }
+          ]
+        },
+        // {
+        //   icon: ServerIcon, label: 'Reliability & Performance', path: '/MN0400_210', children: [
+        //     { icon: ChartBarIcon, label: 'Equipment Reliability Index', path: '/MN0400_211', disabled: true },
+        //     { icon: ChartBarIcon, label: 'Overall Equipment Effectiveness', path: '/MN0400_212', disabled: true },
+        //     { icon: ChartBarIcon, label: 'Uptime & Availability', path: '/MN0400_213', disabled: true },
+        //     { icon: DocumentTextIcon, label: 'Mean Time Between Failures', path: '/MN0400_214', disabled: true },
+        //     { icon: DocumentTextIcon, label: 'Mean Time To Repair', path: '/MN0400_215', disabled: true }
+        //   ]
+        // },
+        // {
+        //   icon: WrenchScrewdriverIcon, label: 'Maintenance & Operations', path: '/MN0400_220', children: [
+        //     { icon: ChartPieIcon, label: 'Maintenance Cost by Category', path: '/MN0400_221', disabled: true },
+        //     { icon: ChartBarIcon, label: 'Predictive Maintenance Insights', path: '/MN0400_222', disabled: true },
+        //     { icon: ChartBarIcon, label: 'Work Order Completion Rate', path: '/MN0400_223', disabled: true },
+        //     { icon: DocumentTextIcon, label: 'Preventive vs Reactive Maintenance', path: '/MN0400_224', disabled: true },
+        //     { icon: DocumentTextIcon, label: 'Maintenance Backlog Analysis', path: '/MN0400_225', disabled: true }
+        //   ]
+        // },
+        // {
+        //   icon: BoltIcon  , label: 'Energy & Sustainability', path: '/MN0400_230', children: [
+        //     { icon: ChartBarIcon, label: 'Energy Consumption Trends', path: '/MN0400_231', disabled: true },
+        //     { icon: ChartPieIcon, label: 'Carbon Footprint Analysis', path: '/MN0400_232', disabled: true },
+        //     { icon: ChartBarIcon, label: 'Energy Cost per Unit', path: '/MN0400_233', disabled: true },
+        //     { icon: DocumentTextIcon, label: 'Sustainability KPIs', path: '/MN0400_234', disabled: true }
+        //   ]
+        // },
+        // {
+        //   icon: HomeModernIcon, label: 'Facilities Management', path: '/MN0400_240', children: [
+        //     { icon: ChartBarIcon, label: 'Facility Utilization Heatmap', path: '/MN0400_241', disabled: true },
+        //     { icon: ChartBarIcon, label: 'Space Optimization Analysis', path: '/MN0400_242', disabled: true },
+        //     { icon: DocumentTextIcon, label: 'Facility Condition Assessment', path: '/MN0400_243', disabled: true }
+        //   ]
+        // }
+      ]
     },
     {
       icon: TruckIcon, label: 'Logistics Analytics', path: '/MN0400_005', hidden: true,
@@ -491,7 +537,54 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
         ]
       }
       ]
-    }
+    },
+    {
+      icon: TruckIcon, label: 'Logistics Analytics', path: '/MN0400_005', hidden: false,
+      children: [
+        {
+          icon: ArchiveBoxIcon, label: 'Inventory Management', path: '/MN0400_310', children: [
+            { icon: ChartBarIcon, label: 'Inventory Health Score', path: '/MN0400_311', disabled: true, hidden: true },
+            { icon: MapPinIcon, label: 'Stock Distribution by Location', path: '/MN0400_312', disabled: false, hidden: false },
+            { icon: ChartBarIcon, label: 'Inventory Turnover Ratio', path: '/MN0400_313', disabled: true, hidden: true },
+            { icon: ChartBarIcon, label: 'Stock-out & Overstock Analysis', path: '/MN0400_314', disabled: true, hidden: true },
+            { icon: DocumentTextIcon, label: 'Days of Inventory on Hand', path: '/MN0400_315', disabled: true, hidden: true },
+            { icon: DocumentTextIcon, label: 'ABC Analysis', path: '/MN0400_316', disabled: true, hidden: true }
+          ]
+        },
+        {
+          icon: DocumentChartBarIcon, label: 'Supply Chain Performance', path: '/MN0400_320', hidden: true, children: [
+            { icon: ChartPieIcon, label: 'Supply Chain Cost Analysis', path: '/MN0400_321', disabled: true },
+            { icon: TableCellsIcon, label: 'Supplier Performance Scorecard', path: '/MN0400_322', disabled: true },
+            { icon: ChartBarIcon, label: 'Lead Time Analysis', path: '/MN0400_323', disabled: true },
+            { icon: DocumentTextIcon, label: 'Perfect Order Rate', path: '/MN0400_324', disabled: true },
+            { icon: DocumentTextIcon, label: 'Order Fulfillment Cycle Time', path: '/MN0400_325', disabled: true }
+          ]
+        },
+        {
+          icon: TruckIcon, label: 'Transportation & Distribution', path: '/MN0400_330', hidden: true, children: [
+            { icon: ChartBarIcon, label: 'Transportation Cost per Unit', path: '/MN0400_331', disabled: true },
+            { icon: ChartBarIcon, label: 'Fleet Utilization', path: '/MN0400_332', disabled: true },
+            { icon: ChartBarIcon, label: 'On-Time Delivery Performance', path: '/MN0400_333', disabled: true },
+            { icon: DocumentTextIcon, label: 'Route Optimization Analysis', path: '/MN0400_334', disabled: true }
+          ]
+        },
+        {
+          icon: HomeModernIcon, label: 'Warehouse Operations', path: '/MN0400_340', hidden: true, children: [
+            { icon: ChartBarIcon, label: 'Warehouse Space Utilization', path: '/MN0400_341', disabled: true },
+            { icon: ChartBarIcon, label: 'Picking & Packing Efficiency', path: '/MN0400_342', disabled: true },
+            { icon: ChartBarIcon, label: 'Dock Door Utilization', path: '/MN0400_343', disabled: true },
+            { icon: DocumentTextIcon, label: 'Warehouse Productivity Metrics', path: '/MN0400_344', disabled: true }
+          ]
+        },
+        {
+          icon: ChartPieIcon, label: 'Demand Planning', path: '/MN0400_350', hidden: true, children: [
+            { icon: ChartBarIcon, label: 'Demand Forecast Accuracy', path: '/MN0400_351', disabled: true },
+            { icon: ChartBarIcon, label: 'Seasonal Demand Patterns', path: '/MN0400_352', disabled: true },
+            { icon: DocumentTextIcon, label: 'Forecast vs Actual Analysis', path: '/MN0400_353', disabled: true }
+          ]
+        }
+      ]
+    },
   ]
 
 
