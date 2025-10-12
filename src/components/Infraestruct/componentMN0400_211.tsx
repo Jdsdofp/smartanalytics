@@ -1802,11 +1802,11 @@ export default function DeviceLogsView() {
         </div>
       )}
 
-                     {activeTab === 'rawdata' && (
-  <div className="space-y-6">
-    <RawDataExplorer />
-  </div>
-)}
+          {activeTab === 'rawdata' && (
+
+              <RawDataExplorer />
+
+          )}
 
       <MapModal
         device={selectedDevice}
