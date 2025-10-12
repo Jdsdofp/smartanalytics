@@ -1032,7 +1032,7 @@ const RawDataExplorer: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 bg-gray-50">
+      <div className="border-b border-gray-200 bg-gray-50 overflow-x-auto">
         <nav className="flex space-x-4 px-6">
           {Object.values(tableConfigs).map((config) => (
             <button
