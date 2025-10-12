@@ -15,7 +15,7 @@
     "reports": "Reports",
     "settings": "Settings"
   },
-   "home": {
+  "home": {
     "welcome": "Welcome, {{name}}!",
     "yourProfile": "Your Profile",
     "email": "Email",
@@ -151,5 +151,386 @@
       "good": "GOOD 🟡",
       "regular": "REGULAR 🟠"
     }
+  },
+  "rawDataExplorer": {
+    "title": "Raw Data Explorer",
+    "refresh": "Refresh",
+    "activeFilters": "Active filters",
+    "tabs": {
+      "gps": "GPS Reports",
+      "events": "Events",
+      "scanning": "Scanning",
+      "configuration": "Configuration",
+      "errors": "GPS Errors"
+    },
+    "filters": {
+      "globalSearchPlaceholder": "🔍 Quick global search...",
+      "globalSearchHint": "Use global search or individual filters in each table column",
+      "advancedFilters": "Advanced Filters",
+      "tip": "Tip",
+      "tipMessage": "Use filters in each table column for specific searches",
+      "clearGlobalFilters": "Clear global filters",
+      "all": "All",
+      "filterBy": "Filter by {{field}}",
+      "fields": {
+        "dev_eui": "Device EUI",
+        "customer_name": "Customer",
+        "start_date": "Start Date",
+        "end_date": "End Date",
+        "event_type": "Event Type",
+        "is_valid_event": "Valid Event",
+        "battery_min": "Minimum Battery (%)",
+        "battery_max": "Maximum Battery (%)",
+        "tracking_mode": "Tracking Mode",
+        "error_type": "Error Type"
+      },
+      "options": {
+        "SOS_MODE_START": "SOS Start",
+        "SOS_MODE_END": "SOS End",
+        "MOTION_START": "Motion Start",
+        "MOTION_END": "Motion End",
+        "GEOFENCE_ENTRY": "Geofence Entry",
+        "GEOFENCE_EXIT": "Geofence Exit",
+        "MOTION_TRACKING": "Motion Tracking",
+        "PERMANENT_TRACKING": "Permanent Tracking"
+      }
+    },
+    "pagination": {
+      "showing": "Showing {{start}} - {{end}} of {{total}} records",
+      "perPage": "{{count}} per page",
+      "first": "First",
+      "previous": "Previous",
+      "next": "Next",
+      "last": "Last",
+      "pageOf": "Page {{current}} of {{total}}"
+    },
+    "table": {
+      "noRecords": "No records found",
+      "activeFilters": "Active filters: {{count}}",
+      "clearAllFilters": "Clear all filters",
+      "filterColumn": "Filter {{column}}...",
+      "showingRecords": "Showing {{count}} record(s)",
+      "filteredLocally": "filtered locally"
+    },
+    "export": {
+      "export": "Export",
+      "exporting": "Exporting...",
+      "localExport": "Local Export",
+      "rawData": "Raw Data",
+      "dataExport": "Data Export",
+      "monitoringSystem": "Monitoring System",
+      "success": "✅ Export completed! {{count}} records exported.",
+      "error": "❌ Error exporting data. Please try again.",
+      "availableRecords": "{{count}} records available",
+      "formats": {
+        "excel": "Excel (XLSX)",
+        "excelDesc": "With formatting",
+        "csv": "CSV",
+        "csvDesc": "Tabular data",
+        "json": "JSON",
+        "jsonDesc": "Structured data"
+      }
+    }
+  },
+  "deviceLogs": {
+    "title": "Device Monitoring Dashboard",
+    "lastUpdate": "Last update",
+    "refresh": "Refresh",
+    "searchPlaceholder": {
+      "devices": "Search by Device or Customer..."
+    },
+    "alerts": {
+      "sos": "SOS Alerts",
+      "battery": "Low Battery",
+      "offline": "Offline"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "devices": "Devices",
+      "events": "Events",
+      "network": "Network",
+      "customers": "Customers",
+      "rawData": "Raw Data"
+    },
+    "kpis": {
+      "deviceUptime": {
+        "title": "Device Uptime",
+        "subtitle": "{{online}} online of {{total}} total"
+      },
+      "gpsSuccess": {
+        "title": "GPS Success Rate",
+        "subtitle": "{{valid}} valid GPS reports"
+      },
+      "batteryHealth": {
+        "title": "Battery Health",
+        "subtitle": "{{critical}} devices critical"
+      },
+      "activeAlerts": {
+        "title": "Active Alerts",
+        "subtitle": "{{lowBattery}} low battery"
+      }
+    },
+    "charts": {
+      "batteryDistribution": "Battery Status Distribution",
+      "gpsAccuracy": "GPS Accuracy Distribution",
+      "eventDistribution": "Event Type Distribution"
+    },
+    "sosAlerts": {
+      "title": "Active SOS Alerts ({{count}})",
+      "minutesAgo": "{{minutes}} min ago"
+    },
+    "tables": {
+      "deviceEui": "Device EUI",
+      "customer": "Customer",
+      "startTime": "Start Time",
+      "timeElapsed": "Time Elapsed",
+      "battery": "Battery",
+      "location": "Location",
+      "viewOnMap": "View on Map",
+      "state": "State",
+      "lastPosition": "Last Position",
+      "actions": "Actions",
+      "viewDetails": "View Details",
+      "noDevicesFound": "No devices found"
+    },
+    "deviceMotion": {
+      "title": "Device Motion Status ({{count}} devices)",
+      "moving": "Moving",
+      "static": "Static"
+    },
+    "deviceStates": {
+      "moving": "Moving",
+      "static": "Static"
+    },
+    "events": {
+      "legend": "Event Statistics"
+    }
+  },
+  "deviceDetails": {
+    "title": "Device Details",
+    "iconAlt": "Mobile device icon"
+  },
+  "customer": {
+    "label": "Customer"
+  },
+  "status": {
+    "label": "Status"
+  },
+  "motionState": {
+    "moving": "🚶 Moving",
+    "static": "⏸️ Static"
+  },
+   "battery": {
+    "label": "Battery"
+  },
+    "lastUpdate": {
+    "label": "Last Update"
+  },
+  "tabs": {
+    "info": "Information",
+    "route": "Route (24h)",
+    "events": "Events",
+    "config": "Configuration"
+  },
+  "generalInfo": {
+    "title": "📋 General Information",
+    "deviceEUI": "Device EUI",
+    "customer": "Customer",
+    "batteryLevel": "Battery Level",
+    "motionState": "Motion State"
+  },
+  "gpsLocation": {
+    "title": "📍 GPS Location",
+    "latitude": "Latitude",
+    "longitude": "Longitude"
+  },
+  "offlineDevices": {
+    "title": "Offline Devices",
+    "deviceEUI": "Device EUI",
+    "customer": "Customer",
+    "lastPosition": "Last Position",
+    "offlineTime": "Offline Time",
+    "battery": "Battery",
+    "notAvailable": "N/A"
+  },
+  "deviceLog": {
+    "events": {
+      "legend": "Event Statistics",
+      "eventType": "Event Type",
+      "total": "Total",
+      "valid": "Valid",
+      "duplicate": "Duplicate",
+      "uniqueDevices": "Unique Devices",
+      "duplicationRate": "Duplication Rate",
+      "emptyMessage": "No events recorded in the last 24 hours"
+    }
+  },
+  "eventLegend": {
+    "title": "📖 Event Types Legend",
+    "types": {
+      "SOS_MODE_START": "SOS alert start",
+      "SOS_MODE_END": "SOS alert end",
+      "MOTION_START": "Motion start",
+      "MOTION_END": "Motion end",
+      "GEOFENCE_ENTRY": "Geofence entry",
+      "GEOFENCE_EXIT": "Geofence exit"
+    }
+  },
+   "gateway": {
+    "title": "Gateway Signal Quality",
+    "statsTitle": "Gateway Statistics",
+    "gateway": "Gateway",
+    "reports": "Reports",
+    "avgRssi": "Average RSSI",
+    "avgSnr": "Average SNR",
+    "minRssi": "Min RSSI",
+    "maxRssi": "Max RSSI",
+    "quality": "Quality",
+    "notAvailable": "N/A",
+    "qualityLevels": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor"
+    },
+    "metrics": {
+      "activeGateways": "Active Gateways",
+      "overallAvgRssi": "Overall Average RSSI",
+      "totalReports": "Total Reports"
+    },
+    "emptyMessage": "No gateway data available"
+  },
+  "customerActivity": {
+    "searchPlaceholder": "Search by Customer or Domain...",
+    "title": "Customer Activity",
+    "customer": "Customer",
+    "domain": "Domain",
+    "devices": "Devices",
+    "reports24h": "Reports (24h)",
+    "avgBattery": "Average Battery",
+    "lastActivity": "Last Activity",
+    "actions": "Actions",
+    "notAvailable": "N/A",
+    "timeAgo": {
+      "minutes": "min ago",
+      "hours": "h ago",
+      "days": "d ago"
+    },
+    "viewDetails": "View Details →",
+    "emptyMessage": "No customers found",
+    "metrics": {
+      "totalCustomers": "Total Customers",
+      "totalDevices": "Total Devices",
+      "totalReports": "Total Reports",
+      "overallAvgBattery": "Overall Average Battery"
+    }
+  },
+  "route24h": {
+    "positionsRegistered": "📍 {{count}} positions registered in the last 24 hours",
+    "time": "Time",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "speed": "Speed",
+    "battery": "Battery",
+    "notAvailable": "N/A",
+    "noRoute": "No route recorded in the last 24 hours",
+    "speedUnit": "km/h"
+  },
+  "recentEvents": {
+    "eventsCount": "🚨 {{count}} recent events",
+    "noEvents": "No recent events recorded",
+    "battery": "🔋 {{level}}%"
+  },
+   "deviceConfig": {
+    "title": "⚙️ Current Configuration",
+    "trackingMode": "Tracking Mode",
+    "uplinkPeriod": "Uplink Period",
+    "batteryAtLastConfig": "Battery at Last Config",
+    "lastReconfiguration": "Last Reconfiguration",
+    "notAvailable": "Configuration not available"
+  },
+  "common": {
+    "close": "Close"
+  },
+   "locationModal": {
+    "title": "📍 Device Location",
+    "sosAlert": "🚨 SOS ALERT ACTIVE",
+    "status": {
+      "sosActive": "🚨 SOS ACTIVE",
+      "moving": "🚶 Moving",
+      "static": "⏸️ Static"
+    },
+    "popup": {
+      "sosAlert": "🚨 SOS ALERT",
+      "battery": "Battery",
+      "status": "Status"
+    },
+    "metrics": {
+      "status": "Status",
+      "battery": "Battery",
+      "latitude": "Latitude",
+      "longitude": "Longitude"
+    },
+    "actions": {
+      "openGoogleMaps": "Open in Google Maps",
+      "close": "Close"
+    }
+  },
+  "batteryChart": {
+    "tooltip": "{b}: {c} ({d}%)",
+    "seriesName": "Battery Status",
+    "healthy": "Healthy (≥30%)",
+    "warning": "Warning (20-29%)",
+    "critical": "Critical (<20%)"
+  },
+   "accuracyChart": {
+    "tooltip": {
+      "trigger": "axis",
+      "axisPointer": { "type": "shadow" }
+    },
+    "yAxis": {
+      "name": "Quantity"
+    },
+    "series": {
+      "name": "Reports"
+    },
+    "accuracyRanges": {
+      "excellent": "Excellent",
+      "good": "Good", 
+      "fair": "Fair",
+      "poor": "Poor"
+    }
+  },
+  "gatewayChart": {
+    "tooltip": {
+      "trigger": "axis",
+      "axisPointer": { "type": "cross" }
+    },
+    "legend": {
+      "avgRssi": "Average RSSI",
+      "avgSnr": "Average SNR", 
+      "reportCount": "Report Count"
+    },
+    "yAxis": {
+      "rssiSnr": "RSSI/SNR",
+      "count": "Count"
+    }
+  },
+   "eventsChart": {
+    "tooltip": {
+      "trigger": "axis",
+      "axisPointer": { "type": "shadow" }
+    },
+    "legend": {
+      "validEvents": "Valid Events",
+      "duplicates": "Duplicates"
+    },
+    "yAxis": {
+      "name": "Quantity"
+    }
+  },
+  "error": {
+    "title": "Error loading data",
+    "retry": "Try again"
   }
 }

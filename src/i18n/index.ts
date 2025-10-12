@@ -4,16 +4,17 @@ import LanguageDetector from "i18next-browser-languagedetector";
 
 import en from "./locales/en/translation.json";
 import pt from "./locales/pt/translation.json";
-// import es from "./locales/es/translation.json";
+import es from "./locales/es/translation.json";
 // import ar from "./locales/ar/translation.json";
 
 // Função para carregar idioma do localStorage
 const getSavedLanguage = () => {
   try {
-    const savedSettings = localStorage.getItem('administrationSettings');
+    const savedSettings = sessionStorage.getItem('companyData');
+    
     if (savedSettings) {
       const settings = JSON.parse(savedSettings);
-      return settings.language || 'pt';
+      return settings.language || 'en';
     }
   } catch (error) {
     console.error('Erro ao carregar idioma salvo:', error);
@@ -28,7 +29,7 @@ i18n
     resources: {
       en: { translation: en },
       pt: { translation: pt },
-      // es: { translation: es },
+      es: { translation: es },
       // ar: { translation: ar }
     },
     lng: getSavedLanguage(), // Define o idioma inicial baseado no localStorage

@@ -56,7 +56,7 @@ function Header({ onMenuClick }: HeaderProps) {
               />
             )}
             <h1 className="text-xl font-bold text-primary-600 dark:text-primary-400 max-[400px]:hidden">
-              Smart Analytics
+              SmartxHub Analytics
             </h1>
           </div>
         </div>

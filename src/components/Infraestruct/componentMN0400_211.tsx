@@ -22,6 +22,8 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import RawDataExplorer from './DataGrid/gridMN0400_211';
+import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 // =====================================
 // 📊 INTERFACES
@@ -160,7 +162,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
 
   const fetchDeviceDetails = async () => {
     if (!device) return;
-    
+
     setLoading(true);
     try {
       const [routeRes, eventsRes, configRes] = await Promise.all([
@@ -190,18 +192,18 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
         onClick={onClose}
       />
-      
+
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
           <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
             <div>
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <DevicePhoneMobileIcon className="h-6 w-6 text-blue-600" />
-                Detalhes do Dispositivo
+                {t('deviceDetails.title')}
               </h3>
               <p className="mt-1 text-sm text-gray-600">{device.dev_eui}</p>
             </div>
@@ -216,28 +218,26 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
             <div className="p-6 bg-gray-50">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Cliente</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">{t('customer.label')}</p>
                   <p className="mt-1 text-sm font-semibold text-gray-900">{device.customer_name}</p>
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Estado</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">{t('status.label')}</p>
                   <p className="mt-1 text-sm font-semibold">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
-                      device.dynamic_motion_state === 'MOVING' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {device.dynamic_motion_state === 'MOVING' ? '🚶 Movimento' : '⏸️ Estático'}
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${device.dynamic_motion_state === 'MOVING' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                      {device.dynamic_motion_state === 'MOVING' ? t('motionState.moving') : '⏸️ ' + t('motionState.static')}
                     </span>
                   </p>
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Bateria</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">  {t('battery.label')}</p>
                   <div className="mt-1 flex items-center gap-2">
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
                       <div
-                        className={`h-2 rounded-full ${
-                          device.battery_level >= 30 ? 'bg-green-500' : 
+                        className={`h-2 rounded-full ${device.battery_level >= 30 ? 'bg-green-500' :
                           device.battery_level >= 20 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}
+                          }`}
                         style={{ width: `${device.battery_level}%` }}
                       />
                     </div>
@@ -245,7 +245,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                   </div>
                 </div>
                 <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Última Atualização</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">  {t('lastUpdate.label')}</p>
                   <p className="mt-1 text-xs font-medium text-gray-900">
                     {new Date(device.timestamp).toLocaleString('pt-BR')}
                   </p>
@@ -256,19 +256,18 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
             <div className="border-b border-gray-200 px-6">
               <nav className="-mb-px flex space-x-8">
                 {[
-                  { id: 'info', label: 'Informações', icon: '📋' },
-                  { id: 'route', label: 'Rota (24h)', icon: '🗺️' },
-                  { id: 'events', label: 'Eventos', icon: '🚨' },
-                  { id: 'config', label: 'Configuração', icon: '⚙️' },
+                  { id: 'info', label: t('tabs.info'), icon: '📋' },
+                  { id: 'route', label: t('tabs.route'), icon: '🗺️' },
+                  { id: 'events', label: t('tabs.events'), icon: '🚨' },
+                  { id: 'config', label: t('tabs.config'), icon: '⚙️' },
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveDetailsTab(tab.id as any)}
-                    className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                      activeDetailsTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+                    className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${activeDetailsTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
                   >
                     <span>{tab.icon}</span>
                     {tab.label}
@@ -287,39 +286,45 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                   {activeDetailsTab === 'info' && (
                     <div className="space-y-6">
                       <div className="bg-white border border-gray-200 rounded-lg p-6">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-4">📋 Informações Gerais</h4>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                          {t('generalInfo.title')}
+                        </h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <p className="text-sm text-gray-500">Device EUI</p>
+                            <p className="text-sm text-gray-500">{t('generalInfo.deviceEUI')}</p>
                             <p className="mt-1 text-sm font-mono font-medium text-gray-900">{device.dev_eui}</p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">Cliente</p>
+                            <p className="text-sm text-gray-500">{t('generalInfo.customer')}</p>
                             <p className="mt-1 text-sm font-medium text-gray-900">{device.customer_name}</p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">Nível de Bateria</p>
+                            <p className="text-sm text-gray-500">{t('generalInfo.batteryLevel')}</p>
                             <p className="mt-1 text-sm font-medium text-gray-900">{device.battery_level}%</p>
                           </div>
                           <div>
-                            <p className="text-sm text-gray-500">Estado de Movimento</p>
-                            <p className="mt-1 text-sm font-medium text-gray-900">{device.dynamic_motion_state}</p>
+                            <p className="text-sm text-gray-500">{t('generalInfo.motionState')}</p>
+                            <p className="mt-1 text-sm font-medium text-gray-900">
+                              {device.dynamic_motion_state === 'MOVING' ? t('motionState.moving') : t('motionState.static')}
+                            </p>
                           </div>
                         </div>
                       </div>
 
                       {device.gps_latitude && device.gps_longitude && (
                         <div className="bg-white border border-gray-200 rounded-lg p-6">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-4">📍 Localização GPS</h4>
+                          <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                            {t('gpsLocation.title')}
+                          </h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <p className="text-sm text-gray-500">Latitude</p>
+                              <p className="text-sm text-gray-500">{t('gpsLocation.latitude')}</p>
                               <p className="mt-1 text-sm font-mono font-medium text-gray-900">
                                 {device.gps_latitude.toFixed(6)}
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">Longitude</p>
+                              <p className="text-sm text-gray-500">{t('gpsLocation.longitude')}</p>
                               <p className="mt-1 text-sm font-mono font-medium text-gray-900">
                                 {device.gps_longitude.toFixed(6)}
                               </p>
@@ -336,25 +341,35 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                         <>
                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <p className="text-sm text-blue-800">
-                              📍 {deviceDetails.route24h.length} posições registradas nas últimas 24 horas
+                              {t('route24h.positionsRegistered', { count: deviceDetails.route24h.length })}
                             </p>
                           </div>
                           <div className="overflow-y-auto max-h-[400px]">
                             <table className="min-w-full divide-y divide-gray-300">
                               <thead className="bg-gray-50 sticky top-0">
                                 <tr>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Horário</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Latitude</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Longitude</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Velocidade</th>
-                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bateria</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t('route24h.time')}
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t('route24h.latitude')}
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t('route24h.longitude')}
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t('route24h.speed')}
+                                  </th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                    {t('route24h.battery')}
+                                  </th>
                                 </tr>
                               </thead>
                               <tbody className="bg-white divide-y divide-gray-200">
                                 {deviceDetails.route24h.map((point, idx) => (
                                   <tr key={idx} className="hover:bg-gray-50">
                                     <td className="px-4 py-3 text-sm text-gray-900">
-                                      {new Date(point.timestamp).toLocaleString('pt-BR')}
+                                      {new Date(point.timestamp).toLocaleString()}
                                     </td>
                                     <td className="px-4 py-3 text-sm font-mono text-gray-900">
                                       {point.latitude.toFixed(6)}
@@ -363,7 +378,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                                       {point.longitude.toFixed(6)}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-gray-900">
-                                      {point.speed ? `${point.speed.toFixed(1)} km/h` : 'N/A'}
+                                      {point.speed ? `${point.speed.toFixed(1)} ${t('route24h.speedUnit')}` : t('route24h.notAvailable')}
                                     </td>
                                     <td className="px-4 py-3 text-sm text-gray-900">
                                       {point.battery_level}%
@@ -377,7 +392,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                       ) : (
                         <div className="text-center py-12 text-gray-500">
                           <MapPinIcon className="mx-auto h-12 w-12 text-gray-400" />
-                          <p className="mt-2">Nenhuma rota registrada nas últimas 24 horas</p>
+                          <p className="mt-2">{t('route24h.noRoute')}</p>
                         </div>
                       )}
                     </div>
@@ -389,7 +404,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                         <>
                           <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                             <p className="text-sm text-purple-800">
-                              🚨 {deviceDetails.recentEvents.length} eventos recentes
+                              {t('recentEvents.eventsCount', { count: deviceDetails.recentEvents.length })}
                             </p>
                           </div>
                           <div className="space-y-3">
@@ -399,11 +414,11 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                                   <div>
                                     <p className="font-medium text-gray-900">{event.event_type}</p>
                                     <p className="text-xs text-gray-500 mt-1">
-                                      {new Date(event.event_timestamp).toLocaleString('pt-BR')}
+                                      {new Date(event.event_timestamp).toLocaleString()}
                                     </p>
                                   </div>
                                   <span className="text-xs font-medium text-gray-600">
-                                    🔋 {event.battery_level}%
+                                    {t('recentEvents.battery', { level: event.battery_level })}
                                   </span>
                                 </div>
                               </div>
@@ -413,7 +428,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                       ) : (
                         <div className="text-center py-12 text-gray-500">
                           <ShieldExclamationIcon className="mx-auto h-12 w-12 text-gray-400" />
-                          <p className="mt-2">Nenhum evento recente registrado</p>
+                          <p className="mt-2">{t('recentEvents.noEvents')}</p>
                         </div>
                       )}
                     </div>
@@ -423,30 +438,32 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                     <div className="space-y-6">
                       {deviceDetails?.configuration ? (
                         <div className="bg-white border border-gray-200 rounded-lg p-6">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-4">⚙️ Configuração Atual</h4>
+                          <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                            {t('deviceConfig.title')}
+                          </h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <p className="text-sm text-gray-500">Modo de Rastreamento</p>
+                              <p className="text-sm text-gray-500">{t('deviceConfig.trackingMode')}</p>
                               <p className="mt-1 text-sm font-medium text-gray-900">
                                 {deviceDetails.configuration.tracking_mode}
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">Período de Uplink</p>
+                              <p className="text-sm text-gray-500">{t('deviceConfig.uplinkPeriod')}</p>
                               <p className="mt-1 text-sm font-medium text-gray-900">
                                 {deviceDetails.configuration.tracking_ul_period}s
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">Bateria na Última Config</p>
+                              <p className="text-sm text-gray-500">{t('deviceConfig.batteryAtLastConfig')}</p>
                               <p className="mt-1 text-sm font-medium text-gray-900">
                                 {deviceDetails.configuration.battery_level}%
                               </p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">Última Reconfiguração</p>
+                              <p className="text-sm text-gray-500">{t('deviceConfig.lastReconfiguration')}</p>
                               <p className="mt-1 text-sm font-medium text-gray-900">
-                                {new Date(deviceDetails.configuration.last_config).toLocaleString('pt-BR')}
+                                {new Date(deviceDetails.configuration.last_config).toLocaleString()}
                               </p>
                             </div>
                           </div>
@@ -454,7 +471,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                       ) : (
                         <div className="text-center py-12 text-gray-500">
                           <Cog6ToothIcon className="mx-auto h-12 w-12 text-gray-400" />
-                          <p className="mt-2">Configuração não disponível</p>
+                          <p className="mt-2">{t('deviceConfig.notAvailable')}</p>
                         </div>
                       )}
                     </div>
@@ -469,7 +486,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             >
-              Fechar
+              {t('common.close')}
             </button>
           </div>
         </div>
@@ -510,18 +527,17 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex min-h-full items-center justify-center p-4 bg-black bg-opacity-50">
       <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full">
-        <div className={`flex items-center justify-between p-6 border-b ${
-          isSOSAlert ? 'border-red-200 bg-red-50' : 'border-gray-200'
-        }`}>
+        <div className={`flex items-center justify-between p-6 border-b ${isSOSAlert ? 'border-red-200 bg-red-50' : 'border-gray-200'
+          }`}>
           <div>
             <div className="flex items-center gap-2">
               {isSOSAlert && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 animate-pulse">
-                  🚨 ALERTA SOS ATIVO
+                  {t('locationModal.sosAlert')}
                 </span>
               )}
               <h3 className={`text-lg font-semibold ${isSOSAlert ? 'text-red-900' : 'text-gray-900'}`}>
-                📍 Localização do Dispositivo
+                {t('locationModal.title')}
               </h3>
             </div>
             <p className="mt-1 text-sm text-gray-600">
@@ -536,9 +552,8 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
         </div>
 
         <div className="p-6">
-          <div className={`h-[500px] rounded-lg overflow-hidden border-2 ${
-            isSOSAlert ? 'border-red-400' : 'border-gray-200'
-          }`}>
+          <div className={`h-[500px] rounded-lg overflow-hidden border-2 ${isSOSAlert ? 'border-red-400' : 'border-gray-200'
+            }`}>
             <MapContainer
               center={position}
               zoom={15}
@@ -553,13 +568,17 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
                 <Popup>
                   <div className="p-2">
                     {isSOSAlert && (
-                      <p className="font-bold text-red-600 mb-1">🚨 ALERTA SOS</p>
+                      <p className="font-bold text-red-600 mb-1">{t('locationModal.popup.sosAlert')}</p>
                     )}
                     <p className="font-semibold">{device.dev_eui}</p>
                     <p className="text-sm text-gray-600">{device.customer_name}</p>
-                    <p className="text-xs text-gray-500 mt-1">Bateria: {device.battery_level}%</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t('locationModal.popup.battery')}: {device.battery_level}%
+                    </p>
                     <p className="text-xs text-gray-500">
-                      Estado: {device.dynamic_motion_state === 'SOS_ACTIVE' ? 'SOS ATIVO' : device.dynamic_motion_state}
+                      {t('locationModal.popup.status')}: {device.dynamic_motion_state === 'SOS_ACTIVE'
+                        ? t('locationModal.status.sosActive')
+                        : device.dynamic_motion_state}
                     </p>
                   </div>
                 </Popup>
@@ -569,33 +588,31 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
         </div>
 
         <div className="px-6 pb-6">
-          <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 rounded-lg p-4 ${
-            isSOSAlert ? 'bg-red-50' : 'bg-gray-50'
-          }`}>
+          <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 rounded-lg p-4 ${isSOSAlert ? 'bg-red-50' : 'bg-gray-50'
+            }`}>
             <div>
-              <p className="text-xs text-gray-500">Estado</p>
+              <p className="text-xs text-gray-500">{t('locationModal.metrics.status')}</p>
               <p className={`mt-1 font-medium ${isSOSAlert ? 'text-red-900' : 'text-gray-900'}`}>
-                {device.dynamic_motion_state === 'SOS_ACTIVE' 
-                  ? '🚨 SOS ATIVO' 
-                  : device.dynamic_motion_state === 'MOVING' 
-                  ? '🚶 Em Movimento' 
-                  : '⏸️ Estático'}
+                {device.dynamic_motion_state === 'SOS_ACTIVE'
+                  ? t('locationModal.status.sosActive')
+                  : device.dynamic_motion_state === 'MOVING'
+                    ? t('locationModal.status.moving')
+                    : t('locationModal.status.static')}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Bateria</p>
-              <p className={`mt-1 font-medium ${
-                device.battery_level < 20 ? 'text-red-600' : 'text-gray-900'
-              }`}>
+              <p className="text-xs text-gray-500">{t('locationModal.metrics.battery')}</p>
+              <p className={`mt-1 font-medium ${device.battery_level < 20 ? 'text-red-600' : 'text-gray-900'
+                }`}>
                 {device.battery_level}%
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Latitude</p>
+              <p className="text-xs text-gray-500">{t('locationModal.metrics.latitude')}</p>
               <p className="mt-1 font-mono text-sm text-gray-900">{device.gps_latitude?.toFixed(6)}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Longitude</p>
+              <p className="text-xs text-gray-500">{t('locationModal.metrics.longitude')}</p>
               <p className="mt-1 font-mono text-sm text-gray-900">{device.gps_longitude?.toFixed(6)}</p>
             </div>
           </div>
@@ -608,7 +625,7 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
           >
-            Abrir no Google Maps
+            {t('locationModal.actions.openGoogleMaps')}
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
@@ -617,7 +634,7 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
           >
-            Fechar
+            {t('locationModal.actions.close')}
           </button>
         </div>
       </div>
@@ -628,14 +645,14 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
 // =====================================
 // 🎨 COMPONENTES DE UI
 // =====================================
-const KPICard = ({ 
-  title, 
-  value, 
-  subtitle, 
-  icon: Icon, 
-  trend, 
-  color = 'blue' 
-}: { 
+const KPICard = ({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  trend,
+  color = 'blue'
+}: {
   title: string;
   value: string | number;
   subtitle: string;
@@ -675,26 +692,22 @@ const KPICard = ({
   );
 };
 
-const AlertBadge = ({ 
-  type, 
-  count 
-}: { 
-  type: 'sos' | 'battery' | 'offline';
-  count: number;
-}) => {
+const AlertBadge = ({ type, count }: { type: 'sos' | 'battery' | 'offline'; count: number }) => {
+  const { t } = useTranslation(); // ✅ ADICIONAR
+
   const config = {
     sos: {
-      label: 'SOS Ativo',
+      label: t('deviceLogs.alerts.sos'), // ✅ TRADUZIR
       icon: ShieldExclamationIcon,
       color: 'bg-red-100 text-red-800 ring-red-600/20',
     },
     battery: {
-      label: 'Bateria Baixa',
+      label: t('deviceLogs.alerts.battery'), // ✅ TRADUZIR
       icon: BoltIcon,
       color: 'bg-yellow-100 text-yellow-800 ring-yellow-600/20',
     },
     offline: {
-      label: 'Offline',
+      label: t('deviceLogs.alerts.offline'), // ✅ TRADUZIR
       icon: SignalSlashIcon,
       color: 'bg-gray-100 text-gray-800 ring-gray-600/20',
     },
@@ -710,11 +723,11 @@ const AlertBadge = ({
   );
 };
 
-const DataTable = ({ 
-  columns, 
-  data, 
-  emptyMessage = 'Nenhum dado disponível' 
-}: { 
+const DataTable = ({
+  columns,
+  data,
+  emptyMessage = 'Nenhum dado disponível'
+}: {
   columns: Array<{ key: string; label: string; render?: (value: any, row: any) => React.ReactNode }>;
   data: any[];
   emptyMessage?: string;
@@ -758,11 +771,11 @@ const DataTable = ({
   );
 };
 
-const ChartContainer = ({ 
-  id, 
-  title, 
-  height = '400px' 
-}: { 
+const ChartContainer = ({
+  id,
+  title,
+  height = '400px'
+}: {
   id: string;
   title: string;
   height?: string;
@@ -776,13 +789,14 @@ const ChartContainer = ({
 };
 
 export default function DeviceLogsView() {
+  const { t } = useTranslation(); // ✅ ADICIONAR
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [motionDevices, setMotionDevices] = useState<DevicePosition[]>([]);
   const [gatewayQuality, setGatewayQuality] = useState<GatewaySignal[]>([]);
   const [eventTypes, setEventTypes] = useState<EventTypeStats[]>([]);
   const [customerStats, setCustomerStats] = useState<CustomerActivity[]>([]);
-  
+
   const [activeTab, setActiveTab] = useState<'overview' | 'devices' | 'events' | 'network' | 'customers' | 'rawdata'>('overview');
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -858,7 +872,7 @@ export default function DeviceLogsView() {
           const batteryOption: EChartsOption = {
             tooltip: {
               trigger: 'item',
-              formatter: '{b}: {c} ({d}%)',
+              formatter: t('batteryChart.tooltip'),
             },
             legend: {
               orient: 'vertical',
@@ -866,13 +880,25 @@ export default function DeviceLogsView() {
             },
             series: [
               {
-                name: 'Status da Bateria',
+                name: t('batteryChart.seriesName'),
                 type: 'pie',
                 radius: '70%',
                 data: [
-                  { value: overview.kpis.battery_health.healthy_devices, name: 'Saudável (≥30%)', itemStyle: { color: '#10b981' } },
-                  { value: overview.kpis.battery_health.warning_devices, name: 'Atenção (20-29%)', itemStyle: { color: '#f59e0b' } },
-                  { value: overview.kpis.battery_health.critical_devices, name: 'Crítico (<20%)', itemStyle: { color: '#ef4444' } },
+                  {
+                    value: overview.kpis.battery_health.healthy_devices,
+                    name: t('batteryChart.healthy'),
+                    itemStyle: { color: '#10b981' }
+                  },
+                  {
+                    value: overview.kpis.battery_health.warning_devices,
+                    name: t('batteryChart.warning'),
+                    itemStyle: { color: '#f59e0b' }
+                  },
+                  {
+                    value: overview.kpis.battery_health.critical_devices,
+                    name: t('batteryChart.critical'),
+                    itemStyle: { color: '#ef4444' }
+                  },
                 ],
                 emphasis: {
                   itemStyle: {
@@ -903,7 +929,15 @@ export default function DeviceLogsView() {
             },
             xAxis: {
               type: 'category',
-              data: overview.kpis.accuracy_distribution.map(d => d.accuracy_range),
+              data: overview.kpis.accuracy_distribution.map(d => {
+                // Mapear os ranges de accuracy para os idiomas
+                const range = d.accuracy_range;
+                if (range.includes('Excellent')) return t('accuracyChart.accuracyRanges.excellent');
+                if (range.includes('Good')) return t('accuracyChart.accuracyRanges.good');
+                if (range.includes('Fair')) return t('accuracyChart.accuracyRanges.fair');
+                if (range.includes('Poor')) return t('accuracyChart.accuracyRanges.poor');
+                return range;
+              }),
               axisLabel: {
                 rotate: 45,
                 fontSize: 11,
@@ -911,18 +945,18 @@ export default function DeviceLogsView() {
             },
             yAxis: {
               type: 'value',
-              name: 'Quantidade',
+              name: t('accuracyChart.yAxis.name'),
             },
             series: [
               {
-                name: 'Relatórios',
+                name: t('accuracyChart.series.name'),
                 type: 'bar',
                 data: overview.kpis.accuracy_distribution.map(d => ({
                   value: d.report_count,
                   itemStyle: {
                     color: d.accuracy_range.includes('Excellent') ? '#10b981' :
-                           d.accuracy_range.includes('Good') ? '#3b82f6' :
-                           d.accuracy_range.includes('Fair') ? '#f59e0b' : '#ef4444',
+                      d.accuracy_range.includes('Good') ? '#3b82f6' :
+                        d.accuracy_range.includes('Fair') ? '#f59e0b' : '#ef4444',
                   },
                 })),
                 label: {
@@ -946,7 +980,11 @@ export default function DeviceLogsView() {
                 axisPointer: { type: 'cross' },
               },
               legend: {
-                data: ['RSSI Médio', 'SNR Médio', 'Contagem de Relatórios'],
+                data: [
+                  t('gatewayChart.legend.avgRssi'),
+                  t('gatewayChart.legend.avgSnr'),
+                  t('gatewayChart.legend.reportCount')
+                ],
               },
               grid: {
                 left: '3%',
@@ -965,30 +1003,30 @@ export default function DeviceLogsView() {
               yAxis: [
                 {
                   type: 'value',
-                  name: 'RSSI/SNR',
+                  name: t('gatewayChart.yAxis.rssiSnr'),
                   position: 'left',
                 },
                 {
                   type: 'value',
-                  name: 'Contagem',
+                  name: t('gatewayChart.yAxis.count'),
                   position: 'right',
                 },
               ],
               series: [
                 {
-                  name: 'RSSI Médio',
+                  name: t('gatewayChart.legend.avgRssi'),
                   type: 'line',
                   data: gatewayQuality.map(g => g.avg_rssi),
                   itemStyle: { color: '#3b82f6' },
                 },
                 {
-                  name: 'SNR Médio',
+                  name: t('gatewayChart.legend.avgSnr'),
                   type: 'line',
                   data: gatewayQuality.map(g => g.avg_snr),
                   itemStyle: { color: '#10b981' },
                 },
                 {
-                  name: 'Contagem de Relatórios',
+                  name: t('gatewayChart.legend.reportCount'),
                   type: 'bar',
                   yAxisIndex: 1,
                   data: gatewayQuality.map(g => g.report_count),
@@ -1010,7 +1048,10 @@ export default function DeviceLogsView() {
                 axisPointer: { type: 'shadow' },
               },
               legend: {
-                data: ['Eventos Válidos', 'Duplicados'],
+                data: [
+                  t('eventsChart.legend.validEvents'),
+                  t('eventsChart.legend.duplicates')
+                ],
               },
               grid: {
                 left: '3%',
@@ -1028,18 +1069,18 @@ export default function DeviceLogsView() {
               },
               yAxis: {
                 type: 'value',
-                name: 'Quantidade',
+                name: t('eventsChart.yAxis.name'),
               },
               series: [
                 {
-                  name: 'Eventos Válidos',
+                  name: t('eventsChart.legend.validEvents'),
                   type: 'bar',
                   stack: 'total',
                   data: eventTypes.map(e => e.valid_events),
                   itemStyle: { color: '#10b981' },
                 },
                 {
-                  name: 'Duplicados',
+                  name: t('eventsChart.legend.duplicates'),
                   type: 'bar',
                   stack: 'total',
                   data: eventTypes.map(e => e.duplicate_events),
@@ -1057,7 +1098,7 @@ export default function DeviceLogsView() {
 
     return () => {
       clearTimeout(timer);
-      
+
       const batteryElement = document.getElementById('battery-chart');
       const accuracyElement = document.getElementById('accuracy-chart');
       const gatewayElement = document.getElementById('gateway-chart');
@@ -1105,12 +1146,14 @@ export default function DeviceLogsView() {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Erro ao carregar dados</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            {t('error.title')}
+          </h3>
           <button
             onClick={fetchData}
             className="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
           >
-            Tentar novamente
+            {t('error.retry')}
           </button>
         </div>
       </div>
@@ -1120,21 +1163,24 @@ export default function DeviceLogsView() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mb-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Device Logs & Monitoring</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t('deviceLogs.title')}
+            </h1>
             <p className="mt-2 text-sm text-gray-600">
-              Última atualização: {new Date(overview.generated_at).toLocaleString('pt-BR')}
+              {t('deviceLogs.lastUpdate')}: {new Date(overview.generated_at).toLocaleString('pt-BR')}
             </p>
           </div>
           <button
             onClick={fetchData}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 w-full sm:w-auto justify-center"
           >
             <ArrowPathIcon className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-            Atualizar
+            {t('deviceLogs.refresh')}
           </button>
+
         </div>
 
         <div className="mt-6 flex flex-wrap gap-3">
@@ -1144,24 +1190,24 @@ export default function DeviceLogsView() {
         </div>
       </div>
 
+
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex space-x-8 overflow-x-auto">
           {[
-            { id: 'overview', label: 'Visão Geral', icon: ChartBarIcon },
-            { id: 'devices', label: 'Dispositivos', icon: DevicePhoneMobileIcon },
-            { id: 'events', label: 'Eventos', icon: ShieldExclamationIcon },
-            { id: 'network', label: 'Rede', icon: SignalIcon },
-            { id: 'customers', label: 'Clientes', icon: MapPinIcon },
-            { id: 'rawdata', label: 'Dados Brutos', icon: DocumentChartBarIcon },
+            { id: 'overview', label: t('deviceLogs.tabs.overview'), icon: ChartBarIcon },
+            { id: 'devices', label: t('deviceLogs.tabs.devices'), icon: DevicePhoneMobileIcon },
+            { id: 'events', label: t('deviceLogs.tabs.events'), icon: ShieldExclamationIcon },
+            { id: 'network', label: t('deviceLogs.tabs.network'), icon: SignalIcon },
+            { id: 'customers', label: t('deviceLogs.tabs.customers'), icon: MapPinIcon },
+            { id: 'rawdata', label: t('deviceLogs.tabs.rawData'), icon: DocumentChartBarIcon },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
             >
               <tab.icon className="h-5 w-5" />
               {tab.label}
@@ -1170,140 +1216,120 @@ export default function DeviceLogsView() {
         </nav>
       </div>
 
+      {/* ✅ TAB OVERVIEW COM KPIs TRADUZIDOS */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <KPICard
-              title="Device Uptime"
+              title={t('deviceLogs.kpis.deviceUptime.title')}
               value={`${overview.kpis.uptime.uptime_percentage}%`}
-              subtitle={`${overview.kpis.uptime.devices_online} de ${overview.kpis.uptime.total_devices} online`}
+              subtitle={t('deviceLogs.kpis.deviceUptime.subtitle', {
+                online: overview.kpis.uptime.devices_online,
+                total: overview.kpis.uptime.total_devices
+              })}
               icon={SignalIcon}
               color="green"
               trend="up"
             />
-            <KPICard
-              title="Taxa de Sucesso GPS"
+            {/* <KPICard
+              title={t('deviceLogs.kpis.gpsSuccess.title')}
               value={`${overview.kpis.gps_success.success_rate_percent}%`}
-              subtitle={`${overview.kpis.gps_success.valid_gps_reports} relatórios válidos`}
+              subtitle={t('deviceLogs.kpis.gpsSuccess.subtitle', {
+                valid: overview.kpis.gps_success.valid_gps_reports
+              })}
               icon={MapPinIcon}
               color="blue"
               trend="up"
-            />
+            /> */}
             <KPICard
-              title="Saúde da Bateria"
+              title={t('deviceLogs.kpis.batteryHealth.title')}
               value={`${overview.kpis.battery_health.health_percentage}%`}
-              subtitle={`${overview.kpis.battery_health.critical_devices} dispositivos críticos`}
+              subtitle={t('deviceLogs.kpis.batteryHealth.subtitle', {
+                critical: overview.kpis.battery_health.critical_devices
+              })}
               icon={BoltIcon}
               color={overview.kpis.battery_health.critical_devices > 10 ? 'red' : 'yellow'}
-              trend={overview.kpis.battery_health.critical_devices > 10 ? 'down' : 'neutral'}
             />
             <KPICard
-              title="Alertas Ativos"
+              title={t('deviceLogs.kpis.activeAlerts.title')}
               value={overview.alerts.active_sos_count}
-              subtitle={`${overview.alerts.low_battery_count} baterias baixas`}
+              subtitle={t('deviceLogs.kpis.activeAlerts.subtitle', {
+                lowBattery: overview.alerts.low_battery_count
+              })}
               icon={ExclamationTriangleIcon}
               color={overview.alerts.active_sos_count > 0 ? 'red' : 'green'}
-              trend={overview.alerts.active_sos_count > 0 ? 'down' : 'neutral'}
             />
           </div>
 
+          {/* ✅ GRÁFICOS COM RESPONSIVIDADE */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ChartContainer id="battery-chart" title="Distribuição de Saúde da Bateria" />
-            <ChartContainer id="accuracy-chart" title="Precisão de Posição GPS" />
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.batteryDistribution')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <div id="battery-chart" className="w-full h-full min-w-0" />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.gpsAccuracy')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <div id="accuracy-chart" className="w-full h-full min-w-0" />
+              </div>
+            </div>
           </div>
 
+          {/* ✅ ALERTAS SOS TRADUZIDOS */}
           {overview.alerts.active_sos_count > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-red-200 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
                 <ShieldExclamationIcon className="h-6 w-6" />
-                Alertas SOS Ativos ({overview.alerts.active_sos_count})
+                {t('deviceLogs.sosAlerts.title', { count: overview.alerts.active_sos_count })}
               </h3>
-              <DataTable
-                columns={[
-                  { key: 'dev_eui', label: 'Device EUI' },
-                  { key: 'customer_name', label: 'Cliente' },
-                  { 
-                    key: 'sos_start_time', 
-                    label: 'Início',
-                    render: (val) => new Date(val).toLocaleString('pt-BR'),
-                  },
-                  { 
-                    key: 'minutes_elapsed', 
-                    label: 'Tempo Decorrido',
-                    render: (val) => `${val} min`,
-                  },
-                  { 
-                    key: 'battery_level', 
-                    label: 'Bateria',
-                    render: (val) => (
-                      <span className={`font-semibold ${val < 20 ? 'text-red-600' : 'text-green-600'}`}>
-                        {val}%
-                      </span>
-                    ),
-                  },
-                  {
-                    key: 'actions',
-                    label: 'Localização',
-                    render: (_, row) => {
-                      const device: DevicePosition = {
-                        dev_eui: row.dev_eui,
-                        customer_name: row.customer_name,
-                        dynamic_motion_state: 'SOS_ACTIVE',
-                        timestamp: row.sos_start_time,
-                        battery_level: row.battery_level,
-                        gps_latitude: row.gps_latitude,
-                        gps_longitude: row.gps_longitude,
-                      };
+              <div className="overflow-x-auto">
+                <DataTable
 
-                      return (
+                  columns={[
+                    { key: 'dev_eui', label: t('deviceLogs.tables.deviceEui') },
+                    { key: 'customer_name', label: t('deviceLogs.tables.customer') },
+                    {
+                      key: 'sos_start_time',
+                      label: t('deviceLogs.tables.startTime'),
+                      render: (val) => new Date(val).toLocaleString(),
+                    },
+                    {
+                      key: 'minutes_elapsed',
+                      label: t('deviceLogs.tables.timeElapsed'),
+                      render: (val) => t('deviceLogs.sosAlerts.minutesAgo', { minutes: val }),
+                    },
+                    {
+                      key: 'battery_level',
+                      label: t('deviceLogs.tables.battery'),
+                      render: (val) => (
+                        <span className={`font-semibold ${val < 20 ? 'text-red-600' : 'text-green-600'}`}>
+                          {val}%
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'actions',
+                      label: t('deviceLogs.tables.location'),
+                      render: (_, row) => (
                         <button
-                          onClick={() => openMapModal(device)}
+                          onClick={() => openMapModal(row)}
                           className="text-blue-600 hover:text-blue-800 text-xs font-medium underline"
                         >
-                          📍 Ver no Mapa
+                          {t('deviceLogs.tables.viewOnMap')}
                         </button>
-                      );
+                      ),
                     },
-                  },
-                ]}
-                data={overview.alerts.active_sos_list}
-              />
-            </div>
-          )}
-
-          {overview.alerts.low_battery_count > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-yellow-200 p-6">
-              <h3 className="text-lg font-semibold text-yellow-900 mb-4 flex items-center gap-2">
-                <BoltIcon className="h-6 w-6" />
-                Dispositivos com Bateria Baixa ({overview.alerts.low_battery_count})
-              </h3>
-              <DataTable
-                columns={[
-                  { key: 'dev_eui', label: 'Device EUI' },
-                  { key: 'customer_name', label: 'Cliente' },
-                  { 
-                    key: 'battery_level', 
-                    label: 'Nível',
-                    render: (val) => (
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 bg-gray-200 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${val < 10 ? 'bg-red-600' : 'bg-yellow-500'}`}
-                            style={{ width: `${val}%` }}
-                          />
-                        </div>
-                        <span className="font-semibold">{val}%</span>
-                      </div>
-                    ),
-                  },
-                  { 
-                    key: 'timestamp', 
-                    label: 'Última Atualização',
-                    render: (val) => new Date(val).toLocaleString('pt-BR'),
-                  },
-                ]}
-                data={overview.alerts.low_battery_devices}
-              />
+                  ]}
+                  data={overview.alerts.active_sos_list}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -1316,7 +1342,7 @@ export default function DeviceLogsView() {
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar por Device EUI ou Cliente..."
+                placeholder={t('deviceLogs.searchPlaceholder.devices')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -1327,36 +1353,34 @@ export default function DeviceLogsView() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <DevicePhoneMobileIcon className="h-6 w-6" />
-              Status de Movimento dos Dispositivos ({filteredMotionDevices.length})
+              {t('deviceLogs.deviceMotion.title', { count: filteredMotionDevices.length })}
             </h3>
-            
+
             <div className="overflow-y-auto max-h-[600px]">
               <DataTable
                 columns={[
-                  { key: 'dev_eui', label: 'Device EUI' },
-                  { key: 'customer_name', label: 'Cliente' },
-                  { 
-                    key: 'dynamic_motion_state', 
-                    label: 'Estado',
+                  { key: 'dev_eui', label: t('deviceLogs.tables.deviceEui') },
+                  { key: 'customer_name', label: t('deviceLogs.tables.customer') },
+                  {
+                    key: 'dynamic_motion_state',
+                    label: t('deviceLogs.tables.state'),
                     render: (val) => (
-                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
-                        val === 'MOVING' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {val === 'MOVING' ? '🚶 Em Movimento' : '⏸️ Estático'}
+                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${val === 'MOVING' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                        {val === 'MOVING' ? '🚶 ' + t('deviceLogs.deviceStates.moving') : '⏸️ ' + t('deviceLogs.deviceStates.static')}
                       </span>
                     ),
                   },
-                  { 
-                    key: 'battery_level', 
-                    label: 'Bateria',
+                  {
+                    key: 'battery_level',
+                    label: t('deviceLogs.tables.battery'),
                     render: (val) => (
                       <div className="flex items-center gap-2">
                         <div className="w-16 bg-gray-200 rounded-full h-2">
                           <div
-                            className={`h-2 rounded-full ${
-                              val >= 30 ? 'bg-green-500' : 
+                            className={`h-2 rounded-full ${val >= 30 ? 'bg-green-500' :
                               val >= 20 ? 'bg-yellow-500' : 'bg-red-500'
-                            }`}
+                              }`}
                             style={{ width: `${val}%` }}
                           />
                         </div>
@@ -1364,14 +1388,14 @@ export default function DeviceLogsView() {
                       </div>
                     ),
                   },
-                  { 
-                    key: 'timestamp', 
-                    label: 'Última Posição',
+                  {
+                    key: 'timestamp',
+                    label: t('deviceLogs.tables.lastPosition'),
                     render: (val) => new Date(val).toLocaleString('pt-BR'),
                   },
                   {
                     key: 'actions',
-                    label: 'Ações',
+                    label: t('deviceLogs.tables.actions'),
                     render: (_, row) => (
                       <div className="flex gap-2">
                         {row.gps_latitude && row.gps_longitude && (
@@ -1379,21 +1403,22 @@ export default function DeviceLogsView() {
                             onClick={() => openMapModal(row)}
                             className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                           >
-                            📍 Mapa
+                            📍 {t('deviceLogs.tables.viewOnMap')}
                           </button>
                         )}
-                        <button 
+                        <button
                           onClick={() => openDetailsModal(row)}
                           className="text-purple-600 hover:text-purple-800 text-xs font-medium"
                         >
-                          📊 Detalhes
+                          📊 {t('deviceLogs.tables.viewDetails')}
                         </button>
                       </div>
                     ),
                   },
                 ]}
                 data={filteredMotionDevices}
-                emptyMessage="Nenhum dispositivo encontrado"
+                emptyMessage={t('deviceLogs.tables.noDevicesFound')}
+
               />
             </div>
           </div>
@@ -1402,33 +1427,32 @@ export default function DeviceLogsView() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <SignalSlashIcon className="h-6 w-6 text-gray-500" />
-                Dispositivos Offline ({overview.alerts.offline_count})
+                {t('offlineDevices.title')} ({overview.alerts.offline_count})
               </h3>
               <DataTable
                 columns={[
-                  { key: 'dev_eui', label: 'Device EUI' },
-                  { key: 'customer_name', label: 'Cliente' },
-                  { 
-                    key: 'last_position', 
-                    label: 'Última Posição',
+                  { key: 'dev_eui', label: t('offlineDevices.deviceEUI') },
+                  { key: 'customer_name', label: t('offlineDevices.customer') },
+                  {
+                    key: 'last_position',
+                    label: t('offlineDevices.lastPosition'),
                     render: (val) => new Date(val).toLocaleString('pt-BR'),
                   },
-                  { 
-                    key: 'hours_offline', 
-                    label: 'Tempo Offline',
+                  {
+                    key: 'hours_offline',
+                    label: t('offlineDevices.offlineTime'),
                     render: (val) => (
-                      <span className={`font-semibold ${
-                        val > 72 ? 'text-red-600' : 
+                      <span className={`font-semibold ${val > 72 ? 'text-red-600' :
                         val > 48 ? 'text-orange-600' : 'text-yellow-600'
-                      }`}>
+                        }`}>
                         {val}h
                       </span>
                     ),
                   },
-                  { 
-                    key: 'battery_level', 
-                    label: 'Bateria',
-                    render: (val) => val ? `${val}%` : 'N/A',
+                  {
+                    key: 'battery_level',
+                    label: t('offlineDevices.battery'),
+                    render: (val) => val ? `${val}%` : t('offlineDevices.notAvailable'),
                   },
                 ]}
                 data={overview.alerts.offline_devices}
@@ -1440,50 +1464,50 @@ export default function DeviceLogsView() {
 
       {activeTab === 'events' && (
         <div className="space-y-6">
-          <ChartContainer id="events-chart" title="Distribuição de Tipos de Eventos (24h)" height="500px" />
+          <ChartContainer id="events-chart" title={t('deviceLogs.charts.eventDistribution')} height="500px" />
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <ChartBarIcon className="h-6 w-6" />
-              Estatísticas de Eventos
+              {t('deviceLog.events.legend')}
             </h3>
             <DataTable
               columns={[
-                { key: 'event_type', label: 'Tipo de Evento' },
-                { 
-                  key: 'total', 
-                  label: 'Total',
+                { key: 'event_type', label: t('deviceLog.events.eventType') },
+                {
+                  key: 'total',
+                  label: t('deviceLog.events.total'),
                   render: (val) => (
                     <span className="font-semibold text-gray-900">{val.toLocaleString()}</span>
                   ),
                 },
-                { 
-                  key: 'valid_events', 
-                  label: 'Válidos',
+                {
+                  key: 'valid_events',
+                  label: t('deviceLog.events.valid'),
                   render: (val) => (
                     <span className="text-green-600 font-medium">{val.toLocaleString()}</span>
                   ),
                 },
-                { 
-                  key: 'duplicate_events', 
-                  label: 'Duplicados',
+                {
+                  key: 'duplicate_events',
+                  label: t('deviceLog.events.duplicate'),
                   render: (val) => (
                     <span className="text-red-600 font-medium">{val.toLocaleString()}</span>
                   ),
                 },
-                { 
-                  key: 'unique_devices', 
-                  label: 'Dispositivos Únicos',
+                {
+                  key: 'unique_devices',
+                  label: t('deviceLog.events.uniqueDevices'),
                   render: (val) => (
                     <span className="text-blue-600 font-medium">{val}</span>
                   ),
                 },
                 {
                   key: 'duplication_rate',
-                  label: 'Taxa de Duplicação',
+                  label: t('deviceLog.events.duplicationRate'),
                   render: (_, row) => {
-                    const rate = row.total > 0 
-                      ? ((row.duplicate_events / row.total) * 100).toFixed(1) 
+                    const rate = row.total > 0
+                      ? ((row.duplicate_events / row.total) * 100).toFixed(1)
                       : '0.0';
                     return (
                       <div className="flex items-center gap-2">
@@ -1500,26 +1524,30 @@ export default function DeviceLogsView() {
                 },
               ]}
               data={eventTypes}
-              emptyMessage="Nenhum evento registrado nas últimas 24 horas"
+              emptyMessage={t('deviceLogs.events.emptyMessage')}
             />
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">📖 Legenda de Tipos de Eventos</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {t('eventLegend.title')}
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
-                { type: 'SOS_MODE_START', desc: 'Início de alerta SOS', color: 'red' },
-                { type: 'SOS_MODE_END', desc: 'Fim de alerta SOS', color: 'green' },
-                { type: 'MOTION_START', desc: 'Início de movimento', color: 'blue' },
-                { type: 'MOTION_END', desc: 'Fim de movimento', color: 'gray' },
-                { type: 'GEOFENCE_ENTRY', desc: 'Entrada em geofence', color: 'purple' },
-                { type: 'GEOFENCE_EXIT', desc: 'Saída de geofence', color: 'orange' },
+                { type: 'SOS_MODE_START', color: 'red' },
+                { type: 'SOS_MODE_END', color: 'green' },
+                { type: 'MOTION_START', color: 'blue' },
+                { type: 'MOTION_END', color: 'gray' },
+                { type: 'GEOFENCE_ENTRY', color: 'purple' },
+                { type: 'GEOFENCE_EXIT', color: 'orange' },
               ].map((item) => (
                 <div key={item.type} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
                   <div>
                     <p className="text-sm font-medium text-gray-900">{item.type}</p>
-                    <p className="text-xs text-gray-500">{item.desc}</p>
+                    <p className="text-xs text-gray-500">
+                      {t(`eventLegend.types.${item.type}`)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -1530,83 +1558,85 @@ export default function DeviceLogsView() {
 
       {activeTab === 'network' && (
         <div className="space-y-6">
-          <ChartContainer id="gateway-chart" title="Qualidade de Sinal por Gateway" height="500px" />
+          <ChartContainer
+            id="gateway-chart"
+            title={t('gateway.title')}
+            height="500px"
+          />
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <SignalIcon className="h-6 w-6" />
-              Estatísticas de Gateways ({gatewayQuality.length})
+              {t('gateway.statsTitle')} ({gatewayQuality.length})
             </h3>
             <DataTable
               columns={[
-                { key: 'gateway_name', label: 'Gateway' },
-                { 
-                  key: 'report_count', 
-                  label: 'Relatórios',
+                { key: 'gateway_name', label: t('gateway.gateway') },
+                {
+                  key: 'report_count',
+                  label: t('gateway.reports'),
                   render: (val) => (
                     <span className="font-semibold text-blue-600">{val.toLocaleString()}</span>
                   ),
                 },
-                { 
-                  key: 'avg_rssi', 
-                  label: 'RSSI Médio',
+                {
+                  key: 'avg_rssi',
+                  label: t('gateway.avgRssi'),
                   render: (val) => {
-                    if (val == null || isNaN(val)) return 'N/A';
+                    if (val == null || isNaN(val)) return t('gateway.notAvailable');
                     const rssi = Number(val).toFixed(1);
                     return (
-                      <span className={`font-medium ${
-                        val > -80 ? 'text-green-600' : 
+                      <span className={`font-medium ${val > -80 ? 'text-green-600' :
                         val > -100 ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
+                        }`}>
                         {rssi} dBm
                       </span>
                     );
                   },
                 },
-                { 
-                  key: 'avg_snr', 
-                  label: 'SNR Médio',
+                {
+                  key: 'avg_snr',
+                  label: t('gateway.avgSnr'),
                   render: (val) => {
-                    if (val == null || isNaN(val)) return 'N/A';
+                    if (val == null || isNaN(val)) return t('gateway.notAvailable');
                     const snr = Number(val).toFixed(1);
                     return (
-                      <span className={`font-medium ${
-                        val > 5 ? 'text-green-600' : 
+                      <span className={`font-medium ${val > 5 ? 'text-green-600' :
                         val > 0 ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
+                        }`}>
                         {snr} dB
                       </span>
                     );
                   },
                 },
-                { 
-                  key: 'min_rssi', 
-                  label: 'RSSI Min',
+                {
+                  key: 'min_rssi',
+                  label: t('gateway.minRssi'),
                   render: (val) => {
-                    if (val == null || isNaN(val)) return 'N/A';
+                    if (val == null || isNaN(val)) return t('gateway.notAvailable');
                     return `${Number(val).toFixed(1)} dBm`;
                   },
                 },
-                { 
-                  key: 'max_rssi', 
-                  label: 'RSSI Max',
+                {
+                  key: 'max_rssi',
+                  label: t('gateway.maxRssi'),
                   render: (val) => {
-                    if (val == null || isNaN(val)) return 'N/A';
+                    if (val == null || isNaN(val)) return t('gateway.notAvailable');
                     return `${Number(val).toFixed(1)} dBm`;
                   },
                 },
                 {
                   key: 'quality',
-                  label: 'Qualidade',
+                  label: t('gateway.quality'),
                   render: (_, row) => {
-                    if (row.avg_rssi == null || isNaN(row.avg_rssi)) return 'N/A';
-                    
-                    const quality = row.avg_rssi > -80 ? 'Excelente' : 
-                                   row.avg_rssi > -90 ? 'Bom' : 
-                                   row.avg_rssi > -100 ? 'Regular' : 'Ruim';
-                    const color = row.avg_rssi > -80 ? 'green' : 
-                                 row.avg_rssi > -90 ? 'blue' : 
-                                 row.avg_rssi > -100 ? 'yellow' : 'red';
+                    if (row.avg_rssi == null || isNaN(row.avg_rssi)) return t('gateway.notAvailable');
+
+                    const quality = row.avg_rssi > -80 ? t('gateway.qualityLevels.excellent') :
+                      row.avg_rssi > -90 ? t('gateway.qualityLevels.good') :
+                        row.avg_rssi > -100 ? t('gateway.qualityLevels.fair') : t('gateway.qualityLevels.poor');
+                    const color = row.avg_rssi > -80 ? 'green' :
+                      row.avg_rssi > -90 ? 'blue' :
+                        row.avg_rssi > -100 ? 'yellow' : 'red';
                     return (
                       <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium bg-${color}-100 text-${color}-800`}>
                         {quality}
@@ -1616,7 +1646,7 @@ export default function DeviceLogsView() {
                 },
               ]}
               data={gatewayQuality}
-              emptyMessage="Nenhum dado de gateway disponível"
+              emptyMessage={t('gateway.emptyMessage')}
             />
           </div>
 
@@ -1624,7 +1654,7 @@ export default function DeviceLogsView() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Gateways Ativos</p>
+                  <p className="text-sm font-medium text-gray-600">{t('gateway.metrics.activeGateways')}</p>
                   <p className="mt-2 text-3xl font-semibold text-gray-900">{gatewayQuality.length}</p>
                 </div>
                 <SignalIcon className="h-10 w-10 text-blue-600" />
@@ -1634,9 +1664,9 @@ export default function DeviceLogsView() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">RSSI Médio Geral</p>
+                  <p className="text-sm font-medium text-gray-600">{t('gateway.metrics.overallAvgRssi')}</p>
                   <p className="mt-2 text-3xl font-semibold text-gray-900">
-                    {gatewayQuality.length > 0 
+                    {gatewayQuality.length > 0
                       ? (gatewayQuality.reduce((sum, g) => sum + (g.avg_rssi || 0), 0) / gatewayQuality.length).toFixed(1)
                       : '0'
                     } dBm
@@ -1649,7 +1679,7 @@ export default function DeviceLogsView() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total de Relatórios</p>
+                  <p className="text-sm font-medium text-gray-600">{t('gateway.metrics.totalReports')}</p>
                   <p className="mt-2 text-3xl font-semibold text-gray-900">
                     {gatewayQuality.reduce((sum, g) => sum + (g.report_count || 0), 0).toLocaleString()}
                   </p>
@@ -1668,7 +1698,7 @@ export default function DeviceLogsView() {
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Buscar por Cliente ou Domínio..."
+                placeholder={t('customerActivity.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -1679,15 +1709,15 @@ export default function DeviceLogsView() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <MapPinIcon className="h-6 w-6" />
-              Atividade por Cliente ({filteredCustomers.length})
+              {t('customerActivity.title')} ({filteredCustomers.length})
             </h3>
             <DataTable
               columns={[
-                { key: 'customer_name', label: 'Cliente' },
-                { key: 'domain_name', label: 'Domínio' },
-                { 
-                  key: 'total_devices', 
-                  label: 'Dispositivos',
+                { key: 'customer_name', label: t('customerActivity.customer') },
+                { key: 'domain_name', label: t('customerActivity.domain') },
+                {
+                  key: 'total_devices',
+                  label: t('customerActivity.devices'),
                   render: (val) => (
                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       <DevicePhoneMobileIcon className="h-4 w-4" />
@@ -1695,30 +1725,29 @@ export default function DeviceLogsView() {
                     </span>
                   ),
                 },
-                { 
-                  key: 'total_reports', 
-                  label: 'Relatórios (24h)',
+                {
+                  key: 'total_reports',
+                  label: t('customerActivity.reports24h'),
                   render: (val) => (
                     <span className="font-semibold text-gray-900">{val.toLocaleString()}</span>
                   ),
                 },
-                { 
-                  key: 'avg_battery', 
-                  label: 'Bateria Média',
+                {
+                  key: 'avg_battery',
+                  label: t('customerActivity.avgBattery'),
                   render: (val) => {
-                    if (val == null || isNaN(val)) return 'N/A';
-                    
+                    if (val == null || isNaN(val)) return t('customerActivity.notAvailable');
+
                     const battery = Number(val).toFixed(1);
                     const percentage = Math.min(100, Math.max(0, val));
-                    
+
                     return (
                       <div className="flex items-center gap-2">
                         <div className="w-20 bg-gray-200 rounded-full h-2">
                           <div
-                            className={`h-2 rounded-full ${
-                              val >= 30 ? 'bg-green-500' : 
+                            className={`h-2 rounded-full ${val >= 30 ? 'bg-green-500' :
                               val >= 20 ? 'bg-yellow-500' : 'bg-red-500'
-                            }`}
+                              }`}
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -1727,23 +1756,23 @@ export default function DeviceLogsView() {
                     );
                   },
                 },
-                { 
-                  key: 'last_activity', 
-                  label: 'Última Atividade',
+                {
+                  key: 'last_activity',
+                  label: t('customerActivity.lastActivity'),
                   render: (val) => {
                     const date = new Date(val);
                     const now = new Date();
                     const diffMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-                    
+
                     let timeAgo = '';
                     if (diffMinutes < 60) {
-                      timeAgo = `${diffMinutes} min atrás`;
+                      timeAgo = `${diffMinutes} ${t('customerActivity.timeAgo.minutes')}`;
                     } else if (diffMinutes < 1440) {
-                      timeAgo = `${Math.floor(diffMinutes / 60)}h atrás`;
+                      timeAgo = `${Math.floor(diffMinutes / 60)}${t('customerActivity.timeAgo.hours')}`;
                     } else {
-                      timeAgo = `${Math.floor(diffMinutes / 1440)}d atrás`;
+                      timeAgo = `${Math.floor(diffMinutes / 1440)}${t('customerActivity.timeAgo.days')}`;
                     }
-                    
+
                     return (
                       <div className="flex items-center gap-2">
                         <ClockIcon className="h-4 w-4 text-gray-400" />
@@ -1754,43 +1783,43 @@ export default function DeviceLogsView() {
                 },
                 {
                   key: 'actions',
-                  label: 'Ações',
+                  label: t('customerActivity.actions'),
                   render: (_, row) => (
-                    <button 
+                    <button
                       onClick={() => {
                         console.log('Cliente:', row.customer_name);
                       }}
                       className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                     >
-                      Ver Detalhes →
+                      {t('customerActivity.viewDetails')}
                     </button>
                   ),
                 },
               ]}
               data={filteredCustomers}
-              emptyMessage="Nenhum cliente encontrado"
+              emptyMessage={t('customerActivity.emptyMessage')}
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <p className="text-sm font-medium text-gray-600">Total de Clientes</p>
+              <p className="text-sm font-medium text-gray-600">{t('customerActivity.metrics.totalCustomers')}</p>
               <p className="mt-2 text-3xl font-semibold text-gray-900">{customerStats.length}</p>
             </div>
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <p className="text-sm font-medium text-gray-600">Total de Dispositivos</p>
+              <p className="text-sm font-medium text-gray-600">{t('customerActivity.metrics.totalDevices')}</p>
               <p className="mt-2 text-3xl font-semibold text-gray-900">
                 {customerStats.reduce((sum, c) => sum + c.total_devices, 0)}
               </p>
             </div>
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <p className="text-sm font-medium text-gray-600">Total de Relatórios</p>
+              <p className="text-sm font-medium text-gray-600">{t('customerActivity.metrics.totalReports')}</p>
               <p className="mt-2 text-3xl font-semibold text-gray-900">
                 {customerStats.reduce((sum, c) => sum + c.total_reports, 0).toLocaleString()}
               </p>
             </div>
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <p className="text-sm font-medium text-gray-600">Bateria Média Geral</p>
+              <p className="text-sm font-medium text-gray-600">{t('customerActivity.metrics.overallAvgBattery')}</p>
               <p className="mt-2 text-3xl font-semibold text-gray-900">
                 {customerStats.length > 0
                   ? (customerStats.reduce((sum, c) => sum + c.avg_battery, 0) / customerStats.length).toFixed(1)
@@ -1802,11 +1831,11 @@ export default function DeviceLogsView() {
         </div>
       )}
 
-          {activeTab === 'rawdata' && (
+      {activeTab === 'rawdata' && (
 
-              <RawDataExplorer />
+        <RawDataExplorer />
 
-          )}
+      )}
 
       <MapModal
         device={selectedDevice}

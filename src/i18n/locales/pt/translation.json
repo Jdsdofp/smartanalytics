@@ -10,15 +10,15 @@
     "logout": "Sair"
   },
   "navbar": {
-    "dashboard": "Dashboard",
-    "analytics": "Analytics",
+    "dashboard": "Painel",
+    "analytics": "Analíticas",
     "reports": "Relatórios",
     "settings": "Configurações"
   },
   "home": {
     "welcome": "Bem-vindo, {{name}}!",
     "yourProfile": "Seu Perfil",
-    "email": "Email",
+    "email": "E-mail",
     "login": "Login",
     "type": "Tipo",
     "company": "Empresa",
@@ -27,22 +27,22 @@
     "state": "Estado",
     "status": "Status",
     "account": "Conta",
-    "active": " ✓ Ativa",
-    "inactive": " ✗ Inativa",
-    "timezone": "Fuso",
+    "active": " ✓ Ativo",
+    "inactive": " ✗ Inativo",
+    "timezone": "Fuso Horário",
     "id": "ID",
     "module": "Módulo {{number}}",
     "moduleContent": "Conteúdo do módulo em desenvolvimento",
-    "access": "Acessar",
+    "access": "Acesso",
     "technicalInfo": "Informações Técnicas",
-    "companyId": "Company ID",
-    "webKey": "WebKey",
+    "companyId": "ID da Empresa",
+    "webKey": "Chave Web",
     "address": "Endereço"
   },
   "login": {
-    "logoAlt": "Smart Analytics Logo",
+    "logoAlt": "Logo Smart Analytics",
     "subtitle": "Faça login para acessar sua conta",
-    "email": "Email",
+    "email": "E-mail",
     "emailPlaceholder": "Usuário",
     "password": "Senha",
     "passwordPlaceholder": "••••••••",
@@ -51,15 +51,15 @@
     "error": "Erro ao fazer login",
     "copyright": "© 2025 Smart Analytics. Todos os direitos reservados."
   },
-   "assets": {
-    "title": "Dashboard de Gestão de Ativos",
+  "assets": {
+    "title": "Painel de Gestão de Ativos",
     "stats": {
-      "totalAssets": "Total de Ativos",
-      "totalCategories": "Total de Categorias",
+      "totalAssets": "Ativos Totais",
+      "totalCategories": "Categorias Totais",
       "totalInvestment": "Investimento Total",
       "misplacedItems": "Itens Deslocados",
       "maintenanceDue": "Manutenção Devida",
-      "serialCompletion": "Completude Serial"
+      "serialCompletion": "Conclusão Serial"
     },
     "ageDistribution": {
       "0_3Months": "Ativos 0-3 Meses",
@@ -69,18 +69,18 @@
     },
     "charts": {
       "assetsByDepartment": "Ativos por Departamento",
-      "averagePurchaseCost": "Custo Médio de Aquisição por Categoria",
+      "averagePurchaseCost": "Custo Médio de Compra por Categoria",
       "assetsByCostCenter": "Ativos por Centro de Custo",
       "investmentByCostCenter": "Investimento por Centro de Custo",
       "assetsByCategory": "Ativos por Categoria",
       "assetsByGroup": "Ativos por Grupo",
       "assetDisposition": "Disposição de Ativos",
-      "averageCycleCount": "Contagem Média de Ciclo por Categoria"
+      "averageCycleCount": "Contagem Média de Ciclos por Categoria"
     },
     "departments": {
       "it": "Departamento de TI",
       "operations": "Operações",
-      "finance": "Finanças",
+      "finance": "Financeiro",
       "hr": "RH",
       "marketing": "Marketing",
       "sales": "Vendas",
@@ -112,30 +112,29 @@
       "active": "Ativo",
       "disposed": "Descartado",
       "maintenance": "Em Manutenção",
-      "retired": "Retirado"
+      "retired": "Desativado"
     }
   },
   "people": {
     "title": "Gestão de Pessoas - NR36",
-    "employeeView": "Visão por Funcionário",
+    "employeeView": "Visualização do Funcionário",
     "department": "Departamento",
     "employee": "Funcionário",
     "employees": "funcionários",
     "occurrences": "ocorrências",
-    "score": "Score",
+    "score": "Pontuação",
     "status": "Status",
     "averageHours": "Média (h)",
     "day": "dia",
     "stats": {
-      "working": "EM TRABALHO",
+      "working": "TRABALHANDO",
       "onBreak": "EM PAUSA",
-      "avgDifference": "MÉDIA DIF.",
-      "active": "ATIVOS",
+      "avgDifference": "DIF. MÉD.",
+      "active": "ATIVO",
       "totalTime": "Tempo total",
       "plannedVsActual": "Planejado vs Real"
-    }
-  },
-  "metrics": {
+    },
+    "metrics": {
       "overallCompliance": "Conformidade Geral",
       "adequateBreaks": "Pausas Adequadas",
       "workdayViolations": "Violações de Jornada",
@@ -143,14 +142,395 @@
     },
     "charts": {
       "totalWorkTime": "Tempo total de trabalho por funcionário 📊",
-      "avgWorkHours": "Média de horas trabalhadas por funcionário 🧮",
-      "departmentScore": "Score Departamental 🚩",
-      "totalScore": "Score Total 🕐"
+      "avgWorkHours": "Horas médias de trabalho por funcionário 🧮",
+      "departmentScore": "Pontuação do Departamento 🚩",
+      "totalScore": "Pontuação Total 🕐"
     },
     "status": {
       "excellent": "EXCELENTE 🟢",
       "good": "BOM 🟡",
       "regular": "REGULAR 🟠"
     }
-
+  },
+  "rawDataExplorer": {
+    "title": "Explorador de Dados Brutos",
+    "refresh": "Atualizar",
+    "activeFilters": "Filtros ativos",
+    "tabs": {
+      "gps": "Relatórios GPS",
+      "events": "Eventos",
+      "scanning": "Escaneamento",
+      "configuration": "Configuração",
+      "errors": "Erros GPS"
+    },
+    "filters": {
+      "globalSearchPlaceholder": "🔍 Busca global rápida...",
+      "globalSearchHint": "Use busca global ou filtros individuais em cada coluna da tabela",
+      "advancedFilters": "Filtros Avançados",
+      "tip": "Dica",
+      "tipMessage": "Use filtros em cada coluna da tabela para buscas específicas",
+      "clearGlobalFilters": "Limpar filtros globais",
+      "all": "Todos",
+      "filterBy": "Filtrar por {{field}}",
+      "fields": {
+        "dev_eui": "Device EUI",
+        "customer_name": "Cliente",
+        "start_date": "Data de Início",
+        "end_date": "Data de Término",
+        "event_type": "Tipo de Evento",
+        "is_valid_event": "Evento Válido",
+        "battery_min": "Bateria Mínima (%)",
+        "battery_max": "Bateria Máxima (%)",
+        "tracking_mode": "Modo de Rastreamento",
+        "error_type": "Tipo de Erro"
+      },
+      "options": {
+        "SOS_MODE_START": "Início SOS",
+        "SOS_MODE_END": "Fim SOS",
+        "MOTION_START": "Início de Movimento",
+        "MOTION_END": "Fim de Movimento",
+        "GEOFENCE_ENTRY": "Entrada na Geocerca",
+        "GEOFENCE_EXIT": "Saída da Geocerca",
+        "MOTION_TRACKING": "Rastreamento por Movimento",
+        "PERMANENT_TRACKING": "Rastreamento Permanente"
+      }
+    },
+    "pagination": {
+      "showing": "Mostrando {{start}} - {{end}} de {{total}} registros",
+      "perPage": "{{count}} por página",
+      "first": "Primeira",
+      "previous": "Anterior",
+      "next": "Próxima",
+      "last": "Última",
+      "pageOf": "Página {{current}} de {{total}}"
+    },
+    "table": {
+      "noRecords": "Nenhum registro encontrado",
+      "activeFilters": "Filtros ativos: {{count}}",
+      "clearAllFilters": "Limpar todos os filtros",
+      "filterColumn": "Filtrar {{column}}...",
+      "showingRecords": "Mostrando {{count}} registro(s)",
+      "filteredLocally": "filtrado localmente"
+    },
+    "export": {
+      "export": "Exportar",
+      "exporting": "Exportando...",
+      "localExport": "Exportação Local",
+      "rawData": "Dados Brutos",
+      "dataExport": "Exportação de Dados",
+      "monitoringSystem": "Sistema de Monitoramento",
+      "success": "✅ Exportação concluída! {{count}} registros exportados.",
+      "error": "❌ Erro ao exportar dados. Por favor, tente novamente.",
+      "availableRecords": "{{count}} registros disponíveis",
+      "formats": {
+        "excel": "Excel (XLSX)",
+        "excelDesc": "Com formatação",
+        "csv": "CSV",
+        "csvDesc": "Dados tabulares",
+        "json": "JSON",
+        "jsonDesc": "Dados estruturados"
+      }
+    }
+  },
+  "deviceLogs": {
+    "title": "Painel de Monitoramento de Dispositivos",
+    "lastUpdate": "Última atualização",
+    "refresh": "Atualizar",
+    "searchPlaceholder": {
+      "devices": "Buscar por Dispositivo ou Cliente..."
+    },
+    "alerts": {
+      "sos": "Alertas SOS",
+      "battery": "Bateria Baixa",
+      "offline": "Offline"
+    },
+    "tabs": {
+      "overview": "Visão Geral",
+      "devices": "Dispositivos",
+      "events": "Eventos",
+      "network": "Rede",
+      "customers": "Clientes",
+      "rawData": "Dados Brutos"
+    },
+    "kpis": {
+      "deviceUptime": {
+        "title": "Tempo de Atividade",
+        "subtitle": "{{online}} online de {{total}} total"
+      },
+      "gpsSuccess": {
+        "title": "Taxa de Sucesso GPS",
+        "subtitle": "{{valid}} relatórios GPS válidos"
+      },
+      "batteryHealth": {
+        "title": "Saúde da Bateria",
+        "subtitle": "{{critical}} dispositivos críticos"
+      },
+      "activeAlerts": {
+        "title": "Alertas Ativos",
+        "subtitle": "{{lowBattery}} bateria baixa"
+      }
+    },
+    "charts": {
+      "batteryDistribution": "Distribuição do Estado da Bateria",
+      "gpsAccuracy": "Distribuição da Precisão GPS",
+      "eventDistribution": "Distribuição de Tipos de Evento"
+    },
+    "sosAlerts": {
+      "title": "Alertas SOS Ativos ({{count}})",
+      "minutesAgo": "há {{minutes}} min"
+    },
+    "tables": {
+      "deviceEui": "Device EUI",
+      "customer": "Cliente",
+      "startTime": "Hora de Início",
+      "timeElapsed": "Tempo Decorrido",
+      "battery": "Bateria",
+      "location": "Localização",
+      "viewOnMap": "Ver no Mapa",
+      "state": "Estado",
+      "lastPosition": "Última Posição",
+      "actions": "Ações",
+      "viewDetails": "Ver Detalhes",
+      "noDevicesFound": "Nenhum dispositivo encontrado"
+    },
+    "deviceMotion": {
+      "title": "Estado de Movimento ({{count}} dispositivos)",
+      "moving": "Em Movimento",
+      "static": "Estático"
+    },
+    "deviceStates": {
+      "moving": "Em Movimento",
+      "static": "Estático"
+    },
+    "events": {
+      "legend": "Estatísticas de Eventos"
+    }
+  },
+  "deviceDetails": {
+    "title": "Detalhes do Dispositivo",
+    "iconAlt": "Ícone de dispositivo móvel"
+  },
+  "customer": {
+    "label": "Cliente"
+  },
+   "status": {
+    "label": "Estado"
+  },
+  "motionState": {
+    "moving": "🚶 Movimento",
+    "static": "⏸️ Estático"
+  },
+   "battery": {
+    "label": "Bateria"
+  },
+    "lastUpdate": {
+    "label": "Última Atualização"
+  },
+   "tabs": {
+    "info": "Informações",
+    "route": "Rota (24h)",
+    "events": "Eventos",
+    "config": "Configuração"
+  },
+  "generalInfo": {
+    "title": "📋 Informações Gerais",
+    "deviceEUI": "Device EUI",
+    "customer": "Cliente",
+    "batteryLevel": "Nível de Bateria",
+    "motionState": "Estado de Movimento"
+  },
+  "gpsLocation": {
+    "title": "📍 Localização GPS",
+    "latitude": "Latitude",
+    "longitude": "Longitude"
+  },
+   "offlineDevices": {
+    "title": "Dispositivos Offline",
+    "deviceEUI": "Device EUI",
+    "customer": "Cliente",
+    "lastPosition": "Última Posição",
+    "offlineTime": "Tempo Offline",
+    "battery": "Bateria",
+    "notAvailable": "N/A"
+  },
+  "deviceLog": {
+    "events": {
+      "legend": "Estatísticas de Eventos",
+      "eventType": "Tipo de Evento",
+      "total": "Total",
+      "valid": "Válidos",
+      "duplicate": "Duplicados",
+      "uniqueDevices": "Dispositivos Únicos",
+      "duplicationRate": "Taxa de Duplicação",
+      "emptyMessage": "Nenhum evento registrado nas últimas 24 horas"
+    }
+  },
+  "eventLegend": {
+    "title": "📖 Legenda de Tipos de Eventos",
+    "types": {
+      "SOS_MODE_START": "Início de alerta SOS",
+      "SOS_MODE_END": "Fim de alerta SOS",
+      "MOTION_START": "Início de movimento",
+      "MOTION_END": "Fim de movimento",
+      "GEOFENCE_ENTRY": "Entrada em geofence",
+      "GEOFENCE_EXIT": "Saída de geofence"
+    }
+  },
+  "gateway": {
+    "title": "Qualidade de Sinal por Gateway",
+    "statsTitle": "Estatísticas de Gateways",
+    "gateway": "Gateway",
+    "reports": "Relatórios",
+    "avgRssi": "RSSI Médio",
+    "avgSnr": "SNR Médio",
+    "minRssi": "RSSI Min",
+    "maxRssi": "RSSI Max",
+    "quality": "Qualidade",
+    "notAvailable": "N/A",
+    "qualityLevels": {
+      "excellent": "Excelente",
+      "good": "Bom",
+      "fair": "Regular",
+      "poor": "Ruim"
+    },
+    "metrics": {
+      "activeGateways": "Gateways Ativos",
+      "overallAvgRssi": "RSSI Médio Geral",
+      "totalReports": "Total de Relatórios"
+    },
+    "emptyMessage": "Nenhum dado de gateway disponível"
+  },
+  "customerActivity": {
+    "searchPlaceholder": "Buscar por Cliente ou Domínio...",
+    "title": "Atividade por Cliente",
+    "customer": "Cliente",
+    "domain": "Domínio",
+    "devices": "Dispositivos",
+    "reports24h": "Relatórios (24h)",
+    "avgBattery": "Bateria Média",
+    "lastActivity": "Última Atividade",
+    "actions": "Ações",
+    "notAvailable": "N/A",
+    "timeAgo": {
+      "minutes": "min atrás",
+      "hours": "h atrás",
+      "days": "d atrás"
+    },
+    "viewDetails": "Ver Detalhes →",
+    "emptyMessage": "Nenhum cliente encontrado",
+    "metrics": {
+      "totalCustomers": "Total de Clientes",
+      "totalDevices": "Total de Dispositivos",
+      "totalReports": "Total de Relatórios",
+      "overallAvgBattery": "Bateria Média Geral"
+    }
+  },
+  "route24h": {
+    "positionsRegistered": "📍 {{count}} posições registradas nas últimas 24 horas",
+    "time": "Horário",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "speed": "Velocidade",
+    "battery": "Bateria",
+    "notAvailable": "N/A",
+    "noRoute": "Nenhuma rota registrada nas últimas 24 horas",
+    "speedUnit": "km/h"
+  },
+  "recentEvents": {
+    "eventsCount": "🚨 {{count}} eventos recentes",
+    "noEvents": "Nenhum evento recente registrado",
+    "battery": "🔋 {{level}}%"
+  },
+  "deviceConfig": {
+    "title": "⚙️ Configuração Atual",
+    "trackingMode": "Modo de Rastreamento",
+    "uplinkPeriod": "Período de Uplink",
+    "batteryAtLastConfig": "Bateria na Última Config",
+    "lastReconfiguration": "Última Reconfiguração",
+    "notAvailable": "Configuração não disponível"
+  },
+   "common": {
+    "close": "Fechar"
+  },
+  "locationModal": {
+    "title": "📍 Localização do Dispositivo",
+    "sosAlert": "🚨 ALERTA SOS ATIVO",
+    "status": {
+      "sosActive": "🚨 SOS ATIVO",
+      "moving": "🚶 Em Movimento",
+      "static": "⏸️ Estático"
+    },
+    "popup": {
+      "sosAlert": "🚨 ALERTA SOS",
+      "battery": "Bateria",
+      "status": "Estado"
+    },
+    "metrics": {
+      "status": "Estado",
+      "battery": "Bateria",
+      "latitude": "Latitude",
+      "longitude": "Longitude"
+    },
+    "actions": {
+      "openGoogleMaps": "Abrir no Google Maps",
+      "close": "Fechar"
+    }
+  },
+  "batteryChart": {
+    "tooltip": "{b}: {c} ({d}%)",
+    "seriesName": "Status da Bateria",
+    "healthy": "Saudável (≥30%)",
+    "warning": "Atenção (20-29%)",
+    "critical": "Crítico (<20%)"
+  },
+  "accuracyChart": {
+    "tooltip": {
+      "trigger": "axis",
+      "axisPointer": { "type": "shadow" }
+    },
+    "yAxis": {
+      "name": "Quantidade"
+    },
+    "series": {
+      "name": "Relatórios"
+    },
+    "accuracyRanges": {
+      "excellent": "Excelente",
+      "good": "Bom",
+      "fair": "Regular",
+      "poor": "Ruim"
+    }
+  },
+  "gatewayChart": {
+    "tooltip": {
+      "trigger": "axis",
+      "axisPointer": { "type": "cross" }
+    },
+    "legend": {
+      "avgRssi": "RSSI Médio",
+      "avgSnr": "SNR Médio",
+      "reportCount": "Contagem de Relatórios"
+    },
+    "yAxis": {
+      "rssiSnr": "RSSI/SNR",
+      "count": "Contagem"
+    }
+  },
+   "eventsChart": {
+    "tooltip": {
+      "trigger": "axis",
+      "axisPointer": { "type": "shadow" }
+    },
+    "legend": {
+      "validEvents": "Eventos Válidos",
+      "duplicates": "Duplicados"
+    },
+    "yAxis": {
+      "name": "Quantidade"
+    }
+  },
+  "error": {
+    "title": "Erro ao carregar dados",
+    "retry": "Tentar novamente"
+  }
 }

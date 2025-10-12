@@ -58,7 +58,7 @@ export default function Login() {
             </div>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-                Smart Analytics
+                SmartxHub Analytics
               </h1>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {t('login.subtitle')}
@@ -158,11 +158,11 @@ export default function Login() {
           </form>
 
           {/* Footer */}
-          <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+          {/* <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {t('login.copyright')}
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
 
