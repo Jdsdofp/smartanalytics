@@ -194,7 +194,9 @@
         "GEOFENCE_ENTRY": "Geofence Entry",
         "GEOFENCE_EXIT": "Geofence Exit",
         "MOTION_TRACKING": "Motion Tracking",
-        "PERMANENT_TRACKING": "Permanent Tracking"
+        "PERMANENT_TRACKING": "Permanent Tracking",
+        "yesOnly": "Yes, only valid GPS",
+        "all": "All records"
       }
     },
     "pagination": {

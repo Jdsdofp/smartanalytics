@@ -20,6 +20,7 @@ import {
     ChevronDownIcon,  // 🆕 ADICIONE
     ArrowsUpDownIcon, // 🆕 ADICIONE
 } from '@heroicons/react/24/outline';
+// import GPSRouteMap from '../Map/GPSRouteMap';
 
 // =====================================
 // 📊 INTERFACES E TIPOS
@@ -653,7 +654,8 @@ const RawDataExplorer: React.FC = () => {
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
             ],
-        },
+        }
+
     };
 
     const currentConfig = tableConfigs[activeTab];
@@ -965,6 +967,8 @@ const RawDataExplorer: React.FC = () => {
                 sortBy={sortBy}              // 🆕 ADICIONE
                 sortOrder={sortOrder}        // 🆕 ADICIONE
             />
+        
+
 
             {!loading && data.length > 0 && (
                 <Pagination
