@@ -9,6 +9,16 @@ import {
     ArrowPathIcon,
     XMarkIcon,
     MagnifyingGlassIcon,
+    MapPinIcon,
+    ExclamationTriangleIcon,
+    RssIcon,
+    SignalIcon,
+    Cog6ToothIcon,
+    XCircleIcon,
+    BoltIcon,
+    ChevronUpIcon,    // 🆕 ADICIONE
+    ChevronDownIcon,  // 🆕 ADICIONE
+    ArrowsUpDownIcon, // 🆕 ADICIONE
 } from '@heroicons/react/24/outline';
 
 // =====================================
@@ -26,7 +36,7 @@ interface Column {
 interface TableConfig {
     id: string;
     label: string;
-    icon: string;
+    icon: React.ComponentType<{ className?: string }>; // ✅ Mudou de string para ComponentType
     endpoint: string;
     exportTable: string;
     columns: Column[];
@@ -87,6 +97,9 @@ interface DataTableProps {
     loading: boolean;
     onColumnFiltersChange: (filters: Record<string, string>) => void;
     currentColumnFilters: Record<string, string>;
+    onSort: (column: string) => void;          // 🆕 ADICIONE
+    sortBy: string;                             // 🆕 ADICIONE
+    sortOrder: 'ASC' | 'DESC';                 // 🆕 ADICIONE
 }
 
 // Filter Bar Component
@@ -217,7 +230,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 // Active Filters Display
 const ActiveFilters: React.FC<ActiveFiltersProps> = ({ filters, onRemove }) => {
     const { t } = useTranslation();
-    
+
     if (Object.keys(filters).length === 0) return null;
 
     return (
@@ -318,7 +331,10 @@ const DataTable: React.FC<DataTableProps> = ({
     data,
     loading,
     onColumnFiltersChange,
-    currentColumnFilters
+    currentColumnFilters,
+    onSort,      // 🆕 ADICIONE
+    sortBy,      // 🆕 ADICIONE
+    sortOrder,   // 🆕 ADICIONE
 }) => {
     const { t } = useTranslation();
     const [localColumnFilters, setLocalColumnFilters] = useState<Record<string, string>>({});
@@ -430,7 +446,22 @@ const DataTable: React.FC<DataTableProps> = ({
                             >
                                 <div className="flex flex-col gap-1">
                                     <div className="flex items-center justify-between">
-                                        <span className="font-semibold">{col}</span>
+                                        {/* 🆕 BOTÃO DE ORDENAÇÃO */}
+                                        <button
+                                            onClick={() => onSort(col)}
+                                            className="flex items-center gap-1 hover:text-blue-600 transition-colors"
+                                        >
+                                            <span className="font-semibold">{col}</span>
+                                            {sortBy === col ? (
+                                                sortOrder === 'ASC' ? (
+                                                    <ChevronUpIcon className="h-4 w-4 text-blue-600" />
+                                                ) : (
+                                                    <ChevronDownIcon className="h-4 w-4 text-blue-600" />
+                                                )
+                                            ) : (
+                                                <ArrowsUpDownIcon className="h-4 w-4 text-gray-400" />
+                                            )}
+                                        </button>
                                         {localColumnFilters[col] && (
                                             <div className="flex items-center gap-1">
                                                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -507,6 +538,12 @@ const RawDataExplorer: React.FC = () => {
     const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
     const [activeTab, setActiveTab] = useState<string>('gps');
     const [data, setData] = useState<any[]>([]);
+
+    // 🆕 ADICIONE ESTES ESTADOS
+    const [sortBy, setSortBy] = useState<string>('');
+    const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC')
+
+
     const [pagination, setPagination] = useState<PaginationState>({
         current_page: 1,
         per_page: 50,
@@ -521,7 +558,7 @@ const RawDataExplorer: React.FC = () => {
         gps: {
             id: 'gps',
             label: t('rawDataExplorer.tabs.gps'),
-            icon: '📍',
+            icon: MapPinIcon,
             endpoint: '/api/dashboard/devices/raw/gps-reports',
             exportTable: 'device_gps_report_monitoring',
             columns: [],
@@ -535,7 +572,7 @@ const RawDataExplorer: React.FC = () => {
         events: {
             id: 'events',
             label: t('rawDataExplorer.tabs.events'),
-            icon: '🚨',
+            icon: ExclamationTriangleIcon,
             endpoint: '/api/dashboard/devices/raw/events',
             exportTable: 'device_events_management',
             columns: [],
@@ -549,7 +586,7 @@ const RawDataExplorer: React.FC = () => {
         scanning: {
             id: 'scanning',
             label: t('rawDataExplorer.tabs.scanning'),
-            icon: '📡',
+            icon: SignalIcon,
             endpoint: '/api/dashboard/devices/raw/scanning',
             exportTable: 'device_scanning_monitoring',
             columns: [],
@@ -563,7 +600,7 @@ const RawDataExplorer: React.FC = () => {
         configuration: {
             id: 'configuration',
             label: t('rawDataExplorer.tabs.configuration'),
-            icon: '⚙️',
+            icon: Cog6ToothIcon,
             endpoint: '/api/dashboard/devices/raw/configuration',
             exportTable: 'device_configuration_management',
             columns: [],
@@ -577,13 +614,42 @@ const RawDataExplorer: React.FC = () => {
         errors: {
             id: 'errors',
             label: t('rawDataExplorer.tabs.errors'),
-            icon: '❌',
+            icon: XCircleIcon,
             endpoint: '/api/dashboard/devices/raw/gps-errors',
             exportTable: 'device_gps_error_management',
             columns: [],
             filters: [
                 { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
                 { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
+                { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
+                { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
+            ],
+        },
+        heartbeats: {
+            id: 'heartbeats',
+            label: t('rawDataExplorer.tabs.heartbeats'),
+            icon: BoltIcon,
+            endpoint: '/api/dashboard/devices/heartbeats/raw',
+            exportTable: 'device_heartbeat',
+            columns: [],
+            filters: [
+                { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
+                { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
+                { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
+                { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
+            ],
+        },
+        scannedBeacons: {
+            id: 'scannedBeacons',
+            label: t('rawDataExplorer.tabs.scannedBeacons'),
+            icon: RssIcon,
+            endpoint: '/api/dashboard/devices/scanned-beacons/raw',
+            exportTable: 'device_scanned_beacons_list',
+            columns: [],
+            filters: [
+                { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
+                { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
+                { key: 'beacon_id', label: t('rawDataExplorer.filters.fields.beacon_id'), type: 'text' },
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
             ],
@@ -595,17 +661,28 @@ const RawDataExplorer: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
+            // ✅ Garante valores padrão caso pagination esteja undefined
+            const currentPage = pagination?.current_page || 1;
+            const perPage = pagination?.per_page || 50;
+
             const params = new URLSearchParams({
-                page: pagination.current_page.toString(),
-                limit: pagination.per_page.toString(),
+                page: currentPage.toString(),
+                limit: perPage.toString(),
                 ...filters,
             });
+
+            // 🆕 ADICIONE SORT
+            if (sortBy) {
+                params.append('sortBy', sortBy);
+                params.append('sortOrder', sortOrder);
+            }
 
             if (Object.keys(columnFilters).length > 0) {
                 params.append('column_filters', JSON.stringify(columnFilters));
             }
 
-            const response = await fetch(`https://api-dashboards-u1oh.onrender.com${currentConfig.endpoint}?${params}`);
+            //https://api-dashboards-u1oh.onrender.com
+            const response = await fetch(`http://localhost:3306${currentConfig.endpoint}?${params}`);
             const result: PaginatedResponse = await response.json();
 
             setData(result.data);
@@ -626,13 +703,20 @@ const RawDataExplorer: React.FC = () => {
                 limit: '999999',
             });
 
+            // 🆕 ADICIONE SORT NA EXPORTAÇÃO
+            if (sortBy) {
+                params.append('sortBy', sortBy);
+                params.append('sortOrder', sortOrder);
+            }
+
+
             if (Object.keys(columnFilters).length > 0) {
                 params.append('column_filters', JSON.stringify(columnFilters));
             }
 
-            const response = await fetch(`https://api-dashboards-u1oh.onrender.com${currentConfig.endpoint}?${params}`);
+            const response = await fetch(`http://localhost:3306${currentConfig.endpoint}?${params}`);
             const result: PaginatedResponse = await response.json();
-            
+
             const exportData = result.data;
             const timestamp = new Date().toISOString().split('T')[0];
             const filename = `${currentConfig.exportTable}_${timestamp}`;
@@ -643,7 +727,7 @@ const RawDataExplorer: React.FC = () => {
                 link.href = window.URL.createObjectURL(blob);
                 link.download = `${filename}.json`;
                 link.click();
-            } 
+            }
             else if (format === 'csv') {
                 const ws = XLSX.utils.json_to_sheet(exportData);
                 const csv = XLSX.utils.sheet_to_csv(ws);
@@ -655,7 +739,7 @@ const RawDataExplorer: React.FC = () => {
             }
             else if (format === 'xlsx') {
                 const ws = XLSX.utils.json_to_sheet(exportData);
-                
+
                 const colWidths = Object.keys(exportData[0] || {}).map(key => {
                     const maxLength = Math.max(
                         key.length,
@@ -667,7 +751,7 @@ const RawDataExplorer: React.FC = () => {
 
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, currentConfig.label);
-                
+
                 wb.Props = {
                     Title: `${currentConfig.label} - ${t('rawDataExplorer.export.rawData')}`,
                     Subject: t('rawDataExplorer.export.dataExport'),
@@ -718,7 +802,35 @@ const RawDataExplorer: React.FC = () => {
 
     useEffect(() => {
         fetchData();
-    }, [activeTab, pagination.current_page, pagination.per_page, filters, columnFilters]);
+    }, [activeTab, pagination.current_page, pagination.per_page, filters, columnFilters, sortBy, sortOrder]);
+
+    const getTabColors = (id: string, isActive: boolean) => {
+        const colors: any = {
+            gps: { active: 'text-green-600', inactive: 'text-green-400' },
+            events: { active: 'text-red-600', inactive: 'text-red-400' },
+            heartbeats: { active: 'text-yellow-700', inactive: 'text-yellow-600' },
+            scannedBeacons: { active: 'text-purple-600', inactive: 'text-purple-400' },
+            scanning: { active: 'text-blue-600', inactive: 'text-blue-400' },
+            configuration: { active: 'text-gray-600', inactive: 'text-gray-400' },
+            errors: { active: 'text-orange-600', inactive: 'text-orange-400' },
+        };
+
+        return isActive ? colors[id]?.active : colors[id]?.inactive;
+    };
+
+    // 🆕 ADICIONE ESTA FUNÇÃO
+    const handleSort = (column: string) => {
+        if (sortBy === column) {
+            // Se já está ordenando por esta coluna, inverte a ordem
+            setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
+        } else {
+            // Nova coluna, começa com ASC
+            setSortBy(column);
+            setSortOrder('ASC');
+        }
+        setPagination(prev => ({ ...prev, current_page: 1 }));
+    };
+
 
     return (
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
@@ -785,7 +897,7 @@ const RawDataExplorer: React.FC = () => {
                                         </div>
                                     </button>
                                 </div>
-                                
+
                                 {data.length > 0 && (
                                     <div className="px-4 py-2 text-xs text-gray-500 border-t border-gray-200 bg-gray-50">
                                         💡 {t('rawDataExplorer.export.availableRecords', { count: pagination.total_records })}
@@ -799,26 +911,35 @@ const RawDataExplorer: React.FC = () => {
 
             <div className="border-b border-gray-200 bg-gray-50 overflow-x-auto">
                 <nav className="flex space-x-2 sm:space-x-4 px-4 sm:px-6 min-w-max">
-                    {Object.values(tableConfigs).map((config) => (
-                        <button
-                            key={config.id}
-                            onClick={() => {
-                                setActiveTab(config.id);
-                                setFilters({});
-                                setPagination(prev => ({ ...prev, current_page: 1 }));
-                            }}
-                            className={`
-                                flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
-                                ${activeTab === config.id
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }
-                            `}
-                        >
-                            <span className="text-base sm:text-lg">{config.icon}</span>
-                            {config.label}
-                        </button>
-                    ))}
+                    {Object.values(tableConfigs).map((config) => {
+                        const IconComponent = config.icon;
+                        return (
+                            <button
+                                key={config.id}
+                                onClick={() => {
+                                    setActiveTab(config.id);
+                                    setFilters({});
+                                    setColumnFilters({});
+                                    setSortBy('');        // 🆕 ADICIONE
+                                    setSortOrder('DESC'); // 🆕 ADICIONE
+                                    setPagination(prev => ({ ...prev, current_page: 1 }));
+                                }}
+                                className={`
+                        flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 
+                        text-sm font-medium border-b-2 transition-colors whitespace-nowrap
+                        ${activeTab === config.id
+                                        ? 'border-blue-600 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }
+                    `}
+                            >
+                                <IconComponent
+                                    className={`h-4 w-4 sm:h-5 sm:w-5 ${getTabColors(config.id, activeTab === config.id)}`}
+                                />
+                                {config.label}
+                            </button>
+                        );
+                    })}
                 </nav>
             </div>
 
@@ -834,11 +955,15 @@ const RawDataExplorer: React.FC = () => {
                 onRemove={(key) => handleFilterChange(key, '')}
             />
 
+            
             <DataTable
                 data={data}
                 loading={loading}
                 onColumnFiltersChange={handleColumnFiltersChange}
                 currentColumnFilters={columnFilters}
+                onSort={handleSort}          // 🆕 ADICIONE
+                sortBy={sortBy}              // 🆕 ADICIONE
+                sortOrder={sortOrder}        // 🆕 ADICIONE
             />
 
             {!loading && data.length > 0 && (

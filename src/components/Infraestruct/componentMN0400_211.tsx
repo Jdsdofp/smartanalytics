@@ -166,9 +166,9 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
     setLoading(true);
     try {
       const [routeRes, eventsRes, configRes] = await Promise.all([
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/route/${device.dev_eui}`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/events/${device.dev_eui}?limit=10`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/config/${device.dev_eui}`),
+        fetch(`http://localhost:3306/api/dashboard/devices/route/${device.dev_eui}`),
+        fetch(`http://localhost:3306/api/dashboard/devices/events/${device.dev_eui}?limit=10`),
+        fetch(`http://localhost:3306/api/dashboard/devices/config/${device.dev_eui}`),
       ]);
 
       const routeData = await routeRes.json();
@@ -829,11 +829,11 @@ export default function DeviceLogsView() {
     setRefreshing(true);
     try {
       const [overviewRes, motionRes, gatewayRes, eventsRes, customerRes] = await Promise.all([
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/dashboard/overview'),
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/motion-state'),
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/gateway-quality'),
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/events/types'),
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/customer-stats'),
+        fetch('http://localhost:3306/api/dashboard/devices/dashboard/overview'),
+        fetch('http://localhost:3306/api/dashboard/devices/motion-state'),
+        fetch('http://localhost:3306/api/dashboard/devices/gateway-quality'),
+        fetch('http://localhost:3306/api/dashboard/devices/events/types'),
+        fetch('http://localhost:3306/api/dashboard/devices/customer-stats'),
       ]);
 
       const overviewData = await overviewRes.json();

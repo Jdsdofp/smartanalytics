@@ -160,6 +160,8 @@
       "gps": "Reportes GPS",
       "events": "Eventos",
       "scanning": "Escaneo",
+      "heartbeats": "Heartbeats",
+      "scannedBeacons": "Balizas escaneadas",
       "configuration": "Configuración",
       "errors": "Errores GPS"
     },
