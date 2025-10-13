@@ -515,6 +515,19 @@ interface MapModalProps {
 }
 
 const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
+
+  const formatCoordinate = (coord: string | number | null | undefined): string => {
+  if (coord === null || coord === undefined || coord === '') return 'N/A';
+  
+  try {
+    const num = typeof coord === 'string' ? parseFloat(coord) : coord;
+    if (isNaN(num)) return 'N/A';
+    return num.toFixed(6);
+  } catch {
+    return 'N/A';
+  }
+};
+
   if (!isOpen || !device) return null;
 
   const position: [number, number] = [
@@ -609,11 +622,11 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
             </div>
             <div>
               <p className="text-xs text-gray-500">{t('locationModal.metrics.latitude')}</p>
-              <p className="mt-1 font-mono text-sm text-gray-900">{device.gps_latitude?.toFixed(6)}</p>
+              <p className="mt-1 font-mono text-sm text-gray-900">{formatCoordinate(device.gps_latitude)}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">{t('locationModal.metrics.longitude')}</p>
-              <p className="mt-1 font-mono text-sm text-gray-900">{device.gps_longitude?.toFixed(6)}</p>
+              <p className="mt-1 font-mono text-sm text-gray-900">  {formatCoordinate(device.gps_longitude)}</p>
             </div>
           </div>
         </div>
