@@ -24,7 +24,7 @@ import 'leaflet/dist/leaflet.css';
 import RawDataExplorer from './DataGrid/gridMN0400_211';
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
-import GPSRouteMap from './Map/GPSRouteMap';
+import GPSRouteMapLeaflet from './Map/GPSRouteMap';
 
 // =====================================
 // 📊 INTERFACES
@@ -1862,7 +1862,7 @@ export default function DeviceLogsView() {
         isOpen={isDetailsModalOpen}
         onClose={closeDetailsModal}
       />
-      <GPSRouteMap/>
+      <GPSRouteMapLeaflet/>
     </div>
   );
 }
