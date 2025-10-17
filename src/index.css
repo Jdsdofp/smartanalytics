@@ -321,4 +321,17 @@
 }
 
 
+/* .route-animation {
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: drawRoute 6s linear infinite;
+}
 
+@keyframes drawRoute {
+  0% {
+    stroke-dashoffset: 2000;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+} */

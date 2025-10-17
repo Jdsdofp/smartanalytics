@@ -248,6 +248,7 @@
     },
     "tabs": {
       "overview": "Visão Geral",
+      "mapview": "Visão Mapa",
       "devices": "Dispositivos",
       "events": "Eventos",
       "network": "Rede",

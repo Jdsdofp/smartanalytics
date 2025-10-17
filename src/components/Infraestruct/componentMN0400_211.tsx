@@ -14,6 +14,7 @@ import {
   ClockIcon,
   DevicePhoneMobileIcon,
   DocumentChartBarIcon,
+  MapIcon,
 } from '@heroicons/react/24/outline';
 import * as echarts from 'echarts';
 import type { EChartsOption } from 'echarts';
@@ -811,7 +812,7 @@ export default function DeviceLogsView() {
   const [eventTypes, setEventTypes] = useState<EventTypeStats[]>([]);
   const [customerStats, setCustomerStats] = useState<CustomerActivity[]>([]);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'devices' | 'events' | 'network' | 'customers' | 'rawdata'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'mapview' | 'devices' | 'events' | 'network' | 'customers' | 'rawdata'>('overview');
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -1209,6 +1210,7 @@ export default function DeviceLogsView() {
         <nav className="-mb-px flex space-x-8 overflow-x-auto">
           {[
             { id: 'overview', label: t('deviceLogs.tabs.overview'), icon: ChartBarIcon },
+            {id: 'mapview', label: t('deviceLogs.tabs.mapview'), icon: MapIcon},
             { id: 'devices', label: t('deviceLogs.tabs.devices'), icon: DevicePhoneMobileIcon },
             { id: 'events', label: t('deviceLogs.tabs.events'), icon: ShieldExclamationIcon },
             { id: 'network', label: t('deviceLogs.tabs.network'), icon: SignalIcon },
@@ -1346,6 +1348,130 @@ export default function DeviceLogsView() {
               </div>
             </div>
           )}
+
+          <GPSRouteMapLeaflet/>
+        </div>
+      )}
+
+
+            {/* ✅ TAB OVERVIEW COM KPIs TRADUZIDOS */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <KPICard
+              title={t('deviceLogs.kpis.deviceUptime.title')}
+              value={`${overview.kpis.uptime.uptime_percentage}%`}
+              subtitle={t('deviceLogs.kpis.deviceUptime.subtitle', {
+                online: overview.kpis.uptime.devices_online,
+                total: overview.kpis.uptime.total_devices
+              })}
+              icon={SignalIcon}
+              color="green"
+              trend="up"
+            />
+            {/* <KPICard
+              title={t('deviceLogs.kpis.gpsSuccess.title')}
+              value={`${overview.kpis.gps_success.success_rate_percent}%`}
+              subtitle={t('deviceLogs.kpis.gpsSuccess.subtitle', {
+                valid: overview.kpis.gps_success.valid_gps_reports
+              })}
+              icon={MapPinIcon}
+              color="blue"
+              trend="up"
+            /> */}
+            <KPICard
+              title={t('deviceLogs.kpis.batteryHealth.title')}
+              value={`${overview.kpis.battery_health.health_percentage}%`}
+              subtitle={t('deviceLogs.kpis.batteryHealth.subtitle', {
+                critical: overview.kpis.battery_health.critical_devices
+              })}
+              icon={BoltIcon}
+              color={overview.kpis.battery_health.critical_devices > 10 ? 'red' : 'yellow'}
+            />
+            <KPICard
+              title={t('deviceLogs.kpis.activeAlerts.title')}
+              value={overview.alerts.active_sos_count}
+              subtitle={t('deviceLogs.kpis.activeAlerts.subtitle', {
+                lowBattery: overview.alerts.low_battery_count
+              })}
+              icon={ExclamationTriangleIcon}
+              color={overview.alerts.active_sos_count > 0 ? 'red' : 'green'}
+            />
+          </div>
+
+          {/* ✅ GRÁFICOS COM RESPONSIVIDADE */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.batteryDistribution')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <div id="battery-chart" className="w-full h-full min-w-0" />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.gpsAccuracy')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <div id="accuracy-chart" className="w-full h-full min-w-0" />
+              </div>
+            </div>
+          </div>
+
+          {/* ✅ ALERTAS SOS TRADUZIDOS */}
+          {overview.alerts.active_sos_count > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 sm:p-6">
+              <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
+                <ShieldExclamationIcon className="h-6 w-6" />
+                {t('deviceLogs.sosAlerts.title', { count: overview.alerts.active_sos_count })}
+              </h3>
+              <div className="overflow-x-auto">
+                <DataTable
+
+                  columns={[
+                    { key: 'dev_eui', label: t('deviceLogs.tables.deviceEui') },
+                    { key: 'customer_name', label: t('deviceLogs.tables.customer') },
+                    {
+                      key: 'sos_start_time',
+                      label: t('deviceLogs.tables.startTime'),
+                      render: (val) => new Date(val).toLocaleString(),
+                    },
+                    {
+                      key: 'minutes_elapsed',
+                      label: t('deviceLogs.tables.timeElapsed'),
+                      render: (val) => t('deviceLogs.sosAlerts.minutesAgo', { minutes: val }),
+                    },
+                    {
+                      key: 'battery_level',
+                      label: t('deviceLogs.tables.battery'),
+                      render: (val) => (
+                        <span className={`font-semibold ${val < 20 ? 'text-red-600' : 'text-green-600'}`}>
+                          {val}%
+                        </span>
+                      ),
+                    },
+                    {
+                      key: 'actions',
+                      label: t('deviceLogs.tables.location'),
+                      render: (_, row) => (
+                        <button
+                          onClick={() => openMapModal(row)}
+                          className="text-blue-600 hover:text-blue-800 text-xs font-medium underline"
+                        >
+                          {t('deviceLogs.tables.viewOnMap')}
+                        </button>
+                      ),
+                    },
+                  ]}
+                  data={overview.alerts.active_sos_list}
+                />
+              </div>
+            </div>
+          )}
+
+          <GPSRouteMapLeaflet/>
         </div>
       )}
 
@@ -1862,7 +1988,7 @@ export default function DeviceLogsView() {
         isOpen={isDetailsModalOpen}
         onClose={closeDetailsModal}
       />
-      <GPSRouteMapLeaflet/>
+      
     </div>
   );
 }

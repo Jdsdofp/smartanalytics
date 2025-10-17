@@ -250,6 +250,7 @@
     },
     "tabs": {
       "overview": "Overview",
+      "mapview": "Map View",
       "devices": "Devices",
       "events": "Events",
       "network": "Network",

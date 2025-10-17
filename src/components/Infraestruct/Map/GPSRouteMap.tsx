@@ -20,42 +20,40 @@ import {
   MagnifyingGlassMinusIcon,
 } from '@heroicons/react/24/outline';
 
+// Tipos de mapas disponíveis
+const MAP_TYPES = {
+  streets: {
+    name: 'Ruas',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 19
+  },
+  satellite: {
+    name: 'Satélite',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
+    maxZoom: 19,
+  },
+  terrain: {
+    name: 'Terreno',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+  },
+  dark: {
+    name: 'Escuro',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 17,
+  },
+};
 
 // Fix para ícones do Leaflet
-// delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  maxZoom: 20,
 });
-
-// Ícones customizados
-// const startIcon = new L.Icon({
-//   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-//   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-//   iconSize: [25, 41],
-//   iconAnchor: [12, 41],
-//   popupAnchor: [1, -34],
-//   shadowSize: [41, 41]
-// });
-
-// const endIcon = new L.Icon({
-//   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-//   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-//   iconSize: [25, 41],
-//   iconAnchor: [12, 41],
-//   popupAnchor: [1, -34],
-//   shadowSize: [41, 41]
-// });
-
-// const waypointIcon = new L.Icon({
-//   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-//   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-//   iconSize: [20, 33],
-//   iconAnchor: [10, 33],
-//   popupAnchor: [1, -28],
-//   shadowSize: [33, 33]
-// });
 
 // Ícone para o marcador de reprodução
 const playerIcon = new L.Icon({
@@ -75,31 +73,30 @@ interface GPSPoint {
   gps_accuracy: number;
 }
 
-
 // Componente para ajustar o mapa aos bounds
 function MapBounds({ positions }: { positions: [number, number][] }) {
   const map = useMap();
-  
+
   useEffect(() => {
     if (positions.length > 0) {
       const bounds = L.latLngBounds(positions);
-      map.fitBounds(bounds, { 
-        padding: [50, 50], 
-        maxZoom: 15 // Zoom inicial mais conservador
+      map.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 15
       });
     }
   }, [positions, map]);
-  
+
   return null;
 }
 
-// Componente para controlar o zoom automático - CORRIGIDO
-function AutoZoom({ 
-  position, 
-  isPlaying, 
+// Componente para controlar o zoom automático
+function AutoZoom({
+  position,
+  isPlaying,
   isDragging,
-  autoZoomEnabled 
-}: { 
+  autoZoomEnabled
+}: {
   position: [number, number] | null;
   isPlaying: boolean;
   isDragging: boolean;
@@ -113,50 +110,39 @@ function AutoZoom({
   useEffect(() => {
     if (!autoZoomEnabled || !position) return;
 
-    // Limpa timeout anterior
     if (zoomTimeoutRef.current) {
       clearTimeout(zoomTimeoutRef.current);
     }
 
     const currentZoom = map.getZoom();
     const shouldApplyZoom = () => {
-      // Se não há posição anterior, aplica zoom
       if (!lastPositionRef.current) return true;
-      
-      // Calcula distância desde a última posição
+
       const distance = L.latLng(position).distanceTo(L.latLng(lastPositionRef.current));
-      
-      // Só aplica zoom se moveu significativamente (pelo menos 100 metros)
-      // OU se é o início da reprodução/arraste
       return distance > 100 || isPlaying || isDragging;
     };
 
     if (shouldApplyZoom()) {
-      // Define zoom baseado no modo
       let targetZoom: number;
-      
+
       if (isDragging) {
-        targetZoom = 17; // Zoom mais próximo durante arraste
+        targetZoom = 17;
       } else if (isPlaying) {
-        targetZoom = 15; // Zoom médio durante reprodução
+        targetZoom = 15;
       } else {
-        targetZoom = lastZoomRef.current; // Mantém zoom atual
+        targetZoom = lastZoomRef.current;
       }
 
-      // Só aplica zoom se for significativamente diferente do atual
-      // E se não estiver muito recente
       if (Math.abs(currentZoom - targetZoom) >= 1) {
-        // Pequeno delay para agrupar movimentos rápidos
         zoomTimeoutRef.current = setTimeout(() => {
           map.setView(position, targetZoom, {
             animate: true,
-            duration: 1.5, // Animação um pouco mais lenta
+            duration: 1.5,
             easeLinearity: 0.25
           });
           lastZoomRef.current = targetZoom;
         }, 300);
       } else {
-        // Apenas centraliza sem mudar zoom
         map.panTo(position, {
           animate: true,
           duration: 1,
@@ -174,7 +160,6 @@ function AutoZoom({
     };
   }, [position, isPlaying, isDragging, autoZoomEnabled, map]);
 
-  // Efeito para resetar quando desativar o auto zoom
   useEffect(() => {
     if (!autoZoomEnabled) {
       lastPositionRef.current = null;
@@ -235,83 +220,135 @@ function RouteArrows({ positions }: { positions: [number, number][] }) {
   return null;
 }
 
-function ZoomControls({ 
-  autoZoomEnabled, 
-  onAutoZoomToggle 
-}: { 
+function ZoomControls({
+  autoZoomEnabled,
+  onAutoZoomToggle,
+  mapType,
+  onMapTypeChange
+}: {
   autoZoomEnabled: boolean;
   onAutoZoomToggle: (enabled: boolean) => void;
+  mapType: keyof typeof MAP_TYPES;
+  onMapTypeChange: (type: keyof typeof MAP_TYPES) => void;
 }) {
   const map = useMap();
-  
+  const [showMapTypes, setShowMapTypes] = useState(false);
+
   return (
-    <div className="leaflet-top leaflet-right">
-      <div className="leaflet-control leaflet-bar flex flex-col">
-        <button 
-          className="leaflet-control-zoom-in"
-          onClick={() => {
-            map.zoomIn();
-            // Quando usuário controla manualmente, desativa auto zoom temporariamente?
-          }}
-          style={{
-            width: '30px',
-            height: '30px',
-            lineHeight: '30px',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            border: 'none',
-            backgroundColor: 'white'
-          }}
-        >
-          +
-        </button>
-        <button 
-          className="leaflet-control-zoom-out"
-          onClick={() => {
-            map.zoomOut();
-          }}
-          style={{
-            width: '30px',
-            height: '30px',
-            lineHeight: '30px',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            border: 'none',
-            backgroundColor: 'white',
-            borderTop: '1px solid #ccc'
-          }}
-        >
-          -
-        </button>
-        <button 
-          className={`leaflet-control-auto-zoom ${
-            autoZoomEnabled ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
-          }`}
-          onClick={() => onAutoZoomToggle(!autoZoomEnabled)}
-          style={{
-            width: '30px',
-            height: '30px',
-            lineHeight: '30px',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            border: 'none',
-            borderTop: '1px solid #ccc'
-          }}
-          title="Zoom Automático"
-        >
-          A
-        </button>
+    <>
+      <div className="leaflet-top leaflet-right">
+        <div className="leaflet-control leaflet-bar flex flex-col">
+          <button
+            className="leaflet-control-zoom-in"
+            onClick={() => map.zoomIn()}
+            style={{
+              width: '30px',
+              height: '30px',
+              lineHeight: '30px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              border: 'none',
+              backgroundColor: 'white'
+            }}
+          >
+            +
+          </button>
+          <button
+            className="leaflet-control-zoom-out"
+            onClick={() => map.zoomOut()}
+            style={{
+              width: '30px',
+              height: '30px',
+              lineHeight: '30px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              border: 'none',
+              backgroundColor: 'white',
+              borderTop: '1px solid #ccc'
+            }}
+          >
+            -
+          </button>
+          <button
+            className={`leaflet-control-auto-zoom ${autoZoomEnabled ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
+              }`}
+            onClick={() => onAutoZoomToggle(!autoZoomEnabled)}
+            style={{
+              width: '30px',
+              height: '30px',
+              lineHeight: '30px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              border: 'none',
+              borderTop: '1px solid #ccc'
+            }}
+            title="Zoom Automático"
+          >
+            A
+          </button>
+          <button
+            className="leaflet-control-map-type bg-white text-gray-700"
+            onClick={() => setShowMapTypes(!showMapTypes)}
+            style={{
+              width: '30px',
+              height: '30px',
+              lineHeight: '30px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              border: 'none',
+              borderTop: '1px solid #ccc'
+            }}
+            title="Tipo de Mapa"
+          >
+            🗺️
+          </button>
+        </div>
       </div>
-    </div>
+
+      {showMapTypes && (
+        <div
+          className="leaflet-top leaflet-right"
+          style={{
+            marginTop: '140px',
+            marginRight: '10px'
+          }}
+        >
+          <div className="leaflet-control leaflet-bar bg-white rounded shadow-lg p-2">
+            <div className="text-xs font-semibold text-gray-700 mb-2 px-2">
+              Tipo de Mapa
+            </div>
+            {(Object.keys(MAP_TYPES) as Array<keyof typeof MAP_TYPES>).map((type) => (
+              <button
+                key={type}
+                onClick={() => {
+                  onMapTypeChange(type);
+                  setShowMapTypes(false);
+                }}
+                className={`w-full text-left px-3 py-2 text-xs rounded hover:bg-blue-50 transition-colors ${mapType === type ? 'bg-blue-100 font-semibold text-blue-700' : 'text-gray-700'
+                  }`}
+                style={{
+                  border: 'none',
+                  backgroundColor: mapType === type ? '#DBEAFE' : 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                {MAP_TYPES[type].name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
-// Função para encontrar o ponto mais próximo na linha (projeção na polilinha)
+// Função para encontrar o ponto mais próximo na linha
 function findClosestPointOnLine(
-  point: [number, number], 
+  point: [number, number],
   line: [number, number][]
 ): { point: [number, number], index: number, distance: number } {
   let closestPoint: [number, number] = line[0];
@@ -321,10 +358,10 @@ function findClosestPointOnLine(
   for (let i = 0; i < line.length - 1; i++) {
     const segmentStart = line[i];
     const segmentEnd = line[i + 1];
-    
+
     const projected = projectPointOnSegment(point, segmentStart, segmentEnd);
     const distance = L.latLng(point).distanceTo(L.latLng(projected));
-    
+
     if (distance < minDistance) {
       minDistance = distance;
       closestPoint = projected;
@@ -334,7 +371,7 @@ function findClosestPointOnLine(
 
   let exactClosestIndex = 0;
   let exactMinDistance = Number.MAX_VALUE;
-  
+
   line.forEach((linePoint, index) => {
     const distance = L.latLng(point).distanceTo(L.latLng(linePoint));
     if (distance < exactMinDistance) {
@@ -370,41 +407,40 @@ function projectPointOnSegment(
 
   const dx = x2 - x1;
   const dy = y2 - y1;
-  
+
   const px = x - x1;
   const py = y - y1;
-  
+
   const dot = px * dx + py * dy;
   const lenSq = dx * dx + dy * dy;
-  
+
   let param = 0;
   if (lenSq !== 0) {
     param = dot / lenSq;
   }
-  
+
   param = Math.max(0, Math.min(1, param));
-  
+
   const projectedX = x1 + param * dx;
   const projectedY = y1 + param * dy;
-  
+
   return [projectedY, projectedX];
 }
 
 // Componente para o marcador draggable que segue a linha
-function DraggableRouteMarker({ 
-  positions, 
-  currentPointIndex, 
+function DraggableRouteMarker({
+  positions,
+  currentPointIndex,
   onIndexChange,
   validData,
   onDraggingChange
-}: { 
+}: {
   positions: [number, number][];
   currentPointIndex: number;
   onIndexChange: (index: number) => void;
   validData: any[];
   onDraggingChange: (dragging: boolean) => void;
 }) {
-  // const map = useMap();
   const markerRef = useRef<L.Marker | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -418,13 +454,13 @@ function DraggableRouteMarker({
     const marker = e.target;
     const position = marker.getLatLng();
     const draggedPosition: [number, number] = [position.lat, position.lng];
-    
+
     const closest = findClosestPointOnLine(draggedPosition, positions);
     marker.setLatLng(closest.point);
-    
+
     let newIndex = 0;
     let minDistance = Number.MAX_VALUE;
-    
+
     positions.forEach((pos, index) => {
       const distance = L.latLng(closest.point).distanceTo(L.latLng(pos));
       if (distance < minDistance) {
@@ -432,7 +468,7 @@ function DraggableRouteMarker({
         newIndex = index;
       }
     });
-    
+
     if (newIndex !== currentPointIndex) {
       onIndexChange(newIndex);
     }
@@ -458,7 +494,6 @@ function DraggableRouteMarker({
       draggable={true}
       ref={markerRef}
       eventHandlers={{
-        // drag: handleDrag,
         dragstart: handleDragStart,
         dragend: handleDragEnd,
       }}
@@ -492,7 +527,7 @@ const GPSRouteMapLeaflet = () => {
   const [maxAccuracy, setMaxAccuracy] = useState('');
   const [limit, setLimit] = useState(200);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Estados para o player da rota
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPointIndex, setCurrentPointIndex] = useState(0);
@@ -500,6 +535,7 @@ const GPSRouteMapLeaflet = () => {
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
+  const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('streets');
   const playbackIntervalRef = useRef<any | null>(null);
 
   const fetchGPSRoute = async () => {
@@ -553,7 +589,7 @@ const GPSRouteMapLeaflet = () => {
   // Funções do player da rota
   const startPlayback = () => {
     if (validData.length === 0) return;
-    
+
     setIsPlaying(true);
     playbackIntervalRef.current = setInterval(() => {
       setCurrentPointIndex(prev => {
@@ -636,8 +672,8 @@ const GPSRouteMapLeaflet = () => {
   // Processar dados
   const processedData = data.map(point => ({
     ...point,
-    gps_latitude: typeof point.gps_latitude === 'string' 
-      ? parseFloat(point.gps_latitude) 
+    gps_latitude: typeof point.gps_latitude === 'string'
+      ? parseFloat(point.gps_latitude)
       : point.gps_latitude,
     gps_longitude: typeof point.gps_longitude === 'string'
       ? parseFloat(point.gps_longitude)
@@ -655,14 +691,13 @@ const GPSRouteMapLeaflet = () => {
   ]);
 
   // Posição atual para o zoom automático
-  const currentPosition = validData[currentPointIndex] 
+  const currentPosition = validData[currentPointIndex]
     ? [validData[currentPointIndex].gps_latitude, validData[currentPointIndex].gps_longitude] as [number, number]
     : null;
 
   // Centro padrão (caso não haja dados)
   const defaultCenter: [number, number] = [-2.4833, -44.2167];
   const center = positions.length > 0 ? positions[0] : defaultCenter;
-
 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
@@ -704,7 +739,6 @@ const GPSRouteMapLeaflet = () => {
       {showFilters && (
         <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* ... (filtros existentes permanecem iguais) ... */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <MagnifyingGlassIcon className="h-4 w-4 inline mr-1" />
@@ -804,7 +838,7 @@ const GPSRouteMapLeaflet = () => {
                   >
                     <BackwardIcon className="h-4 w-4" />
                   </button>
-                  
+
                   {!isPlaying ? (
                     <button
                       onClick={startPlayback}
@@ -820,14 +854,14 @@ const GPSRouteMapLeaflet = () => {
                       <PauseIcon className="h-4 w-4" />
                     </button>
                   )}
-                  
+
                   <button
                     onClick={stopPlayback}
                     className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600"
                   >
                     <StopIcon className="h-4 w-4" />
                   </button>
-                  
+
                   <button
                     onClick={nextPoint}
                     disabled={currentPointIndex === validData.length - 1}
@@ -836,7 +870,7 @@ const GPSRouteMapLeaflet = () => {
                     <ForwardIcon className="h-4 w-4" />
                   </button>
                 </div>
-                
+
                 <select
                   value={playbackSpeed}
                   onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
@@ -868,7 +902,7 @@ const GPSRouteMapLeaflet = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-sm text-gray-600">
                 {currentPointIndex + 1} / {validData.length}
                 {autoZoomEnabled && (
@@ -876,21 +910,21 @@ const GPSRouteMapLeaflet = () => {
                 )}
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-gray-600">
                 <span>Início: {new Date(validData[0].timestamp).toLocaleTimeString('pt-BR')}</span>
                 <span>Atual: {new Date(validData[currentPointIndex].timestamp).toLocaleTimeString('pt-BR')}</span>
                 <span>Fim: {new Date(validData[validData.length - 1].timestamp).toLocaleTimeString('pt-BR')}</span>
               </div>
-              
+
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
-              
+
               <input
                 type="range"
                 min="0"
@@ -905,8 +939,8 @@ const GPSRouteMapLeaflet = () => {
             <div className="flex items-center justify-center space-x-2 text-xs text-gray-600 bg-yellow-100 px-3 py-2 rounded-md">
               <HandThumbUpIcon className="h-4 w-4" />
               <span>
-                💡 <strong>Dica:</strong> {autoZoomEnabled 
-                  ? 'Zoom automático ativado - o mapa acompanhará o movimento!' 
+                💡 <strong>Dica:</strong> {autoZoomEnabled
+                  ? 'Zoom automático ativado - o mapa acompanhará o movimento!'
                   : 'Ative o Zoom Auto para o mapa acompanhar o movimento'}
               </span>
             </div>
@@ -969,34 +1003,39 @@ const GPSRouteMapLeaflet = () => {
         ) : (
           <MapContainer
             center={center}
-            zoom={13}
-            maxZoom={22}
-            zoomControl={false} // Desabilita controles padrão para usar os customizados
+            zoom={19}
+            maxZoom={20}
+            zoomControl={false}
             style={{ height: '700px', width: '100%' }}
             className="rounded-lg shadow-md"
           >
+            {/* TileLayer dinâmico baseado no mapType */}
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              maxZoom={22}
+              attribution={MAP_TYPES[mapType].attribution}
+              url={MAP_TYPES[mapType].url}
+              // maxNativeZoom={19} // Máximo zoom com tiles disponíveis
+              maxZoom={18}
+    
             />
-            
-            {/* Controles customizados com zoom automático */}
-            <ZoomControls 
+
+            {/* Controles customizados com todas as props */}
+            <ZoomControls
               autoZoomEnabled={autoZoomEnabled}
               onAutoZoomToggle={setAutoZoomEnabled}
+              mapType={mapType}
+              onMapTypeChange={setMapType}
             />
-            
+
             {/* Zoom automático */}
-            <AutoZoom 
+            <AutoZoom
               position={currentPosition}
               isPlaying={isPlaying}
               isDragging={isDragging}
               autoZoomEnabled={autoZoomEnabled}
             />
-            
+
             <MapBounds positions={positions} />
-            
+
             {/* Linha da rota */}
             {positions.length > 1 && (
               <Polyline
@@ -1008,10 +1047,10 @@ const GPSRouteMapLeaflet = () => {
                 }}
               />
             )}
-            
+
             {/* Setas indicando direção */}
             {positions.length > 1 && <RouteArrows positions={positions} />}
-            
+
             {/* Marcador do player que segue a linha */}
             <DraggableRouteMarker
               positions={positions}
@@ -1020,7 +1059,7 @@ const GPSRouteMapLeaflet = () => {
               validData={validData}
               onDraggingChange={handleDraggingChange}
             />
-            
+
             {/* Marcadores estáticos apenas para pontos importantes */}
             {validData.map((point, index) => {
               const isStart = index === 0;
@@ -1032,8 +1071,8 @@ const GPSRouteMapLeaflet = () => {
               const color = isStart
                 ? '#22c55e'
                 : isEnd
-                ? '#ef4444'
-                : '#3b82f6';
+                  ? '#ef4444'
+                  : '#3b82f6';
 
               const radius = isStart || isEnd ? 8 : 4;
 
@@ -1097,8 +1136,8 @@ const GPSRouteMapLeaflet = () => {
             </div>
           </div>
           <p className="text-center text-xs text-gray-500 mt-3">
-            💡 {autoZoomEnabled 
-              ? 'Zoom automático ativado! O mapa acompanhará o marcador durante a reprodução e arraste.' 
+            💡 {autoZoomEnabled
+              ? 'Zoom automático ativado! O mapa acompanhará o marcador durante a reprodução e arraste.'
               : 'Ative o Zoom Auto para o mapa acompanhar automaticamente o movimento!'}
           </p>
         </div>

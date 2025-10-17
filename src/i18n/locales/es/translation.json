@@ -248,6 +248,7 @@
     },
     "tabs": {
       "overview": "Resumen",
+      "mapview": "vista de mapa",
       "devices": "Dispositivos",
       "events": "Eventos",
       "network": "Red",
