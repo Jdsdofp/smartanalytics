@@ -152,6 +152,8 @@ const createWorkerIcon = (color: string = '#3b82f6') => {
 //   });
 // };
 
+//ajuste final
+
 // Ícone para ponto atual (player)
 const createCurrentWorkerIcon = (color: string = '#eab308') => {
   return L.divIcon({
