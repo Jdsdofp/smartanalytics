@@ -15,6 +15,8 @@ import {
   DevicePhoneMobileIcon,
   DocumentChartBarIcon,
   MapIcon,
+  PlayIcon,
+  PauseIcon,
 } from '@heroicons/react/24/outline';
 import * as echarts from 'echarts';
 import type { EChartsOption } from 'echarts';
@@ -22,6 +24,7 @@ import type { EChartsOption } from 'echarts';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet-polylinedecorator';
 import RawDataExplorer from './DataGrid/gridMN0400_211';
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
@@ -709,21 +712,21 @@ const KPICard = ({
 };
 
 const AlertBadge = ({ type, count }: { type: 'sos' | 'battery' | 'offline'; count: number }) => {
-  const { t } = useTranslation(); // ✅ ADICIONAR
+  const { t } = useTranslation();
 
   const config = {
     sos: {
-      label: t('deviceLogs.alerts.sos'), // ✅ TRADUZIR
+      label: t('deviceLogs.alerts.sos'),
       icon: ShieldExclamationIcon,
       color: 'bg-red-100 text-red-800 ring-red-600/20',
     },
     battery: {
-      label: t('deviceLogs.alerts.battery'), // ✅ TRADUZIR
+      label: t('deviceLogs.alerts.battery'),
       icon: BoltIcon,
       color: 'bg-yellow-100 text-yellow-800 ring-yellow-600/20',
     },
     offline: {
-      label: t('deviceLogs.alerts.offline'), // ✅ TRADUZIR
+      label: t('deviceLogs.alerts.offline'),
       icon: SignalSlashIcon,
       color: 'bg-gray-100 text-gray-800 ring-gray-600/20',
     },
@@ -805,7 +808,7 @@ const ChartContainer = ({
 };
 
 export default function DeviceLogsView() {
-  const { t } = useTranslation(); // ✅ ADICIONAR
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [motionDevices, setMotionDevices] = useState<DevicePosition[]>([]);
@@ -816,6 +819,10 @@ export default function DeviceLogsView() {
   const [activeTab, setActiveTab] = useState<'overview' | 'mapview' | 'devices' | 'events' | 'network' | 'customers' | 'rawdata'>('overview');
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // ✨ NOVO: Estados para controle de refresh
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
+  const [refreshInterval, setRefreshInterval] = useState(30000); // 30 segundos padrão
 
   const [selectedDevice, setSelectedDevice] = useState<DevicePosition | null>(null);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
@@ -871,11 +878,37 @@ export default function DeviceLogsView() {
     }
   };
 
+  // ✨ ATUALIZADO: useEffect com controle de auto-refresh
   useEffect(() => {
+    fetchData(); // Buscar dados inicialmente
+    
+    let interval: any;
+    
+    if (autoRefreshEnabled) {
+      interval = setInterval(fetchData, refreshInterval);
+    }
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [autoRefreshEnabled, refreshInterval]);
+
+  // ✨ NOVA FUNÇÃO: Alternar auto-refresh
+  const toggleAutoRefresh = () => {
+    setAutoRefreshEnabled(prev => !prev);
+  };
+
+  // ✨ NOVA FUNÇÃO: Alterar intervalo de refresh
+  const handleIntervalChange = (interval: number) => {
+    setRefreshInterval(interval);
+  };
+
+  // ✨ NOVA FUNÇÃO: Refresh manual
+  const handleManualRefresh = () => {
     fetchData();
-    const interval = setInterval(fetchData, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  };
 
   useEffect(() => {
     if (!overview) return;
@@ -946,7 +979,6 @@ export default function DeviceLogsView() {
             xAxis: {
               type: 'category',
               data: overview.kpis.accuracy_distribution.map(d => {
-                // Mapear os ranges de accuracy para os idiomas
                 const range = d.accuracy_range;
                 if (range.includes('Excellent')) return t('accuracyChart.accuracyRanges.excellent');
                 if (range.includes('Good')) return t('accuracyChart.accuracyRanges.good');
@@ -1178,9 +1210,10 @@ export default function DeviceLogsView() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      {/* ✨ NOVO: Header com controles de refresh */}
       <div className="mb-8">
-        <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3">
-          <div>
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-900">
               {t('deviceLogs.title')}
             </h1>
@@ -1188,25 +1221,73 @@ export default function DeviceLogsView() {
               {t('deviceLogs.lastUpdate')}: {new Date(overview.generated_at).toLocaleString('pt-BR')}
             </p>
           </div>
-          <button
-            onClick={fetchData}
-            disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 w-full sm:w-auto justify-center"
-          >
-            <ArrowPathIcon className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-            {t('deviceLogs.refresh')}
-          </button>
+          
+          {/* ✨ CONTROLES DE REFRESH */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+            {/* Status do Auto-Refresh */}
+            <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
+              <div className={`w-3 h-3 rounded-full ${autoRefreshEnabled ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+              <span className="text-sm text-gray-700">
+                {autoRefreshEnabled ? 'Auto-refresh ativo' : 'Auto-refresh pausado'}
+              </span>
+            </div>
 
+            {/* Seletor de Intervalo */}
+            <select
+              value={refreshInterval}
+              onChange={(e) => handleIntervalChange(Number(e.target.value))}
+              disabled={!autoRefreshEnabled}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value={10000}>10 segundos</option>
+              <option value={30000}>30 segundos</option>
+              <option value={60000}>1 minuto</option>
+              <option value={300000}>5 minutos</option>
+            </select>
+
+            {/* Botão Toggle Auto-Refresh */}
+            <button
+              onClick={toggleAutoRefresh}
+              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                autoRefreshEnabled 
+                  ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' 
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              {autoRefreshEnabled ? (
+                <>
+                  <PauseIcon className="h-4 w-4" />
+                  Pausar
+                </>
+              ) : (
+                <>
+                  <PlayIcon className="h-4 w-4" />
+                  Ativar
+                </>
+              )}
+            </button>
+
+            {/* Botão Refresh Manual */}
+            <button
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+            >
+              <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? 'Atualizando...' : 'Atualizar'}
+            </button>
+          </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        {/* Alertas */}
+        <div className="flex flex-wrap gap-3">
           <AlertBadge type="sos" count={overview.alerts.active_sos_count} />
           <AlertBadge type="battery" count={overview.alerts.low_battery_count} />
           <AlertBadge type="offline" count={overview.alerts.offline_count} />
         </div>
       </div>
 
-
+      {/* Tabs de Navegação */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex space-x-8 overflow-x-auto">
           {[
@@ -1231,6 +1312,24 @@ export default function DeviceLogsView() {
             </button>
           ))}
         </nav>
+      </div>
+
+      {/* Indicador de Status do Refresh */}
+      <div className="mb-4 p-3 bg-gray-100 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${autoRefreshEnabled ? 'bg-green-500' : 'bg-gray-400'}`} />
+            <span className="text-sm text-gray-600">
+              Última atualização: {new Date().toLocaleTimeString('pt-BR')}
+            </span>
+          </div>
+          {refreshing && (
+            <span className="text-sm text-blue-600 animate-pulse flex items-center gap-2">
+              <ArrowPathIcon className="h-4 w-4 animate-spin" />
+              Atualizando dados...
+            </span>
+          )}
+        </div>
       </div>
 
       {/* ✅ TAB OVERVIEW COM KPIs TRADUZIDOS */}
