@@ -26,6 +26,7 @@ import RawDataExplorer from './DataGrid/gridMN0400_211';
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
 import GPSRouteMapLeaflet from './Map/GPSRouteMap';
+import GPSMapViewer from './Map/GPSMapViewer';
 
 // =====================================
 // 📊 INTERFACES
@@ -519,16 +520,16 @@ interface MapModalProps {
 const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
 
   const formatCoordinate = (coord: string | number | null | undefined): string => {
-  if (coord === null || coord === undefined || coord === '') return 'N/A';
-  
-  try {
-    const num = typeof coord === 'string' ? parseFloat(coord) : coord;
-    if (isNaN(num)) return 'N/A';
-    return num.toFixed(6);
-  } catch {
-    return 'N/A';
-  }
-};
+    if (coord === null || coord === undefined || coord === '') return 'N/A';
+
+    try {
+      const num = typeof coord === 'string' ? parseFloat(coord) : coord;
+      if (isNaN(num)) return 'N/A';
+      return num.toFixed(6);
+    } catch {
+      return 'N/A';
+    }
+  };
 
   if (!isOpen || !device) return null;
 
@@ -1210,7 +1211,7 @@ export default function DeviceLogsView() {
         <nav className="-mb-px flex space-x-8 overflow-x-auto">
           {[
             { id: 'overview', label: t('deviceLogs.tabs.overview'), icon: ChartBarIcon },
-            {id: 'mapview', label: t('deviceLogs.tabs.mapview'), icon: MapIcon},
+            { id: 'mapview', label: t('deviceLogs.tabs.mapview'), icon: MapIcon },
             { id: 'devices', label: t('deviceLogs.tabs.devices'), icon: DevicePhoneMobileIcon },
             { id: 'events', label: t('deviceLogs.tabs.events'), icon: ShieldExclamationIcon },
             { id: 'network', label: t('deviceLogs.tabs.network'), icon: SignalIcon },
@@ -1349,12 +1350,11 @@ export default function DeviceLogsView() {
             </div>
           )}
 
-          <GPSRouteMapLeaflet/>
         </div>
       )}
 
 
-            {/* ✅ TAB OVERVIEW COM KPIs TRADUZIDOS */}
+      {/* ✅ TAB OVERVIEW COM KPIs TRADUZIDOS */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -1471,8 +1471,12 @@ export default function DeviceLogsView() {
             </div>
           )}
 
-          <GPSRouteMapLeaflet/>
+          <GPSRouteMapLeaflet />
         </div>
+      )}
+
+      {activeTab === 'mapview' && (
+        <GPSMapViewer />
       )}
 
       {activeTab === 'devices' && (
@@ -1988,7 +1992,7 @@ export default function DeviceLogsView() {
         isOpen={isDetailsModalOpen}
         onClose={closeDetailsModal}
       />
-      
+
     </div>
   );
 }
