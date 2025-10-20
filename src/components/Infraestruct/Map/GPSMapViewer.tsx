@@ -281,7 +281,7 @@ const GPSMapViewer = () => {
     setLoadingDevices(true);
     try {
       const response = await fetch(
-        'http://localhost:3306/api/dashboard/devices/device/list'
+        'https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/device/list'
       );
 
       if (!response.ok) {
@@ -329,7 +329,7 @@ const GPSMapViewer = () => {
       if (filters.min_accuracy) params.append('min_accuracy', filters.min_accuracy);
 
       const response = await fetch(
-        `http://localhost:3306/api/dashboard/devices/gps-data?${params}`
+        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/gps-data?${params}`
       );
 
       if (!response.ok) {
@@ -363,7 +363,7 @@ const GPSMapViewer = () => {
       if (filters.end_date) params.append('end_date', filters.end_date);
 
       const response = await fetch(
-        `http://localhost:3306/api/dashboard/devices/api/gps-stats?${params}`
+        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/api/gps-stats?${params}`
       );
 
       if (response.ok) {
