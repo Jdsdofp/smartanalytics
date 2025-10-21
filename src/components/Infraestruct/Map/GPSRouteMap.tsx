@@ -19,6 +19,7 @@ import {
   MagnifyingGlassPlusIcon,
   MagnifyingGlassMinusIcon,
 } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 // Tipos de mapas disponíveis
 const MAP_TYPES = {
@@ -231,6 +232,7 @@ function ZoomControls({
   mapType: keyof typeof MAP_TYPES;
   onMapTypeChange: (type: keyof typeof MAP_TYPES) => void;
 }) {
+  const { t } = useTranslation();
   const map = useMap();
   const [showMapTypes, setShowMapTypes] = useState(false);
 
@@ -285,7 +287,7 @@ function ZoomControls({
               border: 'none',
               borderTop: '1px solid #ccc'
             }}
-            title="Zoom Automático"
+            title={t('gpsRouteMap.player.autoZoom')}
           >
             A
           </button>
@@ -302,7 +304,7 @@ function ZoomControls({
               border: 'none',
               borderTop: '1px solid #ccc'
             }}
-            title="Tipo de Mapa"
+            title={t('gpsRouteMap.map.mapType')}
           >
             🗺️
           </button>
@@ -319,7 +321,7 @@ function ZoomControls({
         >
           <div className="leaflet-control leaflet-bar bg-white rounded shadow-lg p-2">
             <div className="text-xs font-semibold text-gray-700 mb-2 px-2">
-              Tipo de Mapa
+              {t('gpsRouteMap.map.mapType')}
             </div>
             {(Object.keys(MAP_TYPES) as Array<keyof typeof MAP_TYPES>).map((type) => (
               <button
@@ -336,7 +338,7 @@ function ZoomControls({
                   cursor: 'pointer'
                 }}
               >
-                {MAP_TYPES[type].name}
+                {t(`gpsRouteMap.map.mapTypes.${type}`)}
               </button>
             ))}
           </div>
@@ -441,6 +443,7 @@ function DraggableRouteMarker({
   validData: any[];
   onDraggingChange: (dragging: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const markerRef = useRef<L.Marker | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -501,15 +504,15 @@ function DraggableRouteMarker({
     >
       <Popup>
         <div className="p-2">
-          <strong className="text-sm">🎯 Posição Atual do Player</strong>
+          <strong className="text-sm">{t('gpsRouteMap.markers.currentPosition')}</strong>
           <div className="mt-2 text-xs space-y-1">
-            <div><strong>Horário:</strong> {new Date(validData[currentPointIndex].timestamp).toLocaleString('pt-BR')}</div>
-            <div><strong>Latitude:</strong> {validData[currentPointIndex].gps_latitude.toFixed(6)}</div>
-            <div><strong>Longitude:</strong> {validData[currentPointIndex].gps_longitude.toFixed(6)}</div>
-            <div><strong>Precisão:</strong> {validData[currentPointIndex].gps_accuracy}m</div>
-            <div><strong>Progresso:</strong> {currentPointIndex + 1} de {validData.length}</div>
+            <div><strong>{t('gpsRouteMap.markers.time')}:</strong> {new Date(validData[currentPointIndex].timestamp).toLocaleString()}</div>
+            <div><strong>{t('gpsRouteMap.markers.latitude')}:</strong> {validData[currentPointIndex].gps_latitude.toFixed(6)}</div>
+            <div><strong>{t('gpsRouteMap.markers.longitude')}:</strong> {validData[currentPointIndex].gps_longitude.toFixed(6)}</div>
+            <div><strong>{t('gpsRouteMap.markers.accuracy')}:</strong> {validData[currentPointIndex].gps_accuracy}m</div>
+            <div><strong>{t('gpsRouteMap.markers.progress')}:</strong> {currentPointIndex + 1} {t('gpsRouteMap.markers.of')} {validData.length}</div>
             <div className="mt-2 text-green-600 font-medium">
-              💡 Arraste-me ao longo da linha azul!
+              💡 {t('gpsRouteMap.player.dragTip')}
             </div>
           </div>
         </div>
@@ -519,6 +522,7 @@ function DraggableRouteMarker({
 }
 
 const GPSRouteMapLeaflet = () => {
+  const { t } = useTranslation();
   const [data, setData] = useState<GPSPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [devEui, setDevEui] = useState('20635F0241000AB7');
@@ -540,7 +544,7 @@ const GPSRouteMapLeaflet = () => {
 
   const fetchGPSRoute = async () => {
     if (!devEui) {
-      alert('Por favor, insira um Device EUI');
+      alert(t('gpsRouteMap.alerts.noDeviceEUI'));
       return;
     }
 
@@ -569,11 +573,11 @@ const GPSRouteMapLeaflet = () => {
         resetPlayer();
       } else {
         setData([]);
-        alert('Nenhum dado encontrado para os filtros aplicados');
+        alert(t('gpsRouteMap.alerts.noData'));
       }
     } catch (error) {
       console.error('Error fetching GPS route:', error);
-      alert('Erro ao carregar dados GPS');
+      alert(t('gpsRouteMap.alerts.error'));
     } finally {
       setLoading(false);
     }
@@ -708,10 +712,10 @@ const GPSRouteMapLeaflet = () => {
             <MapPinIcon className="h-8 w-8 text-white" />
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-white">
-                Mapa de Rota GPS
+                {t('gpsRouteMap.title')}
               </h2>
               <p className="text-sm text-white/80 mt-1">
-                Visualize a rota do dispositivo com Leaflet
+                {t('gpsRouteMap.subtitle')}
               </p>
             </div>
           </div>
@@ -721,7 +725,7 @@ const GPSRouteMapLeaflet = () => {
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-white/20 hover:bg-white/30 rounded-md transition-colors"
             >
               <FunnelIcon className="h-5 w-5" />
-              <span className="hidden sm:inline">Filtros</span>
+              <span className="hidden sm:inline">{t('gpsRouteMap.filters.showFilters')}</span>
             </button>
             <button
               onClick={fetchGPSRoute}
@@ -729,7 +733,7 @@ const GPSRouteMapLeaflet = () => {
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-white/20 hover:bg-white/30 rounded-md transition-colors disabled:opacity-50"
             >
               <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Carregar</span>
+              <span className="hidden sm:inline">{t('gpsRouteMap.filters.load')}</span>
             </button>
           </div>
         </div>
@@ -742,7 +746,7 @@ const GPSRouteMapLeaflet = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <MagnifyingGlassIcon className="h-4 w-4 inline mr-1" />
-                Device EUI
+                {t('gpsRouteMap.filters.deviceEUI')}
               </label>
               <input
                 type="text"
@@ -756,7 +760,7 @@ const GPSRouteMapLeaflet = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <CalendarIcon className="h-4 w-4 inline mr-1" />
-                Data Inicial
+                {t('gpsRouteMap.filters.startDate')}
               </label>
               <input
                 type="date"
@@ -769,7 +773,7 @@ const GPSRouteMapLeaflet = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <CalendarIcon className="h-4 w-4 inline mr-1" />
-                Data Final
+                {t('gpsRouteMap.filters.endDate')}
               </label>
               <input
                 type="date"
@@ -781,7 +785,7 @@ const GPSRouteMapLeaflet = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Precisão Máxima (m)
+                {t('gpsRouteMap.filters.maxAccuracy')}
               </label>
               <input
                 type="number"
@@ -794,17 +798,17 @@ const GPSRouteMapLeaflet = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Limite de Pontos
+                {t('gpsRouteMap.filters.pointLimit')}
               </label>
               <select
                 value={limit}
                 onChange={(e) => setLimit(Number(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value={50}>50 pontos</option>
-                <option value={100}>100 pontos</option>
-                <option value={200}>200 pontos</option>
-                <option value={500}>500 pontos</option>
+                <option value={50}>{t('gpsRouteMap.filters.pointOptions.50')}</option>
+                <option value={100}>{t('gpsRouteMap.filters.pointOptions.100')}</option>
+                <option value={200}>{t('gpsRouteMap.filters.pointOptions.200')}</option>
+                <option value={500}>{t('gpsRouteMap.filters.pointOptions.500')}</option>
               </select>
             </div>
 
@@ -814,7 +818,7 @@ const GPSRouteMapLeaflet = () => {
                 className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
               >
                 <XMarkIcon className="h-4 w-4 inline mr-1" />
-                Limpar Filtros
+                {t('gpsRouteMap.filters.clearFilters')}
               </button>
             </div>
           </div>
@@ -828,13 +832,14 @@ const GPSRouteMapLeaflet = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <span className="text-sm font-medium text-gray-700">
-                  Player de Rota:
+                  {t('gpsRouteMap.player.title')}
                 </span>
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={previousPoint}
                     disabled={currentPointIndex === 0}
                     className="p-2 rounded-full bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={t('gpsRouteMap.player.previous')}
                   >
                     <BackwardIcon className="h-4 w-4" />
                   </button>
@@ -843,6 +848,7 @@ const GPSRouteMapLeaflet = () => {
                     <button
                       onClick={startPlayback}
                       className="p-2 rounded-full bg-green-500 text-white hover:bg-green-600"
+                      title={t('gpsRouteMap.player.play')}
                     >
                       <PlayIcon className="h-4 w-4" />
                     </button>
@@ -850,6 +856,7 @@ const GPSRouteMapLeaflet = () => {
                     <button
                       onClick={pausePlayback}
                       className="p-2 rounded-full bg-yellow-500 text-white hover:bg-yellow-600"
+                      title={t('gpsRouteMap.player.pause')}
                     >
                       <PauseIcon className="h-4 w-4" />
                     </button>
@@ -858,6 +865,7 @@ const GPSRouteMapLeaflet = () => {
                   <button
                     onClick={stopPlayback}
                     className="p-2 rounded-full bg-red-500 text-white hover:bg-red-600"
+                    title={t('gpsRouteMap.player.stop')}
                   >
                     <StopIcon className="h-4 w-4" />
                   </button>
@@ -866,6 +874,7 @@ const GPSRouteMapLeaflet = () => {
                     onClick={nextPoint}
                     disabled={currentPointIndex === validData.length - 1}
                     className="p-2 rounded-full bg-white border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={t('gpsRouteMap.player.next')}
                   >
                     <ForwardIcon className="h-4 w-4" />
                   </button>
@@ -876,10 +885,10 @@ const GPSRouteMapLeaflet = () => {
                   onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
                   className="px-3 py-1 border border-gray-300 rounded-md text-sm"
                 >
-                  <option value={0.5}>0.5x</option>
-                  <option value={1}>1x</option>
-                  <option value={2}>2x</option>
-                  <option value={5}>5x</option>
+                  <option value={0.5}>{t('gpsRouteMap.player.speeds.0.5')}</option>
+                  <option value={1}>{t('gpsRouteMap.player.speeds.1')}</option>
+                  <option value={2}>{t('gpsRouteMap.player.speeds.2')}</option>
+                  <option value={5}>{t('gpsRouteMap.player.speeds.5')}</option>
                 </select>
 
                 {/* Controle de Zoom Automático */}
@@ -891,7 +900,7 @@ const GPSRouteMapLeaflet = () => {
                       onChange={(e) => setAutoZoomEnabled(e.target.checked)}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span>Zoom Auto</span>
+                    <span>{t('gpsRouteMap.player.autoZoom')}</span>
                   </label>
                   <div className="flex items-center text-xs text-gray-500">
                     {autoZoomEnabled ? (
@@ -913,9 +922,9 @@ const GPSRouteMapLeaflet = () => {
 
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-gray-600">
-                <span>Início: {new Date(validData[0].timestamp).toLocaleTimeString('pt-BR')}</span>
-                <span>Atual: {new Date(validData[currentPointIndex].timestamp).toLocaleTimeString('pt-BR')}</span>
-                <span>Fim: {new Date(validData[validData.length - 1].timestamp).toLocaleTimeString('pt-BR')}</span>
+                <span>{t('gpsRouteMap.markers.start')}: {new Date(validData[0].timestamp).toLocaleTimeString()}</span>
+                <span>{t('gpsRouteMap.markers.current')}: {new Date(validData[currentPointIndex].timestamp).toLocaleTimeString()}</span>
+                <span>{t('gpsRouteMap.markers.end')}: {new Date(validData[validData.length - 1].timestamp).toLocaleTimeString()}</span>
               </div>
 
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -939,9 +948,9 @@ const GPSRouteMapLeaflet = () => {
             <div className="flex items-center justify-center space-x-2 text-xs text-gray-600 bg-yellow-100 px-3 py-2 rounded-md">
               <HandThumbUpIcon className="h-4 w-4" />
               <span>
-                💡 <strong>Dica:</strong> {autoZoomEnabled
-                  ? 'Zoom automático ativado - o mapa acompanhará o movimento!'
-                  : 'Ative o Zoom Auto para o mapa acompanhar o movimento'}
+                {t('gpsRouteMap.player.tip')} {autoZoomEnabled
+                  ? t('gpsRouteMap.player.autoZoomEnabled')
+                  : t('gpsRouteMap.player.autoZoomDisabled')}
               </span>
             </div>
           </div>
@@ -953,25 +962,25 @@ const GPSRouteMapLeaflet = () => {
         <div className="bg-blue-50 border-b border-blue-200 px-6 py-3">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <p className="text-xs text-gray-600">Total de Pontos</p>
+              <p className="text-xs text-gray-600">{t('gpsRouteMap.stats.totalPoints')}</p>
               <p className="text-lg font-bold text-blue-600">{validData.length}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-600">Precisão Média</p>
+              <p className="text-xs text-gray-600">{t('gpsRouteMap.stats.averageAccuracy')}</p>
               <p className="text-lg font-bold text-blue-600">
                 {(validData.reduce((sum, p) => sum + p.gps_accuracy, 0) / validData.length).toFixed(1)}m
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-600">Primeiro Ponto</p>
+              <p className="text-xs text-gray-600">{t('gpsRouteMap.stats.firstPoint')}</p>
               <p className="text-xs font-medium text-gray-900">
-                {new Date(validData[0].timestamp).toLocaleString('pt-BR')}
+                {new Date(validData[0].timestamp).toLocaleString()}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-600">Último Ponto</p>
+              <p className="text-xs text-gray-600">{t('gpsRouteMap.stats.lastPoint')}</p>
               <p className="text-xs font-medium text-gray-900">
-                {new Date(validData[validData.length - 1].timestamp).toLocaleString('pt-BR')}
+                {new Date(validData[validData.length - 1].timestamp).toLocaleString()}
               </p>
             </div>
           </div>
@@ -984,19 +993,19 @@ const GPSRouteMapLeaflet = () => {
           <div className="flex items-center justify-center h-[700px]">
             <div className="text-center">
               <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Carregando dados GPS...</p>
+              <p className="text-gray-600">{t('gpsRouteMap.map.loading')}</p>
             </div>
           </div>
         ) : data.length === 0 ? (
           <div className="flex items-center justify-center h-[700px]">
             <div className="text-center">
               <MapPinIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">Nenhuma rota carregada</p>
+              <p className="text-gray-600">{t('gpsRouteMap.map.noRoute')}</p>
               <button
                 onClick={fetchGPSRoute}
                 className="mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
               >
-                Carregar Rota
+                {t('gpsRouteMap.map.loadRoute')}
               </button>
             </div>
           </div>
@@ -1013,9 +1022,7 @@ const GPSRouteMapLeaflet = () => {
             <TileLayer
               attribution={MAP_TYPES[mapType].attribution}
               url={MAP_TYPES[mapType].url}
-              // maxNativeZoom={19} // Máximo zoom com tiles disponíveis
               maxZoom={18}
-    
             />
 
             {/* Controles customizados com todas as props */}
@@ -1064,7 +1071,6 @@ const GPSRouteMapLeaflet = () => {
             {validData.map((point, index) => {
               const isStart = index === 0;
               const isEnd = index === validData.length - 1;
-              // const isCurrent = index === currentPointIndex;
 
               if (!isStart && !isEnd && index % 20 !== 0) return null;
 
@@ -1091,13 +1097,13 @@ const GPSRouteMapLeaflet = () => {
                   <Popup>
                     <div className="p-2">
                       <strong className="text-sm">
-                        {isStart ? '🟢 Início' : isEnd ? '🔴 Fim' : `📍 Ponto ${index + 1}`}
+                        {isStart ? t('gpsRouteMap.markers.start') : isEnd ? t('gpsRouteMap.markers.end') : `${t('gpsRouteMap.markers.point')} ${index + 1}`}
                       </strong>
                       <div className="mt-2 text-xs space-y-1">
-                        <div><strong>Horário:</strong> {new Date(point.timestamp).toLocaleString('pt-BR')}</div>
-                        <div><strong>Latitude:</strong> {point.gps_latitude.toFixed(6)}</div>
-                        <div><strong>Longitude:</strong> {point.gps_longitude.toFixed(6)}</div>
-                        <div><strong>Precisão:</strong> {point.gps_accuracy}m</div>
+                        <div><strong>{t('gpsRouteMap.markers.time')}:</strong> {new Date(point.timestamp).toLocaleString()}</div>
+                        <div><strong>{t('gpsRouteMap.markers.latitude')}:</strong> {point.gps_latitude.toFixed(6)}</div>
+                        <div><strong>{t('gpsRouteMap.markers.longitude')}:</strong> {point.gps_longitude.toFixed(6)}</div>
+                        <div><strong>{t('gpsRouteMap.markers.accuracy')}:</strong> {point.gps_accuracy}m</div>
                       </div>
                     </div>
                   </Popup>
@@ -1114,31 +1120,31 @@ const GPSRouteMapLeaflet = () => {
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-full bg-green-500 border-2 border-white shadow"></div>
-              <span className="text-gray-700 font-medium">Ponto Inicial</span>
+              <span className="text-gray-700 font-medium">{t('gpsRouteMap.legend.startPoint')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow"></div>
-              <span className="text-gray-700">Pontos Intermediários</span>
+              <span className="text-gray-700">{t('gpsRouteMap.legend.intermediatePoints')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-full bg-red-500 border-2 border-white shadow"></div>
-              <span className="text-gray-700 font-medium">Ponto Final</span>
+              <span className="text-gray-700 font-medium">{t('gpsRouteMap.legend.endPoint')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-full bg-yellow-500 border-2 border-white shadow"></div>
-              <span className="text-gray-700 font-medium">Player (Segue a Linha)</span>
+              <span className="text-gray-700 font-medium">{t('gpsRouteMap.legend.player')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow">
                 <div className="w-3 h-3 rounded-full bg-white mx-auto mt-1"></div>
               </div>
-              <span className="text-gray-700 font-medium">Zoom Auto {autoZoomEnabled ? '✅' : '❌'}</span>
+              <span className="text-gray-700 font-medium">{t('gpsRouteMap.legend.autoZoom')} {autoZoomEnabled ? '✅' : '❌'}</span>
             </div>
           </div>
           <p className="text-center text-xs text-gray-500 mt-3">
             💡 {autoZoomEnabled
-              ? 'Zoom automático ativado! O mapa acompanhará o marcador durante a reprodução e arraste.'
-              : 'Ative o Zoom Auto para o mapa acompanhar automaticamente o movimento!'}
+              ? t('gpsRouteMap.player.autoZoomEnabled')
+              : t('gpsRouteMap.player.autoZoomDisabled')}
           </p>
         </div>
       )}

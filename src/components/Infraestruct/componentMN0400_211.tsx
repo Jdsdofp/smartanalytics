@@ -1457,7 +1457,7 @@ export default function DeviceLogsView() {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <KPICard
+            {/* <KPICard
               title={t('deviceLogs.kpis.deviceUptime.title')}
               value={`${overview.kpis.uptime.uptime_percentage}%`}
               subtitle={t('deviceLogs.kpis.deviceUptime.subtitle', {
@@ -1467,7 +1467,7 @@ export default function DeviceLogsView() {
               icon={SignalIcon}
               color="green"
               trend="up"
-            />
+            /> */}
             {/* <KPICard
               title={t('deviceLogs.kpis.gpsSuccess.title')}
               value={`${overview.kpis.gps_success.success_rate_percent}%`}
@@ -1478,7 +1478,7 @@ export default function DeviceLogsView() {
               color="blue"
               trend="up"
             /> */}
-            <KPICard
+            {/* <KPICard
               title={t('deviceLogs.kpis.batteryHealth.title')}
               value={`${overview.kpis.battery_health.health_percentage}%`}
               subtitle={t('deviceLogs.kpis.batteryHealth.subtitle', {
@@ -1495,11 +1495,11 @@ export default function DeviceLogsView() {
               })}
               icon={ExclamationTriangleIcon}
               color={overview.alerts.active_sos_count > 0 ? 'red' : 'green'}
-            />
+            /> */}
           </div>
 
           {/* ✅ GRÁFICOS COM RESPONSIVIDADE */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {t('deviceLogs.charts.batteryDistribution')}
@@ -1517,7 +1517,7 @@ export default function DeviceLogsView() {
                 <div id="accuracy-chart" className="w-full h-full min-w-0" />
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* ✅ ALERTAS SOS TRADUZIDOS */}
           {overview.alerts.active_sos_count > 0 && (

@@ -535,5 +535,246 @@
   "error": {
     "title": "Erro ao carregar dados",
     "retry": "Tentar novamente"
+  },
+  
+  "gpsRouteMap": {
+    "title": "Mapa de Rota GPS",
+    "subtitle": "Visualize a rota do dispositivo com Leaflet",
+    "filters": {
+      "showFilters": "Filtros",
+      "load": "Carregar",
+      "clearFilters": "Limpar Filtros",
+      "deviceEUI": "Device EUI",
+      "startDate": "Data Inicial",
+      "endDate": "Data Final",
+      "maxAccuracy": "Precisão Máxima (m)",
+      "pointLimit": "Limite de Pontos",
+      "pointOptions": {
+        "50": "50 pontos",
+        "100": "100 pontos",
+        "200": "200 pontos",
+        "500": "500 pontos"
+      }
+    },
+    "player": {
+      "title": "Player de Rota:",
+      "play": "Reproduzir",
+      "pause": "Pausar",
+      "stop": "Parar",
+      "previous": "Anterior",
+      "next": "Próximo",
+      "autoZoom": "Zoom Automático",
+      "autoZoomEnabled": "Zoom automático ativado - o mapa acompanhará o movimento!",
+      "autoZoomDisabled": "Ative o Zoom Auto para o mapa acompanhar o movimento",
+      "speed": "Velocidade",
+      "speeds": {
+        "0.5": "0.5x",
+        "1": "1x",
+        "2": "2x",
+        "5": "5x"
+      },
+      "tip": "💡 Dica:",
+      "dragTip": "Arraste-me ao longo da linha azul!"
+    },
+    "stats": {
+      "totalPoints": "Total de Pontos",
+      "averageAccuracy": "Precisão Média",
+      "firstPoint": "Primeiro Ponto",
+      "lastPoint": "Último Ponto"
+    },
+    "map": {
+      "noRoute": "Nenhuma rota carregada",
+      "loadRoute": "Carregar Rota",
+      "loading": "Carregando dados GPS...",
+      "mapTypes": {
+        "streets": "Ruas",
+        "satellite": "Satélite",
+        "terrain": "Terreno",
+        "dark": "Escuro"
+      },
+      "mapType": "Tipo de Mapa"
+    },
+    "markers": {
+      "currentPosition": "🎯 Posição Atual do Player",
+      "start": "🟢 Início",
+      "end": "🔴 Fim",
+      "point": "📍 Ponto",
+      "time": "Horário",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "accuracy": "Precisão",
+      "progress": "Progresso",
+      "of": "de"
+    },
+    "legend": {
+      "startPoint": "Ponto Inicial",
+      "intermediatePoints": "Pontos Intermediários",
+      "endPoint": "Ponto Final",
+      "player": "Player (Segue a Linha)",
+      "autoZoom": "Zoom Auto"
+    },
+    "alerts": {
+      "noDeviceEUI": "Por favor, insira um Device EUI",
+      "noData": "Nenhum dado encontrado para os filtros aplicados",
+      "error": "Erro ao carregar dados GPS"
+    }
+  },
+
+   "gpsMap": {
+    "title": "Rastreamento de Trabalhadores",
+    "subtitle": "Monitoramento em tempo real da equipe em campo",
+    "filters": {
+      "title": "Filtros",
+      "show": "Mostrar Filtros",
+      "hide": "Ocultar Filtros",
+      "devices": "Dispositivos (DEV_EUI)",
+      "loadingDevices": "Carregando...",
+      "selectDevices": "Selecione dispositivos...",
+      "selectedCount": "{{count}} dispositivo(s) selecionado(s)",
+      "selectAll": "Selecionar todos",
+      "clearAll": "Limpar",
+      "reload": "Recarregar",
+      "noDevices": "Nenhum dispositivo disponível",
+      "selected": "Selecionados ({{count}})",
+      "removeAll": "Remover todos",
+      "remove": "Remover",
+      "startDate": "Data Inicial",
+      "endDate": "Data Final",
+      "minAccuracy": "Precisão Mínima (m)",
+      "maxAccuracy": "Precisão Máxima (m)",
+      "minAccuracyPlaceholder": "Ex: 0",
+      "maxAccuracyPlaceholder": "Ex: 100",
+      "validGPSOnly": "Apenas pontos com GPS válido",
+      "latestOnly": "Apenas último registro de cada dispositivo",
+      "latestOnlyNew": "NOVO",
+      "applyFilters": "Aplicar Filtros",
+      "searching": "Buscando...",
+      "clear": "Limpar"
+    },
+    "stats": {
+      "totalPoints": "Total Pontos",
+      "devices": "Dispositivos",
+      "avgAccuracy": "Precisão Média",
+      "minAccuracy": "Precisão Mín",
+      "maxAccuracy": "Precisão Máx",
+      "firstRecord": "Primeiro Registro",
+      "lastRecord": "Último Registro",
+      "latestMode": "Modo: Último registro por dispositivo"
+    },
+    "player": {
+      "stop": "Parar",
+      "previous": "Anterior",
+      "play": "Reproduzir",
+      "pause": "Pausar",
+      "next": "Próximo",
+      "autoZoom": "Auto Zoom",
+      "point": "Ponto: {{current}} / {{total}}",
+      "speed": {
+        "0.5x": "0.5x",
+        "1x": "1x",
+        "2x": "2x",
+        "4x": "4x"
+      }
+    },
+    "map": {
+      "type": "Tipo de Mapa:",
+      "streets": "Ruas",
+      "satellite": "Satélite",
+      "terrain": "Terreno",
+      "dark": "Escuro",
+      "heatmap": "Mapa de Calor",
+      "showHeatmap": "Mostrar mapa de calor",
+      "hideHeatmap": "Ocultar mapa de calor"
+    },
+    "modes": {
+      "latestPositions": "Últimas Posições dos Trabalhadores",
+      "latestView": "Modo de visualização: Última posição conhecida de cada dispositivo",
+      "devicesFound": "{{count}} dispositivo(s) encontrado(s)",
+      "noRoute": "Nenhuma rota carregada",
+      "noDevices": "Nenhum dispositivo encontrado"
+    },
+    "markers": {
+      "start": "Início",
+      "end": "Fim",
+      "current": "Atual",
+      "point": "Ponto {{index}}",
+      "device": "DEV_EUI:",
+      "time": "Horário:",
+      "latitude": "Latitude:",
+      "longitude": "Longitude:",
+      "accuracy": "Precisão:",
+      "battery": "Bateria:",
+      "moving": "Em movimento",
+      "stopped": "Parado",
+      "viewDetails": "Ver detalhes completos"
+    },
+    "legend": {
+      "workers": "Trabalhadores ({{count}})",
+      "firstPoint": "Primeiro Ponto",
+      "lastPoint": "Último Ponto",
+      "currentPoint": "Ponto Atual (Player)",
+      "intermediatePoints": "Pontos Intermediários",
+      "connectionStatus": "Status de Conexão",
+      "online": "Online (últimos 5 min)",
+      "offline": "Offline",
+      "accuracyExcellent": "Precisão < 10m",
+      "accuracyGood": "Precisão 10-25m",
+      "accuracyRegular": "Precisão > 25m",
+      "scrollHint": "↑↓ Role para ver mais trabalhadores"
+    },
+    "worker": {
+      "unidentified": "Trabalhador não identificado",
+      "position": "posição",
+      "point": "ponto",
+      "points": "pontos",
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "modal": {
+      "title": "Detalhes do Trabalhador",
+      "subtitle": "Informações completas da localização",
+      "location": "Localização GPS",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "gpsAccuracy": "Precisão do GPS",
+      "quality": "Qualidade",
+      "excellent": "Excelente",
+      "good": "Boa",
+      "regular": "Regular",
+      "deviceStatus": "Status do Dispositivo",
+      "readingTime": "Data e Hora da Leitura",
+      "batteryLevel": "Nível da Bateria",
+      "batteryGood": "Bateria em bom estado",
+      "batteryModerate": "Bateria moderada",
+      "batteryLow": "Bateria fraca - recarregar",
+      "motionStatus": "Status de Movimento",
+      "moving": "Em movimento",
+      "stopped": "Parado",
+      "movingDescription": "O dispositivo está se movendo ativamente",
+      "stoppedDescription": "O dispositivo está parado há algum tempo",
+      "technicalInfo": "Informações Técnicas",
+      "originalTimestamp": "Timestamp Original",
+      "recordId": "ID do Registro",
+      "connectionStatus": "Status da Conexão",
+      "deviceType": "Tipo de Dispositivo",
+      "lastUpdate": "Última Atualização",
+      "shareCoordinates": "Coordenadas para compartilhamento",
+      "copy": "Copiar",
+      "close": "Fechar",
+      "exportPDF": "Exportar PDF",
+      "updatedAt": "Dados atualizados em {{date}}"
+    },
+    "status": {
+      "loading": "Carregando dados GPS...",
+      "error": "Erro ao carregar dados",
+      "tryAgain": "Tentar Novamente",
+      "configureFilters": "Configure os filtros e clique em 'Aplicar Filtros'"
+    },
+    "pagination": {
+      "page": "Página {{current}} de {{total}}",
+      "records": "{{count}} registros",
+      "previous": "Anterior",
+      "next": "Próxima"
+    }
   }
 }

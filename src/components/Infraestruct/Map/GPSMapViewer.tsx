@@ -23,6 +23,8 @@ import {
 } from '@heroicons/react/24/outline';
 // ⭐ IMPORTAR FUNÇÃO DE EXPORTAÇÃO PDF
 import { exportGPSPointToPDF } from '../../../utils/exportGPSPointToPDF'
+import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 // =====================================
 // 👷 ÍCONES PERSONALIZADOS PARA TRABALHADORES
@@ -296,25 +298,25 @@ const getDeviceColor = (devEui: string, allDevices: string[]): string => {
 // =====================================
 const MAP_TYPES = {
   streets: {
-    name: 'Ruas',
+    name: t('gpsMap.map.streets'),
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; OpenStreetMap',
     maxZoom: 19
   },
   satellite: {
-    name: 'Satélite',
+     name: t('gpsMap.map.satellite'),
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri',
     maxZoom: 19,
   },
   terrain: {
-    name: 'Terreno',
+    name: t('gpsMap.map.terrain'),
     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
     attribution: '&copy; OpenTopoMap',
     maxZoom: 17,
   },
   dark: {
-    name: 'Escuro',
+    name: t('gpsMap.map.dark'),
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     attribution: '&copy; CARTO',
     maxZoom: 17,
@@ -440,6 +442,7 @@ function AutoZoom({
 
 const GPSMapViewer = () => {
   // Estados principais
+   const { t } = useTranslation();
   const [data, setData] = useState<GPSPoint[]>([]);
   const [stats, setStats] = useState<GPSStats | null>(null);
   const [loading, setLoading] = useState(false);
@@ -738,9 +741,9 @@ const GPSMapViewer = () => {
             <div className="flex items-center gap-3">
               <MapPinIcon className="h-8 w-8 text-white" />
               <div>
-                <h2 className="text-xl font-bold text-white">Rastreamento de Trabalhadores</h2>
+                <h2 className="text-xl font-bold text-white">{t('gpsMap.title')}</h2>
                 <p className="text-sm text-blue-100">
-                  Monitoramento em tempo real da equipe em campo
+                  {t('gpsMap.subtitle')}
                 </p>
               </div>
             </div>
@@ -753,10 +756,11 @@ const GPSMapViewer = () => {
                     ? 'bg-orange-500 hover:bg-orange-600 text-white'
                     : 'bg-white/20 hover:bg-white/30 text-white'
                 }`}
-                title={showHeatmap ? 'Ocultar mapa de calor' : 'Mostrar mapa de calor'}
+                // title={showHeatmap ? 'Ocultar mapa de calor' : 'Mostrar mapa de calor'}
+                title={showHeatmap ? t('gpsMap.map.hideHeatmap') : t('gpsMap.map.showHeatmap')}
               >
                 <FireIcon className="h-5 w-5" />
-                Mapa de Calor
+                {t('gpsMap.map.heatmap')}
               </button>
               
               <button
@@ -777,10 +781,11 @@ const GPSMapViewer = () => {
               {/* Dev EUI - Dropdown com Checkboxes */}
               <div className="dropdown-container">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dispositivos (DEV_EUI)
+                  {t('gpsMap.filters.devices')}
+                  
                   {loadingDevices && (
                     <span className="ml-2 text-xs text-gray-500 animate-pulse">
-                      Carregando...
+                      {t('gpsMap.filters.loadingDevices')}
                     </span>
                   )}
                 </label>
@@ -795,7 +800,7 @@ const GPSMapViewer = () => {
                   >
                     <span className="text-sm text-gray-700">
                       {filters.dev_eui.length === 0
-                        ? 'Selecione dispositivos...'
+                        ? t('gpsMap.filters.selectDevices')
                         : `${filters.dev_eui.length} dispositivo(s) selecionado(s)`}
                     </span>
                     <svg
@@ -825,7 +830,7 @@ const GPSMapViewer = () => {
                             onClick={selectAllDevices}
                             className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                           >
-                            Selecionar todos
+                            {t('gpsMap.filters.selectAll')}
                           </button>
                           <span className="text-gray-300">|</span>
                           <button
@@ -833,7 +838,7 @@ const GPSMapViewer = () => {
                             onClick={deselectAllDevices}
                             className="text-xs text-red-600 hover:text-red-800 font-medium"
                           >
-                            Limpar
+                            {t('gpsMap.filters.clear')}
                           </button>
                         </div>
                         <button
@@ -851,7 +856,7 @@ const GPSMapViewer = () => {
                       <div className="overflow-y-auto max-h-64">
                         {availableDevices.length === 0 ? (
                           <div className="px-4 py-8 text-center text-sm text-gray-500">
-                            Nenhum dispositivo disponível
+                            {t('gpsMap.filters.noDevices')}
                           </div>
                         ) : (
                           availableDevices.map((devEui) => {
@@ -916,7 +921,7 @@ const GPSMapViewer = () => {
                         onClick={deselectAllDevices}
                         className="text-xs text-red-600 hover:text-red-800 font-medium"
                       >
-                        Remover todos
+                        {t('gpsMap.filters.removeAll')}
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 max-h-32 overflow-y-auto">
@@ -954,7 +959,7 @@ const GPSMapViewer = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Data Inicial
+                    {t('gpsMap.filters.startDate')}
                   </label>
                   <input
                     type="datetime-local"
@@ -967,7 +972,7 @@ const GPSMapViewer = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Data Final
+                    {t('gpsMap.filters.endDate')}
                   </label>
                   <input
                     type="datetime-local"
@@ -984,7 +989,7 @@ const GPSMapViewer = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Precisão Mínima (m)
+                    {t('gpsMap.filters.minAccuracy')}
                   </label>
                   <input
                     type="number"
@@ -998,7 +1003,7 @@ const GPSMapViewer = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Precisão Máxima (m)
+                    {t('gpsMap.filters.maxAccuracy')}
                   </label>
                   <input
                     type="number"
@@ -1024,7 +1029,7 @@ const GPSMapViewer = () => {
                   className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <label htmlFor="valid_gps" className="text-sm text-gray-700">
-                  Apenas pontos com GPS válido
+                  {t('gpsMap.filters.validGPSOnly')}
                 </label>
               </div>
 
@@ -1040,11 +1045,8 @@ const GPSMapViewer = () => {
                   className="w-4 h-4 text-purple-600 rounded focus:ring-2 focus:ring-purple-500"
                 />
                 <label htmlFor="latest_only" className="text-sm text-purple-700 font-medium">
-                  Apenas último registro de cada dispositivo
+                  {t('gpsMap.filters.latestOnly')}
                 </label>
-                <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium">
-                  NOVO
-                </span>
               </div>
 
               {/* Botões de Ação */}
@@ -1055,13 +1057,14 @@ const GPSMapViewer = () => {
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
                 >
                   <MagnifyingGlassIcon className="h-5 w-5" />
-                  {loading ? 'Buscando...' : 'Aplicar Filtros'}
+                  {/* {loading ? 'Buscando...' : 'Aplicar Filtros'} */}
+                  {loading ? t('gpsMap.filters.searching') : t('gpsMap.filters.applyFilters')}
                 </button>
                 <button
                   onClick={handleClearFilters}
                   className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                 >
-                  Limpar
+                  {t('gpsMap.filters.clear')}
                 </button>
               </div>
             </div>
@@ -1076,44 +1079,44 @@ const GPSMapViewer = () => {
               <div className="text-center mb-3">
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full border border-purple-200">
                   <MapPinIcon className="h-4 w-4" />
-                  Modo: Último registro por dispositivo
+                  {t('gpsMap.stats.latestMode')}
                 </span>
               </div>
             )}
 
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 text-center">
               <div>
-                <p className="text-xs text-gray-600">Total Pontos</p>
+                <p className="text-xs text-gray-600">{t('gpsMap.stats.totalPoints')}</p>
                 <p className="text-lg font-bold text-blue-600">
                   {toNumber(stats.total_records).toLocaleString()}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600">Dispositivos</p>
+                <p className="text-xs text-gray-600">{t('gpsMap.stats.devices')}</p>
                 <p className="text-lg font-bold text-blue-600">
                   {toNumber(stats.unique_devices)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600">Precisão Média</p>
+                <p className="text-xs text-gray-600">{t('gpsMap.stats.avgAccuracy')}</p>
                 <p className="text-lg font-bold text-blue-600">
                   {formatNumber(stats.avg_accuracy, 1)}m
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600">Precisão Mín</p>
+                <p className="text-xs text-gray-600">{t('gpsMap.stats.minAccuracy')}</p>
                 <p className="text-sm font-medium text-green-600">
                   {formatNumber(stats.min_accuracy, 1)}m
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600">Precisão Máx</p>
+                <p className="text-xs text-gray-600">{t('gpsMap.stats.maxAccuracy')}</p>
                 <p className="text-sm font-medium text-red-600">
                   {formatNumber(stats.max_accuracy, 1)}m
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600">Primeiro Registro</p>
+                <p className="text-xs text-gray-600">{t('gpsMap.stats.firstRecord')}</p>
                 <p className="text-xs font-medium text-gray-900">
                   {stats.oldest_record
                     ? new Date(stats.oldest_record).toLocaleDateString('pt-BR')
@@ -1121,7 +1124,7 @@ const GPSMapViewer = () => {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-600">Último Registro</p>
+                <p className="text-xs text-gray-600">{t('gpsMap.stats.lastRecord')}</p>
                 <p className="text-xs font-medium text-gray-900">
                   {stats.newest_record
                     ? new Date(stats.newest_record).toLocaleDateString('pt-BR')
@@ -1191,7 +1194,7 @@ const GPSMapViewer = () => {
                     }`}
                   title="Zoom Automático"
                 >
-                  Auto Zoom {autoZoomEnabled ? '✓' : '✗'}
+                  {t('gpsMap.player.autoZoom')} {autoZoomEnabled ? '✓' : '✗'}
                 </button>
               </div>
 
@@ -1233,7 +1236,7 @@ const GPSMapViewer = () => {
         {validData.length > 0 && (
           <div className="bg-white border-b border-gray-200 px-6 py-3">
             <div className="flex items-center justify-center gap-4">
-              <span className="text-sm font-medium text-gray-700">Tipo de Mapa:</span>
+              <span className="text-sm font-medium text-gray-700">{t('gpsMap.map.type')}</span>
               <select
                 value={mapType}
                 onChange={(e) => setMapType(e.target.value as keyof typeof MAP_TYPES)}
@@ -1268,11 +1271,11 @@ const GPSMapViewer = () => {
               <div className="flex items-center justify-center gap-2 text-purple-700">
                 <MapPinIcon className="h-5 w-5" />
                 <span className="font-medium">
-                  Modo de visualização: Última posição conhecida de cada dispositivo
+                  {t('gpsMap.modes.latestView')}
                 </span>
               </div>
               <p className="text-sm text-purple-600 mt-1">
-                {validData.length} dispositivo(s) encontrado(s)
+                {t('gpsMap.modes.devicesFound', { count: validData.length })}
               </p>
             </div>
           </div>
@@ -1622,7 +1625,7 @@ const GPSMapViewer = () => {
             {uniqueDevices.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">
-                  {filters.latest_only ? 'Últimas Posições dos Trabalhadores' : 'Trabalhadores'}
+                  {filters.latest_only ? t('gpsMap.modes.latestPositions') : t('gpsMap.legend.workers')}
                   ({uniqueDevices.length})
                 </h4>
                 <div
@@ -1641,7 +1644,7 @@ const GPSMapViewer = () => {
                       new Date(current.timestamp) > new Date(latest.timestamp) ? current : latest
                     );
 
-                    const userName = latestPoint.Item_Name || 'Trabalhador não identificado';
+                    const userName = latestPoint.Item_Name || t('gpsMap.worker.unidentified');
                     const userImage = latestPoint.Image_hash;
 
                     return (
@@ -1697,7 +1700,7 @@ const GPSMapViewer = () => {
                             </code>
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-gray-500">
-                                {devicePointCount} {filters.latest_only ? 'posição' : devicePointCount === 1 ? 'ponto' : 'pontos'}
+                                {devicePointCount} {filters.latest_only ? t('gpsMap.worker.position') : devicePointCount === 1 ? t('gpsMap.worker.point') : t('gpsMap.worker.points')}
                               </span>
 
                               {/* Status online/offline baseado no timestamp */}
@@ -1754,7 +1757,7 @@ const GPSMapViewer = () => {
                 {uniqueDevices.length > 8 && (
                   <div className="text-center mt-2">
                     <span className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200">
-                      ↑↓ Role para ver mais trabalhadores
+                      {t('gpsMap.legend.scrollHint')}
                     </span>
                   </div>
                 )}
@@ -1789,27 +1792,27 @@ const GPSMapViewer = () => {
             {/* Legenda adicional para o modo latest_only */}
             {filters.latest_only && (
               <div className="mt-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">Status de Conexão</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('gpsMap.legend.connectionStatus')}</h4>
                 <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-gray-700 font-medium">Online (últimos 5 min)</span>
+                    <span className="text-gray-700 font-medium">{t('gpsMap.legend.online')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-                    <span className="text-gray-700 font-medium">Offline</span>
+                    <span className="text-gray-700 font-medium">{t('gpsMap.legend.offline')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded-full bg-green-100 border-2 border-green-500"></div>
-                    <span className="text-gray-700 font-medium">Precisão &lt; 10m</span>
+                    <span className="text-gray-700 font-medium">{t('gpsMap.legend.accuracyExcellent')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded-full bg-yellow-100 border-2 border-yellow-500"></div>
-                    <span className="text-gray-700 font-medium">Precisão 10-25m</span>
+                    <span className="text-gray-700 font-medium">{t('gpsMap.legend.accuracyGood')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded-full bg-red-100 border-2 border-red-500"></div>
-                    <span className="text-gray-700 font-medium">Precisão &gt; 25m</span>
+                    <span className="text-gray-700 font-medium">{t('gpsMap.legend.accuracyRegular')}</span>
                   </div>
                 </div>
               </div>

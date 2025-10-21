@@ -535,5 +535,245 @@
   "error": {
     "title": "Error al cargar datos",
     "retry": "Intentar nuevamente"
+  },
+   "gpsRouteMap": {
+    "title": "Mapa de Ruta GPS",
+    "subtitle": "Visualiza la ruta del dispositivo con Leaflet",
+    "filters": {
+      "showFilters": "Filtros",
+      "load": "Cargar",
+      "clearFilters": "Limpiar Filtros",
+      "deviceEUI": "Device EUI",
+      "startDate": "Fecha Inicial",
+      "endDate": "Fecha Final",
+      "maxAccuracy": "Precisión Máxima (m)",
+      "pointLimit": "Límite de Puntos",
+      "pointOptions": {
+        "50": "50 puntos",
+        "100": "100 puntos",
+        "200": "200 puntos",
+        "500": "500 puntos"
+      }
+    },
+    "player": {
+      "title": "Reproductor de Ruta:",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "stop": "Detener",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "autoZoom": "Zoom Automático",
+      "autoZoomEnabled": "Zoom automático activado - ¡el mapa seguirá el movimiento!",
+      "autoZoomDisabled": "Activa el Zoom Auto para que el mapa siga el movimiento",
+      "speed": "Velocidad",
+      "speeds": {
+        "0.5": "0.5x",
+        "1": "1x",
+        "2": "2x",
+        "5": "5x"
+      },
+      "tip": "💡 Consejo:",
+      "dragTip": "¡Arrástrame a lo largo de la línea azul!"
+    },
+    "stats": {
+      "totalPoints": "Total de Puntos",
+      "averageAccuracy": "Precisión Promedio",
+      "firstPoint": "Primer Punto",
+      "lastPoint": "Último Punto"
+    },
+    "map": {
+      "noRoute": "Ninguna ruta cargada",
+      "loadRoute": "Cargar Ruta",
+      "loading": "Cargando datos GPS...",
+      "mapTypes": {
+        "streets": "Calles",
+        "satellite": "Satélite",
+        "terrain": "Terreno",
+        "dark": "Oscuro"
+      },
+      "mapType": "Tipo de Mapa"
+    },
+    "markers": {
+      "currentPosition": "🎯 Posición Actual del Reproductor",
+      "start": "🟢 Inicio",
+      "end": "🔴 Fin",
+      "point": "📍 Punto",
+      "time": "Hora",
+      "latitude": "Latitud",
+      "longitude": "Longitud",
+      "accuracy": "Precisión",
+      "progress": "Progreso",
+      "of": "de"
+    },
+    "legend": {
+      "startPoint": "Punto Inicial",
+      "intermediatePoints": "Puntos Intermedios",
+      "endPoint": "Punto Final",
+      "player": "Reproductor (Sigue la Línea)",
+      "autoZoom": "Zoom Automático"
+    },
+    "alerts": {
+      "noDeviceEUI": "Por favor, ingrese un Device EUI",
+      "noData": "No se encontraron datos para los filtros aplicados",
+      "error": "Error al cargar datos GPS"
+    }
+  },
+
+  "gpsMap": {
+    "title": "Seguimiento de Trabajadores",
+    "subtitle": "Monitoreo en tiempo real del equipo en campo",
+    "filters": {
+      "title": "Filtros",
+      "show": "Mostrar Filtros",
+      "hide": "Ocultar Filtros",
+      "devices": "Dispositivos (DEV_EUI)",
+      "loadingDevices": "Cargando...",
+      "selectDevices": "Seleccionar dispositivos...",
+      "selectedCount": "{{count}} dispositivo(s) seleccionado(s)",
+      "selectAll": "Seleccionar todos",
+      "clearAll": "Limpiar todo",
+      "reload": "Recargar",
+      "noDevices": "No hay dispositivos disponibles",
+      "selected": "Seleccionados ({{count}})",
+      "removeAll": "Eliminar todos",
+      "remove": "Eliminar",
+      "startDate": "Fecha Inicial",
+      "endDate": "Fecha Final",
+      "minAccuracy": "Precisión Mínima (m)",
+      "maxAccuracy": "Precisión Máxima (m)",
+      "minAccuracyPlaceholder": "Ej: 0",
+      "maxAccuracyPlaceholder": "Ej: 100",
+      "validGPSOnly": "Solo puntos GPS válidos",
+      "latestOnly": "Solo último registro por dispositivo",
+      "latestOnlyNew": "NUEVO",
+      "applyFilters": "Aplicar Filtros",
+      "searching": "Buscando...",
+      "clear": "Limpiar"
+    },
+    "stats": {
+      "totalPoints": "Total Puntos",
+      "devices": "Dispositivos",
+      "avgAccuracy": "Precisión Promedio",
+      "minAccuracy": "Precisión Mín",
+      "maxAccuracy": "Precisión Máx",
+      "firstRecord": "Primer Registro",
+      "lastRecord": "Último Registro",
+      "latestMode": "Modo: Último registro por dispositivo"
+    },
+    "player": {
+      "stop": "Detener",
+      "previous": "Anterior",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "next": "Siguiente",
+      "autoZoom": "Zoom Automático",
+      "point": "Punto: {{current}} / {{total}}",
+      "speed": {
+        "0.5x": "0.5x",
+        "1x": "1x",
+        "2x": "2x",
+        "4x": "4x"
+      }
+    },
+    "map": {
+      "type": "Tipo de Mapa:",
+      "streets": "Calles",
+      "satellite": "Satélite",
+      "terrain": "Terreno",
+      "dark": "Oscuro",
+      "heatmap": "Mapa de Calor",
+      "showHeatmap": "Mostrar mapa de calor",
+      "hideHeatmap": "Ocultar mapa de calor"
+    },
+    "modes": {
+      "latestPositions": "Últimas Posiciones de Trabajadores",
+      "latestView": "Modo de visualización: Última posición conocida de cada dispositivo",
+      "devicesFound": "{{count}} dispositivo(s) encontrado(s)",
+      "noRoute": "Ninguna ruta cargada",
+      "noDevices": "No se encontraron dispositivos"
+    },
+    "markers": {
+      "start": "Inicio",
+      "end": "Fin",
+      "current": "Actual",
+      "point": "Punto {{index}}",
+      "device": "DEV_EUI:",
+      "time": "Hora:",
+      "latitude": "Latitud:",
+      "longitude": "Longitud:",
+      "accuracy": "Precisión:",
+      "battery": "Batería:",
+      "moving": "En movimiento",
+      "stopped": "Detenido",
+      "viewDetails": "Ver detalles completos"
+    },
+    "legend": {
+      "workers": "Trabajadores ({{count}})",
+      "firstPoint": "Primer Punto",
+      "lastPoint": "Último Punto",
+      "currentPoint": "Punto Actual (Reproductor)",
+      "intermediatePoints": "Puntos Intermedios",
+      "connectionStatus": "Estado de Conexión",
+      "online": "En línea (últimos 5 min)",
+      "offline": "Desconectado",
+      "accuracyExcellent": "Precisión < 10m",
+      "accuracyGood": "Precisión 10-25m",
+      "accuracyRegular": "Precisión > 25m",
+      "scrollHint": "↑↓ Desplazar para ver más trabajadores"
+    },
+    "worker": {
+      "unidentified": "Trabajador no identificado",
+      "position": "posición",
+      "point": "punto",
+      "points": "puntos",
+      "online": "En línea",
+      "offline": "Desconectado"
+    },
+    "modal": {
+      "title": "Detalles del Trabajador",
+      "subtitle": "Información completa de la ubicación",
+      "location": "Ubicación GPS",
+      "latitude": "Latitud",
+      "longitude": "Longitud",
+      "gpsAccuracy": "Precisión GPS",
+      "quality": "Calidad",
+      "excellent": "Excelente",
+      "good": "Buena",
+      "regular": "Regular",
+      "deviceStatus": "Estado del Dispositivo",
+      "readingTime": "Fecha y Hora de Lectura",
+      "batteryLevel": "Nivel de Batería",
+      "batteryGood": "Batería en buen estado",
+      "batteryModerate": "Batería moderada",
+      "batteryLow": "Batería baja - recargar",
+      "motionStatus": "Estado de Movimiento",
+      "moving": "En movimiento",
+      "stopped": "Detenido",
+      "movingDescription": "El dispositivo se está moviendo activamente",
+      "stoppedDescription": "El dispositivo ha estado estacionario por algún tiempo",
+      "technicalInfo": "Información Técnica",
+      "originalTimestamp": "Timestamp Original",
+      "recordId": "ID del Registro",
+      "connectionStatus": "Estado de Conexión",
+      "deviceType": "Tipo de Dispositivo",
+      "lastUpdate": "Última Actualización",
+      "shareCoordinates": "Coordenadas para compartir",
+      "copy": "Copiar",
+      "close": "Cerrar",
+      "exportPDF": "Exportar PDF",
+      "updatedAt": "Datos actualizados el {{date}}"
+    },
+    "status": {
+      "loading": "Cargando datos GPS...",
+      "error": "Error al cargar datos",
+      "tryAgain": "Intentar Nuevamente",
+      "configureFilters": "Configure los filtros y haga clic en 'Aplicar Filtros'"
+    },
+    "pagination": {
+      "page": "Página {{current}} de {{total}}",
+      "records": "{{count}} registros",
+      "previous": "Anterior",
+      "next": "Siguiente"
+    }
   }
 }

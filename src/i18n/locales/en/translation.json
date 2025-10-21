@@ -537,5 +537,246 @@
   "error": {
     "title": "Error loading data",
     "retry": "Try again"
+  },
+  
+  "gpsRouteMap": {
+    "title": "GPS Route Map",
+    "subtitle": "Visualize device route with Leaflet",
+    "filters": {
+      "showFilters": "Filters",
+      "load": "Load",
+      "clearFilters": "Clear Filters",
+      "deviceEUI": "Device EUI",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "maxAccuracy": "Maximum Accuracy (m)",
+      "pointLimit": "Point Limit",
+      "pointOptions": {
+        "50": "50 points",
+        "100": "100 points",
+        "200": "200 points",
+        "500": "500 points"
+      }
+    },
+    "player": {
+      "title": "Route Player:",
+      "play": "Play",
+      "pause": "Pause",
+      "stop": "Stop",
+      "previous": "Previous",
+      "next": "Next",
+      "autoZoom": "Auto Zoom",
+      "autoZoomEnabled": "Auto zoom enabled - map will follow movement!",
+      "autoZoomDisabled": "Enable Auto Zoom for map to follow movement",
+      "speed": "Speed",
+      "speeds": {
+        "0.5": "0.5x",
+        "1": "1x",
+        "2": "2x",
+        "5": "5x"
+      },
+      "tip": "💡 Tip:",
+      "dragTip": "Drag me along the blue line!"
+    },
+    "stats": {
+      "totalPoints": "Total Points",
+      "averageAccuracy": "Average Accuracy",
+      "firstPoint": "First Point",
+      "lastPoint": "Last Point"
+    },
+    "map": {
+      "noRoute": "No route loaded",
+      "loadRoute": "Load Route",
+      "loading": "Loading GPS data...",
+      "mapTypes": {
+        "streets": "Streets",
+        "satellite": "Satellite",
+        "terrain": "Terrain",
+        "dark": "Dark"
+      },
+      "mapType": "Map Type"
+    },
+    "markers": {
+      "currentPosition": "🎯 Current Player Position",
+      "start": "🟢 Start",
+      "end": "🔴 End",
+      "point": "📍 Point",
+      "time": "Time",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "accuracy": "Accuracy",
+      "progress": "Progress",
+      "of": "of"
+    },
+    "legend": {
+      "startPoint": "Start Point",
+      "intermediatePoints": "Intermediate Points",
+      "endPoint": "End Point",
+      "player": "Player (Follows Line)",
+      "autoZoom": "Auto Zoom"
+    },
+    "alerts": {
+      "noDeviceEUI": "Please enter a Device EUI",
+      "noData": "No data found for applied filters",
+      "error": "Error loading GPS data"
+    }
+  },
+
+  "gpsMap": {
+    "title": "Worker Tracking",
+    "subtitle": "Real-time field team monitoring",
+    "filters": {
+      "title": "Filters",
+      "show": "Show Filters",
+      "hide": "Hide Filters",
+      "devices": "Devices (DEV_EUI)",
+      "loadingDevices": "Loading...",
+      "selectDevices": "Select devices...",
+      "selectedCount": "{{count}} device(s) selected",
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "reload": "Reload",
+      "noDevices": "No devices available",
+      "selected": "Selected ({{count}})",
+      "removeAll": "Remove all",
+      "remove": "Remove",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "minAccuracy": "Minimum Accuracy (m)",
+      "maxAccuracy": "Maximum Accuracy (m)",
+      "minAccuracyPlaceholder": "Ex: 0",
+      "maxAccuracyPlaceholder": "Ex: 100",
+      "validGPSOnly": "Only valid GPS points",
+      "latestOnly": "Only last record per device",
+      "latestOnlyNew": "NEW",
+      "applyFilters": "Apply Filters",
+      "searching": "Searching...",
+      "clear": "Clear"
+    },
+    "stats": {
+      "totalPoints": "Total Points",
+      "devices": "Devices",
+      "avgAccuracy": "Avg Accuracy",
+      "minAccuracy": "Min Accuracy",
+      "maxAccuracy": "Max Accuracy",
+      "firstRecord": "First Record",
+      "lastRecord": "Last Record",
+      "latestMode": "Mode: Last record per device"
+    },
+    "player": {
+      "stop": "Stop",
+      "previous": "Previous",
+      "play": "Play",
+      "pause": "Pause",
+      "next": "Next",
+      "autoZoom": "Auto Zoom",
+      "point": "Point: {{current}} / {{total}}",
+      "speed": {
+        "0.5x": "0.5x",
+        "1x": "1x",
+        "2x": "2x",
+        "4x": "4x"
+      }
+    },
+    "map": {
+      "type": "Map Type:",
+      "streets": "Streets",
+      "satellite": "Satellite",
+      "terrain": "Terrain",
+      "dark": "Dark",
+      "heatmap": "Heatmap",
+      "showHeatmap": "Show heatmap",
+      "hideHeatmap": "Hide heatmap"
+    },
+    "modes": {
+      "latestPositions": "Latest Worker Positions",
+      "latestView": "View mode: Last known position of each device",
+      "devicesFound": "{{count}} device(s) found",
+      "noRoute": "No route loaded",
+      "noDevices": "No devices found"
+    },
+    "markers": {
+      "start": "Start",
+      "end": "End",
+      "current": "Current",
+      "point": "Point {{index}}",
+      "device": "DEV_EUI:",
+      "time": "Time:",
+      "latitude": "Latitude:",
+      "longitude": "Longitude:",
+      "accuracy": "Accuracy:",
+      "battery": "Battery:",
+      "moving": "Moving",
+      "stopped": "Stopped",
+      "viewDetails": "View full details"
+    },
+    "legend": {
+      "workers": "Workers ({{count}})",
+      "firstPoint": "First Point",
+      "lastPoint": "Last Point",
+      "currentPoint": "Current Point (Player)",
+      "intermediatePoints": "Intermediate Points",
+      "connectionStatus": "Connection Status",
+      "online": "Online (last 5 min)",
+      "offline": "Offline",
+      "accuracyExcellent": "Accuracy < 10m",
+      "accuracyGood": "Accuracy 10-25m",
+      "accuracyRegular": "Accuracy > 25m",
+      "scrollHint": "↑↓ Scroll to see more workers"
+    },
+    "worker": {
+      "unidentified": "Unidentified worker",
+      "position": "position",
+      "point": "point",
+      "points": "points",
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "modal": {
+      "title": "Worker Details",
+      "subtitle": "Complete location information",
+      "location": "GPS Location",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "gpsAccuracy": "GPS Accuracy",
+      "quality": "Quality",
+      "excellent": "Excellent",
+      "good": "Good",
+      "regular": "Regular",
+      "deviceStatus": "Device Status",
+      "readingTime": "Reading Date and Time",
+      "batteryLevel": "Battery Level",
+      "batteryGood": "Battery in good condition",
+      "batteryModerate": "Moderate battery",
+      "batteryLow": "Low battery - recharge",
+      "motionStatus": "Motion Status",
+      "moving": "Moving",
+      "stopped": "Stopped",
+      "movingDescription": "The device is actively moving",
+      "stoppedDescription": "The device has been stationary for some time",
+      "technicalInfo": "Technical Information",
+      "originalTimestamp": "Original Timestamp",
+      "recordId": "Record ID",
+      "connectionStatus": "Connection Status",
+      "deviceType": "Device Type",
+      "lastUpdate": "Last Update",
+      "shareCoordinates": "Coordinates for sharing",
+      "copy": "Copy",
+      "close": "Close",
+      "exportPDF": "Export PDF",
+      "updatedAt": "Data updated at {{date}}"
+    },
+    "status": {
+      "loading": "Loading GPS data...",
+      "error": "Error loading data",
+      "tryAgain": "Try Again",
+      "configureFilters": "Configure filters and click 'Apply Filters'"
+    },
+    "pagination": {
+      "page": "Page {{current}} of {{total}}",
+      "records": "{{count}} records",
+      "previous": "Previous",
+      "next": "Next"
+    }
   }
 }
