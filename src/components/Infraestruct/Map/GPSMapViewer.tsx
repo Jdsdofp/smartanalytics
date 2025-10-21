@@ -61,7 +61,7 @@ const createWorkerIcon = (color: string = '#3b82f6') => {
   });
 };
 
-// // Ícone para trabalhador em movimento
+// // Ícone para trabalhador em movimento...
 // const createMovingWorkerIcon = (color: string = '#10b981') => {
 //   return L.divIcon({
 //     html: `
