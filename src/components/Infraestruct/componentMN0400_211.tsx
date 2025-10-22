@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
 import GPSRouteMapLeaflet from './Map/GPSRouteMap';
 import GPSMapViewer from './Map/GPSMapViewer';
+import { companyId } from '../../utils/variables';
 
 // =====================================
 // 📊 INTERFACES
@@ -155,7 +156,11 @@ interface DetailsModalProps {
   onClose: () => void;
 }
 
+
+
 const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
+  
+  
   const [loading, setLoading] = useState(false);
   const [deviceDetails, setDeviceDetails] = useState<DeviceDetails | null>(null);
   const [activeDetailsTab, setActiveDetailsTab] = useState<'info' | 'route' | 'events' | 'config'>('info');
@@ -172,9 +177,9 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
     setLoading(true);
     try {
       const [routeRes, eventsRes, configRes] = await Promise.all([
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/route/${device.dev_eui}`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/events/${device.dev_eui}?limit=10`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/config/${device.dev_eui}`),
+        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/route/${device.dev_eui}`),
+        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/events/${device.dev_eui}?limit=10`),
+        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/config/${device.dev_eui}`),
       ]);
 
       const routeData = await routeRes.json();
@@ -809,6 +814,7 @@ const ChartContainer = ({
 
 export default function DeviceLogsView() {
   const { t } = useTranslation();
+  
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [motionDevices, setMotionDevices] = useState<DevicePosition[]>([]);
@@ -850,13 +856,15 @@ export default function DeviceLogsView() {
 
   const fetchData = async () => {
     setRefreshing(true);
+
+    //https://api-dashboards-u1oh.onrender.com
     try {
       const [overviewRes, motionRes, gatewayRes, eventsRes, customerRes] = await Promise.all([
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/dashboard/overview'),
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/motion-state'),
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/gateway-quality'),
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/events/types'),
-        fetch('https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/customer-stats'),
+        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/dashboard/overview`),
+        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/motion-state`),
+        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/gateway-quality`),
+        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/events/types`),
+        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/customer-stats`),
       ]);
 
       const overviewData = await overviewRes.json();
@@ -1520,7 +1528,7 @@ export default function DeviceLogsView() {
           </div> */}
 
           {/* ✅ ALERTAS SOS TRADUZIDOS */}
-          {overview.alerts.active_sos_count > 0 && (
+          {/* {overview.alerts.active_sos_count > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
                 <ShieldExclamationIcon className="h-6 w-6" />
@@ -1568,7 +1576,7 @@ export default function DeviceLogsView() {
                 />
               </div>
             </div>
-          )}
+          )} */}
 
           <GPSRouteMapLeaflet />
         </div>

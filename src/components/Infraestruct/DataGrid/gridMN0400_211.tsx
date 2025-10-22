@@ -20,6 +20,7 @@ import {
     ChevronDownIcon,  // 🆕 ADICIONE
     ArrowsUpDownIcon, // 🆕 ADICIONE
 } from '@heroicons/react/24/outline';
+import { companyId } from '../../../utils/variables';
 // import GPSRouteMap from '../Map/GPSRouteMap';
 
 // =====================================
@@ -560,7 +561,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'gps',
             label: t('rawDataExplorer.tabs.gps'),
             icon: MapPinIcon,
-            endpoint: '/api/dashboard/devices/raw/gps-reports',
+            endpoint: `/api/dashboard/devices/${companyId}/raw/gps-reports`,
             exportTable: 'device_gps_report_monitoring',
             columns: [],
             filters: [
@@ -574,7 +575,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'events',
             label: t('rawDataExplorer.tabs.events'),
             icon: ExclamationTriangleIcon,
-            endpoint: '/api/dashboard/devices/raw/events',
+            endpoint: `/api/dashboard/devices/${companyId}/raw/events`,
             exportTable: 'device_events_management',
             columns: [],
             filters: [
@@ -588,7 +589,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'scanning',
             label: t('rawDataExplorer.tabs.scanning'),
             icon: SignalIcon,
-            endpoint: '/api/dashboard/devices/raw/scanning',
+            endpoint: `/api/dashboard/devices/${companyId}/raw/scanning`,
             exportTable: 'device_scanning_monitoring',
             columns: [],
             filters: [
@@ -602,7 +603,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'configuration',
             label: t('rawDataExplorer.tabs.configuration'),
             icon: Cog6ToothIcon,
-            endpoint: '/api/dashboard/devices/raw/configuration',
+            endpoint: `/api/dashboard/devices/${companyId}/raw/configuration`,
             exportTable: 'device_configuration_management',
             columns: [],
             filters: [
@@ -616,7 +617,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'errors',
             label: t('rawDataExplorer.tabs.errors'),
             icon: XCircleIcon,
-            endpoint: '/api/dashboard/devices/raw/gps-errors',
+            endpoint: `/api/dashboard/devices/${companyId}/raw/gps-errors`,
             exportTable: 'device_gps_error_management',
             columns: [],
             filters: [
@@ -630,7 +631,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'heartbeats',
             label: t('rawDataExplorer.tabs.heartbeats'),
             icon: BoltIcon,
-            endpoint: '/api/dashboard/devices/heartbeats/raw',
+            endpoint: `/api/dashboard/devices/${companyId}/heartbeats/raw`,
             exportTable: 'device_heartbeat',
             columns: [],
             filters: [
@@ -644,7 +645,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'scannedBeacons',
             label: t('rawDataExplorer.tabs.scannedBeacons'),
             icon: RssIcon,
-            endpoint: '/api/dashboard/devices/scanned-beacons/raw',
+            endpoint: `/api/dashboard/devices/${companyId}scanned-beacons/raw`,
             exportTable: 'device_scanned_beacons_list',
             columns: [],
             filters: [

@@ -25,6 +25,7 @@ import {
 import { exportGPSPointToPDF } from '../../../utils/exportGPSPointToPDF'
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
+import { companyId } from '../../../utils/variables';
 
 // =====================================
 // 👷 ÍCONES PERSONALIZADOS PARA TRABALHADORES
@@ -497,7 +498,7 @@ const GPSMapViewer = () => {
     setLoadingDevices(true);
     try {
       const response = await fetch(
-        'https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/device/list'
+        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/device/list`
       );
 
       if (!response.ok) {
@@ -546,7 +547,7 @@ const GPSMapViewer = () => {
       if (filters.latest_only) params.append('latest_only', 'true');
 
       const response = await fetch(
-        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/gps-data?${params}`
+        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/gps-data?${params}`
       );
 
       if (!response.ok) {
@@ -580,7 +581,7 @@ const GPSMapViewer = () => {
       if (filters.end_date) params.append('end_date', filters.end_date);
 
       const response = await fetch(
-        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/gps-stats`
+        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/gps-stats`
       );
 
       if (response.ok) {
