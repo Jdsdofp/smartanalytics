@@ -283,8 +283,8 @@ export function useCompany() {
     return themeData
   })
 
-  const [isLoading, setIsLoading] = useState(false)
-  console.warn(setIsLoading(false))
+  // const [isLoading, setIsLoading] = useState(false)
+  // console.warn(setIsLoading(false))
   // Listener para mudanças no sessionStorage
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
@@ -442,7 +442,6 @@ export function useCompany() {
     theme,
     primaryColor: theme?.colors.primary,
     logo: companyData?.logo_base64,
-    isLoading,
     reloadCompanyData // Função para forçar reload se necessário
   }
 }
