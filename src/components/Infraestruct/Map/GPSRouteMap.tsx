@@ -20,31 +20,40 @@ import {
   MagnifyingGlassMinusIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
+import { useCompany } from '../../../hooks/useCompany';
 
 // Tipos de mapas disponíveis
+// Tipos de mapas disponíveis - ATUALIZADO
 const MAP_TYPES = {
   streets: {
     name: 'Ruas',
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19
+    attribution: '&copy; OpenStreetMap',
+    maxNativeZoom: 19,
+    maxZoom: 22
   },
   satellite: {
     name: 'Satélite',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
-    maxZoom: 19,
+    // ⭐ ALTERNATIVA: Google Satellite (sem API key)
+    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google',
+    maxNativeZoom: 21, // ✅ Suporta zoom muito maior!
+    maxZoom: 22
   },
   terrain: {
     name: 'Terreno',
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+    // ⭐ ALTERNATIVA: Google Terrain
+    url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google',
+    maxNativeZoom: 20,
+    maxZoom: 22
   },
   dark: {
     name: 'Escuro',
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    maxZoom: 17,
+    attribution: '&copy; CARTO',
+    maxNativeZoom: 20,
+    maxZoom: 22
   },
 };
 
@@ -92,6 +101,89 @@ function MapBounds({ positions }: { positions: [number, number][] }) {
 }
 
 // Componente para controlar o zoom automático
+// function AutoZoom({
+//   position,
+//   isPlaying,
+//   isDragging,
+//   autoZoomEnabled
+// }: {
+//   position: [number, number] | null;
+//   isPlaying: boolean;
+//   isDragging: boolean;
+//   autoZoomEnabled: boolean;
+// }) {
+//   const map = useMap();
+//   const lastZoomRef = useRef<number>(map.getZoom());
+//   const lastPositionRef = useRef<[number, number] | null>(null);
+//   const zoomTimeoutRef = useRef<any | null>(null);
+
+//   useEffect(() => {
+//     if (!autoZoomEnabled || !position) return;
+
+//     if (zoomTimeoutRef.current) {
+//       clearTimeout(zoomTimeoutRef.current);
+//     }
+
+//     const currentZoom = map.getZoom();
+//     const shouldApplyZoom = () => {
+//       if (!lastPositionRef.current) return true;
+
+//       const distance = L.latLng(position).distanceTo(L.latLng(lastPositionRef.current));
+//       return distance > 100 || isPlaying || isDragging;
+//     };
+
+//     if (shouldApplyZoom()) {
+//       let targetZoom: number;
+
+//       if (isDragging) {
+//         targetZoom = 17;
+//       } else if (isPlaying) {
+//         targetZoom = 15;
+//       } else {
+//         targetZoom = lastZoomRef.current;
+//       }
+
+//       if (Math.abs(currentZoom - targetZoom) >= 1) {
+//         zoomTimeoutRef.current = setTimeout(() => {
+//           map.setView(position, targetZoom, {
+//             animate: true,
+//             duration: 1.5,
+//             easeLinearity: 0.25
+//           });
+//           lastZoomRef.current = targetZoom;
+//         }, 300);
+//       } else {
+//         map.panTo(position, {
+//           animate: true,
+//           duration: 1,
+//           easeLinearity: 0.25
+//         });
+//       }
+
+//       lastPositionRef.current = position;
+//     }
+
+//     return () => {
+//       if (zoomTimeoutRef.current) {
+//         clearTimeout(zoomTimeoutRef.current);
+//       }
+//     };
+//   }, [position, isPlaying, isDragging, autoZoomEnabled, map]);
+
+//   useEffect(() => {
+//     if (!autoZoomEnabled) {
+//       lastPositionRef.current = null;
+//       if (zoomTimeoutRef.current) {
+//         clearTimeout(zoomTimeoutRef.current);
+//       }
+//     }
+//   }, [autoZoomEnabled]);
+
+//   return null;
+// }
+
+
+// Componente para controlar o zoom automático - VERSÃO CORRIGIDA
 function AutoZoom({
   position,
   isPlaying,
@@ -104,54 +196,52 @@ function AutoZoom({
   autoZoomEnabled: boolean;
 }) {
   const map = useMap();
-  const lastZoomRef = useRef<number>(map.getZoom());
   const lastPositionRef = useRef<[number, number] | null>(null);
   const zoomTimeoutRef = useRef<any | null>(null);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (!autoZoomEnabled || !position) return;
 
-    if (zoomTimeoutRef.current) {
-      clearTimeout(zoomTimeoutRef.current);
+    // Não aplicar zoom no primeiro render para evitar conflito com MapBounds
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      lastPositionRef.current = position;
+      return;
     }
 
-    const currentZoom = map.getZoom();
     const shouldApplyZoom = () => {
       if (!lastPositionRef.current) return true;
-
+      
       const distance = L.latLng(position).distanceTo(L.latLng(lastPositionRef.current));
-      return distance > 100 || isPlaying || isDragging;
+      
+      // Aplicar zoom apenas se a distância for significativa
+      return distance > 10; // Apenas se mover mais de 10 metros
+    };
+
+    const getOptimalZoom = (): number => {
+      if (isDragging) return 17; // Zoom próximo durante arraste
+      if (isPlaying) return 16;  // Zoom durante reprodução
+      return 17; // Zoom padrão
     };
 
     if (shouldApplyZoom()) {
-      let targetZoom: number;
-
-      if (isDragging) {
-        targetZoom = 17;
-      } else if (isPlaying) {
-        targetZoom = 15;
-      } else {
-        targetZoom = lastZoomRef.current;
+      if (zoomTimeoutRef.current) {
+        clearTimeout(zoomTimeoutRef.current);
       }
 
-      if (Math.abs(currentZoom - targetZoom) >= 1) {
-        zoomTimeoutRef.current = setTimeout(() => {
-          map.setView(position, targetZoom, {
-            animate: true,
-            duration: 1.5,
-            easeLinearity: 0.25
-          });
-          lastZoomRef.current = targetZoom;
-        }, 300);
-      } else {
-        map.panTo(position, {
+      zoomTimeoutRef.current = setTimeout(() => {
+        const targetZoom = getOptimalZoom();
+        const duration = isPlaying ? 1.0 : 1.5;
+        
+        map.setView(position, targetZoom, {
           animate: true,
-          duration: 1,
+          duration,
           easeLinearity: 0.25
         });
-      }
-
-      lastPositionRef.current = position;
+        
+        lastPositionRef.current = position;
+      }, isPlaying ? 100 : 0);
     }
 
     return () => {
@@ -160,15 +250,6 @@ function AutoZoom({
       }
     };
   }, [position, isPlaying, isDragging, autoZoomEnabled, map]);
-
-  useEffect(() => {
-    if (!autoZoomEnabled) {
-      lastPositionRef.current = null;
-      if (zoomTimeoutRef.current) {
-        clearTimeout(zoomTimeoutRef.current);
-      }
-    }
-  }, [autoZoomEnabled]);
 
   return null;
 }
@@ -239,108 +320,96 @@ function ZoomControls({
   return (
     <>
       <div className="leaflet-top leaflet-right">
-        <div className="leaflet-control leaflet-bar flex flex-col">
+        <div className="leaflet-control leaflet-bar flex flex-col bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden">
+          {/* Botão de Zoom In */}
           <button
-            className="leaflet-control-zoom-in"
             onClick={() => map.zoomIn()}
-            style={{
-              width: '30px',
-              height: '30px',
-              lineHeight: '30px',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              border: 'none',
-              backgroundColor: 'white'
-            }}
+            className="flex items-center justify-center w-10 h-10 hover:bg-gray-100 transition-colors border-b border-gray-200"
+            title={t('gpsRouteMap.map.zoomIn')}
           >
-            +
+            <MagnifyingGlassPlusIcon className="h-4 w-4 text-gray-700" />
           </button>
+
+          {/* Botão de Zoom Out */}
           <button
-            className="leaflet-control-zoom-out"
             onClick={() => map.zoomOut()}
-            style={{
-              width: '30px',
-              height: '30px',
-              lineHeight: '30px',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              border: 'none',
-              backgroundColor: 'white',
-              borderTop: '1px solid #ccc'
-            }}
+            className="flex items-center justify-center w-10 h-10 hover:bg-gray-100 transition-colors border-b border-gray-200"
+            title={t('gpsRouteMap.map.zoomOut')}
           >
-            -
+            <MagnifyingGlassMinusIcon className="h-4 w-4 text-gray-700" />
           </button>
+
+          {/* Botão de Auto Zoom */}
           <button
-            className={`leaflet-control-auto-zoom ${autoZoomEnabled ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'
-              }`}
             onClick={() => onAutoZoomToggle(!autoZoomEnabled)}
-            style={{
-              width: '30px',
-              height: '30px',
-              lineHeight: '30px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              border: 'none',
-              borderTop: '1px solid #ccc'
-            }}
-            title={t('gpsRouteMap.player.autoZoom')}
+            className={`flex items-center justify-center w-10 h-10 transition-colors border-b border-gray-200 ${
+              autoZoomEnabled 
+                ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+            title={autoZoomEnabled ? t('gpsRouteMap.player.autoZoomDisable') : t('gpsRouteMap.player.autoZoomEnable')}
           >
-            A
+            <div className="flex flex-col items-center">
+              <span className="text-xs font-bold">A</span>
+              <div className={`w-2 h-1 rounded-full ${autoZoomEnabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+            </div>
           </button>
+
+          {/* Botão de Tipo de Mapa */}
           <button
-            className="leaflet-control-map-type bg-white text-gray-700"
             onClick={() => setShowMapTypes(!showMapTypes)}
-            style={{
-              width: '30px',
-              height: '30px',
-              lineHeight: '30px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              border: 'none',
-              borderTop: '1px solid #ccc'
-            }}
+            className="flex items-center justify-center w-10 h-10 bg-white text-gray-700 hover:bg-gray-100 transition-colors"
             title={t('gpsRouteMap.map.mapType')}
           >
-            🗺️
+            <span className="text-lg">🗺️</span>
           </button>
         </div>
       </div>
 
+      {/* Menu de Tipos de Mapa */}
       {showMapTypes && (
         <div
           className="leaflet-top leaflet-right"
           style={{
-            marginTop: '140px',
+            marginTop: '180px',
             marginRight: '10px'
           }}
         >
-          <div className="leaflet-control leaflet-bar bg-white rounded shadow-lg p-2">
-            <div className="text-xs font-semibold text-gray-700 mb-2 px-2">
+          <div className="leaflet-control leaflet-bar bg-white rounded-md shadow-lg border border-gray-200 p-3 min-w-[160px]">
+            <div className="text-sm font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-200">
               {t('gpsRouteMap.map.mapType')}
             </div>
-            {(Object.keys(MAP_TYPES) as Array<keyof typeof MAP_TYPES>).map((type) => (
-              <button
-                key={type}
-                onClick={() => {
-                  onMapTypeChange(type);
-                  setShowMapTypes(false);
-                }}
-                className={`w-full text-left px-3 py-2 text-xs rounded hover:bg-blue-50 transition-colors ${mapType === type ? 'bg-blue-100 font-semibold text-blue-700' : 'text-gray-700'
+            <div className="space-y-2">
+              {(Object.keys(MAP_TYPES) as Array<keyof typeof MAP_TYPES>).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    onMapTypeChange(type);
+                    setShowMapTypes(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 text-sm rounded-md transition-all duration-200 flex items-center gap-3 ${
+                    mapType === type 
+                      ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200' 
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
-                style={{
-                  border: 'none',
-                  backgroundColor: mapType === type ? '#DBEAFE' : 'white',
-                  cursor: 'pointer'
-                }}
-              >
-                {t(`gpsRouteMap.map.mapTypes.${type}`)}
-              </button>
-            ))}
+                >
+                  <div className={`w-3 h-3 rounded-full border-2 ${
+                    mapType === type ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-400'
+                  }`}></div>
+                  <span>{MAP_TYPES[type].name}</span>
+                </button>
+              ))}
+            </div>
+            
+            {/* Legenda de Status do Auto Zoom */}
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="flex items-center justify-between text-xs text-gray-600">
+                <span>Auto Zoom:</span>
+                <span className={`font-medium ${autoZoomEnabled ? 'text-green-600' : 'text-gray-500'}`}>
+                  {autoZoomEnabled ? 'Ativo' : 'Inativo'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -523,6 +592,7 @@ function DraggableRouteMarker({
 
 const GPSRouteMapLeaflet = () => {
   const { t } = useTranslation();
+  const {companyId} = useCompany()
   const [data, setData] = useState<GPSPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [devEui, setDevEui] = useState('20635F0241000AB7');
@@ -532,13 +602,25 @@ const GPSRouteMapLeaflet = () => {
   const [limit, setLimit] = useState(200);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Estados para o player da rota
+  // // Estados para o player da rota
+  // const [isPlaying, setIsPlaying] = useState(false);
+  // const [currentPointIndex, setCurrentPointIndex] = useState(0);
+  // const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  // const [progress, setProgress] = useState(0);
+  // const [isDragging, setIsDragging] = useState(false);
+  // const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
+  // const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('streets');
+  // const playbackIntervalRef = useRef<any | null>(null);
+
+  
+  // Estados para o player da rota - ATUALIZADOS
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPointIndex, setCurrentPointIndex] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
+  const [shouldApplyPlayerZoom, setShouldApplyPlayerZoom] = useState(false); // NOVO ESTADO
   const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('streets');
   const playbackIntervalRef = useRef<any | null>(null);
 
@@ -547,6 +629,8 @@ const GPSRouteMapLeaflet = () => {
       alert(t('gpsRouteMap.alerts.noDeviceEUI'));
       return;
     }
+
+    console.warn(shouldApplyPlayerZoom)
 
     setLoading(true);
     try {
@@ -563,7 +647,7 @@ const GPSRouteMapLeaflet = () => {
       if (maxAccuracy) params.append('max_accuracy', maxAccuracy);
 
       const response = await fetch(
-        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/gps-route/raw?${params}`
+        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/gps-route/raw?${params}`
       );
       const result = await response.json();
 
@@ -591,46 +675,90 @@ const GPSRouteMapLeaflet = () => {
   };
 
   // Funções do player da rota
-  const startPlayback = () => {
-    if (validData.length === 0) return;
+  // const startPlayback = () => {
+  //   if (validData.length === 0) return;
 
-    setIsPlaying(true);
-    playbackIntervalRef.current = setInterval(() => {
-      setCurrentPointIndex(prev => {
-        const nextIndex = prev + 1;
-        if (nextIndex >= validData.length) {
-          stopPlayback();
-          return prev;
-        }
-        setProgress((nextIndex / (validData.length - 1)) * 100);
-        return nextIndex;
-      });
-    }, 1000 / playbackSpeed);
-  };
+  //   setIsPlaying(true);
+  //   playbackIntervalRef.current = setInterval(() => {
+  //     setCurrentPointIndex(prev => {
+  //       const nextIndex = prev + 1;
+  //       if (nextIndex >= validData.length) {
+  //         stopPlayback();
+  //         return prev;
+  //       }
+  //       setProgress((nextIndex / (validData.length - 1)) * 100);
+  //       return nextIndex;
+  //     });
+  //   }, 1000 / playbackSpeed);
+  // };
 
-  const pausePlayback = () => {
-    setIsPlaying(false);
-    if (playbackIntervalRef.current) {
-      clearInterval(playbackIntervalRef.current);
-      playbackIntervalRef.current = null;
-    }
-  };
+  // const pausePlayback = () => {
+  //   setIsPlaying(false);
+  //   if (playbackIntervalRef.current) {
+  //     clearInterval(playbackIntervalRef.current);
+  //     playbackIntervalRef.current = null;
+  //   }
+  // };
 
-  const stopPlayback = () => {
-    setIsPlaying(false);
-    setCurrentPointIndex(0);
-    setProgress(0);
-    if (playbackIntervalRef.current) {
-      clearInterval(playbackIntervalRef.current);
-      playbackIntervalRef.current = null;
-    }
-  };
+  // const stopPlayback = () => {
+  //   setIsPlaying(false);
+  //   setCurrentPointIndex(0);
+  //   setProgress(0);
+  //   if (playbackIntervalRef.current) {
+  //     clearInterval(playbackIntervalRef.current);
+  //     playbackIntervalRef.current = null;
+  //   }
+  // };
 
-  const resetPlayer = () => {
-    stopPlayback();
-    setCurrentPointIndex(0);
-    setProgress(0);
-  };
+  // const resetPlayer = () => {
+  //   stopPlayback();
+  //   setCurrentPointIndex(0);
+  //   setProgress(0);
+  // };
+
+  // Funções do player da rota - ATUALIZADAS
+const startPlayback = () => {
+  if (validData.length === 0) return;
+
+  setIsPlaying(true);
+  setShouldApplyPlayerZoom(true); // Habilitar zoom do player
+  playbackIntervalRef.current = setInterval(() => {
+    setCurrentPointIndex(prev => {
+      const nextIndex = prev + 1;
+      if (nextIndex >= validData.length) {
+        stopPlayback();
+        return prev;
+      }
+      setProgress((nextIndex / (validData.length - 1)) * 100);
+      return nextIndex;
+    });
+  }, 1000 / playbackSpeed);
+};
+
+const pausePlayback = () => {
+  setIsPlaying(false);
+  if (playbackIntervalRef.current) {
+    clearInterval(playbackIntervalRef.current);
+    playbackIntervalRef.current = null;
+  }
+};
+
+const stopPlayback = () => {
+  setIsPlaying(false);
+  setShouldApplyPlayerZoom(false); // Desabilitar zoom do player
+  setCurrentPointIndex(0);
+  setProgress(0);
+  if (playbackIntervalRef.current) {
+    clearInterval(playbackIntervalRef.current);
+    playbackIntervalRef.current = null;
+  }
+};
+
+const resetPlayer = () => {
+  stopPlayback();
+  setCurrentPointIndex(0);
+  setProgress(0);
+};
 
   const goToPoint = (index: number) => {
     const newIndex = Math.max(0, Math.min(index, validData.length - 1));
@@ -1012,17 +1140,19 @@ const GPSRouteMapLeaflet = () => {
         ) : (
           <MapContainer
             center={center}
-            zoom={19}
-            maxZoom={20}
+            zoom={13}
+            maxZoom={22}
             zoomControl={false}
             style={{ height: '700px', width: '100%' }}
             className="rounded-lg shadow-md"
           >
             {/* TileLayer dinâmico baseado no mapType */}
-            <TileLayer
-              attribution={MAP_TYPES[mapType].attribution}
-              url={MAP_TYPES[mapType].url}
-              maxZoom={18}
+                <TileLayer
+                  attribution={MAP_TYPES[mapType].attribution}
+                  // url={MAP_TYPES[mapType].url}
+                  url={MAP_TYPES[mapType].url}
+                  maxNativeZoom={MAP_TYPES[mapType].maxNativeZoom}  // ✅ Zoom do servidor
+                  maxZoom={MAP_TYPES[mapType].maxZoom}              // ✅ Zoom máximo permitido
             />
 
             {/* Controles customizados com todas as props */}
@@ -1041,7 +1171,8 @@ const GPSRouteMapLeaflet = () => {
               autoZoomEnabled={autoZoomEnabled}
             />
 
-            <MapBounds positions={positions} />
+            {/* <MapBounds positions={positions} /> */}
+            {(!isPlaying && !isDragging) && <MapBounds positions={positions} />}
 
             {/* Linha da rota */}
             {positions.length > 1 && (
@@ -1054,6 +1185,8 @@ const GPSRouteMapLeaflet = () => {
                 }}
               />
             )}
+
+            
 
             {/* Setas indicando direção */}
             {positions.length > 1 && <RouteArrows positions={positions} />}

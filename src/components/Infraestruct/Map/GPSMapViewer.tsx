@@ -25,7 +25,7 @@ import {
 import { exportGPSPointToPDF } from '../../../utils/exportGPSPointToPDF'
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
-import { companyId } from '../../../utils/variables';
+import { useCompany } from '../../../hooks/useCompany';
 
 // =====================================
 // 👷 ÍCONES PERSONALIZADOS PARA TRABALHADORES
@@ -297,30 +297,67 @@ const getDeviceColor = (devEui: string, allDevices: string[]): string => {
 // =====================================
 // 🗺️ CONFIGURAÇÕES DE MAPAS
 // =====================================
+// const MAP_TYPES = {
+//   streets: {
+//     name: t('gpsMap.map.streets'),
+//     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+//     attribution: '&copy; OpenStreetMap',
+//     maxNativeZoom: 19, // ⭐ ADICIONAR
+//     maxZoom: 22
+//   },
+//   satellite: {
+//     name: t('gpsMap.map.satellite'),
+//     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+//     attribution: '&copy; Esri',
+//     maxNativeZoom: 19,
+//     maxZoom: 22
+//   },
+//   terrain: {
+//     name: t('gpsMap.map.terrain'),
+//     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+//     attribution: '&copy; OpenTopoMap',
+//     maxNativeZoom: 17, // ⚠️ Corrigir de 19 para 17
+//     maxZoom: 22
+//   },
+//   dark: {
+//     name: t('gpsMap.map.dark'),
+//     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+//     attribution: '&copy; CARTO',
+//     maxNativeZoom: 19, // ⚠️ Corrigir de 17 para 19
+//     maxZoom: 22
+//   },
+// };
+
 const MAP_TYPES = {
   streets: {
     name: t('gpsMap.map.streets'),
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; OpenStreetMap',
-    maxZoom: 19
+    maxNativeZoom: 19,
+    maxZoom: 22
   },
   satellite: {
-     name: t('gpsMap.map.satellite'),
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri',
-    maxZoom: 19,
+    name: t('gpsMap.map.satellite'),
+    // ⭐ ALTERNATIVA: Google Satellite (sem API key)
+    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google',
+    maxNativeZoom: 21, // ✅ Suporta zoom muito maior!
+    maxZoom: 22
   },
   terrain: {
     name: t('gpsMap.map.terrain'),
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; OpenTopoMap',
-    maxZoom: 17,
+    // ⭐ ALTERNATIVA: Google Terrain
+    url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google',
+    maxNativeZoom: 20,
+    maxZoom: 22
   },
   dark: {
     name: t('gpsMap.map.dark'),
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     attribution: '&copy; CARTO',
-    maxZoom: 17,
+    maxNativeZoom: 20,
+    maxZoom: 22
   },
 };
 
@@ -386,64 +423,69 @@ interface GPSStats {
 // =====================================
 // 🗺️ COMPONENTES AUXILIARES DO MAPA
 // =====================================
-function MapBounds({ positions }: { positions: [number, number][] }) {
-  const map = useMap();
+// function MapBounds({ positions }: { positions: [number, number][] }) {
+//   const map = useMap();
 
-  useEffect(() => {
-    if (positions.length > 0) {
-      const bounds = L.latLngBounds(positions);
-      map.fitBounds(bounds, {
-        padding: [50, 50],
-        maxZoom: 15
-      });
-    }
-  }, [positions, map]);
+//   useEffect(() => {
+//     if (positions.length > 0) {
+//       const bounds = L.latLngBounds(positions);
+//       map.fitBounds(bounds, {
+//         padding: [50, 50],
+//         maxZoom: 15
+//       });
+//     }
+//   }, [positions, map]);
 
-  return null;
-}
+//   return null;
+// }
 
-function AutoZoom({
-  position,
-  isPlaying,
-  autoZoomEnabled
-}: {
-  position: [number, number] | null;
-  isPlaying: boolean;
-  autoZoomEnabled: boolean;
-}) {
-  const map = useMap();
-  const lastPositionRef = useRef<[number, number] | null>(null);
+// function AutoZoom({
+//   position,
+//   isPlaying,
+//   autoZoomEnabled
+// }: {
+//   position: [number, number] | null;
+//   isPlaying: boolean;
+//   autoZoomEnabled: boolean;
+// }) {
+//   const map = useMap();
+//   const lastPositionRef = useRef<[number, number] | null>(null);
 
-  useEffect(() => {
-    if (!autoZoomEnabled || !position) return;
+//   useEffect(() => {
+//     if (!autoZoomEnabled || !position) return;
 
-    const shouldApplyZoom = () => {
-      if (!lastPositionRef.current) return true;
-      const distance = L.latLng(position).distanceTo(L.latLng(lastPositionRef.current));
-      return distance > 100 || isPlaying;
-    };
+//     const shouldApplyZoom = () => {
+//       if (!lastPositionRef.current) return true;
+//       const distance = L.latLng(position).distanceTo(L.latLng(lastPositionRef.current));
+//       return distance > 100 || isPlaying;
+//     };
 
-    if (shouldApplyZoom()) {
-      const targetZoom = isPlaying ? 15 : 17;
-      map.setView(position, targetZoom, {
-        animate: true,
-        duration: 1.5,
-        easeLinearity: 0.25
-      });
-      lastPositionRef.current = position;
-    }
-  }, [position, isPlaying, autoZoomEnabled, map]);
+//     if (shouldApplyZoom()) {
+//       const targetZoom = isPlaying ? 15 : 17;
+//       map.setView(position, targetZoom, {
+//         animate: true,
+//         duration: 1.5,
+//         easeLinearity: 0.25
+//       });
+//       lastPositionRef.current = position;
+//     }
+//   }, [position, isPlaying, autoZoomEnabled, map]);
 
-  return null;
-}
+//   return null;
+// }
 
 // =====================================
 // 🎯 COMPONENTE PRINCIPAL
 // =====================================
 
+
+
 const GPSMapViewer = () => {
   // Estados principais
-   const { t } = useTranslation();
+  const { t } = useTranslation();
+  const { companyId } = useCompany()
+  // const [previousPoint, setPreviousPoint] = useState<GPSPoint | null>(null);
+  const [shouldApplyPlayerZoom, setShouldApplyPlayerZoom] = useState(false);
   const [data, setData] = useState<GPSPoint[]>([]);
   const [stats, setStats] = useState<GPSStats | null>(null);
   const [loading, setLoading] = useState(false);
@@ -479,6 +521,10 @@ const GPSMapViewer = () => {
   const [currentPointIndex, setCurrentPointIndex] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1000);
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
+  
+
+
+
 
   // Mapa
   const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('streets');
@@ -616,10 +662,14 @@ const GPSMapViewer = () => {
     };
   }, [isPlaying, data.length, playbackSpeed, filters.latest_only]);
 
-  const togglePlayPause = () => setIsPlaying(!isPlaying);
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
+    setShouldApplyPlayerZoom(true); // Habilitar zoom do player
+  };
   const stopPlayback = () => {
     setIsPlaying(false);
     setCurrentPointIndex(0);
+    setShouldApplyPlayerZoom(false); // Desabilitar zoom do player
   };
   const goToNext = () => {
     setCurrentPointIndex((prev) => Math.min(prev + 1, data.length - 1));
@@ -627,6 +677,35 @@ const GPSMapViewer = () => {
   const goToPrevious = () => {
     setCurrentPointIndex((prev) => Math.max(prev - 1, 0));
   };
+
+
+  // E use este componente:
+  function ControlledAutoZoom({
+    position,
+    isPlaying,
+    autoZoomEnabled,
+    shouldApplyZoom
+  }: {
+    position: [number, number] | null;
+    isPlaying: boolean;
+    autoZoomEnabled: boolean;
+    shouldApplyZoom: boolean;
+  }) {
+    const map = useMap();
+
+    useEffect(() => {
+      if (!autoZoomEnabled || !shouldApplyZoom || !position || !isPlaying) return;
+
+      // Aplicar zoom suave para o ponto atual
+      map.setView(position, 17, {
+        animate: true,
+        duration: 1.0,
+        easeLinearity: 0.25
+      });
+    }, [position, isPlaying, autoZoomEnabled, shouldApplyZoom, map]);
+
+    return null;
+  }
 
   // =====================================
   // 📍 DADOS PARA O MAPA
@@ -650,10 +729,10 @@ const GPSMapViewer = () => {
 
   const uniqueDevices = Object.keys(dataByDevice);
 
-  const positions: [number, number][] = validData.map((point) => [
-    point.gps_latitude,
-    point.gps_longitude,
-  ]);
+  // const positions: [number, number][] = validData.map((point) => [
+  //   point.gps_latitude,
+  //   point.gps_longitude,
+  // ]);
 
   const currentPosition =
     validData.length > 0 && currentPointIndex < validData.length
@@ -730,6 +809,7 @@ const GPSMapViewer = () => {
     fetchGPSData(1);
   };
 
+
   // =====================================
   // 🎨 RENDERIZAÇÃO
   // =====================================
@@ -752,18 +832,17 @@ const GPSMapViewer = () => {
               {/* ⭐ BOTÃO MAPA DE CALOR */}
               <button
                 onClick={() => setShowHeatmap(!showHeatmap)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  showHeatmap
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                    : 'bg-white/20 hover:bg-white/30 text-white'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showHeatmap
+                  ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                  : 'bg-white/20 hover:bg-white/30 text-white'
+                  }`}
                 // title={showHeatmap ? 'Ocultar mapa de calor' : 'Mostrar mapa de calor'}
                 title={showHeatmap ? t('gpsMap.map.hideHeatmap') : t('gpsMap.map.showHeatmap')}
               >
                 <FireIcon className="h-5 w-5" />
                 {t('gpsMap.map.heatmap')}
               </button>
-              
+
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
@@ -783,7 +862,7 @@ const GPSMapViewer = () => {
               <div className="dropdown-container">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('gpsMap.filters.devices')}
-                  
+
                   {loadingDevices && (
                     <span className="ml-2 text-xs text-gray-500 animate-pulse">
                       {t('gpsMap.filters.loadingDevices')}
@@ -1190,8 +1269,8 @@ const GPSMapViewer = () => {
                 <button
                   onClick={() => setAutoZoomEnabled(!autoZoomEnabled)}
                   className={`px-3 py-2 rounded-lg transition-colors ${autoZoomEnabled
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-600'
                     }`}
                   title="Zoom Automático"
                 >
@@ -1254,8 +1333,8 @@ const GPSMapViewer = () => {
               <button
                 onClick={() => setAutoZoomEnabled(!autoZoomEnabled)}
                 className={`px-3 py-2 rounded-lg transition-colors text-sm ${autoZoomEnabled
-                    ? 'bg-green-100 text-green-700 border border-green-300'
-                    : 'bg-gray-100 text-gray-600 border border-gray-300'
+                  ? 'bg-green-100 text-green-700 border border-green-300'
+                  : 'bg-gray-100 text-gray-600 border border-gray-300'
                   }`}
                 title="Zoom Automático"
               >
@@ -1288,7 +1367,7 @@ const GPSMapViewer = () => {
             <div className="flex items-center justify-center h-[700px]">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Carregando dados GPS...</p>
+                <p className="text-gray-600">{t('gpsMap.status.loading')}</p>
               </div>
             </div>
           ) : error ? (
@@ -1300,7 +1379,7 @@ const GPSMapViewer = () => {
                   onClick={() => fetchGPSData(page)}
                   className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
-                  Tentar Novamente
+                  {t('gpsMap.status.tryAgain')}
                 </button>
               </div>
             </div>
@@ -1310,12 +1389,12 @@ const GPSMapViewer = () => {
                 <MapPinIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600">
                   {filters.latest_only
-                    ? "Nenhum dispositivo encontrado"
-                    : "Nenhuma rota carregada"
+                    ? t('gpsMap.modes.noDevices')
+                    : t('gpsMap.modes.noRoute')
                   }
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
-                  Configure os filtros e clique em 'Aplicar Filtros'
+                  {t('gpsRouteMap.map.configureFilters')}
                 </p>
               </div>
             </div>
@@ -1323,7 +1402,7 @@ const GPSMapViewer = () => {
             <MapContainer
               center={currentPosition || center}
               zoom={13}
-              maxZoom={20}
+              maxZoom={22}
               zoomControl={false}
               style={{ height: '700px', width: '100%' }}
               className="rounded-lg shadow-md"
@@ -1331,16 +1410,27 @@ const GPSMapViewer = () => {
               <TileLayer
                 attribution={MAP_TYPES[mapType].attribution}
                 url={MAP_TYPES[mapType].url}
-                maxZoom={MAP_TYPES[mapType].maxZoom}
+                maxNativeZoom={MAP_TYPES[mapType]?.maxNativeZoom}  // ✅ Zoom do servidor
+                maxZoom={MAP_TYPES[mapType].maxZoom}              // ✅ Zoom máximo permitido
               />
 
-              <AutoZoom
-                position={currentPosition}
-                isPlaying={isPlaying}
-                autoZoomEnabled={autoZoomEnabled && !filters.latest_only}
-              />
+                    <ControlledAutoZoom
+                      position={currentPosition}
+                      isPlaying={isPlaying}
+                      autoZoomEnabled={autoZoomEnabled && !filters.latest_only}
+                      shouldApplyZoom={shouldApplyPlayerZoom}
+                    />
 
-              <MapBounds positions={positions} />
+                    {/* <MapBounds positions={positions} /> */}
+
+                    {/* ⭐ MAPBOUNDS CONDICIONAL - Apenas quando NÃO está em reprodução */}
+                    {/* {(!isPlaying && !isDragging) && (
+                      <MapBounds positions={validData.map(point => [
+                        point.gps_latitude,
+                        point.gps_longitude
+                      ])} />
+                    )} */}
+
 
               {/* ⭐ MAPA DE CALOR */}
               <HeatmapLayer points={validData} show={showHeatmap} />
@@ -1484,7 +1574,7 @@ const GPSMapViewer = () => {
                               className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex items-center justify-center gap-2"
                             >
                               <MapPinIcon className="h-4 w-4" />
-                              Ver detalhes completos
+                              {t('gpsMap.markers.viewDetails')}
                             </button>
                           </div>
                         </div>
@@ -1553,10 +1643,10 @@ const GPSMapViewer = () => {
                             {new Date(point.timestamp).toLocaleString('pt-BR')}
                           </div>
                           <div>
-                            <strong>Latitude:</strong> {point.gps_latitude}
+                            <strong>{t('gpsMap.markers.latitude')}:</strong> {point.gps_latitude}
                           </div>
                           <div>
-                            <strong>Longitude:</strong> {point.gps_longitude}
+                            <strong>{t('gpsMap.markers.longitude')}:</strong> {point.gps_longitude}
                           </div>
                           <div>
                             <strong>Precisão:</strong> {point.gps_accuracy}m
@@ -1900,7 +1990,7 @@ const GPSMapViewer = () => {
                   <div className="space-y-4">
                     <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                       <MapPinIcon className="h-5 w-5 text-blue-500" />
-                      Localização GPS
+                      {t('gpsMap.modal.location')}
                     </h4>
 
                     <div className="space-y-3">
@@ -1922,7 +2012,7 @@ const GPSMapViewer = () => {
                       </div>
 
                       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <label className="text-sm font-medium text-gray-600 mb-2 block">Precisão do GPS</label>
+                        <label className="text-sm font-medium text-gray-600 mb-2 block">{t('gpsMap.modal.gpsAccuracy')}</label>
                         <div className="flex items-center justify-between">
                           <span className={`px-3 py-2 rounded-full text-sm font-medium ${selectedPoint.gps_accuracy < 10 ? 'bg-green-100 text-green-800 border border-green-200' :
                             selectedPoint.gps_accuracy < 25 ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
@@ -1931,10 +2021,10 @@ const GPSMapViewer = () => {
                             {selectedPoint.gps_accuracy} metros
                           </span>
                           <div className="text-right">
-                            <div className="text-xs text-gray-500">Qualidade</div>
+                            <div className="text-xs text-gray-500">{t('gpsMap.modal.quality')}</div>
                             <div className="text-sm font-medium text-gray-900">
                               {selectedPoint.gps_accuracy < 10 ? '🎯 Excelente' :
-                                selectedPoint.gps_accuracy < 25 ? '✅ Boa' : '⚠️ Regular'}
+                                selectedPoint.gps_accuracy < 25 ? `✅ ${t('gpsMap.modal.good')}` : `⚠️ ${t('gpsMap.modal.regular')}`}
                             </div>
                           </div>
                         </div>
@@ -1946,12 +2036,12 @@ const GPSMapViewer = () => {
                   <div className="space-y-4">
                     <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                       <BoltIcon className="h-5 w-5 text-yellow-500" />
-                      Status do Dispositivo
+                      {t('gpsMap.modal.deviceStatus')}
                     </h4>
 
                     <div className="space-y-3">
                       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <label className="text-sm font-medium text-gray-600">Data e Hora da Leitura</label>
+                        <label className="text-sm font-medium text-gray-600">{t('gpsMap.modal.readingTime')}</label>
                         <p className="text-lg font-medium text-gray-900">
                           {new Date(selectedPoint.timestamp).toLocaleDateString('pt-BR', {
                             weekday: 'long',
@@ -2022,7 +2112,7 @@ const GPSMapViewer = () => {
 
                 {/* Informações Técnicas Expandidas */}
                 <div className="mt-6 pt-4 border-t border-gray-200">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Informações Técnicas</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">{t('gpsMap.modal.technicalInfo')}</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <label className="text-gray-600 font-medium">DEV_EUI</label>
@@ -2085,14 +2175,14 @@ const GPSMapViewer = () => {
               <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
                 <div className="flex justify-between items-center">
                   <div className="text-sm text-gray-600">
-                    Dados atualizados em {new Date(selectedPoint.timestamp).toLocaleString('pt-BR')}
+                    {t('gpsMap.modal.updatedAt')} {new Date(selectedPoint.timestamp).toLocaleString('pt-BR')}
                   </div>
                   <div className="flex gap-3">
                     <button
                       onClick={() => setIsModalOpen(false)}
                       className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      Fechar
+                      {t('gpsMap.modal.close')}
                     </button>
                     <button
                       onClick={() => {
@@ -2115,7 +2205,7 @@ const GPSMapViewer = () => {
                           d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
                         />
                       </svg>
-                      Exportar PDF
+                      {t('gpsMap.modal.exportPDF')}
                     </button>
                   </div>
                 </div>

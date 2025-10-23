@@ -240,6 +240,8 @@
     "title": "Device Monitoring Dashboard",
     "lastUpdate": "Last update",
     "refresh": "Refresh",
+    "refreshing": "Updating...",
+    "updateData": "Updating data...",
     "searchPlaceholder": {
       "devices": "Search by Device or Customer..."
     },
@@ -588,6 +590,7 @@
       "noRoute": "No route loaded",
       "loadRoute": "Load Route",
       "loading": "Loading GPS data...",
+      "configureFilters": "Configure filters and click 'Apply Filters'",
       "mapTypes": {
         "streets": "Streets",
         "satellite": "Satellite",

@@ -238,6 +238,8 @@
     "title": "Painel de Monitoramento de Dispositivos",
     "lastUpdate": "Última atualização",
     "refresh": "Atualizar",
+    "refreshing": "Atualizando...",
+    "updateData": "Atualizando dados...",
     "searchPlaceholder": {
       "devices": "Buscar por Dispositivo ou Cliente..."
     },
@@ -586,6 +588,7 @@
       "noRoute": "Nenhuma rota carregada",
       "loadRoute": "Carregar Rota",
       "loading": "Carregando dados GPS...",
+      "configureFilters": "Configure os filtros e clique em 'Aplicar Filtros'",
       "mapTypes": {
         "streets": "Ruas",
         "satellite": "Satélite",

@@ -335,3 +335,11 @@
     stroke-dashoffset: 0;
   }
 } */
+
+.leaflet-container {
+  transition: transform 0.8s ease-out;
+}
+
+.leaflet-pane {
+  transform-origin: center center;
+}

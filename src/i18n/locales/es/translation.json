@@ -238,6 +238,8 @@
     "title": "Panel de Monitoreo de Dispositivos",
     "lastUpdate": "Última actualización",
     "refresh": "Actualizar",
+    "refreshing": "Actualizando...",
+    "updateData": "Actualizando datos...",
     "searchPlaceholder": {
       "devices": "Buscar por Dispositivo o Cliente..."
     },
@@ -585,6 +587,7 @@
       "noRoute": "Ninguna ruta cargada",
       "loadRoute": "Cargar Ruta",
       "loading": "Cargando datos GPS...",
+      "configureFilters": "Configure los filtros y haga clic en 'Aplicar Filtros'",
       "mapTypes": {
         "streets": "Calles",
         "satellite": "Satélite",

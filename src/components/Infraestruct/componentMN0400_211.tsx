@@ -30,7 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
 import GPSRouteMapLeaflet from './Map/GPSRouteMap';
 import GPSMapViewer from './Map/GPSMapViewer';
-import { companyId } from '../../utils/variables';
+import { useCompany } from '../../hooks/useCompany';
 
 // =====================================
 // 📊 INTERFACES
@@ -160,7 +160,7 @@ interface DetailsModalProps {
 
 const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
   
-  
+  const { companyId } = useCompany()
   const [loading, setLoading] = useState(false);
   const [deviceDetails, setDeviceDetails] = useState<DeviceDetails | null>(null);
   const [activeDetailsTab, setActiveDetailsTab] = useState<'info' | 'route' | 'events' | 'config'>('info');
@@ -526,7 +526,7 @@ interface MapModalProps {
 }
 
 const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
-
+  
   const formatCoordinate = (coord: string | number | null | undefined): string => {
     if (coord === null || coord === undefined || coord === '') return 'N/A';
 
@@ -813,8 +813,9 @@ const ChartContainer = ({
 };
 
 export default function DeviceLogsView() {
+ 
   const { t } = useTranslation();
-  
+  const { companyId } = useCompany()
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [motionDevices, setMotionDevices] = useState<DevicePosition[]>([]);
@@ -856,7 +857,8 @@ export default function DeviceLogsView() {
 
   const fetchData = async () => {
     setRefreshing(true);
-
+    console.log('ID da company: ', companyId)
+    
     //https://api-dashboards-u1oh.onrender.com
     try {
       const [overviewRes, motionRes, gatewayRes, eventsRes, customerRes] = await Promise.all([
@@ -1265,7 +1267,7 @@ export default function DeviceLogsView() {
               {autoRefreshEnabled ? (
                 <>
                   <PauseIcon className="h-4 w-4" />
-                  Pausar
+                  {t('gpsMap.player.pause')}
                 </>
               ) : (
                 <>
@@ -1282,7 +1284,7 @@ export default function DeviceLogsView() {
               className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              {refreshing ? 'Atualizando...' : 'Atualizar'}
+              {refreshing ? t('deviceLogs.refreshing') : t('deviceLogs.refresh')}
             </button>
           </div>
         </div>
@@ -1328,13 +1330,13 @@ export default function DeviceLogsView() {
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${autoRefreshEnabled ? 'bg-green-500' : 'bg-gray-400'}`} />
             <span className="text-sm text-gray-600">
-              Última atualização: {new Date().toLocaleTimeString('pt-BR')}
+              {t('gpsMap.modal.lastUpdate')}: {new Date().toLocaleTimeString('pt-BR')}
             </span>
           </div>
           {refreshing && (
             <span className="text-sm text-blue-600 animate-pulse flex items-center gap-2">
               <ArrowPathIcon className="h-4 w-4 animate-spin" />
-              Atualizando dados...
+              {t('deviceLogs.updateData')}
             </span>
           )}
         </div>
