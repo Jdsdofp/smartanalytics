@@ -491,10 +491,14 @@ const GPSMapViewer = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Search term select
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Lista de dispositivos disponíveis
   const [availableDevices, setAvailableDevices] = useState<string[]>([]);
   const [loadingDevices, setLoadingDevices] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
 
   // Estados do modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -521,7 +525,7 @@ const GPSMapViewer = () => {
   const [currentPointIndex, setCurrentPointIndex] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1000);
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
-  
+
 
 
 
@@ -809,6 +813,11 @@ const GPSMapViewer = () => {
     fetchGPSData(1);
   };
 
+  // Adicione esta constante depois dos estados principais
+  const filteredDevices = availableDevices.filter(devEui =>
+    devEui.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
 
   // =====================================
   // 🎨 RENDERIZAÇÃO
@@ -859,6 +868,7 @@ const GPSMapViewer = () => {
           <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
             <div className="space-y-4">
               {/* Dev EUI - Dropdown com Checkboxes */}
+              {/* Dev EUI - Dropdown com Search e Checkboxes */}
               <div className="dropdown-container">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('gpsMap.filters.devices')}
@@ -884,62 +894,80 @@ const GPSMapViewer = () => {
                         : `${filters.dev_eui.length} dispositivo(s) selecionado(s)`}
                     </span>
                     <svg
-                      className={`w-5 h-5 text-gray-400 transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''
-                        }`}
+                      className={`w-5 h-5 text-gray-400 transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
 
                   {/* Dropdown Menu */}
                   {isDropdownOpen && (
                     <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-hidden">
-                      {/* Header com ações */}
-                      <div className="sticky top-0 bg-gray-50 border-b border-gray-200 px-3 py-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                      {/* Header com search e ações */}
+                      <div className="sticky top-0 bg-white border-b border-gray-200 p-3 space-y-2">
+                        {/* Search Input */}
+                        <div className="relative">
+                          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Pesquisar dev_eui..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          {searchTerm && (
+                            <button
+                              onClick={() => setSearchTerm('')}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <XMarkIcon className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Ações */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={selectAllDevices}
+                              className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                              {t('gpsMap.filters.selectAll')}
+                            </button>
+                            <span className="text-gray-300">|</span>
+                            <button
+                              type="button"
+                              onClick={deselectAllDevices}
+                              className="text-xs text-red-600 hover:text-red-800 font-medium"
+                            >
+                              {t('gpsMap.filters.clear')}
+                            </button>
+                          </div>
                           <button
                             type="button"
-                            onClick={selectAllDevices}
-                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                            onClick={fetchAvailableDevices}
+                            disabled={loadingDevices}
+                            className="text-xs text-gray-500 hover:text-gray-700"
+                            title="Recarregar"
                           >
-                            {t('gpsMap.filters.selectAll')}
-                          </button>
-                          <span className="text-gray-300">|</span>
-                          <button
-                            type="button"
-                            onClick={deselectAllDevices}
-                            className="text-xs text-red-600 hover:text-red-800 font-medium"
-                          >
-                            {t('gpsMap.filters.clear')}
+                            <ArrowPathIcon className="h-4 w-4" />
                           </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={fetchAvailableDevices}
-                          disabled={loadingDevices}
-                          className="text-xs text-gray-500 hover:text-gray-700"
-                          title="Recarregar"
-                        >
-                          <ArrowPathIcon className="h-4 w-4" />
-                        </button>
                       </div>
 
-                      {/* Lista de dispositivos com checkboxes */}
+                      {/* Lista de dispositivos filtrados */}
                       <div className="overflow-y-auto max-h-64">
-                        {availableDevices.length === 0 ? (
+                        {filteredDevices.length === 0 ? (
                           <div className="px-4 py-8 text-center text-sm text-gray-500">
-                            {t('gpsMap.filters.noDevices')}
+                            {searchTerm ? 'Nenhum dispositivo encontrado' : t('gpsMap.filters.noDevices')}
                           </div>
                         ) : (
-                          availableDevices.map((devEui) => {
+                          filteredDevices.map((devEui) => {
                             const isSelected = filters.dev_eui.includes(devEui);
                             const color = getDeviceColor(devEui, filters.dev_eui);
 
@@ -978,19 +1006,28 @@ const GPSMapViewer = () => {
                         )}
                       </div>
 
-                      {/* Footer com contador */}
-                      {filters.dev_eui.length > 0 && (
-                        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
-                          <p className="text-xs text-gray-600 text-center">
-                            {filters.dev_eui.length} de {availableDevices.length} dispositivos selecionados
+                      {/* Footer com contador e informações de filtro */}
+                      <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-gray-600">
+                            {filteredDevices.length} de {availableDevices.length} dispositivos
+                            {searchTerm && ` (filtrado)`}
                           </p>
+                          {searchTerm && (
+                            <button
+                              onClick={() => setSearchTerm('')}
+                              className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                              Limpar filtro
+                            </button>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   )}
                 </div>
 
-                {/* Dispositivos selecionados - Tags com cores */}
+                {/* Restante do código dos dispositivos selecionados permanece igual */}
                 {filters.dev_eui.length > 0 && (
                   <div className="mt-3">
                     <div className="flex items-center justify-between mb-2">
@@ -1137,7 +1174,6 @@ const GPSMapViewer = () => {
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
                 >
                   <MagnifyingGlassIcon className="h-5 w-5" />
-                  {/* {loading ? 'Buscando...' : 'Aplicar Filtros'} */}
                   {loading ? t('gpsMap.filters.searching') : t('gpsMap.filters.applyFilters')}
                 </button>
                 <button
@@ -1414,17 +1450,17 @@ const GPSMapViewer = () => {
                 maxZoom={MAP_TYPES[mapType].maxZoom}              // ✅ Zoom máximo permitido
               />
 
-                    <ControlledAutoZoom
-                      position={currentPosition}
-                      isPlaying={isPlaying}
-                      autoZoomEnabled={autoZoomEnabled && !filters.latest_only}
-                      shouldApplyZoom={shouldApplyPlayerZoom}
-                    />
+              <ControlledAutoZoom
+                position={currentPosition}
+                isPlaying={isPlaying}
+                autoZoomEnabled={autoZoomEnabled && !filters.latest_only}
+                shouldApplyZoom={shouldApplyPlayerZoom}
+              />
 
-                    {/* <MapBounds positions={positions} /> */}
+              {/* <MapBounds positions={positions} /> */}
 
-                    {/* ⭐ MAPBOUNDS CONDICIONAL - Apenas quando NÃO está em reprodução */}
-                    {/* {(!isPlaying && !isDragging) && (
+              {/* ⭐ MAPBOUNDS CONDICIONAL - Apenas quando NÃO está em reprodução */}
+              {/* {(!isPlaying && !isDragging) && (
                       <MapBounds positions={validData.map(point => [
                         point.gps_latitude,
                         point.gps_longitude

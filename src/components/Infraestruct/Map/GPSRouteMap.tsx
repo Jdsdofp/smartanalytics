@@ -601,26 +601,15 @@ const GPSRouteMapLeaflet = () => {
   const [maxAccuracy, setMaxAccuracy] = useState('');
   const [limit, setLimit] = useState(200);
   const [showFilters, setShowFilters] = useState(false);
-
-  // // Estados para o player da rota
-  // const [isPlaying, setIsPlaying] = useState(false);
-  // const [currentPointIndex, setCurrentPointIndex] = useState(0);
-  // const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  // const [progress, setProgress] = useState(0);
-  // const [isDragging, setIsDragging] = useState(false);
-  // const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
-  // const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('streets');
-  // const playbackIntervalRef = useRef<any | null>(null);
-
   
-  // Estados para o player da rota - ATUALIZADOS
+  // Estados para o player da rota
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPointIndex, setCurrentPointIndex] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
-  const [shouldApplyPlayerZoom, setShouldApplyPlayerZoom] = useState(false); // NOVO ESTADO
+  const [shouldApplyPlayerZoom, setShouldApplyPlayerZoom] = useState(false);
   const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('streets');
   const playbackIntervalRef = useRef<any | null>(null);
 
@@ -674,49 +663,8 @@ const GPSRouteMapLeaflet = () => {
     setLimit(200);
   };
 
+
   // Funções do player da rota
-  // const startPlayback = () => {
-  //   if (validData.length === 0) return;
-
-  //   setIsPlaying(true);
-  //   playbackIntervalRef.current = setInterval(() => {
-  //     setCurrentPointIndex(prev => {
-  //       const nextIndex = prev + 1;
-  //       if (nextIndex >= validData.length) {
-  //         stopPlayback();
-  //         return prev;
-  //       }
-  //       setProgress((nextIndex / (validData.length - 1)) * 100);
-  //       return nextIndex;
-  //     });
-  //   }, 1000 / playbackSpeed);
-  // };
-
-  // const pausePlayback = () => {
-  //   setIsPlaying(false);
-  //   if (playbackIntervalRef.current) {
-  //     clearInterval(playbackIntervalRef.current);
-  //     playbackIntervalRef.current = null;
-  //   }
-  // };
-
-  // const stopPlayback = () => {
-  //   setIsPlaying(false);
-  //   setCurrentPointIndex(0);
-  //   setProgress(0);
-  //   if (playbackIntervalRef.current) {
-  //     clearInterval(playbackIntervalRef.current);
-  //     playbackIntervalRef.current = null;
-  //   }
-  // };
-
-  // const resetPlayer = () => {
-  //   stopPlayback();
-  //   setCurrentPointIndex(0);
-  //   setProgress(0);
-  // };
-
-  // Funções do player da rota - ATUALIZADAS
 const startPlayback = () => {
   if (validData.length === 0) return;
 
