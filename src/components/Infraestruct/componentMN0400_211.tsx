@@ -33,60 +33,141 @@ import GPSMapViewer from './Map/GPSMapViewer';
 import { useCompany } from '../../hooks/useCompany';
 
 // =====================================
-// 📊 INTERFACES
+// 📊 INTERFACES ATUALIZADAS
 // =====================================
 interface DashboardOverview {
   kpis: {
     uptime: {
       devices_online: number;
       total_devices: number;
-      uptime_percentage: number;
+      uptime_percentage: string;
     };
     gps_success: {
       total_reports: number;
-      valid_gps_reports: number;
-      success_rate_percent: number;
+      valid_gps_reports: string;
+      success_rate_percent: string;
     };
     battery_health: {
       total_devices: number;
-      healthy_devices: number;
-      warning_devices: number;
-      critical_devices: number;
-      health_percentage: number;
+      healthy_devices: string;
+      warning_devices: string;
+      critical_devices: string;
+      health_percentage: string;
     };
     accuracy_distribution: Array<{
       accuracy_range: string;
       report_count: number;
-      percentage: number;
+      percentage: string;
     }>;
   };
-  alerts: {
+  device_alerts: {
     active_sos_count: number;
-    active_sos_list: Array<{
-      dev_eui: string;
-      customer_name: string;
-      sos_start_time: string;
-      gps_latitude: number;
-      gps_longitude: number;
-      battery_level: number;
-      minutes_elapsed: number;
-    }>;
+    active_sos_list: any[];
     low_battery_count: number;
     low_battery_devices: Array<{
       dev_eui: string;
       customer_name: string;
-      battery_level: number;
+      domain_name: string;
       timestamp: string;
+      battery_level: number;
+      battery_status: string;
+      gps_latitude: string;
+      gps_longitude: string;
     }>;
     offline_count: number;
-    offline_devices: Array<{
-      dev_eui: string;
-      customer_name: string;
-      last_position: string;
-      hours_offline: number;
+    offline_devices: any[];
+  };
+  people_alerts: {
+    summary: {
+      total_people: number;
+      alarm1_active: string;
+      alarm2_active: string;
+      any_alarm_active: string;
+      button1_pressed: string;
+      button2_pressed: string;
+      any_button_pressed: string;
+      mandown_alerts: string;
+      people_with_alerts: string;
+      highly_critical: string;
+      critical: string;
+      alerts: string;
+    };
+    active_alerts: Array<{
+      person_code: string;
+      person_name: string;
+      dev_uid: string;
+      department_name: string;
+      role_name: string | null;
+      current_zone_description: string;
+      alarm1_status: string;
+      alarm1_minutes_ago: number;
+      alarm2_status: string;
+      alarm2_minutes_ago: number;
+      button1_status: string;
+      button1_minutes_ago: number | null;
+      button2_status: string;
+      button2_minutes_ago: number | null;
+      mandown_alert_status: string;
+      mandown_alert_last_updated: string;
+      alert_priority: string;
+      alert_score: number;
+      status_name: string;
+      battery_level: number;
+      last_report_datetime: string;
+      minutes_since_report: number;
+    }>;
+    active_alerts_count: number;
+    multiple_alerts: Array<{
+      person_code: string;
+      person_name: string;
+      dev_uid: string;
+      department_name: string;
+      current_zone_description: string;
+      active_alerts_count: number;
+      active_alerts_list: string;
+      alert_priority: string;
+      alert_score: number;
+      battery_level: number;
+      last_report_datetime: string;
+    }>;
+    by_department: Array<{
+      department_name: string;
+      total_people: number;
+      alarm1_count: string;
+      alarm2_count: string;
+      button1_count: string;
+      button2_count: string;
+      mandown_count: string;
+      total_alerts: string;
+      alert_percentage: string;
+    }>;
+    by_zone: Array<{
+      zone: string;
+      total_people: number;
+      alarm1: string;
+      alarm2: string;
+      button1: string;
+      button2: string;
+      mandown: string;
+      total_alerts: string;
+      alert_density: string;
+      avg_alert_score: string;
+    }>;
+    button_comparison: Array<{
+      button_type: string;
+      pressed: string;
+      not_pressed: string;
+      avg_minutes_since_press: string;
+    }>;
+    alarm_comparison: Array<{
+      alarm_type: string;
+      active: string;
+      inactive: string;
+      avg_minutes_active: string;
     }>;
   };
   generated_at: string;
+  company_id: string;
 }
 
 interface DevicePosition {
@@ -155,8 +236,6 @@ interface DetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-
 
 const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
   
@@ -812,6 +891,20 @@ const ChartContainer = ({
   );
 };
 
+// Função para converter string para número seguro
+const safeParseNumber = (value: string | number): number => {
+  if (typeof value === 'number') return value;
+  return parseFloat(value) || 0;
+};
+
+// Função para adaptar os dados da API
+const adaptDashboardData = (apiData: any): DashboardOverview => {
+  return {
+    ...apiData,
+    // Mantemos a estrutura original da API
+  };
+};
+
 export default function DeviceLogsView() {
  
   const { t } = useTranslation();
@@ -859,7 +952,6 @@ export default function DeviceLogsView() {
     setRefreshing(true);
     console.log('ID da company: ', companyId)
     
-    //https://api-dashboards-u1oh.onrender.com
     try {
       const [overviewRes, motionRes, gatewayRes, eventsRes, customerRes] = await Promise.all([
         fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/dashboard/overview`),
@@ -875,7 +967,10 @@ export default function DeviceLogsView() {
       const eventsData = await eventsRes.json();
       const customerData = await customerRes.json();
 
-      setOverview(overviewData);
+      // Adapte os dados da overview
+      const adaptedOverview = adaptDashboardData(overviewData);
+      
+      setOverview(adaptedOverview);
       setMotionDevices(motionData);
       setGatewayQuality(gatewayData);
       setEventTypes(eventsData);
@@ -944,17 +1039,17 @@ export default function DeviceLogsView() {
                 radius: '70%',
                 data: [
                   {
-                    value: overview.kpis.battery_health.healthy_devices,
+                    value: safeParseNumber(overview.kpis.battery_health.healthy_devices),
                     name: t('batteryChart.healthy'),
                     itemStyle: { color: '#10b981' }
                   },
                   {
-                    value: overview.kpis.battery_health.warning_devices,
+                    value: safeParseNumber(overview.kpis.battery_health.warning_devices),
                     name: t('batteryChart.warning'),
                     itemStyle: { color: '#f59e0b' }
                   },
                   {
-                    value: overview.kpis.battery_health.critical_devices,
+                    value: safeParseNumber(overview.kpis.battery_health.critical_devices),
                     name: t('batteryChart.critical'),
                     itemStyle: { color: '#ef4444' }
                   },
@@ -1289,11 +1384,11 @@ export default function DeviceLogsView() {
           </div>
         </div>
 
-        {/* Alertas */}
+        {/* Alertas - ATUALIZADO para usar device_alerts */}
         <div className="flex flex-wrap gap-3">
-          <AlertBadge type="sos" count={overview.alerts.active_sos_count} />
-          <AlertBadge type="battery" count={overview.alerts.low_battery_count} />
-          <AlertBadge type="offline" count={overview.alerts.offline_count} />
+          <AlertBadge type="sos" count={overview.device_alerts.active_sos_count} />
+          <AlertBadge type="battery" count={overview.device_alerts.low_battery_count} />
+          <AlertBadge type="offline" count={overview.device_alerts.offline_count} />
         </div>
       </div>
 
@@ -1342,13 +1437,13 @@ export default function DeviceLogsView() {
         </div>
       </div>
 
-      {/* ✅ TAB OVERVIEW COM KPIs TRADUZIDOS */}
+      {/* ✅ TAB OVERVIEW COM KPIs ATUALIZADOS */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <KPICard
               title={t('deviceLogs.kpis.deviceUptime.title')}
-              value={`${overview.kpis.uptime.uptime_percentage}%`}
+              value={`${safeParseNumber(overview.kpis.uptime.uptime_percentage)}%`}
               subtitle={t('deviceLogs.kpis.deviceUptime.subtitle', {
                 online: overview.kpis.uptime.devices_online,
                 total: overview.kpis.uptime.total_devices
@@ -1357,33 +1452,33 @@ export default function DeviceLogsView() {
               color="green"
               trend="up"
             />
-            {/* <KPICard
+            <KPICard
               title={t('deviceLogs.kpis.gpsSuccess.title')}
-              value={`${overview.kpis.gps_success.success_rate_percent}%`}
+              value={`${safeParseNumber(overview.kpis.gps_success.success_rate_percent)}%`}
               subtitle={t('deviceLogs.kpis.gpsSuccess.subtitle', {
                 valid: overview.kpis.gps_success.valid_gps_reports
               })}
               icon={MapPinIcon}
               color="blue"
               trend="up"
-            /> */}
+            />
             <KPICard
               title={t('deviceLogs.kpis.batteryHealth.title')}
-              value={`${overview.kpis.battery_health.health_percentage}%`}
+              value={`${safeParseNumber(overview.kpis.battery_health.health_percentage)}%`}
               subtitle={t('deviceLogs.kpis.batteryHealth.subtitle', {
-                critical: overview.kpis.battery_health.critical_devices
+                critical: safeParseNumber(overview.kpis.battery_health.critical_devices)
               })}
               icon={BoltIcon}
-              color={overview.kpis.battery_health.critical_devices > 10 ? 'red' : 'yellow'}
+              color={safeParseNumber(overview.kpis.battery_health.critical_devices) > 10 ? 'red' : 'yellow'}
             />
             <KPICard
               title={t('deviceLogs.kpis.activeAlerts.title')}
-              value={overview.alerts.active_sos_count}
+              value={overview.device_alerts.active_sos_count}
               subtitle={t('deviceLogs.kpis.activeAlerts.subtitle', {
-                lowBattery: overview.alerts.low_battery_count
+                lowBattery: overview.device_alerts.low_battery_count
               })}
               icon={ExclamationTriangleIcon}
-              color={overview.alerts.active_sos_count > 0 ? 'red' : 'green'}
+              color={overview.device_alerts.active_sos_count > 0 ? 'red' : 'green'}
             />
           </div>
 
@@ -1408,16 +1503,15 @@ export default function DeviceLogsView() {
             </div>
           </div>
 
-          {/* ✅ ALERTAS SOS TRADUZIDOS */}
-          {overview.alerts.active_sos_count > 0 && (
+          {/* ✅ ALERTAS SOS ATUALIZADOS */}
+          {overview.device_alerts.active_sos_count > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
                 <ShieldExclamationIcon className="h-6 w-6" />
-                {t('deviceLogs.sosAlerts.title', { count: overview.alerts.active_sos_count })}
+                {t('deviceLogs.sosAlerts.title', { count: overview.device_alerts.active_sos_count })}
               </h3>
               <div className="overflow-x-auto">
                 <DataTable
-
                   columns={[
                     { key: 'dev_eui', label: t('deviceLogs.tables.deviceEui') },
                     { key: 'customer_name', label: t('deviceLogs.tables.customer') },
@@ -1453,132 +1547,56 @@ export default function DeviceLogsView() {
                       ),
                     },
                   ]}
-                  data={overview.alerts.active_sos_list}
+                  data={overview.device_alerts.active_sos_list}
                 />
               </div>
             </div>
           )}
 
-        </div>
-      )}
-
-
-      {/* ✅ TAB OVERVIEW COM KPIs TRADUZIDOS */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* <KPICard
-              title={t('deviceLogs.kpis.deviceUptime.title')}
-              value={`${overview.kpis.uptime.uptime_percentage}%`}
-              subtitle={t('deviceLogs.kpis.deviceUptime.subtitle', {
-                online: overview.kpis.uptime.devices_online,
-                total: overview.kpis.uptime.total_devices
-              })}
-              icon={SignalIcon}
-              color="green"
-              trend="up"
-            /> */}
-            {/* <KPICard
-              title={t('deviceLogs.kpis.gpsSuccess.title')}
-              value={`${overview.kpis.gps_success.success_rate_percent}%`}
-              subtitle={t('deviceLogs.kpis.gpsSuccess.subtitle', {
-                valid: overview.kpis.gps_success.valid_gps_reports
-              })}
-              icon={MapPinIcon}
-              color="blue"
-              trend="up"
-            /> */}
-            {/* <KPICard
-              title={t('deviceLogs.kpis.batteryHealth.title')}
-              value={`${overview.kpis.battery_health.health_percentage}%`}
-              subtitle={t('deviceLogs.kpis.batteryHealth.subtitle', {
-                critical: overview.kpis.battery_health.critical_devices
-              })}
-              icon={BoltIcon}
-              color={overview.kpis.battery_health.critical_devices > 10 ? 'red' : 'yellow'}
-            />
-            <KPICard
-              title={t('deviceLogs.kpis.activeAlerts.title')}
-              value={overview.alerts.active_sos_count}
-              subtitle={t('deviceLogs.kpis.activeAlerts.subtitle', {
-                lowBattery: overview.alerts.low_battery_count
-              })}
-              icon={ExclamationTriangleIcon}
-              color={overview.alerts.active_sos_count > 0 ? 'red' : 'green'}
-            /> */}
-          </div>
-
-          {/* ✅ GRÁFICOS COM RESPONSIVIDADE */}
-          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('deviceLogs.charts.batteryDistribution')}
-              </h3>
-              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-                <div id="battery-chart" className="w-full h-full min-w-0" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('deviceLogs.charts.gpsAccuracy')}
-              </h3>
-              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-                <div id="accuracy-chart" className="w-full h-full min-w-0" />
-              </div>
-            </div>
-          </div> */}
-
-          {/* ✅ ALERTAS SOS TRADUZIDOS */}
-          {/* {overview.alerts.active_sos_count > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 sm:p-6">
-              <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
-                <ShieldExclamationIcon className="h-6 w-6" />
-                {t('deviceLogs.sosAlerts.title', { count: overview.alerts.active_sos_count })}
+          {/* ✅ ALERTAS DE BATERIA BAIXA */}
+          {overview.device_alerts.low_battery_count > 0 && (
+            <div className="bg-white rounded-lg shadow-sm border border-yellow-200 p-4 sm:p-6">
+              <h3 className="text-lg font-semibold text-yellow-900 mb-4 flex items-center gap-2">
+                <BoltIcon className="h-6 w-6" />
+                {t('deviceLogs.lowBatteryAlerts.title', { count: overview.device_alerts.low_battery_count })}
               </h3>
               <div className="overflow-x-auto">
                 <DataTable
-
                   columns={[
                     { key: 'dev_eui', label: t('deviceLogs.tables.deviceEui') },
                     { key: 'customer_name', label: t('deviceLogs.tables.customer') },
-                    {
-                      key: 'sos_start_time',
-                      label: t('deviceLogs.tables.startTime'),
-                      render: (val) => new Date(val).toLocaleString(),
-                    },
-                    {
-                      key: 'minutes_elapsed',
-                      label: t('deviceLogs.tables.timeElapsed'),
-                      render: (val) => t('deviceLogs.sosAlerts.minutesAgo', { minutes: val }),
-                    },
+                    { key: 'domain_name', label: t('deviceLogs.tables.domain') },
                     {
                       key: 'battery_level',
                       label: t('deviceLogs.tables.battery'),
                       render: (val) => (
-                        <span className={`font-semibold ${val < 20 ? 'text-red-600' : 'text-green-600'}`}>
+                        <span className={`font-semibold ${val < 10 ? 'text-red-600' : 'text-yellow-600'}`}>
                           {val}%
                         </span>
                       ),
                     },
                     {
-                      key: 'actions',
-                      label: t('deviceLogs.tables.location'),
-                      render: (_, row) => (
-                        <button
-                          onClick={() => openMapModal(row)}
-                          className="text-blue-600 hover:text-blue-800 text-xs font-medium underline"
-                        >
-                          {t('deviceLogs.tables.viewOnMap')}
-                        </button>
+                      key: 'battery_status',
+                      label: t('deviceLogs.tables.status'),
+                      render: (val) => (
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs ${
+                          val === 'OPERATING' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {val}
+                        </span>
                       ),
                     },
+                    {
+                      key: 'timestamp',
+                      label: t('deviceLogs.tables.lastUpdate'),
+                      render: (val) => new Date(val).toLocaleString('pt-BR'),
+                    },
                   ]}
-                  data={overview.alerts.active_sos_list}
+                  data={overview.device_alerts.low_battery_devices}
                 />
               </div>
             </div>
-          )} */}
+          )}
 
           <GPSRouteMapLeaflet />
         </div>
@@ -1671,16 +1689,15 @@ export default function DeviceLogsView() {
                 ]}
                 data={filteredMotionDevices}
                 emptyMessage={t('deviceLogs.tables.noDevicesFound')}
-
               />
             </div>
           </div>
 
-          {overview.alerts.offline_count > 0 && (
+          {overview.device_alerts.offline_count > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <SignalSlashIcon className="h-6 w-6 text-gray-500" />
-                {t('offlineDevices.title')} ({overview.alerts.offline_count})
+                {t('offlineDevices.title')} ({overview.device_alerts.offline_count})
               </h3>
               <DataTable
                 columns={[
@@ -1708,7 +1725,7 @@ export default function DeviceLogsView() {
                     render: (val) => val ? `${val}%` : t('offlineDevices.notAvailable'),
                   },
                 ]}
-                data={overview.alerts.offline_devices}
+                data={overview.device_alerts.offline_devices}
               />
             </div>
           )}
@@ -2085,9 +2102,7 @@ export default function DeviceLogsView() {
       )}
 
       {activeTab === 'rawdata' && (
-
         <RawDataExplorer />
-
       )}
 
       <MapModal
@@ -2101,7 +2116,6 @@ export default function DeviceLogsView() {
         isOpen={isDetailsModalOpen}
         onClose={closeDetailsModal}
       />
-
     </div>
   );
 }
