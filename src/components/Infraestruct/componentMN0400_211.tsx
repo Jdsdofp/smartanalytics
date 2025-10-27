@@ -31,6 +31,8 @@ import { t } from 'i18next';
 import GPSRouteMapLeaflet from './Map/GPSRouteMap';
 import GPSMapViewer from './Map/GPSMapViewer';
 import { useCompany } from '../../hooks/useCompany';
+import AssetManagementGrid from './DataGrid/AssetManagementGrid';
+import HealthScoreDashboard from './DataGrid/HealthScoreDashboard';
 
 // =====================================
 // 📊 INTERFACES ATUALIZADAS
@@ -1504,7 +1506,7 @@ export default function DeviceLogsView() {
           </div>
 
           {/* ✅ ALERTAS SOS ATUALIZADOS */}
-          {overview.device_alerts.active_sos_count > 0 && (
+          {/* {overview.device_alerts.active_sos_count > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
                 <ShieldExclamationIcon className="h-6 w-6" />
@@ -1551,7 +1553,7 @@ export default function DeviceLogsView() {
                 />
               </div>
             </div>
-          )}
+          )} */}
 
           {/* ✅ ALERTAS DE BATERIA BAIXA */}
           {overview.device_alerts.low_battery_count > 0 && (
@@ -1597,7 +1599,8 @@ export default function DeviceLogsView() {
               </div>
             </div>
           )}
-
+          <AssetManagementGrid />
+          <HealthScoreDashboard companyId={companyId}/>
           <GPSRouteMapLeaflet />
         </div>
       )}
