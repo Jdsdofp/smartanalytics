@@ -246,6 +246,16 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
   const [deviceDetails, setDeviceDetails] = useState<DeviceDetails | null>(null);
   const [activeDetailsTab, setActiveDetailsTab] = useState<'info' | 'route' | 'events' | 'config'>('info');
 
+
+// Adicione este estado no topo com os outros estados
+// const [healthScoreFilter, setHealthScoreFilter] = useState({
+//   excellent: true,
+//   good: true,
+//   fair: true,
+//   poor: true
+// });
+
+
   useEffect(() => {
     if (isOpen && device) {
       fetchDeviceDetails();
@@ -930,6 +940,8 @@ export default function DeviceLogsView() {
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
+  const [healthScoreData, setHealthScoreData] = useState<any[]>([]);
+
   const openMapModal = (device: DevicePosition) => {
     setSelectedDevice(device);
     setIsMapModalOpen(true);
@@ -953,6 +965,7 @@ export default function DeviceLogsView() {
   const fetchData = async () => {
     setRefreshing(true);
     console.log('ID da company: ', companyId)
+    console.log(healthScoreData)
     
     try {
       const [overviewRes, motionRes, gatewayRes, eventsRes, customerRes] = await Promise.all([
@@ -1016,6 +1029,149 @@ export default function DeviceLogsView() {
   const handleManualRefresh = () => {
     fetchData();
   };
+
+
+   // Adicione este useEffect para o gráfico de health score por categoria
+useEffect(() => {
+  if (!overview || activeTab !== 'overview') return;
+
+  const fetchHealthScoreData = async () => {
+    try {
+      const response = await fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/health-score/category`);
+      const healthData = await response.json();
+      
+      if (healthData.success && healthData.data) {
+        setHealthScoreData(healthData.data);
+        
+        // Inicializar o gráfico após um breve delay
+        setTimeout(() => {
+          initHealthScoreChart(healthData.data);
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error fetching health score data:', error);
+    }
+  };
+
+  fetchHealthScoreData();
+}, [overview, activeTab, companyId]);
+
+
+// Função para inicializar o gráfico de health score
+const initHealthScoreChart = (data: any[]) => {
+  const chartElement = document.getElementById('health-score-chart');
+  if (!chartElement) return;
+
+  const chart = echarts.init(chartElement);
+  
+  // Ordenar dados por valor (maior para menor)
+  const sortedData = [...data].sort((a, b) => parseFloat(b.VALUE) - parseFloat(a.VALUE));
+  
+  const option: EChartsOption = {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      },
+      formatter: (params: any) => {
+        const data = params[0];
+        return `
+          <strong>${data.name}</strong><br/>
+          ${t('healthScoreChart.score')}: <b>${data.value}%</b><br/>
+          ${t('healthScoreChart.devices')}: ${data.data.total_devices}
+        `;
+      }
+    },
+    legend: {
+      type: 'scroll',
+    top: 'bottom',
+    textStyle: { fontSize: 11 },
+    selectedMode: 'multiple', // permite selecionar mais de um filtro
+    },
+    grid: {
+      left: '3%',
+      right: '8%',
+      bottom: '15%',
+      top: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'value',
+      name: t('healthScoreChart.xAxis.name'),
+      nameLocation: 'middle',
+      nameGap: 30,
+      axisLabel: {
+        formatter: '{value}%'
+      },
+      max: 100,
+      min: 0
+    },
+    yAxis: {
+      type: 'category',
+      data: sortedData.map(item => item.NAME),
+      axisLabel: {
+        fontSize: 11,
+        formatter: (value: string) => {
+          // Truncar labels muito longos
+          return value.length > 20 ? value.substring(0, 20) + '...' : value;
+        }
+      },
+      axisTick: {
+        alignWithLabel: true
+      }
+    },
+    series: [
+      {
+        name: t('healthScoreChart.series.name'),
+        type: 'bar',
+        data: sortedData.map(item => ({
+          value: parseFloat(item.VALUE),
+          total_devices: item.total_devices,
+          itemStyle: {
+            color: getHealthScoreColor(parseFloat(item.VALUE))
+          }
+        })),
+        label: {
+          show: true,
+          position: 'right',
+          formatter: '{c}%',
+          fontSize: 11
+        },
+        emphasis: {
+          focus: 'series',
+          itemStyle: {
+            shadowBlur: 10,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ],
+    dataZoom: [
+      {
+        type: 'slider',
+        yAxisIndex: 0,
+        filterMode: 'filter',
+        height: 20,
+        bottom: 0,
+        start: 0,
+        end: 100
+      }
+    ]
+  };
+
+  chart.setOption(option);
+
+  // Adicionar redimensionamento responsivo
+  const handleResize = () => chart.resize();
+  window.addEventListener('resize', handleResize);
+
+  return () => {
+    window.removeEventListener('resize', handleResize);
+    chart.dispose();
+  };
+};
+
+
 
   useEffect(() => {
     if (!overview) return;
@@ -1315,6 +1471,18 @@ export default function DeviceLogsView() {
     );
   }
 
+
+// Função auxiliar para determinar a cor baseada no score
+const getHealthScoreColor = (score: number): string => {
+  if (score >= 80) return '#10b981'; // Verde para scores altos
+  if (score >= 60) return '#f59e0b'; // Amarelo para scores médios
+  if (score >= 40) return '#f97316'; // Laranja para scores baixos
+  return '#ef4444'; // Vermelho para scores muito baixos
+};
+
+
+  
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* ✨ NOVO: Header com controles de refresh */}
@@ -1485,7 +1653,7 @@ export default function DeviceLogsView() {
           </div>
 
           {/* ✅ GRÁFICOS COM RESPONSIVIDADE */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {t('deviceLogs.charts.batteryDistribution')}
@@ -1503,7 +1671,69 @@ export default function DeviceLogsView() {
                 <div id="accuracy-chart" className="w-full h-full min-w-0" />
               </div>
             </div>
-          </div>
+          </div> */}
+
+          {/*  ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO ATUALIZADA COM HEALTH SCORE */}
+          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.batteryDistribution')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <div id="battery-chart" className="w-full h-full min-w-0" />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.healthScoreByCategory')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <div id="health-score-chart" className="w-full h-full min-w-0" />
+              </div>
+            </div>
+          </div> */}
+
+          {/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO ATUALIZADA COM HEALTH SCORE */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      {t('deviceLogs.charts.batteryDistribution')}
+    </h3>
+    <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+      <div id="battery-chart" className="w-full h-full min-w-0" />
+    </div>
+  </div>
+
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      {t('deviceLogs.charts.healthScoreByCategory')}
+    </h3>
+    <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+      <div id="health-score-chart" className="w-full h-full min-w-0" />
+    </div>
+    
+    {/* Legenda do health score */}
+    <div className="mt-4 flex flex-wrap gap-4 text-xs">
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 bg-green-500 rounded"></div>
+        <span>80-100% {t('healthScoreChart.legend.excellent')}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+        <span>60-79% {t('healthScoreChart.legend.good')}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 bg-orange-500 rounded"></div>
+        <span>40-59% {t('healthScoreChart.legend.fair')}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 bg-red-500 rounded"></div>
+        <span>0-39% {t('healthScoreChart.legend.poor')}</span>
+      </div>
+    </div>
+  </div>
+</div>
 
           {/* ✅ ALERTAS SOS ATUALIZADOS */}
           {/* {overview.device_alerts.active_sos_count > 0 && (
