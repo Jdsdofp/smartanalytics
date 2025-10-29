@@ -278,7 +278,24 @@
     "charts": {
       "batteryDistribution": "Distribuição do Estado da Bateria",
       "gpsAccuracy": "Distribuição da Precisão GPS",
-      "eventDistribution": "Distribuição de Tipos de Evento"
+      "eventDistribution": "Distribuição de Tipos de Evento",
+      "healthScoreByCategory": "Pontuação de Saúde por Categoria"
+    },
+    "healthScoreChart": {
+      "score": "Pontuação",
+      "devices": "Dispositivos",
+      "series": {
+        "name": "Pontuação de Saúde"
+      },
+      "legend": {
+        "excellent": "Excelente",
+        "good": "Bom",
+        "fair": "Regular",
+        "poor": "Ruim"
+      },
+      "xAxis": {
+        "name": "Categorias"
+      }
     },
     "sosAlerts": {
       "title": "Alertas SOS Ativos ({{count}})",
@@ -318,20 +335,20 @@
   "customer": {
     "label": "Cliente"
   },
-   "status": {
+  "status": {
     "label": "Estado"
   },
   "motionState": {
     "moving": "🚶 Movimento",
     "static": "⏸️ Estático"
   },
-   "battery": {
+  "battery": {
     "label": "Bateria"
   },
-    "lastUpdate": {
+  "lastUpdate": {
     "label": "Última Atualização"
   },
-   "tabs": {
+  "tabs": {
     "info": "Informações",
     "route": "Rota (24h)",
     "events": "Eventos",
@@ -349,7 +366,7 @@
     "latitude": "Latitude",
     "longitude": "Longitude"
   },
-   "offlineDevices": {
+  "offlineDevices": {
     "title": "Dispositivos Offline",
     "deviceEUI": "Device EUI",
     "customer": "Cliente",
@@ -454,7 +471,7 @@
     "lastReconfiguration": "Última Reconfiguração",
     "notAvailable": "Configuração não disponível"
   },
-   "common": {
+  "common": {
     "close": "Fechar"
   },
   "locationModal": {
@@ -491,7 +508,9 @@
   "accuracyChart": {
     "tooltip": {
       "trigger": "axis",
-      "axisPointer": { "type": "shadow" }
+      "axisPointer": {
+        "type": "shadow"
+      }
     },
     "yAxis": {
       "name": "Quantidade"
@@ -509,7 +528,9 @@
   "gatewayChart": {
     "tooltip": {
       "trigger": "axis",
-      "axisPointer": { "type": "cross" }
+      "axisPointer": {
+        "type": "cross"
+      }
     },
     "legend": {
       "avgRssi": "RSSI Médio",
@@ -521,10 +542,12 @@
       "count": "Contagem"
     }
   },
-   "eventsChart": {
+  "eventsChart": {
     "tooltip": {
       "trigger": "axis",
-      "axisPointer": { "type": "shadow" }
+      "axisPointer": {
+        "type": "shadow"
+      }
     },
     "legend": {
       "validEvents": "Eventos Válidos",
@@ -538,7 +561,6 @@
     "title": "Erro ao carregar dados",
     "retry": "Tentar novamente"
   },
-  
   "gpsRouteMap": {
     "title": "Mapa de Rota GPS",
     "subtitle": "Visualize a rota do dispositivo com Leaflet",
@@ -622,8 +644,7 @@
       "error": "Erro ao carregar dados GPS"
     }
   },
-
-   "gpsMap": {
+  "gpsMap": {
     "title": "Rastreamento de Trabalhadores",
     "subtitle": "Monitoramento em tempo real da equipe em campo",
     "filters": {
@@ -778,6 +799,104 @@
       "records": "{{count}} registros",
       "previous": "Anterior",
       "next": "Próxima"
+    }
+  },
+  "assetManagement": {
+    "title": "Gestão de Ativos",
+    "loading": "Carregando...",
+    "devicesCount": "{{count}} de {{total}} dispositivos",
+    "filtered": "(filtrado)",
+    "sortedBy": "Ordenado por:",
+    "searchPlaceholder": "Buscar dispositivos...",
+    "filters": {
+      "show": "Filtros",
+      "reset": "Limpar",
+      "refresh": "Atualizar",
+      "refreshing": "Atualizando...",
+      "riskLevel": {
+        "label": "Nível de Risco",
+        "all": "Todos os riscos",
+        "critical": "Crítico",
+        "high": "Alto",
+        "medium": "Médio",
+        "low": "Baixo"
+      },
+      "commStatus": {
+        "label": "Status de Comunicação",
+        "all": "Todos os status",
+        "active": "Ativo",
+        "recent": "Recente",
+        "stale": "Desatualizado",
+        "critical": "Crítico",
+        "noData": "Sem Dados"
+      },
+      "category": {
+        "label": "Categoria",
+        "all": "Todas as categorias",
+        "wearable": "Wearable",
+        "vehicle": "Veículo",
+        "asset": "Ativo",
+        "sensor": "Sensor"
+      },
+      "itemsPerPage": "Itens por Página"
+    },
+    "table": {
+      "columns": {
+        "deviceId": "Device ID",
+        "category": "Categoria",
+        "risk": "Risco",
+        "health": "Health",
+        "communication": "Comunicação",
+        "gps": "GPS",
+        "recommendedAction": "Ação Recomendada",
+        "issues": "Problemas"
+      },
+      "noData": "Nenhum dispositivo encontrado",
+      "noDataDescription": "Tente ajustar os filtros ou termo de busca",
+      "noIssues": "Nenhum problema"
+    },
+    "loadingOverlay": {
+      "title": "Carregando análise de ativos...",
+      "description": "Aguarde enquanto buscamos os dados mais recentes"
+    },
+    "pagination": {
+      "pageInfo": "Página {{current}} de {{total}} • {{shown}} de {{totalCount}} resultados",
+      "firstPage": "Primeira página",
+      "previousPage": "Página anterior",
+      "nextPage": "Próxima página",
+      "lastPage": "Última página"
+    }
+  },
+  "healthScore": {
+    "loading": "Carregando dados de Health Score...",
+    "error": {
+      "title": "Erro ao carregar dados",
+      "retry": "Tentar Novamente"
+    },
+    "table": {
+      "title": "Detalhes por Categoria",
+      "summary": "{{categories}} categorias • {{devices}} dispositivos",
+      "headers": {
+        "category": "Categoria",
+        "healthScore": "Health Score",
+        "devices": "Dispositivos",
+        "status": "Status"
+      },
+      "status": {
+        "excellent": "Excelente",
+        "good": "Bom",
+        "fair": "Regular",
+        "critical": "Crítico"
+      },
+      "sort": {
+        "desc": "Maior Score",
+        "asc": "Menor Score"
+      },
+      "pagination": {
+        "showing": "Mostrando {{start}} a {{end}} de {{total}} categorias",
+        "previous": "Anterior",
+        "next": "Próxima"
+      }
     }
   }
 }

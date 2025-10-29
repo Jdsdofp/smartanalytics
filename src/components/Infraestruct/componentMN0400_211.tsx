@@ -966,6 +966,8 @@ export default function DeviceLogsView() {
     setRefreshing(true);
     console.log('ID da company: ', companyId)
     console.log(healthScoreData)
+
+    //https://api-dashboards-u1oh.onrender.com
     
     try {
       const [overviewRes, motionRes, gatewayRes, eventsRes, customerRes] = await Promise.all([
@@ -1077,8 +1079,8 @@ const initHealthScoreChart = (data: any[]) => {
         const data = params[0];
         return `
           <strong>${data.name}</strong><br/>
-          ${t('healthScoreChart.score')}: <b>${data.value}%</b><br/>
-          ${t('healthScoreChart.devices')}: ${data.data.total_devices}
+          ${t('deviceLogs.healthScoreChart.score')}: <b>${data.value}%</b><br/>
+          ${t('deviceLogs.healthScoreChart.devices')}: ${data.data.total_devices}
         `;
       }
     },
@@ -1097,7 +1099,7 @@ const initHealthScoreChart = (data: any[]) => {
     },
     xAxis: {
       type: 'value',
-      name: t('healthScoreChart.xAxis.name'),
+      name: t('deviceLogs.healthScoreChart.xAxis.name'),
       nameLocation: 'middle',
       nameGap: 30,
       axisLabel: {
@@ -1122,7 +1124,7 @@ const initHealthScoreChart = (data: any[]) => {
     },
     series: [
       {
-        name: t('healthScoreChart.series.name'),
+        name: t('deviceLogs.healthScoreChart.series.name'),
         type: 'bar',
         data: sortedData.map(item => ({
           value: parseFloat(item.VALUE),
@@ -1695,45 +1697,45 @@ const getHealthScoreColor = (score: number): string => {
           </div> */}
 
           {/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO ATUALIZADA COM HEALTH SCORE */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-      {t('deviceLogs.charts.batteryDistribution')}
-    </h3>
-    <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-      <div id="battery-chart" className="w-full h-full min-w-0" />
-    </div>
-  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.batteryDistribution')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <div id="battery-chart" className="w-full h-full min-w-0" />
+              </div>
+            </div>
 
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-      {t('deviceLogs.charts.healthScoreByCategory')}
-    </h3>
-    <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-      <div id="health-score-chart" className="w-full h-full min-w-0" />
-    </div>
-    
-    {/* Legenda do health score */}
-    <div className="mt-4 flex flex-wrap gap-4 text-xs">
-      <div className="flex items-center gap-1">
-        <div className="w-3 h-3 bg-green-500 rounded"></div>
-        <span>80-100% {t('healthScoreChart.legend.excellent')}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-        <span>60-79% {t('healthScoreChart.legend.good')}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="w-3 h-3 bg-orange-500 rounded"></div>
-        <span>40-59% {t('healthScoreChart.legend.fair')}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="w-3 h-3 bg-red-500 rounded"></div>
-        <span>0-39% {t('healthScoreChart.legend.poor')}</span>
-      </div>
-    </div>
-  </div>
-</div>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.healthScoreByCategory')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <div id="health-score-chart" className="w-full h-full min-w-0" />
+              </div>
+
+              {/* Legenda do health score */}
+              <div className="mt-4 flex flex-wrap gap-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <span>80-100% {t('deviceLogs.healthScoreChart.legend.excellent')}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                  <span>60-79% {t('deviceLogs.healthScoreChart.legend.good')}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                  <span>40-59% {t('deviceLogs.healthScoreChart.legend.fair')}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-red-500 rounded"></div>
+                  <span>0-39% {t('deviceLogs.healthScoreChart.legend.poor')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* ✅ ALERTAS SOS ATUALIZADOS */}
           {/* {overview.device_alerts.active_sos_count > 0 && (

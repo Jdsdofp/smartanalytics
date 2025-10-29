@@ -250,7 +250,7 @@
     },
     "tabs": {
       "overview": "Resumen",
-      "mapview": "vista de mapa",
+      "mapview": "Vista de Mapa",
       "devices": "Dispositivos",
       "events": "Eventos",
       "network": "Red",
@@ -259,7 +259,7 @@
     },
     "kpis": {
       "deviceUptime": {
-        "title": "Tiempo Activo",
+        "title": "Tiempo Activo del Dispositivo",
         "subtitle": "{{online}} en línea de {{total}} total"
       },
       "gpsSuccess": {
@@ -278,7 +278,24 @@
     "charts": {
       "batteryDistribution": "Distribución de Estado de Batería",
       "gpsAccuracy": "Distribución de Precisión GPS",
-      "eventDistribution": "Distribución de Tipos de Evento"
+      "eventDistribution": "Distribución de Tipos de Evento",
+      "healthScoreByCategory": "Puntuación de Salud por Categoría"
+    },
+    "healthScoreChart": {
+      "score": "Puntuación",
+      "devices": "Dispositivos",
+      "series": {
+        "name": "Puntuación de Salud"
+      },
+      "legend": {
+        "excellent": "Excelente",
+        "good": "Bueno",
+        "fair": "Regular",
+        "poor": "Pobre"
+      },
+      "xAxis": {
+        "name": "Categorías"
+      }
     },
     "sosAlerts": {
       "title": "Alertas SOS Activas ({{count}})",
@@ -299,7 +316,7 @@
       "noDevicesFound": "No se encontraron dispositivos"
     },
     "deviceMotion": {
-      "title": "Estado de Movimiento ({{count}} dispositivos)",
+      "title": "Estado de Movimiento del Dispositivo ({{count}} dispositivos)",
       "moving": "En Movimiento",
       "static": "Estático"
     },
@@ -315,23 +332,23 @@
     "title": "Detalles del Dispositivo",
     "iconAlt": "Icono de dispositivo móvil"
   },
-   "customer": {
+  "customer": {
     "label": "Cliente"
   },
   "status": {
     "label": "Estado"
   },
-   "motionState": {
+  "motionState": {
     "moving": "🚶 Movimiento",
     "static": "⏸️ Estático"
   },
- "battery": {
+  "battery": {
     "label": "Batería"
   },
-    "lastUpdate": {
+  "lastUpdate": {
     "label": "Última Actualización"
   },
-   "tabs": {
+  "tabs": {
     "info": "Información",
     "route": "Ruta (24h)",
     "events": "Eventos",
@@ -430,7 +447,7 @@
       "overallAvgBattery": "Batería Promedio General"
     }
   },
-   "route24h": {
+  "route24h": {
     "positionsRegistered": "📍 {{count}} posiciones registradas en las últimas 24 horas",
     "time": "Hora",
     "latitude": "Latitud",
@@ -441,7 +458,7 @@
     "noRoute": "No hay ruta registrada en las últimas 24 horas",
     "speedUnit": "km/h"
   },
-   "recentEvents": {
+  "recentEvents": {
     "eventsCount": "🚨 {{count}} eventos recientes",
     "noEvents": "No hay eventos recientes registrados",
     "battery": "🔋 {{level}}%"
@@ -481,7 +498,7 @@
       "close": "Cerrar"
     }
   },
-    "batteryChart": {
+  "batteryChart": {
     "tooltip": "{b}: {c} ({d}%)",
     "seriesName": "Estado de la Batería",
     "healthy": "Saludable (≥30%)",
@@ -491,7 +508,9 @@
   "accuracyChart": {
     "tooltip": {
       "trigger": "axis",
-      "axisPointer": { "type": "shadow" }
+      "axisPointer": {
+        "type": "shadow"
+      }
     },
     "yAxis": {
       "name": "Cantidad"
@@ -502,14 +521,16 @@
     "accuracyRanges": {
       "excellent": "Excelente",
       "good": "Bueno",
-      "fair": "Regular", 
+      "fair": "Regular",
       "poor": "Malo"
     }
   },
   "gatewayChart": {
     "tooltip": {
       "trigger": "axis",
-      "axisPointer": { "type": "cross" }
+      "axisPointer": {
+        "type": "cross"
+      }
     },
     "legend": {
       "avgRssi": "RSSI Promedio",
@@ -524,7 +545,9 @@
   "eventsChart": {
     "tooltip": {
       "trigger": "axis",
-      "axisPointer": { "type": "shadow" }
+      "axisPointer": {
+        "type": "shadow"
+      }
     },
     "legend": {
       "validEvents": "Eventos Válidos",
@@ -538,7 +561,7 @@
     "title": "Error al cargar datos",
     "retry": "Intentar nuevamente"
   },
-   "gpsRouteMap": {
+  "gpsRouteMap": {
     "title": "Mapa de Ruta GPS",
     "subtitle": "Visualiza la ruta del dispositivo con Leaflet",
     "filters": {
@@ -621,7 +644,6 @@
       "error": "Error al cargar datos GPS"
     }
   },
-
   "gpsMap": {
     "title": "Seguimiento de Trabajadores",
     "subtitle": "Monitoreo en tiempo real del equipo en campo",
@@ -777,6 +799,104 @@
       "records": "{{count}} registros",
       "previous": "Anterior",
       "next": "Siguiente"
+    }
+  },
+  "assetManagement": {
+    "title": "Gestión de Activos",
+    "loading": "Cargando...",
+    "devicesCount": "{{count}} de {{total}} dispositivos",
+    "filtered": "(filtrado)",
+    "sortedBy": "Ordenado por:",
+    "searchPlaceholder": "Buscar dispositivos...",
+    "filters": {
+      "show": "Filtros",
+      "reset": "Limpiar",
+      "refresh": "Actualizar",
+      "refreshing": "Actualizando...",
+      "riskLevel": {
+        "label": "Nivel de Riesgo",
+        "all": "Todos los riesgos",
+        "critical": "Crítico",
+        "high": "Alto",
+        "medium": "Medio",
+        "low": "Bajo"
+      },
+      "commStatus": {
+        "label": "Estado de Comunicación",
+        "all": "Todos los estados",
+        "active": "Activo",
+        "recent": "Reciente",
+        "stale": "Desactualizado",
+        "critical": "Crítico",
+        "noData": "Sin Datos"
+      },
+      "category": {
+        "label": "Categoría",
+        "all": "Todas las categorías",
+        "wearable": "Wearable",
+        "vehicle": "Vehículo",
+        "asset": "Activo",
+        "sensor": "Sensor"
+      },
+      "itemsPerPage": "Elementos por Página"
+    },
+    "table": {
+      "columns": {
+        "deviceId": "ID del Dispositivo",
+        "category": "Categoría",
+        "risk": "Riesgo",
+        "health": "Salud",
+        "communication": "Comunicación",
+        "gps": "GPS",
+        "recommendedAction": "Acción Recomendada",
+        "issues": "Problemas"
+      },
+      "noData": "No se encontraron dispositivos",
+      "noDataDescription": "Intente ajustar los filtros o término de búsqueda",
+      "noIssues": "Sin problemas"
+    },
+    "loadingOverlay": {
+      "title": "Cargando análisis de activos...",
+      "description": "Espere mientras obtenemos los datos más recientes"
+    },
+    "pagination": {
+      "pageInfo": "Página {{current}} de {{total}} • {{shown}} de {{totalCount}} resultados",
+      "firstPage": "Primera página",
+      "previousPage": "Página anterior",
+      "nextPage": "Página siguiente",
+      "lastPage": "Última página"
+    }
+  },
+  "healthScore": {
+    "loading": "Cargando datos de Health Score...",
+    "error": {
+      "title": "Error al cargar datos",
+      "retry": "Intentar Nuevamente"
+    },
+    "table": {
+      "title": "Detalles por Categoría",
+      "summary": "{{categories}} categorías • {{devices}} dispositivos",
+      "headers": {
+        "category": "Categoría",
+        "healthScore": "Puntuación de Salud",
+        "devices": "Dispositivos",
+        "status": "Estado"
+      },
+      "status": {
+        "excellent": "Excelente",
+        "good": "Bueno",
+        "fair": "Regular",
+        "critical": "Crítico"
+      },
+      "sort": {
+        "desc": "Mayor Puntuación",
+        "asc": "Menor Puntuación"
+      },
+      "pagination": {
+        "showing": "Mostrando {{start}} a {{end}} de {{total}} categorías",
+        "previous": "Anterior",
+        "next": "Siguiente"
+      }
     }
   }
 }

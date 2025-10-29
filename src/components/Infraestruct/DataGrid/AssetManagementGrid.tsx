@@ -23,6 +23,7 @@ import {
 
 // import { useTranslation } from 'react-i18next';
 import { useCompany } from '../../../hooks/useCompany';
+import { useTranslation } from 'react-i18next';
 
 // =====================================
 // 📊 INTERFACES
@@ -85,7 +86,7 @@ interface AssetManagementResponse {
 // 🎨 COMPONENTE PRINCIPAL
 // =====================================
 export default function AssetManagementGrid() {
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
   const { companyId } = useCompany();
   
   // Estados
@@ -421,7 +422,7 @@ export default function AssetManagementGrid() {
               {/* Filtro de Texto */}
               <input
                 type="text"
-                placeholder={`Filtrar ${label.toLowerCase()}...`}
+                placeholder={`${t('assetManagement.searchPlaceholder')}...`}
                 value={columnFilters[column as keyof typeof columnFilters]}
                 onChange={(e) => handleColumnFilterChange(column, e.target.value)}
                 className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
@@ -449,13 +450,13 @@ export default function AssetManagementGrid() {
                   onClick={() => clearColumnFilter(column)}
                   className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
                 >
-                  Limpar
+                  {t('assetManagement.filters.reset')}
                 </button>
                 <button
                   onClick={() => setActiveFilterColumn(null)}
                   className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
-                  Aplicar
+                  {t('assetManagement.filters.show')}
                 </button>
               </div>
             </div>
@@ -544,18 +545,23 @@ export default function AssetManagementGrid() {
             {/* Título e Status */}
             <div className="flex items-center gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Gestão de Ativos</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{t('assetManagement.title')}</h3>
                 <p className="text-sm text-gray-600">
-                  {loading ? 'Carregando...' : `${filteredData.length} de ${pagination.total_count} dispositivos`}
-                  {Object.values(columnFilters).some(filter => filter) && (
-                    <span className="ml-2 text-blue-600">(filtrado)</span>
-                  )}
+                  {loading ? t('assetManagement.loading') : t('assetManagement.devicesCount', {
+              count: filteredData.length,
+              total: pagination.total_count
+            })}
+            {Object.values(columnFilters).some(filter => filter) && (
+              <span className="ml-2 text-blue-600">
+                {t('assetManagement.filtered')}
+              </span>
+            )}
                 </p>
               </div>
               
               {/* Indicador de Ordenação */}
               <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
-                <span>Ordenado por:</span>
+                <span>{t('assetManagement.sortedBy')}</span>
                 <span className="font-medium text-gray-700 capitalize">
                   {sortBy.replace('_', ' ')} 
                   {sortOrder === 'asc' ? 
@@ -573,7 +579,7 @@ export default function AssetManagementGrid() {
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Buscar dispositivos..."
+                  placeholder={t('assetManagement.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 text-sm w-full sm:w-64 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -587,17 +593,17 @@ export default function AssetManagementGrid() {
                   className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 bg-white"
                 >
                   <FunnelIcon className="h-4 w-4" />
-                  Filtros
+                  {t('assetManagement.filters.show')}
                   {showFilters ? <ChevronUpIcon className="h-3 w-3" /> : <ChevronDownIcon className="h-3 w-3" />}
                 </button>
 
                 <button
                   onClick={handleResetFilters}
                   className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 bg-white"
-                  title="Limpar todos os filtros"
+                   title={t('assetManagement.filters.reset')}
                 >
                   <XMarkIcon className="h-4 w-4" />
-                  Limpar
+                  {t('assetManagement.filters.reset')}
                 </button>
                 
                 <button
@@ -606,7 +612,7 @@ export default function AssetManagementGrid() {
                   className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                  {loading ? 'Atualizando...' : 'Atualizar'}
+                  {loading ? t('assetManagement.filters.refreshing') : t('assetManagement.filters.refresh')}
                 </button>
               </div>
             </div>
@@ -617,69 +623,69 @@ export default function AssetManagementGrid() {
             <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Nível de Risco
+                  {t('assetManagement.filters.riskLevel.label')}
                 </label>
                 <select
                   value={selectedRiskLevel}
                   onChange={(e) => setSelectedRiskLevel(e.target.value)}
                   className="w-full text-sm border border-gray-300 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="all">Todos os riscos</option>
-                  <option value="CRITICAL">Crítico</option>
-                  <option value="HIGH">Alto</option>
-                  <option value="MEDIUM">Médio</option>
-                  <option value="LOW">Baixo</option>
+                  <option value="all">{t('assetManagement.filters.riskLevel.all')}</option>
+                  <option value="CRITICAL">{t('assetManagement.filters.riskLevel.critical')}</option>
+                  <option value="HIGH">{t('assetManagement.filters.riskLevel.high')}</option>
+                  <option value="MEDIUM">{t('assetManagement.filters.riskLevel.medium')}</option>
+                  <option value="LOW">{t('assetManagement.filters.riskLevel.low')}</option>
                 </select>
               </div>
               
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Status de Comunicação
+                  {t('assetManagement.filters.commStatus.label')}
                 </label>
                 <select
                   value={selectedCommStatus}
                   onChange={(e) => setSelectedCommStatus(e.target.value)}
                   className="w-full text-sm border border-gray-300 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="all">Todos os status</option>
-                  <option value="ACTIVE">Ativo</option>
-                  <option value="RECENT">Recente</option>
-                  <option value="STALE">Desatualizado</option>
-                  <option value="CRITICAL">Crítico</option>
-                  <option value="NO DATA">Sem Dados</option>
+                  <option value="all">{t('assetManagement.filters.commStatus.all')}</option>
+                  <option value="ACTIVE">{t('assetManagement.filters.commStatus.active')}</option>
+                  <option value="RECENT">{t('assetManagement.filters.commStatus.recent')}</option>
+                  <option value="STALE">{t('assetManagement.filters.commStatus.stale')}</option>
+                  <option value="CRITICAL">{t('assetManagement.filters.commStatus.critical')}</option>
+                  <option value="NO DATA">{t('assetManagement.filters.commStatus.noData')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Categoria
+                  {t('assetManagement.filters.riskLevel.label')}
                 </label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full text-sm border border-gray-300 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="all">Todas as categorias</option>
-                  <option value="Wearable">Wearable</option>
-                  <option value="Vehicle">Veículo</option>
-                  <option value="Asset">Ativo</option>
-                  <option value="Sensor">Sensor</option>
+                  <option value="all">{t('assetManagement.filters.category.all')}</option>
+                  <option value="Wearable">{t('assetManagement.filters.category.wearable')}</option>
+                  <option value="Vehicle">{t('assetManagement.filters.category.vehicle')}</option>
+                  <option value="Asset">{t('assetManagement.filters.category.asset')}</option>
+                  <option value="Sensor">{t('assetManagement.filters.category.sensor')}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Itens por Página
+                  {t('assetManagement.filters.category.label')}
                 </label>
                 <select
                   value={itemsPerPage}
                   onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
                   className="w-full text-sm border border-gray-300 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value={25}>25 itens</option>
-                  <option value={50}>50 itens</option>
-                  <option value={100}>100 itens</option>
-                  <option value={200}>200 itens</option>
+                  <option value={25}>25 {t('assetManagement.filters.itemsPerPage').toLowerCase()}</option>
+                  <option value={50}>50 {t('assetManagement.filters.itemsPerPage').toLowerCase()}</option>
+                  <option value={100}>100 {t('assetManagement.filters.itemsPerPage').toLowerCase()}</option>
+                  <option value={200}>200 {t('assetManagement.filters.itemsPerPage').toLowerCase()}</option>
                 </select>
               </div>
             </div>
@@ -699,8 +705,8 @@ export default function AssetManagementGrid() {
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-20 rounded-full blur-sm"></div>
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Carregando análise de ativos...</h3>
-                <p className="text-sm text-gray-600">Aguarde enquanto buscamos os dados mais recentes</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('assetManagement.loadingOverlay.title')}</h3>
+                <p className="text-sm text-gray-600">{t('assetManagement.loadingOverlay.description')}</p>
                 <div className="mt-4 flex justify-center">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
@@ -719,7 +725,7 @@ export default function AssetManagementGrid() {
                   {/* Device ID com Filtro */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                     <div className="flex items-center gap-2">
-                      <ColumnFilter column="device_id" label="Device ID" />
+                      <ColumnFilter column="device_id" label={t('assetManagement.table.columns.deviceId')} />
                       <button
                         onClick={() => toggleSort('device_id')}
                         className="p-1 rounded hover:bg-gray-200 transition-colors"
@@ -734,14 +740,14 @@ export default function AssetManagementGrid() {
                   {/* Categoria com Filtro */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                     <div className="flex items-center gap-2">
-                      <ColumnFilter column="category" label="Categoria" />
+                      <ColumnFilter column="category" label={t('assetManagement.table.columns.category')} />
                     </div>
                   </th>
 
                   {/* Risco com Filtro */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                     <div className="flex items-center gap-2">
-                      <ColumnFilter column="risk_level" label="Risco" />
+                      <ColumnFilter column="risk_level" label={t('assetManagement.table.columns.risk')} />
                       <button
                         onClick={() => toggleSort('risk_level')}
                         className="p-1 rounded hover:bg-gray-200 transition-colors"
@@ -756,7 +762,7 @@ export default function AssetManagementGrid() {
                   {/* Health Score com Ordenação */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                     <div className="flex items-center gap-2">
-                      <span>Health</span>
+                      <span>{t('assetManagement.table.columns.health')}</span>
                       <button
                         onClick={() => toggleSort('health_score')}
                         className="p-1 rounded hover:bg-gray-200 transition-colors"
@@ -771,27 +777,27 @@ export default function AssetManagementGrid() {
                   {/* Comunicação com Filtro */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                     <div className="flex items-center gap-2">
-                      <ColumnFilter column="comm_status" label="Comunicação" />
+                      <ColumnFilter column="comm_status" label={t('assetManagement.table.columns.communication')} />
                     </div>
                   </th>
 
                   {/* GPS com Filtro */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                     <div className="flex items-center gap-2">
-                      <ColumnFilter column="gps_status" label="GPS" />
+                      <ColumnFilter column="gps_status" label={t('assetManagement.table.columns.gps')} />
                     </div>
                   </th>
 
                   {/* Ação Recomendada com Filtro */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                     <div className="flex items-center gap-2">
-                      <ColumnFilter column="recommended_action" label="Ação Recomendada" />
+                      <ColumnFilter column="recommended_action" label={t('assetManagement.table.columns.recommendedAction')} />
                     </div>
                   </th>
 
                   {/* Problemas */}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    Problemas
+                    {t('assetManagement.table.columns.issues')}
                   </th>
                 </tr>
               </thead>
@@ -897,7 +903,7 @@ export default function AssetManagementGrid() {
                             {device.issues}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400 italic">Nenhum problema</span>
+                          <span className="text-xs text-gray-400 italic">{t('assetManagement.table.noIssues')}</span>
                         )}
                       </td>
                     </tr>
@@ -910,9 +916,9 @@ export default function AssetManagementGrid() {
             {filteredData.length === 0 && !loading && (
               <div className="text-center py-12">
                 <MagnifyingGlassIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum dispositivo encontrado</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">{t('assetManagement.table.noData')}</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Tente ajustar os filtros ou termo de busca
+                  {t('assetManagement.table.noDataDescription')}
                 </p>
               </div>
             )}
@@ -923,12 +929,24 @@ export default function AssetManagementGrid() {
             <div className="border-t border-gray-200 bg-white px-6 py-4 sticky bottom-0">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-sm text-gray-700">
-                  Página <span className="font-medium">{pagination.current_page}</span> de{' '}
+                  {/* Página <span className="font-medium">{pagination.current_page}</span> de{' '}
                   <span className="font-medium">{pagination.total_pages}</span> •{' '}
                   <span className="font-medium">{filteredData.length}</span> de{' '}
                   <span className="font-medium">{pagination.total_count}</span> resultados
                   {Object.values(columnFilters).some(filter => filter) && (
                     <span className="ml-2 text-blue-600 text-xs">(filtrado)</span>
+                  )} */}
+
+                  {t('assetManagement.pagination.pageInfo', {
+                    current: pagination.current_page,
+                    total: pagination.total_pages,
+                    shown: filteredData.length,
+                    totalCount: pagination.total_count
+                  })}
+                  {Object.values(columnFilters).some(filter => filter) && (
+                    <span className="ml-2 text-blue-600 text-xs">
+                      {t('assetManagement.filtered')}
+                    </span>
                   )}
                 </div>
                 
@@ -937,7 +955,7 @@ export default function AssetManagementGrid() {
                     onClick={() => handlePageChange(1)}
                     disabled={pagination.current_page === 1}
                     className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Primeira página"
+                    title={t('assetManagement.pagination.firstPage')}
                   >
                     <ChevronLeftIcon className="h-4 w-4" />
                     <ChevronLeftIcon className="h-4 w-4 -ml-3" />

@@ -280,7 +280,24 @@
     "charts": {
       "batteryDistribution": "Battery Status Distribution",
       "gpsAccuracy": "GPS Accuracy Distribution",
-      "eventDistribution": "Event Type Distribution"
+      "eventDistribution": "Event Type Distribution",
+      "healthScoreByCategory": "Health Score by Category"
+    },
+    "healthScoreChart": {
+      "score": "Score",
+      "devices": "Devices",
+      "series": {
+        "name": "Health Score"
+      },
+      "legend": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "poor": "Poor"
+      },
+      "xAxis": {
+        "name": "Categories"
+      }
     },
     "sosAlerts": {
       "title": "Active SOS Alerts ({{count}})",
@@ -327,10 +344,10 @@
     "moving": "🚶 Moving",
     "static": "⏸️ Static"
   },
-   "battery": {
+  "battery": {
     "label": "Battery"
   },
-    "lastUpdate": {
+  "lastUpdate": {
     "label": "Last Update"
   },
   "tabs": {
@@ -383,7 +400,7 @@
       "GEOFENCE_EXIT": "Geofence exit"
     }
   },
-   "gateway": {
+  "gateway": {
     "title": "Gateway Signal Quality",
     "statsTitle": "Gateway Statistics",
     "gateway": "Gateway",
@@ -448,7 +465,7 @@
     "noEvents": "No recent events recorded",
     "battery": "🔋 {{level}}%"
   },
-   "deviceConfig": {
+  "deviceConfig": {
     "title": "⚙️ Current Configuration",
     "trackingMode": "Tracking Mode",
     "uplinkPeriod": "Uplink Period",
@@ -459,7 +476,7 @@
   "common": {
     "close": "Close"
   },
-   "locationModal": {
+  "locationModal": {
     "title": "📍 Device Location",
     "sosAlert": "🚨 SOS ALERT ACTIVE",
     "status": {
@@ -490,10 +507,12 @@
     "warning": "Warning (20-29%)",
     "critical": "Critical (<20%)"
   },
-   "accuracyChart": {
+  "accuracyChart": {
     "tooltip": {
       "trigger": "axis",
-      "axisPointer": { "type": "shadow" }
+      "axisPointer": {
+        "type": "shadow"
+      }
     },
     "yAxis": {
       "name": "Quantity"
@@ -503,7 +522,7 @@
     },
     "accuracyRanges": {
       "excellent": "Excellent",
-      "good": "Good", 
+      "good": "Good",
       "fair": "Fair",
       "poor": "Poor"
     }
@@ -511,11 +530,13 @@
   "gatewayChart": {
     "tooltip": {
       "trigger": "axis",
-      "axisPointer": { "type": "cross" }
+      "axisPointer": {
+        "type": "cross"
+      }
     },
     "legend": {
       "avgRssi": "Average RSSI",
-      "avgSnr": "Average SNR", 
+      "avgSnr": "Average SNR",
       "reportCount": "Report Count"
     },
     "yAxis": {
@@ -523,10 +544,12 @@
       "count": "Count"
     }
   },
-   "eventsChart": {
+  "eventsChart": {
     "tooltip": {
       "trigger": "axis",
-      "axisPointer": { "type": "shadow" }
+      "axisPointer": {
+        "type": "shadow"
+      }
     },
     "legend": {
       "validEvents": "Valid Events",
@@ -540,7 +563,6 @@
     "title": "Error loading data",
     "retry": "Try again"
   },
-  
   "gpsRouteMap": {
     "title": "GPS Route Map",
     "subtitle": "Visualize device route with Leaflet",
@@ -624,7 +646,6 @@
       "error": "Error loading GPS data"
     }
   },
-
   "gpsMap": {
     "title": "Worker Tracking",
     "subtitle": "Real-time field team monitoring",
@@ -780,6 +801,104 @@
       "records": "{{count}} records",
       "previous": "Previous",
       "next": "Next"
+    }
+  },
+  "assetManagement": {
+    "title": "Asset Management",
+    "loading": "Loading...",
+    "devicesCount": "{{count}} of {{total}} devices",
+    "filtered": "(filtered)",
+    "sortedBy": "Sorted by:",
+    "searchPlaceholder": "Search devices...",
+    "filters": {
+      "show": "Filters",
+      "reset": "Clear",
+      "refresh": "Refresh",
+      "refreshing": "Updating...",
+      "riskLevel": {
+        "label": "Risk Level",
+        "all": "All risks",
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
+      "commStatus": {
+        "label": "Communication Status",
+        "all": "All status",
+        "active": "Active",
+        "recent": "Recent",
+        "stale": "Stale",
+        "critical": "Critical",
+        "noData": "No Data"
+      },
+      "category": {
+        "label": "Category",
+        "all": "All categories",
+        "wearable": "Wearable",
+        "vehicle": "Vehicle",
+        "asset": "Asset",
+        "sensor": "Sensor"
+      },
+      "itemsPerPage": "Items per Page"
+    },
+    "table": {
+      "columns": {
+        "deviceId": "Device ID",
+        "category": "Category",
+        "risk": "Risk",
+        "health": "Health",
+        "communication": "Communication",
+        "gps": "GPS",
+        "recommendedAction": "Recommended Action",
+        "issues": "Issues"
+      },
+      "noData": "No devices found",
+      "noDataDescription": "Try adjusting filters or search term",
+      "noIssues": "No issues"
+    },
+    "loadingOverlay": {
+      "title": "Loading asset analysis...",
+      "description": "Please wait while we fetch the latest data"
+    },
+    "pagination": {
+      "pageInfo": "Page {{current}} of {{total}} • {{shown}} of {{totalCount}} results",
+      "firstPage": "First page",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "lastPage": "Last page"
+    }
+  },
+  "healthScore": {
+    "loading": "Loading Health Score data...",
+    "error": {
+      "title": "Error loading data",
+      "retry": "Try Again"
+    },
+    "table": {
+      "title": "Details by Category",
+      "summary": "{{categories}} categories • {{devices}} devices",
+      "headers": {
+        "category": "Category",
+        "healthScore": "Health Score",
+        "devices": "Devices",
+        "status": "Status"
+      },
+      "status": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "critical": "Critical"
+      },
+      "sort": {
+        "desc": "Highest Score",
+        "asc": "Lowest Score"
+      },
+      "pagination": {
+        "showing": "Showing {{start}} to {{end}} of {{total}} categories",
+        "previous": "Previous",
+        "next": "Next"
+      }
     }
   }
 }
