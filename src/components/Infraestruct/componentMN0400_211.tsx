@@ -1071,7 +1071,7 @@ export default function DeviceLogsView() {
   const fetchDashboardCards = async () => {
   try {
     const response = await fetch(
-      `http://localhost:3306/api/dashboard/devices/dashboards/${companyId}`
+      `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/dashboards/${companyId}`
     );
     const data = await response.json();
     
