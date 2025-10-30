@@ -20,8 +20,6 @@ import {
   BarsArrowDownIcon,
   BarsArrowUpIcon,
 } from '@heroicons/react/24/outline';
-
-// import { useTranslation } from 'react-i18next';
 import { useCompany } from '../../../hooks/useCompany';
 import { useTranslation } from 'react-i18next';
 

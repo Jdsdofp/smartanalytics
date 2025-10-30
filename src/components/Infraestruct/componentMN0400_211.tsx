@@ -246,6 +246,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
   const [deviceDetails, setDeviceDetails] = useState<DeviceDetails | null>(null);
   const [activeDetailsTab, setActiveDetailsTab] = useState<'info' | 'route' | 'events' | 'config'>('info');
 
+ 
 
 // Adicione este estado no topo com os outros estados
 // const [healthScoreFilter, setHealthScoreFilter] = useState({
@@ -760,52 +761,6 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
 // =====================================
 // 🎨 COMPONENTES DE UI
 // =====================================
-const KPICard = ({
-  title,
-  value,
-  subtitle,
-  icon: Icon,
-  trend,
-  color = 'blue'
-}: {
-  title: string;
-  value: string | number;
-  subtitle: string;
-  icon: any;
-  trend?: 'up' | 'down' | 'neutral';
-  color?: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
-}) => {
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600 ring-blue-500/10',
-    green: 'bg-green-50 text-green-600 ring-green-500/10',
-    yellow: 'bg-yellow-50 text-yellow-600 ring-yellow-500/10',
-    red: 'bg-red-50 text-red-600 ring-red-500/10',
-    purple: 'bg-purple-50 text-purple-600 ring-purple-500/10',
-  };
-
-  const trendColors = {
-    up: 'text-green-600',
-    down: 'text-red-600',
-    neutral: 'text-gray-600',
-  };
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{value}</p>
-          <p className={`mt-2 text-sm ${trend ? trendColors[trend] : 'text-gray-500'}`}>
-            {subtitle}
-          </p>
-        </div>
-        <div className={`rounded-full p-3 ${colorClasses[color]}`}>
-          <Icon className="h-8 w-8" />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const AlertBadge = ({ type, count }: { type: 'sos' | 'battery' | 'offline'; count: number }) => {
   const { t } = useTranslation();
@@ -903,6 +858,112 @@ const ChartContainer = ({
   );
 };
 
+
+const EquipmentCard = ({ card }: { card: any }) => {
+  const colorClasses = {
+    blue: 'bg-blue-50 border-blue-200',
+    green: 'bg-green-50 border-green-200',
+    red: 'bg-red-50 border-red-200',
+    gray: 'bg-gray-50 border-gray-200',
+  };
+
+  const textColorClasses = {
+    blue: 'text-blue-600',
+    green: 'text-green-600',
+    red: 'text-red-600',
+    gray: 'text-gray-600',
+  };
+
+  const isPrimary = card.type === 'primary';
+
+  return (
+    <div className={`rounded-lg border-2 p-6 transition-all hover:shadow-lg ${colorClasses[card.color as keyof typeof colorClasses]}`}>
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <p className={`text-sm font-medium opacity-80 uppercase tracking-wide ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+            {card.title}
+          </p>
+          <div className="mt-2 flex items-baseline gap-2">
+            <p className={`font-bold ${isPrimary ? 'text-4xl' : 'text-3xl'} ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+              {card.value}
+            </p>
+            {card.percentage && (
+              <span className={`text-sm font-medium opacity-75 ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+                ({card.percentage}%)
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="text-4xl">
+          {card.icon}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ActivityCard = ({ card }: { card: any }) => {
+  const colorClasses = {
+    green: 'bg-green-50 border-green-200',
+    orange: 'bg-orange-50 border-orange-200',
+    yellow: 'bg-yellow-50 border-yellow-200',
+  };
+
+  const textColorClasses = {
+    green: 'text-green-700',
+    orange: 'text-orange-700',
+    yellow: 'text-yellow-700',
+  };
+
+  return (
+    <div className={`rounded-lg border-2 p-5 transition-all hover:shadow-md ${colorClasses[card.color as keyof typeof colorClasses]}`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className={`text-xs font-medium opacity-80 uppercase tracking-wide ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+            {card.title}
+          </p>
+          <p className={`mt-1 text-3xl font-bold ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+            {card.value}
+          </p>
+        </div>
+        <div className="text-3xl">
+          {card.icon}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const GPSCard = ({ card }: { card: any }) => {
+  const colorClasses = {
+    green: 'bg-gradient-to-br from-green-50 to-green-100 border-green-300',
+    blue: 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300',
+    teal: 'bg-gradient-to-br from-teal-50 to-teal-100 border-teal-300',
+    red: 'bg-gradient-to-br from-red-50 to-red-100 border-red-300',
+  };
+
+  return (
+    <div className={`rounded-lg border-2 p-5 transition-all hover:shadow-lg ${colorClasses[card.color as keyof typeof colorClasses]}`}>
+      <div className="flex items-start gap-3">
+        <div className="text-3xl mt-1">
+          {card.icon}
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-gray-700">
+            {card.title}
+          </p>
+          <p className="mt-1 text-3xl font-bold text-gray-900">
+            {card.value}
+          </p>
+          <p className="mt-1 text-xs text-gray-600">
+            {card.description}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Função para converter string para número seguro
 const safeParseNumber = (value: string | number): number => {
   if (typeof value === 'number') return value;
@@ -931,6 +992,8 @@ export default function DeviceLogsView() {
   const [activeTab, setActiveTab] = useState<'overview' | 'mapview' | 'devices' | 'events' | 'network' | 'customers' | 'rawdata'>('overview');
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+   const [dashboardCards, setDashboardCards] = useState<any>(null);
   
   // ✨ NOVO: Estados para controle de refresh
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
@@ -983,6 +1046,7 @@ export default function DeviceLogsView() {
       const gatewayData = await gatewayRes.json();
       const eventsData = await eventsRes.json();
       const customerData = await customerRes.json();
+      
 
       // Adapte os dados da overview
       const adaptedOverview = adaptDashboardData(overviewData);
@@ -992,13 +1056,32 @@ export default function DeviceLogsView() {
       setGatewayQuality(gatewayData);
       setEventTypes(eventsData);
       setCustomerStats(customerData);
+
+      await fetchDashboardCards();
+
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
+      
     }
   };
+
+  const fetchDashboardCards = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:3306/api/dashboard/devices/dashboards/${companyId}`
+    );
+    const data = await response.json();
+    
+    if (data.success) {
+      setDashboardCards(data.data);
+    }
+  } catch (error) {
+    console.error('Error fetching dashboard cards:', error);
+  }
+};
 
   // ✨ ATUALIZADO: useEffect com controle de auto-refresh
   useEffect(() => {
@@ -1612,47 +1695,103 @@ const getHealthScoreColor = (score: number): string => {
       {/* ✅ TAB OVERVIEW COM KPIs ATUALIZADOS */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <KPICard
-              title={t('deviceLogs.kpis.deviceUptime.title')}
-              value={`${safeParseNumber(overview.kpis.uptime.uptime_percentage)}%`}
-              subtitle={t('deviceLogs.kpis.deviceUptime.subtitle', {
-                online: overview.kpis.uptime.devices_online,
-                total: overview.kpis.uptime.total_devices
-              })}
-              icon={SignalIcon}
-              color="green"
-              trend="up"
-            />
-            <KPICard
-              title={t('deviceLogs.kpis.gpsSuccess.title')}
-              value={`${safeParseNumber(overview.kpis.gps_success.success_rate_percent)}%`}
-              subtitle={t('deviceLogs.kpis.gpsSuccess.subtitle', {
-                valid: overview.kpis.gps_success.valid_gps_reports
-              })}
-              icon={MapPinIcon}
-              color="blue"
-              trend="up"
-            />
-            <KPICard
-              title={t('deviceLogs.kpis.batteryHealth.title')}
-              value={`${safeParseNumber(overview.kpis.battery_health.health_percentage)}%`}
-              subtitle={t('deviceLogs.kpis.batteryHealth.subtitle', {
-                critical: safeParseNumber(overview.kpis.battery_health.critical_devices)
-              })}
-              icon={BoltIcon}
-              color={safeParseNumber(overview.kpis.battery_health.critical_devices) > 10 ? 'red' : 'yellow'}
-            />
-            <KPICard
-              title={t('deviceLogs.kpis.activeAlerts.title')}
-              value={overview.device_alerts.active_sos_count}
-              subtitle={t('deviceLogs.kpis.activeAlerts.subtitle', {
-                lowBattery: overview.device_alerts.low_battery_count
-              })}
-              icon={ExclamationTriangleIcon}
-              color={overview.device_alerts.active_sos_count > 0 ? 'red' : 'green'}
-            />
+              {/* ✨ CARDS DE EQUIPAMENTOS */}
+    {dashboardCards?.equipment_cards && (
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <DevicePhoneMobileIcon className="h-6 w-6" />
+          Status dos Equipamentos
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <EquipmentCard card={dashboardCards.equipment_cards.total} />
+          <EquipmentCard card={dashboardCards.equipment_cards.online} />
+          <EquipmentCard card={dashboardCards.equipment_cards.offline} />
+          <EquipmentCard card={dashboardCards.equipment_cards.no_data} />
+        </div>
+      </div>
+    )}
+
+    {/* ✨ CARDS DE ATIVIDADE */}
+    {dashboardCards?.activity_cards && (
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <ClockIcon className="h-6 w-6" />
+          Atividade Recente
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ActivityCard card={dashboardCards.activity_cards.active_last_hour} />
+          <ActivityCard card={dashboardCards.activity_cards.silent_24h} />
+          <ActivityCard card={dashboardCards.activity_cards.inactive_today} />
+        </div>
+      </div>
+    )}
+
+    {/* ✨ CARDS DE GPS */}
+    {dashboardCards?.gps_cards && (
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <MapPinIcon className="h-6 w-6" />
+          Cobertura GPS
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <GPSCard card={dashboardCards.gps_cards.gps_today} />
+          <GPSCard card={dashboardCards.gps_cards.gps_yesterday} />
+          <GPSCard card={dashboardCards.gps_cards.gps_last_3days} />
+          <GPSCard card={dashboardCards.gps_cards.gps_outdated} />
+        </div>
+      </div>
+    )}
+
+    {/* ✨ MÉTRICAS RÁPIDAS */}
+    {dashboardCards?.quick_metrics && (
+      <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-lg border-2 border-purple-200 p-6 shadow-lg">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <ChartBarIcon className="h-6 w-6" />
+          Métricas Rápidas
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-2xl">🟢</span>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Taxa Online</p>
+              <p className="text-2xl font-bold text-green-600">
+                {dashboardCards.quick_metrics.online_percentage}%
+              </p>
+              <p className="text-xs text-gray-500">Equipamentos online</p>
+            </div>
           </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-2xl">⚡</span>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Taxa de Atividade</p>
+              <p className="text-2xl font-bold text-blue-600">
+                {dashboardCards.quick_metrics.active_rate}%
+              </p>
+              <p className="text-xs text-gray-500">Dispositivos ativos</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0 w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+              <span className="text-2xl">📍</span>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 font-medium">Cobertura GPS</p>
+              <p className="text-2xl font-bold text-purple-600">
+                {dashboardCards.quick_metrics.gps_coverage}%
+              </p>
+              <p className="text-xs text-gray-500">Com GPS recente</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+          
 
           {/* ✅ GRÁFICOS COM RESPONSIVIDADE */}
           {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
