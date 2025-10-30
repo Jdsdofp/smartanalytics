@@ -688,7 +688,7 @@ const RawDataExplorer: React.FC = () => {
             }
 
             //https://api-dashboards-u1oh.onrender.com
-            const response = await fetch(`https://api-dashboards-u1oh.onrender.com${currentConfig.endpoint}?${params}`);
+            const response = await fetch(`https://apinode.smartxhub.cloud${currentConfig.endpoint}?${params}`);
             const result: PaginatedResponse = await response.json();
 
             setData(result.data);
@@ -720,7 +720,7 @@ const RawDataExplorer: React.FC = () => {
                 params.append('column_filters', JSON.stringify(columnFilters));
             }
 
-            const response = await fetch(`https://api-dashboards-u1oh.onrender.com${currentConfig.endpoint}?${params}`);
+            const response = await fetch(`https://apinode.smartxhub.cloud${currentConfig.endpoint}?${params}`);
             const result: PaginatedResponse = await response.json();
 
             const exportData = result.data;

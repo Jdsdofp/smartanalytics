@@ -269,9 +269,9 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
     setLoading(true);
     try {
       const [routeRes, eventsRes, configRes] = await Promise.all([
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/route/${device.dev_eui}`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/events/${device.dev_eui}?limit=10`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/config/${device.dev_eui}`),
+        fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/route/${device.dev_eui}`),
+        fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/events/${device.dev_eui}?limit=10`),
+        fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/config/${device.dev_eui}`),
       ]);
 
       const routeData = await routeRes.json();
@@ -1030,15 +1030,15 @@ export default function DeviceLogsView() {
     console.log('ID da company: ', companyId)
     console.log(healthScoreData)
 
-    //https://api-dashboards-u1oh.onrender.com
+    //https://apinode.smartxhub.cloud
     
     try {
       const [overviewRes, motionRes, gatewayRes, eventsRes, customerRes] = await Promise.all([
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/dashboard/overview`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/motion-state`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/gateway-quality`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/events/types`),
-        fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/customer-stats`),
+        fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/dashboard/overview`),
+        fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/motion-state`),
+        fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/gateway-quality`),
+        fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/events/types`),
+        fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/customer-stats`),
       ]);
 
       const overviewData = await overviewRes.json();
@@ -1071,7 +1071,7 @@ export default function DeviceLogsView() {
   const fetchDashboardCards = async () => {
   try {
     const response = await fetch(
-      `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/dashboards/${companyId}`
+      `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/dashboards`
     );
     const data = await response.json();
     
@@ -1122,7 +1122,7 @@ useEffect(() => {
 
   const fetchHealthScoreData = async () => {
     try {
-      const response = await fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/health-score/category`);
+      const response = await fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/health-score/category`);
       const healthData = await response.json();
       
       if (healthData.success && healthData.data) {

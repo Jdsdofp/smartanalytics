@@ -86,7 +86,7 @@ export default function PredictiveCertificateAnalysis() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/certificates/${companyId}`);
+        const response = await fetch(`https://apinode.smartxhub.cloud/api/dashboard/certificates/${companyId}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

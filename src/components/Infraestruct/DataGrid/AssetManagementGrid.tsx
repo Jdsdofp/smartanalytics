@@ -163,7 +163,7 @@ export default function AssetManagementGrid() {
       });
 
       const response = await fetch(
-        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/sensor-heartbeat?${params}`
+        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/sensor-heartbeat?${params}`
       );
       
       if (!response.ok) throw new Error('Failed to fetch data');

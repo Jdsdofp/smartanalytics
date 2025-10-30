@@ -636,7 +636,7 @@ const GPSRouteMapLeaflet = () => {
       if (maxAccuracy) params.append('max_accuracy', maxAccuracy);
 
       const response = await fetch(
-        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/gps-route/raw?${params}`
+        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/gps-route/raw?${params}`
       );
       const result = await response.json();
 

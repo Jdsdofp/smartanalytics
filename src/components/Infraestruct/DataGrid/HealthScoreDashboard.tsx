@@ -33,7 +33,7 @@ const HealthScoreDashboard: React.FC<{ companyId: any }> = ({ companyId }) => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/health-score/category`);
+      const response = await fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/health-score/category`);
       const result = await response.json();
 
       if (result.success) {

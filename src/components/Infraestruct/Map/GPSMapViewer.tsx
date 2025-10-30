@@ -548,7 +548,7 @@ const GPSMapViewer = () => {
     setLoadingDevices(true);
     try {
       const response = await fetch(
-        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/device/list`
+        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/device/list`
       );
 
       if (!response.ok) {
@@ -597,7 +597,7 @@ const GPSMapViewer = () => {
       if (filters.latest_only) params.append('latest_only', 'true');
 
       const response = await fetch(
-        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/gps-data?${params}`
+        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/gps-data?${params}`
       );
 
       if (!response.ok) {
@@ -631,7 +631,7 @@ const GPSMapViewer = () => {
       if (filters.end_date) params.append('end_date', filters.end_date);
 
       const response = await fetch(
-        `https://api-dashboards-u1oh.onrender.com/api/dashboard/devices/${companyId}/gps-stats`
+        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/gps-stats`
       );
 
       if (response.ok) {

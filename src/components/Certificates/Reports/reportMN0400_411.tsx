@@ -125,7 +125,7 @@ export default function CertificateReportGrid() {
       });
 
       const response = await fetch(
-        `https://api-dashboards-u1oh.onrender.com/api/dashboard/certificates/reports/${companyId}?${params}`
+        `https://apinode.smartxhub.cloud/api/dashboard/certificates/reports/${companyId}?${params}`
       );
       
       if (!response.ok) {
@@ -277,7 +277,7 @@ export default function CertificateReportGrid() {
         });
 
         const response = await fetch(
-          `https://api-dashboards-u1oh.onrender.com/api/dashboard/certificates/reports/${companyId}?${params}`
+          `https://apinode.smartxhub.cloud/api/dashboard/certificates/reports/${companyId}?${params}`
         );
         
         if (!response.ok) {
