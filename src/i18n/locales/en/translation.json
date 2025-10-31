@@ -804,7 +804,7 @@
     }
   },
   "assetManagement": {
-    "title": "Asset Management",
+    "title": "Health Monitoring",
     "loading": "Loading...",
     "devicesCount": "{{count}} of {{total}} devices",
     "filtered": "(filtered)",
@@ -900,5 +900,32 @@
         "next": "Next"
       }
     }
+  },
+  "dashboard": {
+    "title": "Asset Management - Certificate & Permit Management",
+    "subtitle": "Monitor and track certificate compliance and risk status",
+    "totalCertificates": "Total Certificates",
+    "expiringNext90Days": "Expiring Next 90 Days",
+    "complianceScore": "Compliance Score",
+    "urgencyScore": "Urgency Score",
+    "issuedLast90Days": "Issued Last 90 Days",
+    "criticalRiskCompanies": "Critical Risk Companies",
+    "certifiedByDepartments": "Certified by Departments",
+    "department": "Department",
+    "operations": "Operations",
+    "maintenance": "Maintenance",
+    "safetyQuality": "Safety & Quality",
+    "engineering": "Engineering",
+    "logistics": "Logistics",
+    "equipmentStatus": "Equipment Status",
+    "recentActivity": "Recent Activity",
+    "gpsCoverage": "GPS Coverage",
+    "quickMetrics": "Quick Metrics",
+    "onlineRate": "Online Rate",
+    "activityRate": "Activity Rate",
+    "gpsCoverageRate": "GPS Coverage",
+    "devicesOnline": "Devices online",
+    "activeDevices": "Active devices",
+    "recentGps": "With recent GPS"
   }
 }

@@ -802,7 +802,7 @@
     }
   },
   "assetManagement": {
-    "title": "Gestão de Ativos",
+    "title": "Monitoramento de Saúde",
     "loading": "Carregando...",
     "devicesCount": "{{count}} de {{total}} dispositivos",
     "filtered": "(filtrado)",
@@ -898,5 +898,32 @@
         "next": "Próxima"
       }
     }
+  },
+  "dashboard": {
+    "title": "Gestão de Ativos - Certificados e Licenças",
+    "subtitle": "Monitore e acompanhe a conformidade e o status de risco dos certificados",
+    "totalCertificates": "Total de Certificados",
+    "expiringNext90Days": "Expiram nos próximos 90 dias",
+    "complianceScore": "Índice de Conformidade",
+    "urgencyScore": "Pontuação de Urgência",
+    "issuedLast90Days": "Emitidos nos últimos 90 dias",
+    "criticalRiskCompanies": "Empresas com Risco Crítico",
+    "certifiedByDepartments": "Certificados por Departamento",
+    "department": "Departamento",
+    "operations": "Operações",
+    "maintenance": "Manutenção",
+    "safetyQuality": "Segurança e Qualidade",
+    "engineering": "Engenharia",
+    "logistics": "Logística",
+    "equipmentStatus": "Status dos Equipamentos",
+    "recentActivity": "Atividade Recente",
+    "gpsCoverage": "Cobertura GPS",
+    "quickMetrics": "Métricas Rápidas",
+    "onlineRate": "Taxa Online",
+    "activityRate": "Taxa de Atividade",
+    "gpsCoverageRate": "Cobertura GPS",
+    "devicesOnline": "Equipamentos online",
+    "activeDevices": "Dispositivos ativos",
+    "recentGps": "Com GPS recente"
   }
 }

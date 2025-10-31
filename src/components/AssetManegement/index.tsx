@@ -1,9 +1,12 @@
 import { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 
 export default function AssetManagement() {
+  const { t } = useTranslation();
+
   const { darkMode } = useTheme();
    
   const pieChartRef = useRef(null);
@@ -417,44 +420,44 @@ export default function AssetManagement() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Asset Management - Certificate & Permit Management
+            {t('dashboard.title')}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Monitor and track certificate compliance and risk status
+            {t('dashboard.subtitle')}
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
           <div className="bg-green-500 dark:bg-green-600 rounded-lg p-4 text-white shadow-lg transition-colors">
-            <div className="text-sm opacity-90 mb-1">Total Certificates</div>
+            <div className="text-sm opacity-90 mb-1">{t('dashboard.totalCertificates')}</div>
           <div className="text-3xl font-bold">Total </div>
           </div>
           
           <div className="bg-orange-500 dark:bg-orange-600 rounded-lg p-4 text-white shadow-lg transition-colors">
-            <div className="text-sm opacity-90 mb-1">Expiring Next 90 Days</div>
+            <div className="text-sm opacity-90 mb-1">{t('dashboard.expiringNext90Days')}</div>
             <div className="text-3xl font-bold">87</div>
             <div className="text-xs opacity-90 mt-1">7.0%</div>
           </div>
           
           <div className="bg-green-600 dark:bg-green-700 rounded-lg p-4 text-white shadow-lg transition-colors">
-            <div className="text-sm opacity-90 mb-1">Compliance Score</div>
+            <div className="text-sm opacity-90 mb-1">{t('dashboard.complianceScore')}</div>
             <div className="text-3xl font-bold">87.5%</div>
           </div>
           
           <div className="bg-yellow-500 dark:bg-yellow-600 rounded-lg p-4 text-white shadow-lg transition-colors">
-            <div className="text-sm opacity-90 mb-1">Urgency Score</div>
+            <div className="text-sm opacity-90 mb-1">{t('dashboard.urgencyScore')}</div>
             <div className="text-3xl font-bold">42.3</div>
           </div>
           
           <div className="bg-blue-500 dark:bg-blue-600 rounded-lg p-4 text-white shadow-lg transition-colors">
-            <div className="text-sm opacity-90 mb-1">Issued Last 90 Days</div>
+            <div className="text-sm opacity-90 mb-1">{t('dashboard.issuedLast90Days')}</div>
             <div className="text-3xl font-bold">156</div>
             <div className="text-xs opacity-90 mt-1">12.5%</div>
           </div>
           
           <div className="bg-green-600 dark:bg-green-700 rounded-lg p-4 text-white shadow-lg transition-colors">
-            <div className="text-sm opacity-90 mb-1">Critical Risk Companies</div>
+            <div className="text-sm opacity-90 mb-1">{t('dashboard.criticalRiskCompanies')}</div>
             <div className="text-3xl font-bold">3</div>
           </div>
         </div>
@@ -484,39 +487,39 @@ export default function AssetManagement() {
         {/* Department Table */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
           <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-            Certified by Departments
+            {t('dashboard.certifiedByDepartments')}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-100 dark:bg-gray-700 border-b dark:border-gray-600">
                 <tr>
                   <th className="text-left p-3 font-medium text-gray-700 dark:text-gray-300">
-                    Department
+                    {t('dashboard.department')}
                   </th>
                   <th className="text-center p-3 font-medium text-gray-700 dark:text-gray-300">
-                    Total Certificates
+                    {t('dashboard.totalCertificates')}
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <td className="p-3 text-gray-900 dark:text-gray-100">Operations</td>
+                  <td className="p-3 text-gray-900 dark:text-gray-100">{t('dashboard.operations')}</td>
                   <td className="text-center p-3 font-semibold text-gray-900 dark:text-gray-100">342</td>
                 </tr>
                 <tr className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <td className="p-3 text-gray-900 dark:text-gray-100">Maintenance</td>
+                  <td className="p-3 text-gray-900 dark:text-gray-100">{t('dashboard.maintenance')}</td>
                   <td className="text-center p-3 font-semibold text-gray-900 dark:text-gray-100">289</td>
                 </tr>
                 <tr className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <td className="p-3 text-gray-900 dark:text-gray-100">Safety & Quality</td>
+                  <td className="p-3 text-gray-900 dark:text-gray-100">{t('dashboard.safetyQuality')}</td>
                   <td className="text-center p-3 font-semibold text-gray-900 dark:text-gray-100">215</td>
                 </tr>
                 <tr className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <td className="p-3 text-gray-900 dark:text-gray-100">Engineering</td>
+                  <td className="p-3 text-gray-900 dark:text-gray-100">{t('dashboard.engineering')}</td>
                   <td className="text-center p-3 font-semibold text-gray-900 dark:text-gray-100">187</td>
                 </tr>
                 <tr className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <td className="p-3 text-gray-900 dark:text-gray-100">Logistics</td>
+                  <td className="p-3 text-gray-900 dark:text-gray-100">{t('dashboard.logistics')}</td>
                   <td className="text-center p-3 font-semibold text-gray-900 dark:text-gray-100">142</td>
                 </tr>
               </tbody>

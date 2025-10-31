@@ -240,21 +240,21 @@ interface DetailsModalProps {
 }
 
 const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
-  
+
   const { companyId } = useCompany()
   const [loading, setLoading] = useState(false);
   const [deviceDetails, setDeviceDetails] = useState<DeviceDetails | null>(null);
   const [activeDetailsTab, setActiveDetailsTab] = useState<'info' | 'route' | 'events' | 'config'>('info');
 
- 
 
-// Adicione este estado no topo com os outros estados
-// const [healthScoreFilter, setHealthScoreFilter] = useState({
-//   excellent: true,
-//   good: true,
-//   fair: true,
-//   poor: true
-// });
+
+  // Adicione este estado no topo com os outros estados
+  // const [healthScoreFilter, setHealthScoreFilter] = useState({
+  //   excellent: true,
+  //   good: true,
+  //   fair: true,
+  //   poor: true
+  // });
 
 
   useEffect(() => {
@@ -618,7 +618,7 @@ interface MapModalProps {
 }
 
 const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
-  
+
   const formatCoordinate = (coord: string | number | null | undefined): string => {
     if (coord === null || coord === undefined || coord === '') return 'N/A';
 
@@ -979,7 +979,7 @@ const adaptDashboardData = (apiData: any): DashboardOverview => {
 };
 
 export default function DeviceLogsView() {
- 
+
   const { t } = useTranslation();
   const { companyId } = useCompany()
   const [loading, setLoading] = useState(true);
@@ -993,11 +993,11 @@ export default function DeviceLogsView() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-   const [dashboardCards, setDashboardCards] = useState<any>(null);
-  
+  const [dashboardCards, setDashboardCards] = useState<any>(null);
+
   // ✨ NOVO: Estados para controle de refresh
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(30000); // 30 segundos padrão
+  const [refreshInterval, setRefreshInterval] = useState(60000); // 30 segundos padrão
 
   const [selectedDevice, setSelectedDevice] = useState<DevicePosition | null>(null);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
@@ -1031,7 +1031,7 @@ export default function DeviceLogsView() {
     console.log(healthScoreData)
 
     //https://apinode.smartxhub.cloud
-    
+
     try {
       const [overviewRes, motionRes, gatewayRes, eventsRes, customerRes] = await Promise.all([
         fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/dashboard/overview`),
@@ -1046,11 +1046,11 @@ export default function DeviceLogsView() {
       const gatewayData = await gatewayRes.json();
       const eventsData = await eventsRes.json();
       const customerData = await customerRes.json();
-      
+
 
       // Adapte os dados da overview
       const adaptedOverview = adaptDashboardData(overviewData);
-      
+
       setOverview(adaptedOverview);
       setMotionDevices(motionData);
       setGatewayQuality(gatewayData);
@@ -1064,35 +1064,35 @@ export default function DeviceLogsView() {
     } finally {
       setLoading(false);
       setRefreshing(false);
-      
+
     }
   };
 
   const fetchDashboardCards = async () => {
-  try {
-    const response = await fetch(
-      `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/dashboards`
-    );
-    const data = await response.json();
-    
-    if (data.success) {
-      setDashboardCards(data.data);
+    try {
+      const response = await fetch(
+        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/dashboards`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        setDashboardCards(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard cards:', error);
     }
-  } catch (error) {
-    console.error('Error fetching dashboard cards:', error);
-  }
-};
+  };
 
   // ✨ ATUALIZADO: useEffect com controle de auto-refresh
   useEffect(() => {
     fetchData(); // Buscar dados inicialmente
-    
+
     let interval: any;
-    
+
     if (autoRefreshEnabled) {
       interval = setInterval(fetchData, refreshInterval);
     }
-    
+
     return () => {
       if (interval) {
         clearInterval(interval);
@@ -1116,145 +1116,145 @@ export default function DeviceLogsView() {
   };
 
 
-   // Adicione este useEffect para o gráfico de health score por categoria
-useEffect(() => {
-  if (!overview || activeTab !== 'overview') return;
+  // Adicione este useEffect para o gráfico de health score por categoria
+  useEffect(() => {
+    if (!overview || activeTab !== 'overview') return;
 
-  const fetchHealthScoreData = async () => {
-    try {
-      const response = await fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/health-score/category`);
-      const healthData = await response.json();
-      
-      if (healthData.success && healthData.data) {
-        setHealthScoreData(healthData.data);
-        
-        // Inicializar o gráfico após um breve delay
-        setTimeout(() => {
-          initHealthScoreChart(healthData.data);
-        }, 100);
+    const fetchHealthScoreData = async () => {
+      try {
+        const response = await fetch(`https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/health-score/category`);
+        const healthData = await response.json();
+
+        if (healthData.success && healthData.data) {
+          setHealthScoreData(healthData.data);
+
+          // Inicializar o gráfico após um breve delay
+          setTimeout(() => {
+            initHealthScoreChart(healthData.data);
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Error fetching health score data:', error);
       }
-    } catch (error) {
-      console.error('Error fetching health score data:', error);
-    }
-  };
+    };
 
-  fetchHealthScoreData();
-}, [overview, activeTab, companyId]);
+    fetchHealthScoreData();
+  }, [overview, activeTab, companyId]);
 
 
-// Função para inicializar o gráfico de health score
-const initHealthScoreChart = (data: any[]) => {
-  const chartElement = document.getElementById('health-score-chart');
-  if (!chartElement) return;
+  // Função para inicializar o gráfico de health score
+  const initHealthScoreChart = (data: any[]) => {
+    const chartElement = document.getElementById('health-score-chart');
+    if (!chartElement) return;
 
-  const chart = echarts.init(chartElement);
-  
-  // Ordenar dados por valor (maior para menor)
-  const sortedData = [...data].sort((a, b) => parseFloat(b.VALUE) - parseFloat(a.VALUE));
-  
-  const option: EChartsOption = {
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      },
-      formatter: (params: any) => {
-        const data = params[0];
-        return `
+    const chart = echarts.init(chartElement);
+
+    // Ordenar dados por valor (maior para menor)
+    const sortedData = [...data].sort((a, b) => parseFloat(b.VALUE) - parseFloat(a.VALUE));
+
+    const option: EChartsOption = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        },
+        formatter: (params: any) => {
+          const data = params[0];
+          return `
           <strong>${data.name}</strong><br/>
           ${t('deviceLogs.healthScoreChart.score')}: <b>${data.value}%</b><br/>
           ${t('deviceLogs.healthScoreChart.devices')}: ${data.data.total_devices}
         `;
-      }
-    },
-    legend: {
-      type: 'scroll',
-    top: 'bottom',
-    textStyle: { fontSize: 11 },
-    selectedMode: 'multiple', // permite selecionar mais de um filtro
-    },
-    grid: {
-      left: '3%',
-      right: '8%',
-      bottom: '15%',
-      top: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'value',
-      name: t('deviceLogs.healthScoreChart.xAxis.name'),
-      nameLocation: 'middle',
-      nameGap: 30,
-      axisLabel: {
-        formatter: '{value}%'
-      },
-      max: 100,
-      min: 0
-    },
-    yAxis: {
-      type: 'category',
-      data: sortedData.map(item => item.NAME),
-      axisLabel: {
-        fontSize: 11,
-        formatter: (value: string) => {
-          // Truncar labels muito longos
-          return value.length > 20 ? value.substring(0, 20) + '...' : value;
         }
       },
-      axisTick: {
-        alignWithLabel: true
-      }
-    },
-    series: [
-      {
-        name: t('deviceLogs.healthScoreChart.series.name'),
-        type: 'bar',
-        data: sortedData.map(item => ({
-          value: parseFloat(item.VALUE),
-          total_devices: item.total_devices,
-          itemStyle: {
-            color: getHealthScoreColor(parseFloat(item.VALUE))
-          }
-        })),
-        label: {
-          show: true,
-          position: 'right',
-          formatter: '{c}%',
-          fontSize: 11
+      legend: {
+        type: 'scroll',
+        top: 'bottom',
+        textStyle: { fontSize: 11 },
+        selectedMode: 'multiple', // permite selecionar mais de um filtro
+      },
+      grid: {
+        left: '3%',
+        right: '8%',
+        bottom: '15%',
+        top: '3%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'value',
+        name: t('deviceLogs.healthScoreChart.xAxis.name'),
+        nameLocation: 'middle',
+        nameGap: 30,
+        axisLabel: {
+          formatter: '{value}%'
         },
-        emphasis: {
-          focus: 'series',
-          itemStyle: {
-            shadowBlur: 10,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
+        max: 100,
+        min: 0
+      },
+      yAxis: {
+        type: 'category',
+        data: sortedData.map(item => item.NAME),
+        axisLabel: {
+          fontSize: 11,
+          formatter: (value: string) => {
+            // Truncar labels muito longos
+            return value.length > 20 ? value.substring(0, 20) + '...' : value;
+          }
+        },
+        axisTick: {
+          alignWithLabel: true
+        }
+      },
+      series: [
+        {
+          name: t('deviceLogs.healthScoreChart.series.name'),
+          type: 'bar',
+          data: sortedData.map(item => ({
+            value: parseFloat(item.VALUE),
+            total_devices: item.total_devices,
+            itemStyle: {
+              color: getHealthScoreColor(parseFloat(item.VALUE))
+            }
+          })),
+          label: {
+            show: true,
+            position: 'right',
+            formatter: '{c}%',
+            fontSize: 11
+          },
+          emphasis: {
+            focus: 'series',
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
           }
         }
-      }
-    ],
-    dataZoom: [
-      {
-        type: 'slider',
-        yAxisIndex: 0,
-        filterMode: 'filter',
-        height: 20,
-        bottom: 0,
-        start: 0,
-        end: 100
-      }
-    ]
+      ],
+      dataZoom: [
+        {
+          type: 'slider',
+          yAxisIndex: 0,
+          filterMode: 'filter',
+          height: 20,
+          bottom: 0,
+          start: 0,
+          end: 100
+        }
+      ]
+    };
+
+    chart.setOption(option);
+
+    // Adicionar redimensionamento responsivo
+    const handleResize = () => chart.resize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      chart.dispose();
+    };
   };
-
-  chart.setOption(option);
-
-  // Adicionar redimensionamento responsivo
-  const handleResize = () => chart.resize();
-  window.addEventListener('resize', handleResize);
-
-  return () => {
-    window.removeEventListener('resize', handleResize);
-    chart.dispose();
-  };
-};
 
 
 
@@ -1557,16 +1557,16 @@ const initHealthScoreChart = (data: any[]) => {
   }
 
 
-// Função auxiliar para determinar a cor baseada no score
-const getHealthScoreColor = (score: number): string => {
-  if (score >= 80) return '#10b981'; // Verde para scores altos
-  if (score >= 60) return '#f59e0b'; // Amarelo para scores médios
-  if (score >= 40) return '#f97316'; // Laranja para scores baixos
-  return '#ef4444'; // Vermelho para scores muito baixos
-};
+  // Função auxiliar para determinar a cor baseada no score
+  const getHealthScoreColor = (score: number): string => {
+    if (score >= 80) return '#10b981'; // Verde para scores altos
+    if (score >= 60) return '#f59e0b'; // Amarelo para scores médios
+    if (score >= 40) return '#f97316'; // Laranja para scores baixos
+    return '#ef4444'; // Vermelho para scores muito baixos
+  };
 
 
-  
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -1581,7 +1581,7 @@ const getHealthScoreColor = (score: number): string => {
               {t('deviceLogs.lastUpdate')}: {new Date(overview.generated_at).toLocaleString('pt-BR')}
             </p>
           </div>
-          
+
           {/* ✨ CONTROLES DE REFRESH */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
             {/* Status do Auto-Refresh */}
@@ -1599,20 +1599,19 @@ const getHealthScoreColor = (score: number): string => {
               disabled={!autoRefreshEnabled}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              <option value={10000}>10 segundos</option>
-              <option value={30000}>30 segundos</option>
-              <option value={60000}>1 minuto</option>
-              <option value={300000}>5 minutos</option>
+              {/* <option value={10000}>10 segundos</option>
+              <option value={30000}>30 segundos</option> */}
+              <option value={60000}>1 min</option>
+              <option value={300000}>5 min</option>
             </select>
 
             {/* Botão Toggle Auto-Refresh */}
             <button
               onClick={toggleAutoRefresh}
-              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                autoRefreshEnabled 
-                  ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' 
+              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${autoRefreshEnabled
+                  ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
                   : 'bg-green-100 text-green-700 hover:bg-green-200'
-              }`}
+                }`}
             >
               {autoRefreshEnabled ? (
                 <>
@@ -1695,103 +1694,103 @@ const getHealthScoreColor = (score: number): string => {
       {/* ✅ TAB OVERVIEW COM KPIs ATUALIZADOS */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-              {/* ✨ CARDS DE EQUIPAMENTOS */}
-    {dashboardCards?.equipment_cards && (
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <DevicePhoneMobileIcon className="h-6 w-6" />
-          Status dos Equipamentos
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <EquipmentCard card={dashboardCards.equipment_cards.total} />
-          <EquipmentCard card={dashboardCards.equipment_cards.online} />
-          <EquipmentCard card={dashboardCards.equipment_cards.offline} />
-          <EquipmentCard card={dashboardCards.equipment_cards.no_data} />
-        </div>
-      </div>
-    )}
-
-    {/* ✨ CARDS DE ATIVIDADE */}
-    {dashboardCards?.activity_cards && (
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <ClockIcon className="h-6 w-6" />
-          Atividade Recente
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <ActivityCard card={dashboardCards.activity_cards.active_last_hour} />
-          <ActivityCard card={dashboardCards.activity_cards.silent_24h} />
-          <ActivityCard card={dashboardCards.activity_cards.inactive_today} />
-        </div>
-      </div>
-    )}
-
-    {/* ✨ CARDS DE GPS */}
-    {dashboardCards?.gps_cards && (
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <MapPinIcon className="h-6 w-6" />
-          Cobertura GPS
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <GPSCard card={dashboardCards.gps_cards.gps_today} />
-          <GPSCard card={dashboardCards.gps_cards.gps_yesterday} />
-          <GPSCard card={dashboardCards.gps_cards.gps_last_3days} />
-          <GPSCard card={dashboardCards.gps_cards.gps_outdated} />
-        </div>
-      </div>
-    )}
-
-    {/* ✨ MÉTRICAS RÁPIDAS */}
-    {dashboardCards?.quick_metrics && (
-      <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-lg border-2 border-purple-200 p-6 shadow-lg">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <ChartBarIcon className="h-6 w-6" />
-          Métricas Rápidas
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex items-center gap-4">
-            <div className="flex-shrink-0 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🟢</span>
-            </div>
+          {/* ✨ CARDS DE EQUIPAMENTOS */}
+          {dashboardCards?.equipment_cards && (
             <div>
-              <p className="text-sm text-gray-600 font-medium">Taxa Online</p>
-              <p className="text-2xl font-bold text-green-600">
-                {dashboardCards.quick_metrics.online_percentage}%
-              </p>
-              <p className="text-xs text-gray-500">Equipamentos online</p>
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <DevicePhoneMobileIcon className="h-6 w-6" />
+                {t('dashboard.equipmentStatus')}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <EquipmentCard card={dashboardCards.equipment_cards.total} />
+                <EquipmentCard card={dashboardCards.equipment_cards.online} />
+                <EquipmentCard card={dashboardCards.equipment_cards.offline} />
+                <EquipmentCard card={dashboardCards.equipment_cards.no_data} />
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl">⚡</span>
-            </div>
+          )}
+
+          {/* ✨ CARDS DE ATIVIDADE */}
+          {dashboardCards?.activity_cards && (
             <div>
-              <p className="text-sm text-gray-600 font-medium">Taxa de Atividade</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {dashboardCards.quick_metrics.active_rate}%
-              </p>
-              <p className="text-xs text-gray-500">Dispositivos ativos</p>
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <ClockIcon className="h-6 w-6" />
+                {t('dashboard.recentActivity')}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <ActivityCard card={dashboardCards.activity_cards.active_last_hour} />
+                <ActivityCard card={dashboardCards.activity_cards.silent_24h} />
+                <ActivityCard card={dashboardCards.activity_cards.inactive_today} />
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="flex-shrink-0 w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl">📍</span>
-            </div>
+          )}
+
+          {/* ✨ CARDS DE GPS */}
+          {dashboardCards?.gps_cards && (
             <div>
-              <p className="text-sm text-gray-600 font-medium">Cobertura GPS</p>
-              <p className="text-2xl font-bold text-purple-600">
-                {dashboardCards.quick_metrics.gps_coverage}%
-              </p>
-              <p className="text-xs text-gray-500">Com GPS recente</p>
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <MapPinIcon className="h-6 w-6" />
+                {t('dashboard.gpsCoverage')}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <GPSCard card={dashboardCards.gps_cards.gps_today} />
+                <GPSCard card={dashboardCards.gps_cards.gps_yesterday} />
+                <GPSCard card={dashboardCards.gps_cards.gps_last_3days} />
+                <GPSCard card={dashboardCards.gps_cards.gps_outdated} />
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-    )}
-          
+          )}
+
+          {/* ✨ MÉTRICAS RÁPIDAS */}
+          {dashboardCards?.quick_metrics && (
+            <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-lg border-2 border-purple-200 p-6 shadow-lg">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <ChartBarIcon className="h-6 w-6" />
+                {t('dashboard.quickMetrics')}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">🟢</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">{t('dashboard.onlineRate')}</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {dashboardCards.quick_metrics.online_percentage}%
+                    </p>
+                    <p className="text-xs text-gray-500">{t('dashboard.devicesOnline')}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">⚡</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">{t('dashboard.activityRate')}</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {dashboardCards.quick_metrics.active_rate}%
+                    </p>
+                    <p className="text-xs text-gray-500">{t('dashboard.activeDevices')}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex-shrink-0 w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">📍</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">{t('dashboard.gpsCoverage')}</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {dashboardCards.quick_metrics.gps_coverage}%
+                    </p>
+                    <p className="text-xs text-gray-500">{t('dashboard.recentGps')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
 
           {/* ✅ GRÁFICOS COM RESPONSIVIDADE */}
           {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1952,9 +1951,8 @@ const getHealthScoreColor = (score: number): string => {
                       key: 'battery_status',
                       label: t('deviceLogs.tables.status'),
                       render: (val) => (
-                        <span className={`inline-flex px-2 py-1 rounded-full text-xs ${
-                          val === 'OPERATING' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs ${val === 'OPERATING' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
                           {val}
                         </span>
                       ),
@@ -1971,7 +1969,7 @@ const getHealthScoreColor = (score: number): string => {
             </div>
           )}
           <AssetManagementGrid />
-          <HealthScoreDashboard companyId={companyId}/>
+          <HealthScoreDashboard companyId={companyId} />
           <GPSRouteMapLeaflet />
         </div>
       )}
