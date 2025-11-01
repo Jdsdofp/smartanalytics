@@ -927,5 +927,78 @@
     "devicesOnline": "Devices online",
     "activeDevices": "Active devices",
     "recentGps": "With recent GPS"
+  },
+  "lowBatteryTable": {
+    "title": "Low Battery Alerts",
+    "loading": "Loading data...",
+    "headers": {
+      "person": "Person",
+      "deviceUid": "Device UID",
+      "model": "Model",
+      "battery": "Battery %",
+      "status": "Status",
+      "score": "Score",
+      "charging": "Charging",
+      "updated": "Updated",
+      "minAgo": "Min Ago",
+      "fresh": "Freshness",
+      "temp": "Temp",
+      "motion": "Motion",
+      "value": "Value",
+      "changed": "Changed",
+      "lastReport": "Last Report",
+      "min": "Min",
+      "hours": "Hours",
+      "days": "Days",
+      "gpsAge": "GPS Age",
+      "gpsFail": "GPS Fail"
+    },
+    "status": {
+      "critical": "CRITICAL",
+      "warning": "WARNING",
+      "operating": "OPERATING",
+      "moving": "Moving",
+      "static": "Static"
+    },
+    "freshness": {
+      "fresh": "🟢 Fresh",
+      "recent": "🟡 Recent",
+      "old": "🟠 Old",
+      "stale": "🔴 Stale"
+    },
+    "reportStatus": {
+      "active": "🟢 Active",
+      "recent": "🟡 Recent",
+      "delayed": "🟠 Delayed",
+      "lost": "🔴 Lost",
+      "realTime": "REAL TIME",
+      "recentData": "RECENT"
+    },
+    "legend": {
+      "title": "Legend",
+      "battery": "Battery Info",
+      "temperature": "Temperature Info",
+      "motion": "Motion Info",
+      "report": "Report Info",
+      "gps": "GPS Info"
+    },
+    "charging": {
+      "yes": "🔌",
+      "no": "–"
+    },
+    "gps": {
+      "ok": "✓ OK",
+      "notAvailable": "–"
+    }
+  },
+  "pagination": {
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "results": "results",
+    "perPage": "Per page:",
+    "page": "Page",
+    "previous": "Previous page",
+    "next": "Next page"
   }
 }

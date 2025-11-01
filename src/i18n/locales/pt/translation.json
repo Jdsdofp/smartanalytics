@@ -925,5 +925,78 @@
     "devicesOnline": "Equipamentos online",
     "activeDevices": "Dispositivos ativos",
     "recentGps": "Com GPS recente"
+  },
+  "lowBatteryTable": {
+    "title": "Alertas de Bateria Baixa",
+    "loading": "Carregando dados...",
+    "headers": {
+      "person": "Pessoa",
+      "deviceUid": "Device UID",
+      "model": "Modelo",
+      "battery": "Bateria %",
+      "status": "Status",
+      "score": "Score",
+      "charging": "Carregando",
+      "updated": "Atualizado",
+      "minAgo": "Min Atrás",
+      "fresh": "Frescor",
+      "temp": "Temp",
+      "motion": "Movimento",
+      "value": "Valor",
+      "changed": "Mudou",
+      "lastReport": "Último Report",
+      "min": "Min",
+      "hours": "Horas",
+      "days": "Dias",
+      "gpsAge": "GPS Age",
+      "gpsFail": "GPS Falha"
+    },
+    "status": {
+      "critical": "CRÍTICO",
+      "warning": "ALERTA",
+      "operating": "OPERANDO",
+      "moving": "Em Movimento",
+      "static": "Estático"
+    },
+    "freshness": {
+      "fresh": "🟢 Fresco",
+      "recent": "🟡 Recente",
+      "old": "🟠 Antigo",
+      "stale": "🔴 Velho"
+    },
+    "reportStatus": {
+      "active": "🟢 Ativo",
+      "recent": "🟡 Recente",
+      "delayed": "🟠 Atrasado",
+      "lost": "🔴 Perdido",
+      "realTime": "TEMPO REAL",
+      "recentData": "RECENTE"
+    },
+    "legend": {
+      "title": "Legenda",
+      "battery": "Info Bateria",
+      "temperature": "Info Temperatura",
+      "motion": "Info Movimento",
+      "report": "Info Relatório",
+      "gps": "Info GPS"
+    },
+    "charging": {
+      "yes": "🔌",
+      "no": "–"
+    },
+    "gps": {
+      "ok": "✓ OK",
+      "notAvailable": "–"
+    }
+  },
+  "pagination": {
+    "showing": "Mostrando",
+    "to": "a",
+    "of": "de",
+    "results": "resultados",
+    "perPage": "Por página:",
+    "page": "Página",
+    "previous": "Página anterior",
+    "next": "Próxima página"
   }
 }
