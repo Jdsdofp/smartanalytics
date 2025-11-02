@@ -998,5 +998,31 @@
     "page": "Página",
     "previous": "Página anterior",
     "next": "Próxima página"
+  },
+  "dashboardCard": {
+    "gpsCoverage": "Cobertura GPS",
+    "equipmentCards": {
+      "total": "Total de Equipamentos",
+      "online": "Equipamentos Online",
+      "offline": "Equipamentos Offline",
+      "noData": "Sem Dados"
+    },
+    "activityCards": {
+      "activeLastHour": "Ativos na Última Hora",
+      "silent24h": "Silenciosos (+24h)",
+      "inactiveToday": "Inativos Hoje"
+    },
+    "gpsCards": {
+      "gpsToday": "GPS Hoje",
+      "gpsYesterday": "GPS Ontem",
+      "gpsLast3Days": "GPS Últimos 3 Dias",
+      "gpsOutdated": "GPS Desatualizado",
+      "descriptions": {
+        "gpsToday": "Equipamentos com GPS hoje",
+        "gpsYesterday": "Equipamentos com GPS ontem",
+        "gpsLast3Days": "Equipamentos com GPS recente",
+        "gpsOutdated": "Equipamentos sem GPS há +4 dias"
+      }
+    }
   }
 }

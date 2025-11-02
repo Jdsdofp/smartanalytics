@@ -28,7 +28,7 @@ import 'leaflet-polylinedecorator';
 import RawDataExplorer from './DataGrid/gridMN0400_211';
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
-import GPSRouteMapLeaflet from './Map/GPSRouteMap';
+// import GPSRouteMapLeaflet from './Map/GPSRouteMap';
 import GPSMapViewer from './Map/GPSMapViewer';
 import { useCompany } from '../../hooks/useCompany';
 import AssetManagementGrid from './DataGrid/AssetManagementGrid';
@@ -790,36 +790,36 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
 // 🎨 COMPONENTES DE UI
 // =====================================
 
-const AlertBadge = ({ type, count }: { type: 'sos' | 'battery' | 'offline'; count: number }) => {
-  const { t } = useTranslation();
+// const AlertBadge = ({ type, count }: { type: 'sos' | 'battery' | 'offline'; count: number }) => {
+//   const { t } = useTranslation();
 
-  const config = {
-    sos: {
-      label: t('deviceLogs.alerts.sos'),
-      icon: ShieldExclamationIcon,
-      color: 'bg-red-100 text-red-800 ring-red-600/20',
-    },
-    battery: {
-      label: t('deviceLogs.alerts.battery'),
-      icon: BoltIcon,
-      color: 'bg-yellow-100 text-yellow-800 ring-yellow-600/20',
-    },
-    offline: {
-      label: t('deviceLogs.alerts.offline'),
-      icon: SignalSlashIcon,
-      color: 'bg-gray-100 text-gray-800 ring-gray-600/20',
-    },
-  };
+//   const config = {
+//     sos: {
+//       label: t('deviceLogs.alerts.sos'),
+//       icon: ShieldExclamationIcon,
+//       color: 'bg-red-100 text-red-800 ring-red-600/20',
+//     },
+//     battery: {
+//       label: t('deviceLogs.alerts.battery'),
+//       icon: BoltIcon,
+//       color: 'bg-yellow-100 text-yellow-800 ring-yellow-600/20',
+//     },
+//     offline: {
+//       label: t('deviceLogs.alerts.offline'),
+//       icon: SignalSlashIcon,
+//       color: 'bg-gray-100 text-gray-800 ring-gray-600/20',
+//     },
+//   };
 
-  const { label, icon: Icon, color } = config[type];
+//   const { label, icon: Icon, color } = config[type];
 
-  return (
-    <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ring-1 ring-inset ${color}`}>
-      <Icon className="h-5 w-5" />
-      <span>{label}: {count}</span>
-    </div>
-  );
-};
+//   return (
+//     <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ring-1 ring-inset ${color}`}>
+//       <Icon className="h-5 w-5" />
+//       <span>{label}: {count}</span>
+//     </div>
+//   );
+// };
 
 const DataTable = ({
   columns,
@@ -887,7 +887,10 @@ const ChartContainer = ({
 };
 
 
-const EquipmentCard = ({ card }: { card: any }) => {
+const EquipmentCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
+  
+  const { t } = useTranslation();
+
   const colorClasses = {
     blue: 'bg-blue-50 border-blue-200',
     green: 'bg-green-50 border-green-200',
@@ -904,12 +907,16 @@ const EquipmentCard = ({ card }: { card: any }) => {
 
   const isPrimary = card.type === 'primary';
 
+    // Busca a tradução baseada no cardKey
+  const translatedTitle = t(`dashboardCard.equipmentCards.${cardKey}`);
+
   return (
     <div className={`rounded-lg border-2 p-6 transition-all hover:shadow-lg ${colorClasses[card.color as keyof typeof colorClasses]}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className={`text-sm font-medium opacity-80 uppercase tracking-wide ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
-            {card.title}
+            {/* {card.title} */}
+            {translatedTitle}
           </p>
           <div className="mt-2 flex items-baseline gap-2">
             <p className={`font-bold ${isPrimary ? 'text-4xl' : 'text-3xl'} ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
@@ -930,7 +937,8 @@ const EquipmentCard = ({ card }: { card: any }) => {
   );
 };
 
-const ActivityCard = ({ card }: { card: any }) => {
+const ActivityCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
+  const { t } = useTranslation();
   const colorClasses = {
     green: 'bg-green-50 border-green-200',
     orange: 'bg-orange-50 border-orange-200',
@@ -943,12 +951,16 @@ const ActivityCard = ({ card }: { card: any }) => {
     yellow: 'text-yellow-700',
   };
 
+    // Busca a tradução baseada no cardKey
+  const translatedTitle = t(`dashboardCard.activityCards.${cardKey}`);
+
   return (
     <div className={`rounded-lg border-2 p-5 transition-all hover:shadow-md ${colorClasses[card.color as keyof typeof colorClasses]}`}>
       <div className="flex items-center justify-between">
         <div>
           <p className={`text-xs font-medium opacity-80 uppercase tracking-wide ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
-            {card.title}
+            {/* {card.title} */}
+            {translatedTitle}
           </p>
           <p className={`mt-1 text-3xl font-bold ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
             {card.value}
@@ -962,13 +974,20 @@ const ActivityCard = ({ card }: { card: any }) => {
   );
 };
 
-const GPSCard = ({ card }: { card: any }) => {
+const GPSCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
+  const { t } = useTranslation();
+
   const colorClasses = {
     green: 'bg-gradient-to-br from-green-50 to-green-100 border-green-300',
     blue: 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300',
     teal: 'bg-gradient-to-br from-teal-50 to-teal-100 border-teal-300',
     red: 'bg-gradient-to-br from-red-50 to-red-100 border-red-300',
   };
+
+    // Busca a tradução baseada no cardKey
+  const translatedTitle = t(`dashboardCard.gpsCards.${cardKey}`);
+  const translatedDescription = t(`dashboardCard.gpsCards.descriptions.${cardKey}`);
+
 
   return (
     <div className={`rounded-lg border-2 p-5 transition-all hover:shadow-lg ${colorClasses[card.color as keyof typeof colorClasses]}`}>
@@ -978,13 +997,15 @@ const GPSCard = ({ card }: { card: any }) => {
         </div>
         <div className="flex-1">
           <p className="text-sm font-semibold text-gray-700">
-            {card.title}
+            {/* {card.title} */}
+            {translatedTitle}
           </p>
           <p className="mt-1 text-3xl font-bold text-gray-900">
             {card.value}
           </p>
           <p className="mt-1 text-xs text-gray-600">
-            {card.description}
+            {/* {card.description} */}
+            {translatedDescription}
           </p>
         </div>
       </div>
@@ -1092,7 +1113,7 @@ const Pagination = ({
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
             className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-             title={t('pagination.previous')}
+            title={t('pagination.previous')}
           >
             ←
           </button>
@@ -1108,11 +1129,10 @@ const Pagination = ({
                 <button
                   key={page}
                   onClick={() => onPageChange(page as number)}
-                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    currentPage === page
+                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === page
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>
@@ -1236,6 +1256,10 @@ export default function DeviceLogsView() {
       setEventTypes(eventsData);
       setCustomerStats(customerData);
 
+       // ✅ LOG PARA DEBUG - Verifique se battery_health existe
+      // console.log('Overview Data:', overviewData);
+      // console.log('Battery Health:', overviewData?.kpis?.battery_health);
+
       await fetchDashboardCards();
 
     } catch (error) {
@@ -1263,37 +1287,37 @@ export default function DeviceLogsView() {
   };
 
   const fetchLowBatteryData = async (page: number = lowBatteryPage, limit: number = lowBatteryLimit) => {
-  setLoadingLowBattery(true);
-  try {
-    const response = await fetch(
-      `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/low-battery?page=${page}&limit=${limit}`
-    );
-    const result = await response.json();
+    setLoadingLowBattery(true);
+    try {
+      const response = await fetch(
+        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/low-battery?page=${page}&limit=${limit}`
+      );
+      const result = await response.json();
 
-    // ✅ Transformar para o formato esperado
-    const adaptedData = {
-      data: result.data || [],
-      pagination: {
-        currentPage: result.page || 1,
-        totalPages: result.totalPages || 1,
-        totalItems: result.total || 0,
-        itemsPerPage: result.limit || 10,
-        hasNextPage: result.page < result.totalPages,
-        hasPreviousPage: result.page > 1,
-      },
-    };
-    
-    setLowBatteryData(adaptedData);
-    
-    // if (result.success) {
-    //   setLowBatteryData(result);
-    // }
-  } catch (error) {
-    console.error('Error fetching low battery data:', error);
-  } finally {
-    setLoadingLowBattery(false);
-  }
-};
+      // ✅ Transformar para o formato esperado
+      const adaptedData = {
+        data: result.data || [],
+        pagination: {
+          currentPage: result.page || 1,
+          totalPages: result.totalPages || 1,
+          totalItems: result.total || 0,
+          itemsPerPage: result.limit || 10,
+          hasNextPage: result.page < result.totalPages,
+          hasPreviousPage: result.page > 1,
+        },
+      };
+
+      setLowBatteryData(adaptedData);
+
+      // if (result.success) {
+      //   setLowBatteryData(result);
+      // }
+    } catch (error) {
+      console.error('Error fetching low battery data:', error);
+    } finally {
+      setLoadingLowBattery(false);
+    }
+  };
 
   // 1 ✨ ATUALIZADO: useEffect com controle de auto-refresh
   useEffect(() => {
@@ -1846,7 +1870,7 @@ export default function DeviceLogsView() {
               ) : (
                 <>
                   <PlayIcon className="h-4 w-4" />
-                  Ativar
+                  Active
                 </>
               )}
             </button>
@@ -1864,11 +1888,11 @@ export default function DeviceLogsView() {
         </div>
 
         {/* Alertas - ATUALIZADO para usar device_alerts */}
-        <div className="flex flex-wrap gap-3">
+        {/* <div className="flex flex-wrap gap-3">
           <AlertBadge type="sos" count={overview.device_alerts.active_sos_count} />
           <AlertBadge type="battery" count={overview.device_alerts.low_battery_count} />
           <AlertBadge type="offline" count={overview.device_alerts.offline_count} />
-        </div>
+        </div> */}
       </div>
 
       {/* Tabs de Navegação */}
@@ -1927,10 +1951,10 @@ export default function DeviceLogsView() {
                 {t('dashboard.equipmentStatus')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <EquipmentCard card={dashboardCards.equipment_cards.total} />
-                <EquipmentCard card={dashboardCards.equipment_cards.online} />
-                <EquipmentCard card={dashboardCards.equipment_cards.offline} />
-                <EquipmentCard card={dashboardCards.equipment_cards.no_data} />
+                <EquipmentCard card={dashboardCards.equipment_cards.total} cardKey="total" />
+                <EquipmentCard card={dashboardCards.equipment_cards.online} cardKey="online" />
+                <EquipmentCard card={dashboardCards.equipment_cards.offline} cardKey="offline" />
+                <EquipmentCard card={dashboardCards.equipment_cards.no_data} cardKey="noData" />
               </div>
             </div>
           )}
@@ -1943,9 +1967,9 @@ export default function DeviceLogsView() {
                 {t('dashboard.recentActivity')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <ActivityCard card={dashboardCards.activity_cards.active_last_hour} />
-                <ActivityCard card={dashboardCards.activity_cards.silent_24h} />
-                <ActivityCard card={dashboardCards.activity_cards.inactive_today} />
+                <ActivityCard card={dashboardCards.activity_cards.active_last_hour} cardKey="activeLastHour" />
+                <ActivityCard card={dashboardCards.activity_cards.silent_24h} cardKey="silent24h" />
+                <ActivityCard card={dashboardCards.activity_cards.inactive_today} cardKey="inactiveToday" />
               </div>
             </div>
           )}
@@ -1958,10 +1982,10 @@ export default function DeviceLogsView() {
                 {t('dashboard.gpsCoverage')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <GPSCard card={dashboardCards.gps_cards.gps_today} />
-                <GPSCard card={dashboardCards.gps_cards.gps_yesterday} />
-                <GPSCard card={dashboardCards.gps_cards.gps_last_3days} />
-                <GPSCard card={dashboardCards.gps_cards.gps_outdated} />
+                <GPSCard card={dashboardCards.gps_cards.gps_today} cardKey="gpsToday" />
+                <GPSCard card={dashboardCards.gps_cards.gps_yesterday} cardKey="gpsYesterday" />
+                <GPSCard card={dashboardCards.gps_cards.gps_last_3days} cardKey="gpsLast3Days"  />
+                <GPSCard card={dashboardCards.gps_cards.gps_outdated} cardKey="gpsOutdated" />
               </div>
             </div>
           )}
@@ -2155,7 +2179,7 @@ export default function DeviceLogsView() {
             <div className="bg-white rounded-lg shadow-sm border border-yellow-200 p-4">
               <h3 className="text-lg font-semibold text-yellow-900 mb-4 flex items-center gap-2">
                 <BoltIcon className="h-6 w-6" />
-                 {t('lowBatteryTable.title')} ({lowBatteryData.pagination.totalItems})
+                {t('lowBatteryTable.title')} ({lowBatteryData.pagination.totalItems})
               </h3>
 
               {/* Loading State */}
@@ -2235,8 +2259,8 @@ export default function DeviceLogsView() {
                                     <div className="w-12 bg-gray-200 rounded-full h-1.5">
                                       <div
                                         className={`h-1.5 rounded-full transition-all ${device.battery_level >= 30 ? 'bg-green-500' :
-                                            device.battery_level >= 20 ? 'bg-yellow-500' :
-                                              device.battery_level >= 10 ? 'bg-orange-500' : 'bg-red-500'
+                                          device.battery_level >= 20 ? 'bg-yellow-500' :
+                                            device.battery_level >= 10 ? 'bg-orange-500' : 'bg-red-500'
                                           }`}
                                         style={{ width: `${device.battery_level}%` }}
                                       />
@@ -2249,8 +2273,8 @@ export default function DeviceLogsView() {
                                 </td>
                                 <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
                                   <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-semibold ${device.battery_status === 'CRITICAL' ? 'bg-red-100 text-red-800' :
-                                      device.battery_status === 'WARNING' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-green-100 text-green-800'
+                                    device.battery_status === 'WARNING' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-green-100 text-green-800'
                                     }`}>
                                     {device.battery_status}
                                   </span>
@@ -2297,7 +2321,7 @@ export default function DeviceLogsView() {
                                 {/* Temperature Info */}
                                 <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
                                   <span className={`font-medium text-[11px] ${device.temperature < 15 ? 'text-blue-600' :
-                                      device.temperature > 30 ? 'text-red-600' : 'text-gray-700'
+                                    device.temperature > 30 ? 'text-red-600' : 'text-gray-700'
                                     }`}>
                                     {device.temperature}°{device.temperature_unit}
                                   </span>
@@ -2362,8 +2386,8 @@ export default function DeviceLogsView() {
                                 </td>
                                 <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
                                   <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] ${device.report_freshness === 'REAL_TIME' ? 'bg-green-100 text-green-800' :
-                                      device.report_freshness === 'RECENT' ? 'bg-blue-100 text-blue-800' :
-                                        'bg-gray-100 text-gray-700'
+                                    device.report_freshness === 'RECENT' ? 'bg-blue-100 text-blue-800' :
+                                      'bg-gray-100 text-gray-700'
                                     }`}>
                                     {device.report_freshness}
                                   </span>
@@ -2399,7 +2423,7 @@ export default function DeviceLogsView() {
                                 <td className="px-2 py-2 whitespace-nowrap bg-red-50">
                                   {device.gps_age !== null ? (
                                     <span className={`text-[10px] font-medium ${device.gps_age < 30 ? 'text-green-600' :
-                                        device.gps_age < 60 ? 'text-yellow-600' : 'text-red-600'
+                                      device.gps_age < 60 ? 'text-yellow-600' : 'text-red-600'
                                       }`}>
                                       {device.gps_age}m
                                     </span>
@@ -2464,7 +2488,7 @@ export default function DeviceLogsView() {
           )}
           <AssetManagementGrid />
           <HealthScoreDashboard companyId={companyId} />
-          <GPSRouteMapLeaflet />
+          {/* <GPSRouteMapLeaflet /> */}
         </div>
       )}
 
@@ -2970,7 +2994,7 @@ export default function DeviceLogsView() {
       {activeTab === 'rawdata' && (
         <RawDataExplorer />
       )}
-
+    
       <MapModal
         device={selectedDevice}
         isOpen={isMapModalOpen}

@@ -338,7 +338,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           ]
         },
         {
-          icon: ChartPieIcon, label: 'Financial & Cost Analysis', path: '/MN0400_020', disabled: true,
+          icon: ChartPieIcon, label: 'Financial & Cost Analysis', path: '/MN0400_020', hidden: true,
             children: [
             { icon: ChartBarIcon, label: 'Total Cost of Ownership (TCO)', path: '/MN0400_021' },
             { icon: ChartPieIcon, label: 'Capital Asset Distribution', path: '/MN0400_022', disabled: true },
@@ -349,7 +349,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           ]
         },
         {
-          icon: ShieldCheckIcon, label: 'Performance & Risk', path: '/MN0400_030', disabled: true, children: [
+          icon: ShieldCheckIcon, label: 'Performance & Risk', path: '/MN0400_030', hidden: true, children: [
             { icon: ChartBarIcon, label: 'Asset Health Score', path: '/MN0400_031', disabled: true },
             { icon: TableCellsIcon, label: 'Asset Criticality Matrix', path: '/MN0400_032', disabled: true },
             { icon: ChartBarIcon, label: 'Risk Exposure by Category', path: '/MN0400_033', disabled: true },
@@ -358,7 +358,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           ]
         },
         {
-          icon: DocumentChartBarIcon, label: 'Strategic Planning', path: '/MN0400_040', disabled: true, children: [
+          icon: DocumentChartBarIcon, label: 'Strategic Planning', path: '/MN0400_040', hidden: true, children: [
             { icon: ChartPieIcon, label: 'Asset Portfolio Overview', path: '/MN0400_041', disabled: true },
             { icon: MapPinIcon, label: 'Assets by Location Hierarchy', path: '/MN0400_042', disabled: true },
             { icon: ChartBarIcon, label: 'Capacity Planning & Utilization', path: '/MN0400_043', disabled: true },
@@ -369,7 +369,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
       ]
     },
     {
-      icon: UserGroupIcon, label: 'People Analytics', path: '/MN0400_003',
+      icon: UserGroupIcon, label: 'People Analytics', path: '/MN0400_003', hidden: true,
       children: [
         {
           icon: UserGroupIcon, label: 'Workforce Planning', path: '/MN0400_110', children: [
@@ -467,15 +467,15 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           { icon: ChartPieIcon, label: 'Certificate Status Overview', path: '/MN0400_411' },
           { icon: ChartBarIcon, label: 'Compliance Rate by Category', path: '/MN0400_412' },
           { icon: TableCellsIcon, label: 'Superview Certificates', path: '/MN0400_413' },
-          { icon: DocumentTextIcon, label: 'Non-Compliance Report', path: '/MN0400_414', disabled: true },
-          { icon: ChartBarIcon, label: 'Renewal Success Rate', path: '/MN0400_415', disabled: true }
+          { icon: DocumentTextIcon, label: 'Non-Compliance Report', path: '/MN0400_414', hidden: true },
+          { icon: ChartBarIcon, label: 'Renewal Success Rate', path: '/MN0400_415', hidden: true }
         ]
       },
       {
         icon: CalendarIcon,
         label: 'Expiration & Renewal',
         path: '/MN0400_420',
-        disabled: true,
+        hidden: true,
         children: [
           { icon: ChartBarIcon, label: 'Expiring Certificates Timeline', path: '/MN0400_421' },
           { icon: ClockIcon, label: 'Days to Expiration Analysis', path: '/MN0400_422' },
@@ -488,7 +488,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
         icon: BuildingOfficeIcon,
         label: 'Organization & Distribution',
         path: '/MN0400_430',
-        disabled: true,
+        hidden: true,
         children: [
           { icon: MapPinIcon, label: 'Certificates by Location', path: '/MN0400_431' },
           { icon: UserGroupIcon, label: 'Certificates by Department', path: '/MN0400_432', disabled: true },
@@ -501,7 +501,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
         icon: ChartBarIcon,
         label: 'Performance & Trends',
         path: '/MN0400_440',
-        disabled: true,
+        hidden: true,
         children: [
           { icon: ChartBarIcon, label: 'Certificate Issuance Trends', path: '/MN0400_441', disabled: true },
           { icon: ChartPieIcon, label: 'Certificate Type Distribution', path: '/MN0400_442', disabled: true },
@@ -514,7 +514,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
         icon: CurrencyDollarIcon,
         label: 'Cost & Investment',
         path: '/MN0400_450',
-        disabled: true,
+        hidden: true,
         children: [
           { icon: ChartPieIcon, label: 'Certification Cost Analysis', path: '/MN0400_451', disabled: true },
           { icon: ChartBarIcon, label: 'Cost per Certificate Type', path: '/MN0400_452', disabled: true },
@@ -527,7 +527,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
         icon: ShieldExclamationIcon,
         label: 'Risk & Quality',
         path: '/MN0400_460',
-        disabled: true,
+        hidden: true,
         children: [
           { icon: ChartBarIcon, label: 'Risk Score by Certificate', path: '/MN0400_461', disabled: true },
           { icon: TableCellsIcon, label: 'Critical Certificate Register', path: '/MN0400_462', disabled: true },
@@ -539,7 +539,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
       ]
     },
     {
-      icon: TruckIcon, label: 'Logistics Analytics', path: '/MN0400_005', hidden: false,
+      icon: TruckIcon, label: 'Logistics Analytics', path: '/MN0400_005', hidden: true,
       children: [
         {
           icon: ArchiveBoxIcon, label: 'Inventory Management', path: '/MN0400_310', children: [
