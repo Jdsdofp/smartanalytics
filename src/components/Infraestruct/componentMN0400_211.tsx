@@ -15,8 +15,6 @@ import {
   DevicePhoneMobileIcon,
   DocumentChartBarIcon,
   MapIcon,
-  PlayIcon,
-  PauseIcon,
   FunnelIcon,
   XMarkIcon,
   TableCellsIcon,
