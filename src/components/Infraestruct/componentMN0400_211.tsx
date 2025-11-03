@@ -1,5 +1,5 @@
 // src/components/DeviceLogsView.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   SignalIcon,
   SignalSlashIcon,
@@ -17,6 +17,10 @@ import {
   MapIcon,
   PlayIcon,
   PauseIcon,
+  FunnelIcon,
+  XMarkIcon,
+  TableCellsIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import * as echarts from 'echarts';
 import type { EChartsOption } from 'echarts';
@@ -33,6 +37,7 @@ import GPSMapViewer from './Map/GPSMapViewer';
 import { useCompany } from '../../hooks/useCompany';
 import AssetManagementGrid from './DataGrid/AssetManagementGrid';
 import HealthScoreDashboard from './DataGrid/HealthScoreDashboard';
+import { exportToExcel, exportToPDF } from '../../utils/exportMN0400211';
 
 // =====================================
 // 📊 INTERFACES ATUALIZADAS
@@ -268,164 +273,315 @@ interface DetailsModalProps {
 }
 
 
-// const ColumnFilter = ({ column, options, selectedValues, onFilterChange, label }: ColumnFilterProps) => {
-//   const [isOpen, setIsOpen] = useState(false);
-//   const [searchTerm, setSearchTerm] = useState('');
-//   const dropdownRef = useRef<HTMLDivElement>(null);
+interface FilterOptions {
+  personName: string;
+  batteryLevelMin: number;
+  batteryLevelMax: number;
+  batteryStatus: string[];
+  motionStatus: string[];
+  reportFreshness: string[];
+  temperatureMin: number | undefined;
+  temperatureMax: number | undefined;
+}
 
-//   // Fechar dropdown ao clicar fora
-//   useEffect(() => {
-//     const handleClickOutside = (event: MouseEvent) => {
-//       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-//         setIsOpen(false);
-//       }
-//     };
+interface LowBatteryTableFiltersProps {
+  filters: FilterOptions;
+  onFiltersChange: (filters: FilterOptions) => void;
+  onClearFilters: () => void;
+  activeFiltersCount: number;
+}
 
-//     if (isOpen) {
-//       document.addEventListener('mousedown', handleClickOutside);
-//     }
+const LowBatteryTableFilters = ({
+  filters,
+  onFiltersChange,
+  onClearFilters,
+  activeFiltersCount
+}: LowBatteryTableFiltersProps) => {
+  const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-//     return () => {
-//       document.removeEventListener('mousedown', handleClickOutside);
-//     };
-//   }, [isOpen]);
+  // Fechar ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
 
-//   const filteredOptions = options.filter(option =>
-//     option?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-//   );
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
 
-//   const toggleOption = (option: string) => {
-//     if (selectedValues.includes(option)) {
-//       onFilterChange(selectedValues.filter(v => v !== option));
-//     } else {
-//       onFilterChange([...selectedValues, option]);
-//     }
-//   };
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
-//   const selectAll = () => {
-//     onFilterChange(filteredOptions);
-//   };
+  const updateFilter = (key: keyof FilterOptions, value: any) => {
+    onFiltersChange({
+      ...filters,
+      [key]: value
+    });
+  };
 
-//   const clearAll = () => {
-//     onFilterChange([]);
-//   };
+  const toggleArrayFilter = (key: 'batteryStatus' | 'motionStatus' | 'reportFreshness', value: string) => {
+    const currentArray = filters[key] || [];
+    if (currentArray.includes(value)) {
+      updateFilter(key, currentArray.filter(v => v !== value));
+    } else {
+      updateFilter(key, [...currentArray, value]);
+    }
+  };
 
-//   const hasActiveFilters = selectedValues.length > 0 && selectedValues.length < options.length;
+  const batteryStatusOptions = [
+    { value: 'CRITICAL', label: t('lowBatteryTable.filters.statuses.critical'), color: 'red' },
+    { value: 'WARNING', label: t('lowBatteryTable.filters.statuses.warning'), color: 'yellow' },
+    { value: 'HEALTHY', label: t('lowBatteryTable.filters.statuses.healthy'), color: 'green' }
+  ];
 
-//   return (
-//     <div className="relative inline-block" ref={dropdownRef}>
-//       <button
-//         onClick={() => setIsOpen(!isOpen)}
-//         className={`p-1 hover:bg-gray-200 rounded transition-colors ${
-//           hasActiveFilters ? 'text-blue-600' : 'text-gray-400'
-//         }`}
-//         title={t('lowBatteryTable.filters.filterColumn')}
-//       >
-//         <svg
-//           className="w-4 h-4"
-//           fill="none"
-//           stroke="currentColor"
-//           viewBox="0 0 24 24"
-//         >
-//           <path
-//             strokeLinecap="round"
-//             strokeLinejoin="round"
-//             strokeWidth={2}
-//             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-//           />
-//         </svg>
-//       </button>
+  const motionStatusOptions = [
+    { value: 'MOVING', label: t('lowBatteryTable.filters.motion.moving'), icon: '🏃' },
+    { value: 'STATIC', label: t('lowBatteryTable.filters.motion.static'), icon: '⏸️' }
+  ];
 
-//       {isOpen && (
-//         <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 w-64">
-//           {/* Header */}
-//           <div className="p-3 border-b border-gray-200">
-//             <div className="flex items-center justify-between mb-2">
-//               <span className="text-xs font-semibold text-gray-700">{label}</span>
-//               <button
-//                 onClick={() => setIsOpen(false)}
-//                 className="text-gray-400 hover:text-gray-600"
-//               >
-//                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-//                   <path
-//                     fillRule="evenodd"
-//                     d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-//                     clipRule="evenodd"
-//                   />
-//                 </svg>
-//               </button>
-//             </div>
+  const reportFreshnessOptions = [
+    { value: 'REAL_TIME', label: t('lowBatteryTable.filters.freshness.realTime'), color: 'green' },
+    { value: 'RECENT', label: t('lowBatteryTable.filters.freshness.recent'), color: 'blue' },
+    { value: 'STALE', label: t('lowBatteryTable.filters.freshness.stale'), color: 'gray' }
+  ];
 
-//             {/* Search */}
-//             <input
-//               type="text"
-//               value={searchTerm}
-//               onChange={(e) => setSearchTerm(e.target.value)}
-//               placeholder={t('lowBatteryTable.filters.search')}
-//               className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-//             />
-//           </div>
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Botão de Filtros */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+          activeFiltersCount > 0
+            ? 'bg-blue-50 border-blue-500 text-blue-700 hover:bg-blue-100'
+            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+        }`}
+      >
+        <FunnelIcon className="h-5 w-5" />
+        <span className="font-medium">
+          {t('lowBatteryTable.filters.title')}
+          {activeFiltersCount > 0 && ` (${activeFiltersCount})`}
+        </span>
+      </button>
 
-//           {/* Actions */}
-//           <div className="p-2 border-b border-gray-200 flex gap-2">
-//             <button
-//               onClick={selectAll}
-//               className="flex-1 px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors"
-//             >
-//               {t('lowBatteryTable.filters.selectAll')}
-//             </button>
-//             <button
-//               onClick={clearAll}
-//               className="flex-1 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded transition-colors"
-//             >
-//               {t('lowBatteryTable.filters.clearAll')}
-//             </button>
-//           </div>
+      {/* Dropdown de Filtros */}
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-2 w-[600px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[80vh] overflow-y-auto">
+          {/* Header */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {t('lowBatteryTable.filters.title')}
+            </h3>
+            <div className="flex items-center gap-2">
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={onClearFilters}
+                  className="text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                  {t('lowBatteryTable.filters.clearAll')}
+                </button>
+              )}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
 
-//           {/* Options List */}
-//           <div className="max-h-64 overflow-y-auto">
-//             {filteredOptions.length === 0 ? (
-//               <div className="p-3 text-xs text-gray-500 text-center">
-//                 {t('lowBatteryTable.filters.noResults')}
-//               </div>
-//             ) : (
-//               filteredOptions.map((option) => (
-//                 <label
-//                   key={option}
-//                   className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-xs"
-//                 >
-//                   <input
-//                     type="checkbox"
-//                     checked={selectedValues.includes(option)}
-//                     onChange={() => toggleOption(option)}
-//                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-//                   />
-//                   <span className="flex-1 truncate">{option || '(vazio)'}</span>
-//                   <span className="text-gray-400 text-xs">
-//                     ({lowBatteryData?.data.filter((d: any) => d[column] === option).length})
-//                   </span>
-//                 </label>
-//               ))
-//             )}
-//           </div>
+          {/* Filtros */}
+          <div className="p-4 space-y-6">
+            {/* Filtro de Nome */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('lowBatteryTable.filters.personName')}
+              </label>
+              <input
+                type="text"
+                value={filters.personName}
+                onChange={(e) => updateFilter('personName', e.target.value)}
+                placeholder={t('lowBatteryTable.filters.personNamePlaceholder')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
 
-//           {/* Footer */}
-//           <div className="p-2 border-t border-gray-200 bg-gray-50">
-//             <div className="text-xs text-gray-600">
-//               {selectedValues.length === options.length
-//                 ? t('lowBatteryTable.filters.allSelected')
-//                 : t('lowBatteryTable.filters.selectedCount', { 
-//                     count: selectedValues.length, 
-//                     total: options.length 
-//                   })}
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
+            {/* Filtro de Nível de Bateria */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('lowBatteryTable.filters.batteryLevel')}
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    {t('lowBatteryTable.filters.min')}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={filters.batteryLevelMin}
+                    onChange={(e) => updateFilter('batteryLevelMin', parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    {t('lowBatteryTable.filters.max')}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={filters.batteryLevelMax}
+                    onChange={(e) => updateFilter('batteryLevelMax', parseInt(e.target.value) || 100)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              {/* Range Visual */}
+              <div className="mt-3 px-2">
+                <div className="relative h-2 bg-gray-200 rounded-full">
+                  <div
+                    className="absolute h-2 bg-blue-500 rounded-full"
+                    style={{
+                      left: `${filters.batteryLevelMin}%`,
+                      right: `${100 - filters.batteryLevelMax}%`
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>{filters.batteryLevelMin}%</span>
+                  <span>{filters.batteryLevelMax}%</span>
+                </div>
+              </div>
+            </div>
 
+            {/* Filtro de Status da Bateria */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('lowBatteryTable.filters.batteryStatus')}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {batteryStatusOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => toggleArrayFilter('batteryStatus', option.value)}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      filters.batteryStatus.includes(option.value)
+                        ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Filtro de Status de Movimento */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('lowBatteryTable.filters.motionStatus')}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {motionStatusOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => toggleArrayFilter('motionStatus', option.value)}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      filters.motionStatus.includes(option.value)
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span className="mr-2">{option.icon}</span>
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Filtro de Temperatura */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('lowBatteryTable.filters.temperature')} (°C)
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    {t('lowBatteryTable.filters.min')}
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.temperatureMin || ''}
+                    onChange={(e) => updateFilter('temperatureMin', e.target.value ? parseFloat(e.target.value) : undefined)}
+                    placeholder="Ex: -10"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    {t('lowBatteryTable.filters.max')}
+                  </label>
+                  <input
+                    type="number"
+                    value={filters.temperatureMax || ''}
+                    onChange={(e) => updateFilter('temperatureMax', e.target.value ? parseFloat(e.target.value) : undefined)}
+                    placeholder="Ex: 50"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Filtro de Freshness */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('lowBatteryTable.filters.reportFreshness')}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {reportFreshnessOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => toggleArrayFilter('reportFreshness', option.value)}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      filters.reportFreshness.includes(option.value)
+                        ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 flex items-center justify-between">
+            <span className="text-sm text-gray-600">
+              {activeFiltersCount > 0
+                ? t('lowBatteryTable.filters.activeFilters', { count: activeFiltersCount })
+                : t('lowBatteryTable.filters.noActiveFilters')}
+            </span>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              {t('lowBatteryTable.filters.apply')}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 
 
@@ -948,40 +1104,6 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
   );
 };
 
-// =====================================
-// 🎨 COMPONENTES DE UI
-// =====================================
-
-// const AlertBadge = ({ type, count }: { type: 'sos' | 'battery' | 'offline'; count: number }) => {
-//   const { t } = useTranslation();
-
-//   const config = {
-//     sos: {
-//       label: t('deviceLogs.alerts.sos'),
-//       icon: ShieldExclamationIcon,
-//       color: 'bg-red-100 text-red-800 ring-red-600/20',
-//     },
-//     battery: {
-//       label: t('deviceLogs.alerts.battery'),
-//       icon: BoltIcon,
-//       color: 'bg-yellow-100 text-yellow-800 ring-yellow-600/20',
-//     },
-//     offline: {
-//       label: t('deviceLogs.alerts.offline'),
-//       icon: SignalSlashIcon,
-//       color: 'bg-gray-100 text-gray-800 ring-gray-600/20',
-//     },
-//   };
-
-//   const { label, icon: Icon, color } = config[type];
-
-//   return (
-//     <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ring-1 ring-inset ${color}`}>
-//       <Icon className="h-5 w-5" />
-//       <span>{label}: {count}</span>
-//     </div>
-//   );
-// };
 
 const DataTable = ({
   columns,
@@ -1322,6 +1444,111 @@ const Pagination = ({
   );
 };
 
+
+interface QuickExportButtonsProps {
+  data: any[];
+  filters: any;
+  totalItems?: number;
+  isFiltered: boolean;
+}
+
+export const QuickExportButtons = ({ data, filters }: QuickExportButtonsProps) => {
+  const { t, i18n } = useTranslation();
+  const [isExporting, setIsExporting] = useState<string | null>(null);
+
+  const getCurrentLocale = (): 'pt' | 'es' | 'en' => {
+    const lang = i18n.language.toLowerCase();
+    if (lang.startsWith('pt')) return 'pt';
+    if (lang.startsWith('es')) return 'es';
+    return 'en';
+  };
+
+  const handleQuickExport = async (type: 'excel' | 'pdf') => {
+    setIsExporting(type);
+    try {
+      const filename = `report_battery${new Date().toISOString().split('T')[0]}`;
+      const locale = getCurrentLocale();
+      
+      if (type === 'excel') {
+        exportToExcel({
+          data,
+          filename,
+          includeFilters: true,
+          filters,
+          locale
+        });
+      } else {
+        exportToPDF({
+          data,
+          filename,
+          title: t('lowBatteryTable.export.pdfTitle'),
+          includeFilters: true,
+          filters,
+          orientation: 'landscape',
+          locale
+        });
+      }
+    } catch (error) {
+      console.error(`Erro ao exportar ${type}:`, error);
+      alert(t('export.error'));
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {/* Botão Excel */}
+      <button
+        onClick={() => handleQuickExport('excel')}
+        disabled={isExporting !== null || data.length === 0}
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+          data.length === 0
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-green-600 text-white hover:bg-green-700'
+        }`}
+        title={t('export.excel.full')}
+      >
+        {isExporting === 'excel' ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+            <span className="text-sm">{t('export.exporting')}</span>
+          </>
+        ) : (
+          <>
+            <TableCellsIcon className="h-4 w-4" />
+            <span className="text-sm">Excel</span>
+          </>
+        )}
+      </button>
+
+      {/* Botão PDF */}
+      <button
+        onClick={() => handleQuickExport('pdf')}
+        disabled={isExporting !== null || data.length === 0}
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+          data.length === 0
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-red-600 text-white hover:bg-red-700'
+        }`}
+        title={t('export.pdf.title')}
+      >
+        {isExporting === 'pdf' ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+            <span className="text-sm">{t('export.exporting')}</span>
+          </>
+        ) : (
+          <>
+            <DocumentTextIcon className="h-4 w-4" />
+            <span className="text-sm">PDF</span>
+          </>
+        )}
+      </button>
+    </div>
+  );
+};
+
 export default function DeviceLogsView() {
 
   const { t } = useTranslation();
@@ -1359,7 +1586,20 @@ export default function DeviceLogsView() {
   // Adicione estes estados junto com os outros estados de lowBattery
   const [sortField, setSortField] = useState<string>('battery_level');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [filters] = useState({
+
+  // const [filters] = useState({
+  //   personName: '',
+  //   batteryLevelMin: 0,
+  //   batteryLevelMax: 100,
+  //   batteryStatus: [] as string[],
+  //   motionStatus: [] as string[],
+  //   reportFreshness: [] as string[],
+  //   temperatureMin: undefined as number | undefined,
+  //   temperatureMax: undefined as number | undefined,
+  // });
+
+
+    const [filters, setFilters] = useState({
     personName: '',
     batteryLevelMin: 0,
     batteryLevelMax: 100,
@@ -1369,6 +1609,7 @@ export default function DeviceLogsView() {
     temperatureMin: undefined as number | undefined,
     temperatureMax: undefined as number | undefined,
   });
+
 
   // Debounce para o filtro de nome (instale lodash se não tiver: npm install lodash @types/lodash)
   const [debouncedPersonName, setDebouncedPersonName] = useState('');
@@ -1903,7 +2144,38 @@ export default function DeviceLogsView() {
   };
 
 
+      // 3. ADICIONAR FUNÇÕES DE MANIPULAÇÃO DE FILTROS
+      const handleFiltersChange = (newFilters: typeof filters) => {
+        setFilters(newFilters);
+        setLowBatteryPage(1); // Resetar para primeira página ao filtrar
+      };
 
+
+      const handleClearFilters = () => {
+        setFilters({
+          personName: '',
+          batteryLevelMin: 0,
+          batteryLevelMax: 100,
+          batteryStatus: [],
+          motionStatus: [],
+          reportFreshness: [],
+          temperatureMin: undefined,
+          temperatureMax: undefined,
+        });
+        setLowBatteryPage(1);
+      };
+
+
+      const getActiveFiltersCount = () => {
+        let count = 0;
+        if (filters.personName) count++;
+        if (filters.batteryLevelMin !== 0 || filters.batteryLevelMax !== 100) count++;
+        if (filters.batteryStatus.length > 0) count++;
+        if (filters.motionStatus.length > 0) count++;
+        if (filters.reportFreshness.length > 0) count++;
+        if (filters.temperatureMin !== undefined || filters.temperatureMax !== undefined) count++;
+        return count;
+      };
 
 
   // Função para inicializar o gráfico de health score
@@ -2365,10 +2637,34 @@ const SortableHeader = ({
           {/* ✅ ALERTAS DE BATERIA BAIXA ATUALIZADOS */}
           {lowBatteryData.pagination.totalItems > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-yellow-200 p-4">
-              <h3 className="text-lg font-semibold text-yellow-900 mb-4 flex items-center gap-2">
-                <BoltIcon className="h-6 w-6" />
-                {t('lowBatteryTable.title')} ({lowBatteryData.pagination.totalItems})
-              </h3>
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+      <h3 className="text-lg font-semibold text-yellow-900 flex items-center gap-2">
+        <BoltIcon className="h-6 w-6" />
+        {t('lowBatteryTable.title')} ({lowBatteryData.pagination.totalItems})
+      </h3>
+      
+      <QuickExportButtons
+        data={lowBatteryData.data}
+        filters={filters}
+        totalItems={lowBatteryData?.pagination?.totalItems}
+        isFiltered={getActiveFiltersCount() > 0}
+      />
+    </div>
+
+
+              {/* ✨ ADICIONAR AQUI O COMPONENTE DE FILTROS */}
+            <div className="mb-4">
+              
+              <LowBatteryTableFilters
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+                onClearFilters={handleClearFilters}
+                activeFiltersCount={getActiveFiltersCount()}
+              />
+            </div>
+
+
+
 
               {/* Loading State */}
               {loadingLowBattery ? (

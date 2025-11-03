@@ -987,7 +987,56 @@
     "gps": {
       "ok": "✓ OK",
       "notAvailable": "–"
+    },
+    "filters": {
+      "title": "Filtros",
+      "clearAll": "Limpar Tudo",
+      "apply": "Aplicar",
+      "personName": "Nome da Pessoa",
+      "personNamePlaceholder": "Digite o nome...",
+      "batteryLevel": "Nível de Bateria (%)",
+      "min": "Mínimo",
+      "max": "Máximo",
+      "batteryStatus": "Status da Bateria",
+      "motionStatus": "Status de Movimento",
+      "temperature": "Temperatura",
+      "reportFreshness": "Atualização dos Dados",
+      "statuses": {
+        "critical": "Crítico",
+        "warning": "Alerta",
+        "healthy": "Saudável"
+      },
+      "motion": {
+        "moving": "Em Movimento",
+        "static": "Parado"
+      },
+      "freshness": {
+        "realTime": "Tempo Real",
+        "recent": "Recente",
+        "stale": "Desatualizado"
+      },
+      "activeFilters": "{{count}} filtro(s) ativo(s)",
+      "noActiveFilters": "Nenhum filtro ativo"
+    },
+    "export": {
+    "title": "Exportar",
+    "exporting": "Exportando...",
+    "error": "Erro ao exportar dados. Tente novamente.",
+    "selectFormat": "Escolha o formato de exportação",
+    "recordsToExport": "{{count}} registro(s) será(ão) exportado(s)",
+    "tip": "Filtros ativos serão incluídos na exportação",
+    "pdfTitle": "Relatório de Alertas de Bateria Baixa",
+    "excel": {
+      "full": "Excel Completo",
+      "fullDescription": "Todos os dados com colunas detalhadas e aba de filtros",
+      "summary": "Excel Resumo",
+      "summaryDescription": "Estatísticas consolidadas e métricas principais"
+    },
+    "pdf": {
+      "title": "PDF",
+      "description": "Relatório formatado com tabelas e gráficos"
     }
+  }
   },
   "pagination": {
     "showing": "Mostrando",
