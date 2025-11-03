@@ -235,7 +235,7 @@ export default function AssetManagementGrid() {
     });
     setSortBy('risk_level');
     setSortOrder('desc');
-    setItemsPerPage(50);
+    setItemsPerPage(10);
   };
 
   // ✅ FUNÇÃO: Gerar array de páginas para exibição
