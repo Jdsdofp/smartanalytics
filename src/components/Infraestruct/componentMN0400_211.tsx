@@ -1615,8 +1615,8 @@ export default function DeviceLogsView() {
   const [debouncedPersonName, setDebouncedPersonName] = useState('');
 
   // ✨ NOVO: Estados para controle de refresh
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(60000); // 30 segundos padrão
+  // const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
+  // const [refreshInterval, setRefreshInterval] = useState(60000); // 30 segundos padrão
 
   const [selectedDevice, setSelectedDevice] = useState<DevicePosition | null>(null);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
@@ -1646,7 +1646,7 @@ export default function DeviceLogsView() {
 
   const fetchData = async () => {
     setRefreshing(true);
-    console.log('ID da company: ', companyId)
+    
     console.log(healthScoreData)
 
     //https://apinode.smartxhub.cloud
@@ -1789,18 +1789,19 @@ export default function DeviceLogsView() {
   useEffect(() => {
     fetchData(); // Buscar dados inicialmente
 
-    let interval: any;
+    // let interval: any;
 
-    if (autoRefreshEnabled) {
-      interval = setInterval(fetchData, refreshInterval);
-    }
+    // if (autoRefreshEnabled) {
+    //   interval = setInterval(fetchData, refreshInterval);
+    // }
 
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [autoRefreshEnabled, refreshInterval]);
+    // return () => {
+    //   if (interval) {
+    //     clearInterval(interval);
+    //   }
+    // };
+    //autoRefreshEnabled, refreshInterval
+  }, []);
 
   // 2 useEffect para buscar quando mudar página ou limite
   useEffect(() => {
@@ -2129,14 +2130,14 @@ export default function DeviceLogsView() {
   ]);
 
   //  ✨ NOVA FUNÇÃO: Alternar auto-refresh
-  const toggleAutoRefresh = () => {
-    setAutoRefreshEnabled(prev => !prev);
-  };
+  // const toggleAutoRefresh = () => {
+  //   setAutoRefreshEnabled(prev => !prev);
+  // };
 
-  // ✨ NOVA FUNÇÃO: Alterar intervalo de refresh
-  const handleIntervalChange = (interval: number) => {
-    setRefreshInterval(interval);
-  };
+  // // ✨ NOVA FUNÇÃO: Alterar intervalo de refresh
+  // const handleIntervalChange = (interval: number) => {
+  //   setRefreshInterval(interval);
+  // };
 
   // ✨ NOVA FUNÇÃO: Refresh manual
   const handleManualRefresh = () => {
@@ -2393,28 +2394,28 @@ const SortableHeader = ({
           {/* ✨ CONTROLES DE REFRESH */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
             {/* Status do Auto-Refresh */}
-            <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
+            {/* <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
               <div className={`w-3 h-3 rounded-full ${autoRefreshEnabled ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
               <span className="text-sm text-gray-700">
                 {autoRefreshEnabled ? 'Auto-refresh ativo' : 'Auto-refresh pausado'}
               </span>
-            </div>
+            </div> */}
 
             {/* Seletor de Intervalo */}
-            <select
+            {/* <select
               value={refreshInterval}
               onChange={(e) => handleIntervalChange(Number(e.target.value))}
               disabled={!autoRefreshEnabled}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
+            > */}
               {/* <option value={10000}>10 segundos</option>
               <option value={30000}>30 segundos</option> */}
-              <option value={60000}>1 min</option>
+              {/* <option value={60000}>1 min</option>
               <option value={300000}>5 min</option>
-            </select>
+            </select> */}
 
             {/* Botão Toggle Auto-Refresh */}
-            <button
+            {/* <button
               onClick={toggleAutoRefresh}
               className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${autoRefreshEnabled
                 ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
@@ -2432,7 +2433,7 @@ const SortableHeader = ({
                   Active
                 </>
               )}
-            </button>
+            </button> */}
 
             {/* Botão Refresh Manual */}
             <button
@@ -2479,7 +2480,7 @@ const SortableHeader = ({
       <div className="mb-4 p-3 bg-gray-100 rounded-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${autoRefreshEnabled ? 'bg-green-500' : 'bg-gray-400'}`} />
+            {/* <div className={`w-2 h-2 rounded-full ${autoRefreshEnabled ? 'bg-green-500' : 'bg-gray-400'}`} /> */}
             <span className="text-sm text-gray-600">
               {t('gpsMap.modal.lastUpdate')}: {new Date().toLocaleTimeString('pt-BR')}
             </span>
