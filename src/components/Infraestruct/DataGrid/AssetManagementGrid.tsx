@@ -100,7 +100,7 @@ export default function AssetManagementGrid() {
     total_count: 0,
     has_next: false,
     has_prev: false,
-    limit: 50
+    limit: 10
   });
 
   // Filtros
