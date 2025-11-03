@@ -267,6 +267,168 @@ interface DetailsModalProps {
   onClose: () => void;
 }
 
+
+// const ColumnFilter = ({ column, options, selectedValues, onFilterChange, label }: ColumnFilterProps) => {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const [searchTerm, setSearchTerm] = useState('');
+//   const dropdownRef = useRef<HTMLDivElement>(null);
+
+//   // Fechar dropdown ao clicar fora
+//   useEffect(() => {
+//     const handleClickOutside = (event: MouseEvent) => {
+//       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+//         setIsOpen(false);
+//       }
+//     };
+
+//     if (isOpen) {
+//       document.addEventListener('mousedown', handleClickOutside);
+//     }
+
+//     return () => {
+//       document.removeEventListener('mousedown', handleClickOutside);
+//     };
+//   }, [isOpen]);
+
+//   const filteredOptions = options.filter(option =>
+//     option?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+//   );
+
+//   const toggleOption = (option: string) => {
+//     if (selectedValues.includes(option)) {
+//       onFilterChange(selectedValues.filter(v => v !== option));
+//     } else {
+//       onFilterChange([...selectedValues, option]);
+//     }
+//   };
+
+//   const selectAll = () => {
+//     onFilterChange(filteredOptions);
+//   };
+
+//   const clearAll = () => {
+//     onFilterChange([]);
+//   };
+
+//   const hasActiveFilters = selectedValues.length > 0 && selectedValues.length < options.length;
+
+//   return (
+//     <div className="relative inline-block" ref={dropdownRef}>
+//       <button
+//         onClick={() => setIsOpen(!isOpen)}
+//         className={`p-1 hover:bg-gray-200 rounded transition-colors ${
+//           hasActiveFilters ? 'text-blue-600' : 'text-gray-400'
+//         }`}
+//         title={t('lowBatteryTable.filters.filterColumn')}
+//       >
+//         <svg
+//           className="w-4 h-4"
+//           fill="none"
+//           stroke="currentColor"
+//           viewBox="0 0 24 24"
+//         >
+//           <path
+//             strokeLinecap="round"
+//             strokeLinejoin="round"
+//             strokeWidth={2}
+//             d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+//           />
+//         </svg>
+//       </button>
+
+//       {isOpen && (
+//         <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 w-64">
+//           {/* Header */}
+//           <div className="p-3 border-b border-gray-200">
+//             <div className="flex items-center justify-between mb-2">
+//               <span className="text-xs font-semibold text-gray-700">{label}</span>
+//               <button
+//                 onClick={() => setIsOpen(false)}
+//                 className="text-gray-400 hover:text-gray-600"
+//               >
+//                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+//                   <path
+//                     fillRule="evenodd"
+//                     d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+//                     clipRule="evenodd"
+//                   />
+//                 </svg>
+//               </button>
+//             </div>
+
+//             {/* Search */}
+//             <input
+//               type="text"
+//               value={searchTerm}
+//               onChange={(e) => setSearchTerm(e.target.value)}
+//               placeholder={t('lowBatteryTable.filters.search')}
+//               className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+//             />
+//           </div>
+
+//           {/* Actions */}
+//           <div className="p-2 border-b border-gray-200 flex gap-2">
+//             <button
+//               onClick={selectAll}
+//               className="flex-1 px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors"
+//             >
+//               {t('lowBatteryTable.filters.selectAll')}
+//             </button>
+//             <button
+//               onClick={clearAll}
+//               className="flex-1 px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded transition-colors"
+//             >
+//               {t('lowBatteryTable.filters.clearAll')}
+//             </button>
+//           </div>
+
+//           {/* Options List */}
+//           <div className="max-h-64 overflow-y-auto">
+//             {filteredOptions.length === 0 ? (
+//               <div className="p-3 text-xs text-gray-500 text-center">
+//                 {t('lowBatteryTable.filters.noResults')}
+//               </div>
+//             ) : (
+//               filteredOptions.map((option) => (
+//                 <label
+//                   key={option}
+//                   className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-xs"
+//                 >
+//                   <input
+//                     type="checkbox"
+//                     checked={selectedValues.includes(option)}
+//                     onChange={() => toggleOption(option)}
+//                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+//                   />
+//                   <span className="flex-1 truncate">{option || '(vazio)'}</span>
+//                   <span className="text-gray-400 text-xs">
+//                     ({lowBatteryData?.data.filter((d: any) => d[column] === option).length})
+//                   </span>
+//                 </label>
+//               ))
+//             )}
+//           </div>
+
+//           {/* Footer */}
+//           <div className="p-2 border-t border-gray-200 bg-gray-50">
+//             <div className="text-xs text-gray-600">
+//               {selectedValues.length === options.length
+//                 ? t('lowBatteryTable.filters.allSelected')
+//                 : t('lowBatteryTable.filters.selectedCount', { 
+//                     count: selectedValues.length, 
+//                     total: options.length 
+//                   })}
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+
+
+
 const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
 
   const { companyId } = useCompany()
@@ -1194,6 +1356,23 @@ export default function DeviceLogsView() {
   });
   const [loadingLowBattery, setLoadingLowBattery] = useState(false);
 
+  // Adicione estes estados junto com os outros estados de lowBattery
+  const [sortField, setSortField] = useState<string>('battery_level');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [filters] = useState({
+    personName: '',
+    batteryLevelMin: 0,
+    batteryLevelMax: 100,
+    batteryStatus: [] as string[],
+    motionStatus: [] as string[],
+    reportFreshness: [] as string[],
+    temperatureMin: undefined as number | undefined,
+    temperatureMax: undefined as number | undefined,
+  });
+
+  // Debounce para o filtro de nome (instale lodash se não tiver: npm install lodash @types/lodash)
+  const [debouncedPersonName, setDebouncedPersonName] = useState('');
+
   // ✨ NOVO: Estados para controle de refresh
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(60000); // 30 segundos padrão
@@ -1286,38 +1465,84 @@ export default function DeviceLogsView() {
     }
   };
 
+  // const fetchLowBatteryData = async (page: number = lowBatteryPage, limit: number = lowBatteryLimit) => {
+  //   setLoadingLowBattery(true);
+  //   try {
+  //     const response = await fetch(
+  //       `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/low-battery?page=${page}&limit=${limit}`
+  //     );
+  //     const result = await response.json();
+
+  //     // ✅ Transformar para o formato esperado
+  //     const adaptedData = {
+  //       data: result.data || [],
+  //       pagination: {
+  //         currentPage: result.page || 1,
+  //         totalPages: result.totalPages || 1,
+  //         totalItems: result.total || 0,
+  //         itemsPerPage: result.limit || 10,
+  //         hasNextPage: result.page < result.totalPages,
+  //         hasPreviousPage: result.page > 1,
+  //       },
+  //     };
+
+  //     setLowBatteryData(adaptedData);
+
+  //     // if (result.success) {
+  //     //   setLowBatteryData(result);
+  //     // }
+  //   } catch (error) {
+  //     console.error('Error fetching low battery data:', error);
+  //   } finally {
+  //     setLoadingLowBattery(false);
+  //   }
+  // };
+
   const fetchLowBatteryData = async (page: number = lowBatteryPage, limit: number = lowBatteryLimit) => {
-    setLoadingLowBattery(true);
-    try {
-      const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/low-battery?page=${page}&limit=${limit}`
-      );
-      const result = await response.json();
+  setLoadingLowBattery(true);
+  try {
+    // Construir query params
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      sortField,
+      sortOrder,
+    });
 
-      // ✅ Transformar para o formato esperado
-      const adaptedData = {
-        data: result.data || [],
-        pagination: {
-          currentPage: result.page || 1,
-          totalPages: result.totalPages || 1,
-          totalItems: result.total || 0,
-          itemsPerPage: result.limit || 10,
-          hasNextPage: result.page < result.totalPages,
-          hasPreviousPage: result.page > 1,
-        },
-      };
+    // Adicionar filtros se existirem
+    if (debouncedPersonName) params.append('personName', debouncedPersonName);
+    if (filters.batteryLevelMin !== undefined) params.append('batteryLevelMin', filters.batteryLevelMin.toString());
+    if (filters.batteryLevelMax !== undefined) params.append('batteryLevelMax', filters.batteryLevelMax.toString());
+    if (filters.batteryStatus.length > 0) params.append('batteryStatus', filters.batteryStatus.join(','));
+    if (filters.motionStatus.length > 0) params.append('motionStatus', filters.motionStatus.join(','));
+    if (filters.reportFreshness.length > 0) params.append('reportFreshness', filters.reportFreshness.join(','));
+    if (filters.temperatureMin !== undefined) params.append('temperatureMin', filters.temperatureMin.toString());
+    if (filters.temperatureMax !== undefined) params.append('temperatureMax', filters.temperatureMax.toString());
 
-      setLowBatteryData(adaptedData);
+    const response = await fetch(
+      `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/low-battery?${params}`
+    );
+    const result = await response.json();
 
-      // if (result.success) {
-      //   setLowBatteryData(result);
-      // }
-    } catch (error) {
-      console.error('Error fetching low battery data:', error);
-    } finally {
-      setLoadingLowBattery(false);
-    }
-  };
+    const adaptedData = {
+      data: result.data || [],
+      pagination: {
+        currentPage: result.page || 1,
+        totalPages: result.totalPages || 1,
+        totalItems: result.total || 0,
+        itemsPerPage: result.limit || 10,
+        hasNextPage: result.page < result.totalPages,
+        hasPreviousPage: result.page > 1,
+      },
+    };
+
+    setLowBatteryData(adaptedData);
+  } catch (error) {
+    console.error('Error fetching low battery data:', error);
+  } finally {
+    setLoadingLowBattery(false);
+  }
+};
 
   // 1 ✨ ATUALIZADO: useEffect com controle de auto-refresh
   useEffect(() => {
@@ -1631,6 +1856,37 @@ export default function DeviceLogsView() {
     };
   }, [overview, gatewayQuality, eventTypes, activeTab]);
 
+  // 5 useEffect para debounce do nome
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedPersonName(filters.personName);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [filters.personName]);
+
+  // 6 useEffect para buscar quando mudar filtros, sort ou paginação
+  useEffect(() => {
+    if (companyId && activeTab === 'overview') {
+      fetchLowBatteryData();
+    }
+  }, [
+    companyId,
+    lowBatteryPage,
+    lowBatteryLimit,
+    activeTab,
+    sortField,
+    sortOrder,
+    debouncedPersonName,
+    filters.batteryLevelMin,
+    filters.batteryLevelMax,
+    filters.batteryStatus,
+    filters.motionStatus,
+    filters.reportFreshness,
+    filters.temperatureMin,
+    filters.temperatureMax,
+  ]);
+
   //  ✨ NOVA FUNÇÃO: Alternar auto-refresh
   const toggleAutoRefresh = () => {
     setAutoRefreshEnabled(prev => !prev);
@@ -1813,6 +2069,37 @@ export default function DeviceLogsView() {
 
 
 
+const SortableHeader = ({ 
+  field, 
+  children, 
+  bgClass = '' 
+}: { 
+  field: string; 
+  children: React.ReactNode;
+  bgClass?: string;
+}) => (
+  <th
+    onClick={() => {
+      if (sortField === field) {
+        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      } else {
+        setSortField(field);
+        setSortOrder('asc');
+      }
+      setLowBatteryPage(1);
+    }}
+    className={`px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap cursor-pointer hover:bg-opacity-80 transition-colors ${bgClass}`}
+  >
+    <div className="flex items-center gap-1">
+      {children}
+      {sortField === field && (
+        <span className="text-blue-600 font-bold text-sm">
+          {sortOrder === 'asc' ? '↑' : '↓'}
+        </span>
+      )}
+    </div>
+  </th>
+);
 
 
 
@@ -1887,12 +2174,6 @@ export default function DeviceLogsView() {
           </div>
         </div>
 
-        {/* Alertas - ATUALIZADO para usar device_alerts */}
-        {/* <div className="flex flex-wrap gap-3">
-          <AlertBadge type="sos" count={overview.device_alerts.active_sos_count} />
-          <AlertBadge type="battery" count={overview.device_alerts.low_battery_count} />
-          <AlertBadge type="offline" count={overview.device_alerts.offline_count} />
-        </div> */}
       </div>
 
       {/* Tabs de Navegação */}
@@ -2040,49 +2321,6 @@ export default function DeviceLogsView() {
             </div>
           )}
 
-
-          {/* ✅ GRÁFICOS COM RESPONSIVIDADE */}
-          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('deviceLogs.charts.batteryDistribution')}
-              </h3>
-              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-                <div id="battery-chart" className="w-full h-full min-w-0" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('deviceLogs.charts.gpsAccuracy')}
-              </h3>
-              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-                <div id="accuracy-chart" className="w-full h-full min-w-0" />
-              </div>
-            </div>
-          </div> */}
-
-          {/*  ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO ATUALIZADA COM HEALTH SCORE */}
-          {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('deviceLogs.charts.batteryDistribution')}
-              </h3>
-              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-                <div id="battery-chart" className="w-full h-full min-w-0" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('deviceLogs.charts.healthScoreByCategory')}
-              </h3>
-              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-                <div id="health-score-chart" className="w-full h-full min-w-0" />
-              </div>
-            </div>
-          </div> */}
-
           {/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO ATUALIZADA COM HEALTH SCORE */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
@@ -2124,56 +2362,6 @@ export default function DeviceLogsView() {
             </div>
           </div>
 
-          {/* ✅ ALERTAS SOS ATUALIZADOS */}
-          {/* {overview.device_alerts.active_sos_count > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 sm:p-6">
-              <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
-                <ShieldExclamationIcon className="h-6 w-6" />
-                {t('deviceLogs.sosAlerts.title', { count: overview.device_alerts.active_sos_count })}
-              </h3>
-              <div className="overflow-x-auto">
-                <DataTable
-                  columns={[
-                    { key: 'dev_eui', label: t('deviceLogs.tables.deviceEui') },
-                    { key: 'customer_name', label: t('deviceLogs.tables.customer') },
-                    {
-                      key: 'sos_start_time',
-                      label: t('deviceLogs.tables.startTime'),
-                      render: (val) => new Date(val).toLocaleString(),
-                    },
-                    {
-                      key: 'minutes_elapsed',
-                      label: t('deviceLogs.tables.timeElapsed'),
-                      render: (val) => t('deviceLogs.sosAlerts.minutesAgo', { minutes: val }),
-                    },
-                    {
-                      key: 'battery_level',
-                      label: t('deviceLogs.tables.battery'),
-                      render: (val) => (
-                        <span className={`font-semibold ${val < 20 ? 'text-red-600' : 'text-green-600'}`}>
-                          {val}%
-                        </span>
-                      ),
-                    },
-                    {
-                      key: 'actions',
-                      label: t('deviceLogs.tables.location'),
-                      render: (_, row) => (
-                        <button
-                          onClick={() => openMapModal(row)}
-                          className="text-blue-600 hover:text-blue-800 text-xs font-medium underline"
-                        >
-                          {t('deviceLogs.tables.viewOnMap')}
-                        </button>
-                      ),
-                    },
-                  ]}
-                  data={overview.device_alerts.active_sos_list}
-                />
-              </div>
-            </div>
-          )} */}
-
           {/* ✅ ALERTAS DE BATERIA BAIXA ATUALIZADOS */}
           {lowBatteryData.pagination.totalItems > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-yellow-200 p-4">
@@ -2199,7 +2387,7 @@ export default function DeviceLogsView() {
                             <tr>
                               {/* Device Info */}
                               <th className="sticky left-0 z-10 bg-gray-50 px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap"> {t('lowBatteryTable.headers.person')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap">{t('lowBatteryTable.headers.deviceUid')}</th>
+                              <SortableHeader field="dev_uid" bgClass="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap">{t('lowBatteryTable.headers.deviceUid')}</SortableHeader>
                               <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap">{t('lowBatteryTable.headers.model')}</th>
 
                               {/* Battery Info */}
