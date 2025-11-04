@@ -1838,239 +1838,239 @@ export default function DeviceLogsView() {
   useEffect(() => {
     if (!overview) return;
 
-    const timer = setTimeout(() => {
-      try {
-        const batteryElement = document.getElementById('battery-chart');
-        if (batteryElement) {
-          const batteryChart = echarts.init(batteryElement);
-          const batteryOption: EChartsOption = {
-            tooltip: {
-              trigger: 'item',
-              formatter: t('batteryChart.tooltip'),
-            },
-            legend: {
-              orient: 'vertical',
-              left: 'left',
-            },
-            series: [
-              {
-                name: t('batteryChart.seriesName'),
-                type: 'pie',
-                radius: '70%',
-                data: [
-                  {
-                    value: safeParseNumber(overview.kpis.battery_health.healthy_devices),
-                    name: t('batteryChart.healthy'),
-                    itemStyle: { color: '#10b981' }
-                  },
-                  {
-                    value: safeParseNumber(overview.kpis.battery_health.warning_devices),
-                    name: t('batteryChart.warning'),
-                    itemStyle: { color: '#f59e0b' }
-                  },
-                  {
-                    value: safeParseNumber(overview.kpis.battery_health.critical_devices),
-                    name: t('batteryChart.critical'),
-                    itemStyle: { color: '#ef4444' }
-                  },
-                ],
-                emphasis: {
-                  itemStyle: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)',
-                  },
+    // const timer = setTimeout(() => {
+    // }, 100);
+    try {
+      const batteryElement = document.getElementById('battery-chart');
+      if (batteryElement) {
+        const batteryChart = echarts.init(batteryElement);
+        const batteryOption: EChartsOption = {
+          tooltip: {
+            trigger: 'item',
+            formatter: t('batteryChart.tooltip'),
+          },
+          legend: {
+            orient: 'vertical',
+            left: 'left',
+          },
+          series: [
+            {
+              name: t('batteryChart.seriesName'),
+              type: 'pie',
+              radius: '70%',
+              data: [
+                {
+                  value: safeParseNumber(overview.kpis.battery_health.healthy_devices),
+                  name: t('batteryChart.healthy'),
+                  itemStyle: { color: '#10b981' }
+                },
+                {
+                  value: safeParseNumber(overview.kpis.battery_health.warning_devices),
+                  name: t('batteryChart.warning'),
+                  itemStyle: { color: '#f59e0b' }
+                },
+                {
+                  value: safeParseNumber(overview.kpis.battery_health.critical_devices),
+                  name: t('batteryChart.critical'),
+                  itemStyle: { color: '#ef4444' }
+                },
+              ],
+              emphasis: {
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)',
                 },
               },
-            ],
-          };
-          batteryChart.setOption(batteryOption);
-        }
+            },
+          ],
+        };
+        batteryChart.setOption(batteryOption);
+      }
 
-        const accuracyElement = document.getElementById('accuracy-chart');
-        if (accuracyElement) {
-          const accuracyChart = echarts.init(accuracyElement);
-          const accuracyOption: EChartsOption = {
+      const accuracyElement = document.getElementById('accuracy-chart');
+      if (accuracyElement) {
+        const accuracyChart = echarts.init(accuracyElement);
+        const accuracyOption: EChartsOption = {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true,
+          },
+          xAxis: {
+            type: 'category',
+            data: overview.kpis.accuracy_distribution.map(d => {
+              const range = d.accuracy_range;
+              if (range.includes('Excellent')) return t('accuracyChart.accuracyRanges.excellent');
+              if (range.includes('Good')) return t('accuracyChart.accuracyRanges.good');
+              if (range.includes('Fair')) return t('accuracyChart.accuracyRanges.fair');
+              if (range.includes('Poor')) return t('accuracyChart.accuracyRanges.poor');
+              return range;
+            }),
+            axisLabel: {
+              rotate: 45,
+              fontSize: 11,
+            },
+          },
+          yAxis: {
+            type: 'value',
+            name: t('accuracyChart.yAxis.name'),
+          },
+          series: [
+            {
+              name: t('accuracyChart.series.name'),
+              type: 'bar',
+              data: overview.kpis.accuracy_distribution.map(d => ({
+                value: d.report_count,
+                itemStyle: {
+                  color: d.accuracy_range.includes('Excellent') ? '#10b981' :
+                    d.accuracy_range.includes('Good') ? '#3b82f6' :
+                      d.accuracy_range.includes('Fair') ? '#f59e0b' : '#ef4444',
+                },
+              })),
+              label: {
+                show: true,
+                position: 'top',
+                formatter: '{c}',
+              },
+            },
+          ],
+        };
+        accuracyChart.setOption(accuracyOption);
+      }
+
+      if (gatewayQuality.length > 0) {
+        const gatewayElement = document.getElementById('gateway-chart');
+        if (gatewayElement) {
+          const gatewayChart = echarts.init(gatewayElement);
+          const gatewayOption: EChartsOption = {
             tooltip: {
               trigger: 'axis',
-              axisPointer: { type: 'shadow' },
+              axisPointer: { type: 'cross' },
+            },
+            legend: {
+              data: [
+                t('gatewayChart.legend.avgRssi'),
+                t('gatewayChart.legend.avgSnr'),
+                t('gatewayChart.legend.reportCount')
+              ],
             },
             grid: {
               left: '3%',
               right: '4%',
-              bottom: '3%',
+              bottom: '10%',
               containLabel: true,
             },
             xAxis: {
               type: 'category',
-              data: overview.kpis.accuracy_distribution.map(d => {
-                const range = d.accuracy_range;
-                if (range.includes('Excellent')) return t('accuracyChart.accuracyRanges.excellent');
-                if (range.includes('Good')) return t('accuracyChart.accuracyRanges.good');
-                if (range.includes('Fair')) return t('accuracyChart.accuracyRanges.fair');
-                if (range.includes('Poor')) return t('accuracyChart.accuracyRanges.poor');
-                return range;
-              }),
+              data: gatewayQuality.map(g => g.gateway_name),
               axisLabel: {
                 rotate: 45,
-                fontSize: 11,
+                fontSize: 10,
+              },
+            },
+            yAxis: [
+              {
+                type: 'value',
+                name: t('gatewayChart.yAxis.rssiSnr'),
+                position: 'left',
+              },
+              {
+                type: 'value',
+                name: t('gatewayChart.yAxis.count'),
+                position: 'right',
+              },
+            ],
+            series: [
+              {
+                name: t('gatewayChart.legend.avgRssi'),
+                type: 'line',
+                data: gatewayQuality.map(g => g.avg_rssi),
+                itemStyle: { color: '#3b82f6' },
+              },
+              {
+                name: t('gatewayChart.legend.avgSnr'),
+                type: 'line',
+                data: gatewayQuality.map(g => g.avg_snr),
+                itemStyle: { color: '#10b981' },
+              },
+              {
+                name: t('gatewayChart.legend.reportCount'),
+                type: 'bar',
+                yAxisIndex: 1,
+                data: gatewayQuality.map(g => g.report_count),
+                itemStyle: { color: '#8b5cf6' },
+              },
+            ],
+          };
+          gatewayChart.setOption(gatewayOption);
+        }
+      }
+
+      if (eventTypes.length > 0) {
+        const eventsElement = document.getElementById('events-chart');
+        if (eventsElement) {
+          const eventsChart = echarts.init(eventsElement);
+          const eventsOption: EChartsOption = {
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: { type: 'shadow' },
+            },
+            legend: {
+              data: [
+                t('eventsChart.legend.validEvents'),
+                t('eventsChart.legend.duplicates')
+              ],
+            },
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '15%',
+              containLabel: true,
+            },
+            xAxis: {
+              type: 'category',
+              data: eventTypes.map(e => e.event_type),
+              axisLabel: {
+                rotate: 45,
+                fontSize: 10,
               },
             },
             yAxis: {
               type: 'value',
-              name: t('accuracyChart.yAxis.name'),
+              name: t('eventsChart.yAxis.name'),
             },
             series: [
               {
-                name: t('accuracyChart.series.name'),
+                name: t('eventsChart.legend.validEvents'),
                 type: 'bar',
-                data: overview.kpis.accuracy_distribution.map(d => ({
-                  value: d.report_count,
-                  itemStyle: {
-                    color: d.accuracy_range.includes('Excellent') ? '#10b981' :
-                      d.accuracy_range.includes('Good') ? '#3b82f6' :
-                        d.accuracy_range.includes('Fair') ? '#f59e0b' : '#ef4444',
-                  },
-                })),
-                label: {
-                  show: true,
-                  position: 'top',
-                  formatter: '{c}',
-                },
+                stack: 'total',
+                data: eventTypes.map(e => e.valid_events),
+                itemStyle: { color: '#10b981' },
+              },
+              {
+                name: t('eventsChart.legend.duplicates'),
+                type: 'bar',
+                stack: 'total',
+                data: eventTypes.map(e => e.duplicate_events),
+                itemStyle: { color: '#ef4444' },
               },
             ],
           };
-          accuracyChart.setOption(accuracyOption);
+          eventsChart.setOption(eventsOption);
         }
-
-        if (gatewayQuality.length > 0) {
-          const gatewayElement = document.getElementById('gateway-chart');
-          if (gatewayElement) {
-            const gatewayChart = echarts.init(gatewayElement);
-            const gatewayOption: EChartsOption = {
-              tooltip: {
-                trigger: 'axis',
-                axisPointer: { type: 'cross' },
-              },
-              legend: {
-                data: [
-                  t('gatewayChart.legend.avgRssi'),
-                  t('gatewayChart.legend.avgSnr'),
-                  t('gatewayChart.legend.reportCount')
-                ],
-              },
-              grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '10%',
-                containLabel: true,
-              },
-              xAxis: {
-                type: 'category',
-                data: gatewayQuality.map(g => g.gateway_name),
-                axisLabel: {
-                  rotate: 45,
-                  fontSize: 10,
-                },
-              },
-              yAxis: [
-                {
-                  type: 'value',
-                  name: t('gatewayChart.yAxis.rssiSnr'),
-                  position: 'left',
-                },
-                {
-                  type: 'value',
-                  name: t('gatewayChart.yAxis.count'),
-                  position: 'right',
-                },
-              ],
-              series: [
-                {
-                  name: t('gatewayChart.legend.avgRssi'),
-                  type: 'line',
-                  data: gatewayQuality.map(g => g.avg_rssi),
-                  itemStyle: { color: '#3b82f6' },
-                },
-                {
-                  name: t('gatewayChart.legend.avgSnr'),
-                  type: 'line',
-                  data: gatewayQuality.map(g => g.avg_snr),
-                  itemStyle: { color: '#10b981' },
-                },
-                {
-                  name: t('gatewayChart.legend.reportCount'),
-                  type: 'bar',
-                  yAxisIndex: 1,
-                  data: gatewayQuality.map(g => g.report_count),
-                  itemStyle: { color: '#8b5cf6' },
-                },
-              ],
-            };
-            gatewayChart.setOption(gatewayOption);
-          }
-        }
-
-        if (eventTypes.length > 0) {
-          const eventsElement = document.getElementById('events-chart');
-          if (eventsElement) {
-            const eventsChart = echarts.init(eventsElement);
-            const eventsOption: EChartsOption = {
-              tooltip: {
-                trigger: 'axis',
-                axisPointer: { type: 'shadow' },
-              },
-              legend: {
-                data: [
-                  t('eventsChart.legend.validEvents'),
-                  t('eventsChart.legend.duplicates')
-                ],
-              },
-              grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '15%',
-                containLabel: true,
-              },
-              xAxis: {
-                type: 'category',
-                data: eventTypes.map(e => e.event_type),
-                axisLabel: {
-                  rotate: 45,
-                  fontSize: 10,
-                },
-              },
-              yAxis: {
-                type: 'value',
-                name: t('eventsChart.yAxis.name'),
-              },
-              series: [
-                {
-                  name: t('eventsChart.legend.validEvents'),
-                  type: 'bar',
-                  stack: 'total',
-                  data: eventTypes.map(e => e.valid_events),
-                  itemStyle: { color: '#10b981' },
-                },
-                {
-                  name: t('eventsChart.legend.duplicates'),
-                  type: 'bar',
-                  stack: 'total',
-                  data: eventTypes.map(e => e.duplicate_events),
-                  itemStyle: { color: '#ef4444' },
-                },
-              ],
-            };
-            eventsChart.setOption(eventsOption);
-          }
-        }
-      } catch (error) {
-        console.error('Error initializing charts:', error);
       }
-    }, 100);
+    } catch (error) {
+      console.error('Error initializing charts:', error);
+    }
 
     return () => {
-      clearTimeout(timer);
+      // clearTimeout(timer);
 
       const batteryElement = document.getElementById('battery-chart');
       const accuracyElement = document.getElementById('accuracy-chart');
