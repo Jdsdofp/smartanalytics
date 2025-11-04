@@ -2177,6 +2177,16 @@ export default function DeviceLogsView() {
       };
 
 
+  // Função auxiliar para determinar a cor baseada no score
+  const getHealthScoreColor = (score: number): string => {
+    if (score >= 80) return '#10b981'; // Verde para scores altos
+    if (score >= 60) return '#f59e0b'; // Amarelo para scores médios
+    if (score >= 40) return '#f97316'; // Laranja para scores baixos
+    return '#ef4444'; // Vermelho para scores muito baixos
+  };
+
+
+
   // Função para inicializar o gráfico de health score
   const initHealthScoreChart = (data: any[]) => {
     const chartElement = document.getElementById('health-score-chart');
@@ -2329,14 +2339,6 @@ export default function DeviceLogsView() {
     );
   }
 
-
-  // Função auxiliar para determinar a cor baseada no score
-  const getHealthScoreColor = (score: number): string => {
-    if (score >= 80) return '#10b981'; // Verde para scores altos
-    if (score >= 60) return '#f59e0b'; // Amarelo para scores médios
-    if (score >= 40) return '#f97316'; // Laranja para scores baixos
-    return '#ef4444'; // Vermelho para scores muito baixos
-  };
 
 
 
