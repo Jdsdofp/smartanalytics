@@ -1036,7 +1036,8 @@
       "title": "PDF",
       "description": "Reporte formateado con tablas y gráficos"
     }
-  }
+  },
+  "noData":"No se encontraron datos para los filtros aplicados"
   },
   "pagination": {
     "showing": "Mostrando",

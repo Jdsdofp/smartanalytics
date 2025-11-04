@@ -1038,7 +1038,8 @@
       "title": "PDF",
       "description": "Formatted report with tables and charts"
     }
-  }
+  },
+  "noData":"No data found for applied filters"
   },
   "pagination": {
     "showing": "Showing",

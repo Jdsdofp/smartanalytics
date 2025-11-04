@@ -289,6 +289,19 @@ interface LowBatteryTableFiltersProps {
   activeFiltersCount: number;
 }
 
+
+// =====================================
+// 🎨 COMPONENTE DE GRÁFICO DE PIZZA
+// =====================================
+interface BatteryPieChartProps {
+  data: {
+    healthy: number;
+    warning: number;
+    critical: number;
+  };
+}
+
+
 const LowBatteryTableFilters = ({
   filters,
   onFiltersChange,
@@ -354,11 +367,10 @@ const LowBatteryTableFilters = ({
       {/* Botão de Filtros */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
-          activeFiltersCount > 0
-            ? 'bg-blue-50 border-blue-500 text-blue-700 hover:bg-blue-100'
-            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-        }`}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${activeFiltersCount > 0
+          ? 'bg-blue-50 border-blue-500 text-blue-700 hover:bg-blue-100'
+          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
       >
         <FunnelIcon className="h-5 w-5" />
         <span className="font-medium">
@@ -470,11 +482,10 @@ const LowBatteryTableFilters = ({
                   <button
                     key={option.value}
                     onClick={() => toggleArrayFilter('batteryStatus', option.value)}
-                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                      filters.batteryStatus.includes(option.value)
-                        ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
-                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${filters.batteryStatus.includes(option.value)
+                      ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -492,11 +503,10 @@ const LowBatteryTableFilters = ({
                   <button
                     key={option.value}
                     onClick={() => toggleArrayFilter('motionStatus', option.value)}
-                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                      filters.motionStatus.includes(option.value)
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${filters.motionStatus.includes(option.value)
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
                   >
                     <span className="mr-2">{option.icon}</span>
                     {option.label}
@@ -548,11 +558,10 @@ const LowBatteryTableFilters = ({
                   <button
                     key={option.value}
                     onClick={() => toggleArrayFilter('reportFreshness', option.value)}
-                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                      filters.reportFreshness.includes(option.value)
-                        ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
-                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${filters.reportFreshness.includes(option.value)
+                      ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -1170,7 +1179,7 @@ const ChartContainer = ({
 
 
 const EquipmentCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
-  
+
   const { t } = useTranslation();
 
   const colorClasses = {
@@ -1189,7 +1198,7 @@ const EquipmentCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
 
   const isPrimary = card.type === 'primary';
 
-    // Busca a tradução baseada no cardKey
+  // Busca a tradução baseada no cardKey
   const translatedTitle = t(`dashboardCard.equipmentCards.${cardKey}`);
 
   return (
@@ -1233,7 +1242,7 @@ const ActivityCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
     yellow: 'text-yellow-700',
   };
 
-    // Busca a tradução baseada no cardKey
+  // Busca a tradução baseada no cardKey
   const translatedTitle = t(`dashboardCard.activityCards.${cardKey}`);
 
   return (
@@ -1266,7 +1275,7 @@ const GPSCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
     red: 'bg-gradient-to-br from-red-50 to-red-100 border-red-300',
   };
 
-    // Busca a tradução baseada no cardKey
+  // Busca a tradução baseada no cardKey
   const translatedTitle = t(`dashboardCard.gpsCards.${cardKey}`);
   const translatedDescription = t(`dashboardCard.gpsCards.descriptions.${cardKey}`);
 
@@ -1412,8 +1421,8 @@ const Pagination = ({
                   key={page}
                   onClick={() => onPageChange(page as number)}
                   className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${currentPage === page
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
                     }`}
                 >
                   {page}
@@ -1466,7 +1475,7 @@ export const QuickExportButtons = ({ data, filters }: QuickExportButtonsProps) =
     try {
       const filename = `report_battery${new Date().toISOString().split('T')[0]}`;
       const locale = getCurrentLocale();
-      
+
       if (type === 'excel') {
         exportToExcel({
           data,
@@ -1500,11 +1509,10 @@ export const QuickExportButtons = ({ data, filters }: QuickExportButtonsProps) =
       <button
         onClick={() => handleQuickExport('excel')}
         disabled={isExporting !== null || data.length === 0}
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-          data.length === 0
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-green-600 text-white hover:bg-green-700'
-        }`}
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${data.length === 0
+          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          : 'bg-green-600 text-white hover:bg-green-700'
+          }`}
         title={t('export.excel.full')}
       >
         {isExporting === 'excel' ? (
@@ -1524,11 +1532,10 @@ export const QuickExportButtons = ({ data, filters }: QuickExportButtonsProps) =
       <button
         onClick={() => handleQuickExport('pdf')}
         disabled={isExporting !== null || data.length === 0}
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-          data.length === 0
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-red-600 text-white hover:bg-red-700'
-        }`}
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${data.length === 0
+          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          : 'bg-red-600 text-white hover:bg-red-700'
+          }`}
         title={t('export.pdf.title')}
       >
         {isExporting === 'pdf' ? (
@@ -1545,6 +1552,86 @@ export const QuickExportButtons = ({ data, filters }: QuickExportButtonsProps) =
       </button>
     </div>
   );
+};
+
+
+const BatteryPieChart = ({ data }: BatteryPieChartProps) => {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstanceRef = useRef<echarts.ECharts | null>(null);
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!chartRef.current) return;
+
+    // Criar ou obter instância
+    if (!chartInstanceRef.current) {
+      chartInstanceRef.current = echarts.init(chartRef.current);
+    }
+
+    const option: EChartsOption = {
+      tooltip: {
+        trigger: 'item',
+        formatter: t('batteryChart.tooltip'),
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+      },
+      series: [
+        {
+          name: t('batteryChart.seriesName'),
+          type: 'pie',
+          radius: '70%',
+          data: [
+            {
+              value: data.healthy,
+              name: t('batteryChart.healthy'),
+              itemStyle: { color: '#10b981' }
+            },
+            {
+              value: data.warning,
+              name: t('batteryChart.warning'),
+              itemStyle: { color: '#f59e0b' }
+            },
+            {
+              value: data.critical,
+              name: t('batteryChart.critical'),
+              itemStyle: { color: '#ef4444' }
+            },
+          ],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
+            },
+          },
+        },
+      ],
+    };
+
+    chartInstanceRef.current.setOption(option);
+
+    // Resize handler
+    const handleResize = () => {
+      chartInstanceRef.current?.resize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [data, t]);
+
+  // Cleanup ao desmontar
+  useEffect(() => {
+    return () => {
+      chartInstanceRef.current?.dispose();
+      chartInstanceRef.current = null;
+    };
+  }, []);
+
+  return <div ref={chartRef} className="w-full h-full min-w-0" />;
 };
 
 export default function DeviceLogsView() {
@@ -1597,7 +1684,7 @@ export default function DeviceLogsView() {
   // });
 
 
-    const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState({
     personName: '',
     batteryLevelMin: 0,
     batteryLevelMax: 100,
@@ -1644,7 +1731,7 @@ export default function DeviceLogsView() {
 
   const fetchData = async () => {
     setRefreshing(true);
-    
+
     console.log(healthScoreData)
 
     //https://apinode.smartxhub.cloud
@@ -1674,9 +1761,7 @@ export default function DeviceLogsView() {
       setEventTypes(eventsData);
       setCustomerStats(customerData);
 
-       // ✅ LOG PARA DEBUG - Verifique se battery_health existe
-      // console.log('Overview Data:', overviewData);
-      // console.log('Battery Health:', overviewData?.kpis?.battery_health);
+      // ✅ LOG PARA DEBUG - Verifique se battery_health existe
 
       await fetchDashboardCards();
 
@@ -1704,84 +1789,52 @@ export default function DeviceLogsView() {
     }
   };
 
-  // const fetchLowBatteryData = async (page: number = lowBatteryPage, limit: number = lowBatteryLimit) => {
-  //   setLoadingLowBattery(true);
-  //   try {
-  //     const response = await fetch(
-  //       `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/low-battery?page=${page}&limit=${limit}`
-  //     );
-  //     const result = await response.json();
-
-  //     // ✅ Transformar para o formato esperado
-  //     const adaptedData = {
-  //       data: result.data || [],
-  //       pagination: {
-  //         currentPage: result.page || 1,
-  //         totalPages: result.totalPages || 1,
-  //         totalItems: result.total || 0,
-  //         itemsPerPage: result.limit || 10,
-  //         hasNextPage: result.page < result.totalPages,
-  //         hasPreviousPage: result.page > 1,
-  //       },
-  //     };
-
-  //     setLowBatteryData(adaptedData);
-
-  //     // if (result.success) {
-  //     //   setLowBatteryData(result);
-  //     // }
-  //   } catch (error) {
-  //     console.error('Error fetching low battery data:', error);
-  //   } finally {
-  //     setLoadingLowBattery(false);
-  //   }
-  // };
 
   const fetchLowBatteryData = async (page: number = lowBatteryPage, limit: number = lowBatteryLimit) => {
-  setLoadingLowBattery(true);
-  try {
-    // Construir query params
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      sortField,
-      sortOrder,
-    });
+    setLoadingLowBattery(true);
+    try {
+      // Construir query params
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        sortField,
+        sortOrder,
+      });
 
-    // Adicionar filtros se existirem
-    if (debouncedPersonName) params.append('personName', debouncedPersonName);
-    if (filters.batteryLevelMin !== undefined) params.append('batteryLevelMin', filters.batteryLevelMin.toString());
-    if (filters.batteryLevelMax !== undefined) params.append('batteryLevelMax', filters.batteryLevelMax.toString());
-    if (filters.batteryStatus.length > 0) params.append('batteryStatus', filters.batteryStatus.join(','));
-    if (filters.motionStatus.length > 0) params.append('motionStatus', filters.motionStatus.join(','));
-    if (filters.reportFreshness.length > 0) params.append('reportFreshness', filters.reportFreshness.join(','));
-    if (filters.temperatureMin !== undefined) params.append('temperatureMin', filters.temperatureMin.toString());
-    if (filters.temperatureMax !== undefined) params.append('temperatureMax', filters.temperatureMax.toString());
+      // Adicionar filtros se existirem
+      if (debouncedPersonName) params.append('personName', debouncedPersonName);
+      if (filters.batteryLevelMin !== undefined) params.append('batteryLevelMin', filters.batteryLevelMin.toString());
+      if (filters.batteryLevelMax !== undefined) params.append('batteryLevelMax', filters.batteryLevelMax.toString());
+      if (filters.batteryStatus.length > 0) params.append('batteryStatus', filters.batteryStatus.join(','));
+      if (filters.motionStatus.length > 0) params.append('motionStatus', filters.motionStatus.join(','));
+      if (filters.reportFreshness.length > 0) params.append('reportFreshness', filters.reportFreshness.join(','));
+      if (filters.temperatureMin !== undefined) params.append('temperatureMin', filters.temperatureMin.toString());
+      if (filters.temperatureMax !== undefined) params.append('temperatureMax', filters.temperatureMax.toString());
 
-    const response = await fetch(
-      `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/low-battery?${params}`
-    );
-    const result = await response.json();
+      const response = await fetch(
+        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/low-battery?${params}`
+      );
+      const result = await response.json();
 
-    const adaptedData = {
-      data: result.data || [],
-      pagination: {
-        currentPage: result.page || 1,
-        totalPages: result.totalPages || 1,
-        totalItems: result.total || 0,
-        itemsPerPage: result.limit || 10,
-        hasNextPage: result.page < result.totalPages,
-        hasPreviousPage: result.page > 1,
-      },
-    };
+      const adaptedData = {
+        data: result.data || [],
+        pagination: {
+          currentPage: result.page || 1,
+          totalPages: result.totalPages || 1,
+          totalItems: result.total || 0,
+          itemsPerPage: result.limit || 10,
+          hasNextPage: result.page < result.totalPages,
+          hasPreviousPage: result.page > 1,
+        },
+      };
 
-    setLowBatteryData(adaptedData);
-  } catch (error) {
-    console.error('Error fetching low battery data:', error);
-  } finally {
-    setLoadingLowBattery(false);
-  }
-};
+      setLowBatteryData(adaptedData);
+    } catch (error) {
+      console.error('Error fetching low battery data:', error);
+    } finally {
+      setLoadingLowBattery(false);
+    }
+  };
 
   // 1 ✨ ATUALIZADO: useEffect com controle de auto-refresh
   useEffect(() => {
@@ -1860,7 +1913,7 @@ export default function DeviceLogsView() {
               radius: '70%',
               data: [
                 {
-                  value: safeParseNumber(overview.kpis.battery_health.healthy_devices),
+                  value: safeParseNumber(overview?.kpis.battery_health?.healthy_devices),
                   name: t('batteryChart.healthy'),
                   itemStyle: { color: '#10b981' }
                 },
@@ -2143,38 +2196,38 @@ export default function DeviceLogsView() {
   };
 
 
-      // 3. ADICIONAR FUNÇÕES DE MANIPULAÇÃO DE FILTROS
-      const handleFiltersChange = (newFilters: typeof filters) => {
-        setFilters(newFilters);
-        setLowBatteryPage(1); // Resetar para primeira página ao filtrar
-      };
+  // 3. ADICIONAR FUNÇÕES DE MANIPULAÇÃO DE FILTROS
+  const handleFiltersChange = (newFilters: typeof filters) => {
+    setFilters(newFilters);
+    setLowBatteryPage(1); // Resetar para primeira página ao filtrar
+  };
 
 
-      const handleClearFilters = () => {
-        setFilters({
-          personName: '',
-          batteryLevelMin: 0,
-          batteryLevelMax: 100,
-          batteryStatus: [],
-          motionStatus: [],
-          reportFreshness: [],
-          temperatureMin: undefined,
-          temperatureMax: undefined,
-        });
-        setLowBatteryPage(1);
-      };
+  const handleClearFilters = () => {
+    setFilters({
+      personName: '',
+      batteryLevelMin: 0,
+      batteryLevelMax: 100,
+      batteryStatus: [],
+      motionStatus: [],
+      reportFreshness: [],
+      temperatureMin: undefined,
+      temperatureMax: undefined,
+    });
+    setLowBatteryPage(1);
+  };
 
 
-      const getActiveFiltersCount = () => {
-        let count = 0;
-        if (filters.personName) count++;
-        if (filters.batteryLevelMin !== 0 || filters.batteryLevelMax !== 100) count++;
-        if (filters.batteryStatus.length > 0) count++;
-        if (filters.motionStatus.length > 0) count++;
-        if (filters.reportFreshness.length > 0) count++;
-        if (filters.temperatureMin !== undefined || filters.temperatureMax !== undefined) count++;
-        return count;
-      };
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (filters.personName) count++;
+    if (filters.batteryLevelMin !== 0 || filters.batteryLevelMax !== 100) count++;
+    if (filters.batteryStatus.length > 0) count++;
+    if (filters.motionStatus.length > 0) count++;
+    if (filters.reportFreshness.length > 0) count++;
+    if (filters.temperatureMin !== undefined || filters.temperatureMax !== undefined) count++;
+    return count;
+  };
 
 
   // Função auxiliar para determinar a cor baseada no score
@@ -2342,37 +2395,38 @@ export default function DeviceLogsView() {
 
 
 
-const SortableHeader = ({ 
-  field, 
-  children, 
-  bgClass = '' 
-}: { 
-  field: string; 
-  children: React.ReactNode;
-  bgClass?: string;
-}) => (
-  <th
-    onClick={() => {
-      if (sortField === field) {
-        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-      } else {
-        setSortField(field);
-        setSortOrder('asc');
-      }
-      setLowBatteryPage(1);
-    }}
-    className={`px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap cursor-pointer hover:bg-opacity-80 transition-colors ${bgClass}`}
-  >
-    <div className="flex items-center gap-1">
-      {children}
-      {sortField === field && (
-        <span className="text-blue-600 font-bold text-sm">
-          {sortOrder === 'asc' ? '↑' : '↓'}
-        </span>
-      )}
-    </div>
-  </th>
-);
+  const SortableHeader = ({
+    field,
+    children,
+    bgClass = ''
+  }: {
+    field: string;
+    children: React.ReactNode;
+    bgClass?: string;
+  }) => (
+    <th
+      onClick={() => {
+        if (sortField === field) {
+          setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
+        } else {
+          setSortField(field);
+          setSortOrder('asc');
+        }
+        setLowBatteryPage(1);
+      }}
+      className={`px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap cursor-pointer hover:bg-opacity-80 transition-colors ${bgClass}`}
+    >
+      <div className="flex items-center gap-1">
+        {children}
+        {sortField === field && (
+          <span className="text-blue-600 font-bold text-sm">
+
+            {sortOrder === 'asc' ? '↑' : '↓'}
+          </span>
+        )}
+      </div>
+    </th>
+  );
 
 
 
@@ -2408,9 +2462,9 @@ const SortableHeader = ({
               disabled={!autoRefreshEnabled}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             > */}
-              {/* <option value={10000}>10 segundos</option>
+            {/* <option value={10000}>10 segundos</option>
               <option value={30000}>30 segundos</option> */}
-              {/* <option value={60000}>1 min</option>
+            {/* <option value={60000}>1 min</option>
               <option value={300000}>5 min</option>
             </select> */}
 
@@ -2538,7 +2592,7 @@ const SortableHeader = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <GPSCard card={dashboardCards.gps_cards.gps_today} cardKey="gpsToday" />
                 <GPSCard card={dashboardCards.gps_cards.gps_yesterday} cardKey="gpsYesterday" />
-                <GPSCard card={dashboardCards.gps_cards.gps_last_3days} cardKey="gpsLast3Days"  />
+                <GPSCard card={dashboardCards.gps_cards.gps_last_3days} cardKey="gpsLast3Days" />
                 <GPSCard card={dashboardCards.gps_cards.gps_outdated} cardKey="gpsOutdated" />
               </div>
             </div>
@@ -2595,67 +2649,75 @@ const SortableHeader = ({
           )}
 
           {/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO ATUALIZADA COM HEALTH SCORE */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('deviceLogs.charts.batteryDistribution')}
-              </h3>
-              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-                <div id="battery-chart" className="w-full h-full min-w-0" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('deviceLogs.charts.healthScoreByCategory')}
-              </h3>
-              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-                <div id="health-score-chart" className="w-full h-full min-w-0" />
-              </div>
-
-              {/* Legenda do health score */}
-              <div className="mt-4 flex flex-wrap gap-4 text-xs">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-green-500 rounded"></div>
-                  <span>80-100% {t('deviceLogs.healthScoreChart.legend.excellent')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                  <span>60-79% {t('deviceLogs.healthScoreChart.legend.good')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                  <span>40-59% {t('deviceLogs.healthScoreChart.legend.fair')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-red-500 rounded"></div>
-                  <span>0-39% {t('deviceLogs.healthScoreChart.legend.poor')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ✅ ALERTAS DE BATERIA BAIXA ATUALIZADOS */}
-          {lowBatteryData.pagination.totalItems > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-yellow-200 p-4">
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-      <h3 className="text-lg font-semibold text-yellow-900 flex items-center gap-2">
-        <BoltIcon className="h-6 w-6" />
-        {t('lowBatteryTable.title')} ({lowBatteryData.pagination.totalItems})
-      </h3>
-      
-      <QuickExportButtons
-        data={lowBatteryData.data}
-        filters={filters}
-        totalItems={lowBatteryData?.pagination?.totalItems}
-        isFiltered={getActiveFiltersCount() > 0}
+{/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO COM COMPONENTES */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      {t('deviceLogs.charts.batteryDistribution')}
+    </h3>
+    <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+      <BatteryPieChart
+        data={{
+          healthy: safeParseNumber(overview?.kpis.battery_health?.healthy_devices),
+          warning: safeParseNumber(overview?.kpis.battery_health?.warning_devices),
+          critical: safeParseNumber(overview?.kpis.battery_health?.critical_devices),
+        }}
       />
     </div>
+  </div>
+
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      {t('deviceLogs.charts.healthScoreByCategory')}
+    </h3>
+    <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+      <div id="health-score-chart" className="w-full h-full min-w-0" />
+    </div>
+    {/* Legenda do health score */}
+    <div className="mt-4 flex flex-wrap gap-4 text-xs">
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 bg-green-500 rounded"></div>
+        <span>80-100% {t('deviceLogs.healthScoreChart.legend.excellent')}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+        <span>60-79% {t('deviceLogs.healthScoreChart.legend.good')}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 bg-orange-500 rounded"></div>
+        <span>40-59% {t('deviceLogs.healthScoreChart.legend.fair')}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <div className="w-3 h-3 bg-red-500 rounded"></div>
+        <span>0-39% {t('deviceLogs.healthScoreChart.legend.poor')}</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 
-              {/* ✨ ADICIONAR AQUI O COMPONENTE DE FILTROS */}
+
+          {/* ✅ ALERTAS DE BATERIA BAIXA ATUALIZADOS */}
+
+          <div className="bg-white rounded-lg shadow-sm border border-yellow-200 p-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+              <h3 className="text-lg font-semibold text-yellow-900 flex items-center gap-2">
+                <BoltIcon className="h-6 w-6" />
+                {t('lowBatteryTable.title')} ({lowBatteryData.pagination.totalItems})
+              </h3>
+
+              <QuickExportButtons
+                data={lowBatteryData.data}
+                filters={filters}
+                totalItems={lowBatteryData?.pagination?.totalItems}
+                isFiltered={getActiveFiltersCount() > 0}
+              />
+            </div>
+
+
+            {/* ✨ ADICIONAR AQUI O COMPONENTE DE FILTROS */}
             <div className="mb-4">
-              
+
               <LowBatteryTableFilters
                 filters={filters}
                 onFiltersChange={handleFiltersChange}
@@ -2667,310 +2729,320 @@ const SortableHeader = ({
 
 
 
-              {/* Loading State */}
-              {loadingLowBattery ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
-                  <p className="ml-4 text-gray-600">{t('lowBatteryTable.loading')}</p>
-                </div>
-              ) : (
-                <>
-                  {/* Tabela responsiva com scroll horizontal */}
-                  <div className="overflow-auto -mx-4 sm:mx-0">
-                    <div className="inline-block min-w-full align-middle">
-                      <div className="overflow-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                        <table className="min-w-full divide-y divide-gray-300">
-                          <thead className="bg-gray-50">
+            {/* Loading State */}
+            {loadingLowBattery ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+                <p className="ml-4 text-gray-600">{t('lowBatteryTable.loading')}</p>
+              </div>
+            ) : (
+              <>
+                {/* Tabela responsiva com scroll horizontal */}
+                <div className="overflow-auto -mx-4 sm:mx-0">
+                  <div className="inline-block min-w-full align-middle">
+                    <div className="overflow-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                      <table className="min-w-full divide-y divide-gray-300">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            {/* Device Info */}
+                            <th className="sticky left-0 z-10 bg-gray-50 px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap"> {t('lowBatteryTable.headers.person')}</th>
+                            <SortableHeader field="dev_uid" bgClass="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap">{t('lowBatteryTable.headers.deviceUid')}</SortableHeader>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap">{t('lowBatteryTable.headers.model')}</th>
+
+                            {/* Battery Info */}
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.battery')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.status')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.score')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.charging')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.updated')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.minAgo')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.fresh')}</th>
+
+                            {/* Temperature Info */}
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.temp')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.updated')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.minAgo')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.fresh')}</th>
+
+                            {/* Motion Info */}
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.motion')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.value')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.updated')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.changed')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.minAgo')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.fresh')}</th>
+
+                            {/* Report Info */}
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.min')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.hours')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.days')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.status')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.score')}</th>
+
+                            {/* GPS Info */}
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsAge')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsFail')}</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {lowBatteryData.data.length === 0 ? (
                             <tr>
-                              {/* Device Info */}
-                              <th className="sticky left-0 z-10 bg-gray-50 px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap"> {t('lowBatteryTable.headers.person')}</th>
-                              <SortableHeader field="dev_uid" bgClass="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap">{t('lowBatteryTable.headers.deviceUid')}</SortableHeader>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap">{t('lowBatteryTable.headers.model')}</th>
-
-                              {/* Battery Info */}
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.battery')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.status')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.score')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.charging')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.updated')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.minAgo')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.fresh')}</th>
-
-                              {/* Temperature Info */}
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.temp')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.updated')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.minAgo')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.fresh')}</th>
-
-                              {/* Motion Info */}
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.motion')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.value')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.updated')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.changed')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.minAgo')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.fresh')}</th>
-
-                              {/* Report Info */}
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.min')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.hours')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.days')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.status')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.score')}</th>
-
-                              {/* GPS Info */}
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsAge')}</th>
-                              <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsFail')}</th>
+                              <td colSpan={23} className="px-6 py-4 text-center text-sm text-gray-500">
+                                {t('lowBatteryTable.noData')}
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {lowBatteryData.data.map((device: any, idx: number) => (
-                              <tr key={idx} className="hover:bg-gray-50">
-                                {/* Device Info */}
-                                <td className="sticky left-0 z-10 bg-white px-2 py-2 whitespace-nowrap">
-                                  <span className="font-medium text-[11px] text-gray-900">{device.person_name}</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap">
-                                  <span className="font-mono text-[10px] text-gray-700">{device.dev_uid}</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap">
-                                  <span className="text-[10px] text-gray-600">{device.sensor_model}</span>
-                                </td>
+                          ) : (
+                            <>
+                              {lowBatteryData.data.map((device: any, idx: number) => (
 
-                                {/* Battery Info */}
-                                <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
-                                  <div className="flex items-center gap-1">
-                                    <div className="w-12 bg-gray-200 rounded-full h-1.5">
-                                      <div
-                                        className={`h-1.5 rounded-full transition-all ${device.battery_level >= 30 ? 'bg-green-500' :
-                                          device.battery_level >= 20 ? 'bg-yellow-500' :
-                                            device.battery_level >= 10 ? 'bg-orange-500' : 'bg-red-500'
-                                          }`}
-                                        style={{ width: `${device.battery_level}%` }}
-                                      />
+                                <tr key={idx} className="hover:bg-gray-50">
+                                  {/* Device Info */}
+                                  <td className="sticky left-0 z-10 bg-white px-2 py-2 whitespace-nowrap">
+                                    <span className="font-medium text-[11px] text-gray-900">{device.person_name}</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap">
+                                    <span className="font-mono text-[10px] text-gray-700">{device.dev_uid}</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap">
+                                    <span className="text-[10px] text-gray-600">{device.sensor_model}</span>
+                                  </td>
+
+                                  {/* Battery Info */}
+                                  <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
+                                    <div className="flex items-center gap-1">
+                                      <div className="w-12 bg-gray-200 rounded-full h-1.5">
+                                        <div
+                                          className={`h-1.5 rounded-full transition-all ${device.battery_level >= 30 ? 'bg-green-500' :
+                                            device.battery_level >= 20 ? 'bg-yellow-500' :
+                                              device.battery_level >= 10 ? 'bg-orange-500' : 'bg-red-500'
+                                            }`}
+                                          style={{ width: `${device.battery_level}%` }}
+                                        />
+                                      </div>
+                                      <span className={`text-[11px] font-bold ${device.battery_level < 10 ? 'text-red-600' : 'text-yellow-600'
+                                        }`}>
+                                        {device.battery_level}%
+                                      </span>
                                     </div>
-                                    <span className={`text-[11px] font-bold ${device.battery_level < 10 ? 'text-red-600' : 'text-yellow-600'
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
+                                    <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-semibold ${device.battery_status === 'CRITICAL' ? 'bg-red-100 text-red-800' :
+                                      device.battery_status === 'WARNING' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-green-100 text-green-800'
                                       }`}>
-                                      {device.battery_level}%
+                                      {device.battery_status}
                                     </span>
-                                  </div>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
-                                  <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-semibold ${device.battery_status === 'CRITICAL' ? 'bg-red-100 text-red-800' :
-                                    device.battery_status === 'WARNING' ? 'bg-yellow-100 text-yellow-800' :
-                                      'bg-green-100 text-green-800'
-                                    }`}>
-                                    {device.battery_status}
-                                  </span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
-                                  <div className="relative w-8 h-8">
-                                    <svg className="w-8 h-8 transform -rotate-90">
-                                      <circle cx="16" cy="16" r="14" stroke="#e5e7eb" strokeWidth="3" fill="none" />
-                                      <circle
-                                        cx="16"
-                                        cy="16"
-                                        r="14"
-                                        stroke={device.battery_score >= 30 ? '#10b981' : device.battery_score >= 20 ? '#f59e0b' : '#ef4444'}
-                                        strokeWidth="3"
-                                        fill="none"
-                                        strokeDasharray={`${(device.battery_score / 100) * 87.96} 87.96`}
-                                        className="transition-all duration-500"
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                      <span className="text-[9px] font-bold">{device.battery_score}</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
+                                    <div className="relative w-8 h-8">
+                                      <svg className="w-8 h-8 transform -rotate-90">
+                                        <circle cx="16" cy="16" r="14" stroke="#e5e7eb" strokeWidth="3" fill="none" />
+                                        <circle
+                                          cx="16"
+                                          cy="16"
+                                          r="14"
+                                          stroke={device.battery_score >= 30 ? '#10b981' : device.battery_score >= 20 ? '#f59e0b' : '#ef4444'}
+                                          strokeWidth="3"
+                                          fill="none"
+                                          strokeDasharray={`${(device.battery_score / 100) * 87.96} 87.96`}
+                                          className="transition-all duration-500"
+                                        />
+                                      </svg>
+                                      <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-[9px] font-bold">{device.battery_score}</span>
+                                      </div>
                                     </div>
-                                  </div>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
-                                  <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] ${device.battery_charging === 'YES' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
-                                    }`}>
-                                    {device.battery_charging === 'YES' ? '🔌' : '–'}
-                                  </span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
-                                  <div className="text-[9px]">
-                                    <div className="text-gray-900">{new Date(device.battery_last_updated).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
-                                    <div className="text-gray-500">{new Date(device.battery_last_updated).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
-                                  </div>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
-                                  <span className="text-[10px] text-gray-600">{device.battery_minutes_ago}m</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
-                                  <span className="text-[9px]">{device.battery_freshness}</span>
-                                </td>
-
-                                {/* Temperature Info */}
-                                <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
-                                  <span className={`font-medium text-[11px] ${device.temperature < 15 ? 'text-blue-600' :
-                                    device.temperature > 30 ? 'text-red-600' : 'text-gray-700'
-                                    }`}>
-                                    {device.temperature}°{device.temperature_unit}
-                                  </span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
-                                  <div className="text-[9px]">
-                                    <div className="text-gray-900">{new Date(device.temperature_last_updated).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
-                                    <div className="text-gray-500">{new Date(device.temperature_last_updated).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
-                                  </div>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
-                                  <span className="text-[10px] text-gray-600">{device.temperature_minutes_ago}m</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
-                                  <span className="text-[9px]">{device.temperature_freshness}</span>
-                                </td>
-
-                                {/* Motion Info */}
-                                <td className="px-2 py-2 whitespace-nowrap bg-green-50">
-                                  <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-medium ${device.motion_status === 'MOVING' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'
-                                    }`}>
-                                    {device.motion_status === 'MOVING' ? '🏃' : '⏸️'}
-                                  </span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-green-50">
-                                  <span className="text-[10px] text-gray-600">{device.motion_status_numeric}</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-green-50">
-                                  <div className="text-[9px]">
-                                    <div className="text-gray-900">{new Date(device.motion_last_updated).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
-                                    <div className="text-gray-500">{new Date(device.motion_last_updated).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
-                                  </div>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-green-50">
-                                  <div className="text-[9px]">
-                                    <div className="text-gray-900">{new Date(device.motion_last_changed).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
-                                    <div className="text-gray-500">{new Date(device.motion_last_changed).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
-                                  </div>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-green-50">
-                                  <span className="text-[10px] text-gray-600">{device.motion_minutes_ago}m</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-green-50">
-                                  <span className="text-[9px]">{device.motion_freshness}</span>
-                                </td>
-
-                                {/* Report Info */}
-                                <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
-                                  <div className="text-[9px]">
-                                    <div className="text-gray-900">{new Date(device.last_report_datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
-                                    <div className="text-gray-500">{new Date(device.last_report_datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
-                                  </div>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
-                                  <span className="text-[10px] text-gray-600">{device.minutes_since_report}m</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
-                                  <span className="text-[10px] text-gray-600">{device.hours_since_report}h</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
-                                  <span className="text-[10px] text-gray-600">{device.days_since_report}d</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
-                                  <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] ${device.report_freshness === 'REAL_TIME' ? 'bg-green-100 text-green-800' :
-                                    device.report_freshness === 'RECENT' ? 'bg-blue-100 text-blue-800' :
-                                      'bg-gray-100 text-gray-700'
-                                    }`}>
-                                    {device.report_freshness}
-                                  </span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
-                                  <span className="text-[10px]">{device.report_status}</span>
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
-                                  <div className="relative w-8 h-8">
-                                    <svg className="w-8 h-8 transform -rotate-90">
-                                      <circle cx="16" cy="16" r="14" stroke="#e5e7eb" strokeWidth="3" fill="none" />
-                                      <circle
-                                        cx="16"
-                                        cy="16"
-                                        r="14"
-                                        stroke={
-                                          device.freshness_score >= 80 ? '#10b981' :
-                                            device.freshness_score >= 50 ? '#f59e0b' : '#ef4444'
-                                        }
-                                        strokeWidth="3"
-                                        fill="none"
-                                        strokeDasharray={`${(device.freshness_score / 100) * 87.96} 87.96`}
-                                        className="transition-all duration-500"
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                      <span className="text-[9px] font-bold">{device.freshness_score}</span>
-                                    </div>
-                                  </div>
-                                </td>
-
-                                {/* GPS Info */}
-                                <td className="px-2 py-2 whitespace-nowrap bg-red-50">
-                                  {device.gps_age !== null ? (
-                                    <span className={`text-[10px] font-medium ${device.gps_age < 30 ? 'text-green-600' :
-                                      device.gps_age < 60 ? 'text-yellow-600' : 'text-red-600'
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
+                                    <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] ${device.battery_charging === 'YES' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
                                       }`}>
-                                      {device.gps_age}m
+                                      {device.battery_charging === 'YES' ? '🔌' : '–'}
                                     </span>
-                                  ) : (
-                                    <span className="text-[10px] text-gray-400">–</span>
-                                  )}
-                                </td>
-                                <td className="px-2 py-2 whitespace-nowrap bg-red-50">
-                                  {device.loc_fail_reason_descr !== null ? (
-                                    <span className="text-[9px] text-red-600">{device.loc_fail_reason_descr}</span>
-                                  ) : (
-                                    <span className="text-[9px] text-green-600">✓ OK</span>
-                                  )}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
+                                    <div className="text-[9px]">
+                                      <div className="text-gray-900">{new Date(device.battery_last_updated).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
+                                      <div className="text-gray-500">{new Date(device.battery_last_updated).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+                                    </div>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
+                                    <span className="text-[10px] text-gray-600">{device.battery_minutes_ago}m</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
+                                    <span className="text-[9px]">{device.battery_freshness}</span>
+                                  </td>
+
+                                  {/* Temperature Info */}
+                                  <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
+                                    <span className={`font-medium text-[11px] ${device.temperature < 15 ? 'text-blue-600' :
+                                      device.temperature > 30 ? 'text-red-600' : 'text-gray-700'
+                                      }`}>
+                                      {device.temperature}°{device.temperature_unit}
+                                    </span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
+                                    <div className="text-[9px]">
+                                      <div className="text-gray-900">{new Date(device.temperature_last_updated).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
+                                      <div className="text-gray-500">{new Date(device.temperature_last_updated).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+                                    </div>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
+                                    <span className="text-[10px] text-gray-600">{device.temperature_minutes_ago}m</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
+                                    <span className="text-[9px]">{device.temperature_freshness}</span>
+                                  </td>
+
+                                  {/* Motion Info */}
+                                  <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                    <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-medium ${device.motion_status === 'MOVING' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'
+                                      }`}>
+                                      {device.motion_status === 'MOVING' ? '🏃' : '⏸️'}
+                                    </span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                    <span className="text-[10px] text-gray-600">{device.motion_status_numeric}</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                    <div className="text-[9px]">
+                                      <div className="text-gray-900">{new Date(device.motion_last_updated).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
+                                      <div className="text-gray-500">{new Date(device.motion_last_updated).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+                                    </div>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                    <div className="text-[9px]">
+                                      <div className="text-gray-900">{new Date(device.motion_last_changed).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
+                                      <div className="text-gray-500">{new Date(device.motion_last_changed).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+                                    </div>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                    <span className="text-[10px] text-gray-600">{device.motion_minutes_ago}m</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                    <span className="text-[9px]">{device.motion_freshness}</span>
+                                  </td>
+
+                                  {/* Report Info */}
+                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                    <div className="text-[9px]">
+                                      <div className="text-gray-900">{new Date(device.last_report_datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
+                                      <div className="text-gray-500">{new Date(device.last_report_datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+                                    </div>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                    <span className="text-[10px] text-gray-600">{device.minutes_since_report}m</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                    <span className="text-[10px] text-gray-600">{device.hours_since_report}h</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                    <span className="text-[10px] text-gray-600">{device.days_since_report}d</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                    <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] ${device.report_freshness === 'REAL_TIME' ? 'bg-green-100 text-green-800' :
+                                      device.report_freshness === 'RECENT' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-gray-100 text-gray-700'
+                                      }`}>
+                                      {device.report_freshness}
+                                    </span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                    <span className="text-[10px]">{device.report_status}</span>
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                    <div className="relative w-8 h-8">
+                                      <svg className="w-8 h-8 transform -rotate-90">
+                                        <circle cx="16" cy="16" r="14" stroke="#e5e7eb" strokeWidth="3" fill="none" />
+                                        <circle
+                                          cx="16"
+                                          cy="16"
+                                          r="14"
+                                          stroke={
+                                            device.freshness_score >= 80 ? '#10b981' :
+                                              device.freshness_score >= 50 ? '#f59e0b' : '#ef4444'
+                                          }
+                                          strokeWidth="3"
+                                          fill="none"
+                                          strokeDasharray={`${(device.freshness_score / 100) * 87.96} 87.96`}
+                                          className="transition-all duration-500"
+                                        />
+                                      </svg>
+                                      <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-[9px] font-bold">{device.freshness_score}</span>
+                                      </div>
+                                    </div>
+                                  </td>
+
+                                  {/* GPS Info */}
+                                  <td className="px-2 py-2 whitespace-nowrap bg-red-50">
+                                    {device.gps_age !== null ? (
+                                      <span className={`text-[10px] font-medium ${device.gps_age < 30 ? 'text-green-600' :
+                                        device.gps_age < 60 ? 'text-yellow-600' : 'text-red-600'
+                                        }`}>
+                                        {device.gps_age}m
+                                      </span>
+                                    ) : (
+                                      <span className="text-[10px] text-gray-400">–</span>
+                                    )}
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-red-50">
+                                    {device.loc_fail_reason_descr !== null ? (
+                                      <span className="text-[9px] text-red-600">{device.loc_fail_reason_descr}</span>
+                                    ) : (
+                                      <span className="text-[9px] text-green-600">✓ OK</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </>)}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
+                </div>
 
-                  {/* Paginação */}
-                  <Pagination
-                    currentPage={lowBatteryData.pagination.currentPage}
-                    totalPages={lowBatteryData.pagination.totalPages}
-                    totalItems={lowBatteryData.pagination.totalItems}
-                    itemsPerPage={lowBatteryData.pagination.itemsPerPage}
-                    onPageChange={(page) => setLowBatteryPage(page)}
-                    onLimitChange={(limit) => {
-                      setLowBatteryLimit(limit);
-                      setLowBatteryPage(1);
-                    }}
-                  />
+                {/* Paginação */}
+                <Pagination
+                  currentPage={lowBatteryData.pagination.currentPage}
+                  totalPages={lowBatteryData.pagination.totalPages}
+                  totalItems={lowBatteryData.pagination.totalItems}
+                  itemsPerPage={lowBatteryData.pagination.itemsPerPage}
+                  onPageChange={(page) => setLowBatteryPage(page)}
+                  onLimitChange={(limit) => {
+                    setLowBatteryLimit(limit);
+                    setLowBatteryPage(1);
+                  }}
+                />
 
-                  {/* Legenda das cores */}
-                  <div className="mt-4 flex flex-wrap gap-3 text-[10px] text-gray-600">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 bg-yellow-50 border border-yellow-200 rounded"></div>
-                      <span>{t('lowBatteryTable.legend.battery')}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 bg-blue-50 border border-blue-200 rounded"></div>
-                      <span>{t('lowBatteryTable.legend.temperature')}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 bg-green-50 border border-green-200 rounded"></div>
-                      <span>{t('lowBatteryTable.legend.motion')}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 bg-purple-50 border border-purple-200 rounded"></div>
-                      <span>{t('lowBatteryTable.legend.report')}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 bg-red-50 border border-red-200 rounded"></div>
-                      <span>{t('lowBatteryTable.legend.gps')}</span>
-                    </div>
+                {/* Legenda das cores */}
+                <div className="mt-4 flex flex-wrap gap-3 text-[10px] text-gray-600">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 bg-yellow-50 border border-yellow-200 rounded"></div>
+                    <span>{t('lowBatteryTable.legend.battery')}</span>
                   </div>
-                </>
-              )}
-            </div>
-          )}
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 bg-blue-50 border border-blue-200 rounded"></div>
+                    <span>{t('lowBatteryTable.legend.temperature')}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 bg-green-50 border border-green-200 rounded"></div>
+                    <span>{t('lowBatteryTable.legend.motion')}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 bg-purple-50 border border-purple-200 rounded"></div>
+                    <span>{t('lowBatteryTable.legend.report')}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 bg-red-50 border border-red-200 rounded"></div>
+                    <span>{t('lowBatteryTable.legend.gps')}</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
           <AssetManagementGrid />
           <HealthScoreDashboard companyId={companyId} />
           {/* <GPSRouteMapLeaflet /> */}
@@ -3479,7 +3551,7 @@ const SortableHeader = ({
       {activeTab === 'rawdata' && (
         <RawDataExplorer />
       )}
-    
+
       <MapModal
         device={selectedDevice}
         isOpen={isMapModalOpen}
