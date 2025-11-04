@@ -1583,7 +1583,7 @@ export default function DeviceLogsView() {
 
   // Adicione estes estados junto com os outros estados de lowBattery
   const [sortField, setSortField] = useState<string>('battery_level');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // const [filters] = useState({
   //   personName: '',
