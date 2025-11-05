@@ -993,6 +993,8 @@
       "clearAll": "Limpar Tudo",
       "apply": "Aplicar",
       "personName": "Nome da Pessoa",
+      "deviceUidPlaceholder": "Digite o Device UID...",
+      "deviceUid": "Despositivo UID",
       "personNamePlaceholder": "Digite o nome...",
       "batteryLevel": "Nível de Bateria (%)",
       "min": "Mínimo",

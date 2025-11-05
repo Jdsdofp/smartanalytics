@@ -995,6 +995,8 @@
     "clearAll": "Clear All",
     "apply": "Apply",
     "personName": "Person Name",
+    "deviceUid": "Device UID",
+    "deviceUidPlaceholder": "Enter Device UID...",
     "personNamePlaceholder": "Enter name...",
     "batteryLevel": "Battery Level (%)",
     "min": "Min",

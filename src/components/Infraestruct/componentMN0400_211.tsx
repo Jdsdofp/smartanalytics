@@ -277,6 +277,7 @@ interface DetailsModalProps {
 
 interface FilterOptions {
   personName: string;
+  devUid?: string;
   batteryLevelMin: number;
   batteryLevelMax: number;
   batteryStatus: string[];
@@ -294,6 +295,7 @@ interface LowBatteryTableFiltersProps {
 }
 
 
+
 // =====================================
 // 🎨 COMPONENTE DE GRÁFICO DE PIZZA
 // =====================================
@@ -305,6 +307,294 @@ interface BatteryPieChartProps {
   };
 }
 
+
+// const LowBatteryTableFilters = ({
+//   filters,
+//   onFiltersChange,
+//   onClearFilters,
+//   activeFiltersCount
+// }: LowBatteryTableFiltersProps) => {
+//   const { t } = useTranslation();
+//   const [isOpen, setIsOpen] = useState(false);
+//   const dropdownRef = useRef<HTMLDivElement>(null);
+
+//   // Fechar ao clicar fora
+//   useEffect(() => {
+//     const handleClickOutside = (event: MouseEvent) => {
+//       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+//         setIsOpen(false);
+//       }
+//     };
+
+//     if (isOpen) {
+//       document.addEventListener('mousedown', handleClickOutside);
+//     }
+
+//     return () => {
+//       document.removeEventListener('mousedown', handleClickOutside);
+//     };
+//   }, [isOpen]);
+
+//   const updateFilter = (key: keyof FilterOptions, value: any) => {
+//     onFiltersChange({
+//       ...filters,
+//       [key]: value
+//     });
+//   };
+
+//   const toggleArrayFilter = (key: 'batteryStatus' | 'motionStatus' | 'reportFreshness', value: string) => {
+//     const currentArray = filters[key] || [];
+//     if (currentArray.includes(value)) {
+//       updateFilter(key, currentArray.filter(v => v !== value));
+//     } else {
+//       updateFilter(key, [...currentArray, value]);
+//     }
+//   };
+
+//   const batteryStatusOptions = [
+//     { value: 'CRITICAL', label: t('lowBatteryTable.filters.statuses.critical'), color: 'red' },
+//     { value: 'WARNING', label: t('lowBatteryTable.filters.statuses.warning'), color: 'yellow' },
+//     { value: 'HEALTHY', label: t('lowBatteryTable.filters.statuses.healthy'), color: 'green' }
+//   ];
+
+//   const motionStatusOptions = [
+//     { value: 'MOVING', label: t('lowBatteryTable.filters.motion.moving'), icon: '🏃' },
+//     { value: 'STATIC', label: t('lowBatteryTable.filters.motion.static'), icon: '⏸️' }
+//   ];
+
+//   const reportFreshnessOptions = [
+//     { value: 'REAL_TIME', label: t('lowBatteryTable.filters.freshness.realTime'), color: 'green' },
+//     { value: 'RECENT', label: t('lowBatteryTable.filters.freshness.recent'), color: 'blue' },
+//     { value: 'STALE', label: t('lowBatteryTable.filters.freshness.stale'), color: 'gray' }
+//   ];
+
+//   return (
+//     <div className="relative" ref={dropdownRef}>
+//       {/* Botão de Filtros */}
+//       <button
+//         onClick={() => setIsOpen(!isOpen)}
+//         className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${activeFiltersCount > 0
+//           ? 'bg-blue-50 border-blue-500 text-blue-700 hover:bg-blue-100'
+//           : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+//           }`}
+//       >
+//         <FunnelIcon className="h-5 w-5" />
+//         <span className="font-medium">
+//           {t('lowBatteryTable.filters.title')}
+//           {activeFiltersCount > 0 && ` (${activeFiltersCount})`}
+//         </span>
+//       </button>
+
+//       {/* Dropdown de Filtros */}
+//       {isOpen && (
+//         <div className="absolute top-full left-0 mt-2 w-[600px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[80vh] overflow-y-auto">
+//           {/* Header */}
+//           <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+//             <h3 className="text-lg font-semibold text-gray-900">
+//               {t('lowBatteryTable.filters.title')}
+//             </h3>
+//             <div className="flex items-center gap-2">
+//               {activeFiltersCount > 0 && (
+//                 <button
+//                   onClick={onClearFilters}
+//                   className="text-sm text-red-600 hover:text-red-700 font-medium"
+//                 >
+//                   {t('lowBatteryTable.filters.clearAll')}
+//                 </button>
+//               )}
+//               <button
+//                 onClick={() => setIsOpen(false)}
+//                 className="text-gray-400 hover:text-gray-600"
+//               >
+//                 <XMarkIcon className="h-5 w-5" />
+//               </button>
+//             </div>
+//           </div>
+
+//           {/* Filtros */}
+//           <div className="p-4 space-y-6">
+//             {/* Filtro de Nome */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 {t('lowBatteryTable.filters.personName')}
+//               </label>
+//               <input
+//                 type="text"
+//                 value={filters.personName}
+//                 onChange={(e) => updateFilter('personName', e.target.value)}
+//                 placeholder={t('lowBatteryTable.filters.personNamePlaceholder')}
+//                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//               />
+//             </div>
+
+//             {/* Filtro de Nível de Bateria */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 {t('lowBatteryTable.filters.batteryLevel')}
+//               </label>
+//               <div className="grid grid-cols-2 gap-3">
+//                 <div>
+//                   <label className="block text-xs text-gray-600 mb-1">
+//                     {t('lowBatteryTable.filters.min')}
+//                   </label>
+//                   <input
+//                     type="number"
+//                     min="0"
+//                     max="100"
+//                     value={filters.batteryLevelMin}
+//                     onChange={(e) => updateFilter('batteryLevelMin', parseInt(e.target.value) || 0)}
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                   />
+//                 </div>
+//                 <div>
+//                   <label className="block text-xs text-gray-600 mb-1">
+//                     {t('lowBatteryTable.filters.max')}
+//                   </label>
+//                   <input
+//                     type="number"
+//                     min="0"
+//                     max="100"
+//                     value={filters.batteryLevelMax}
+//                     onChange={(e) => updateFilter('batteryLevelMax', parseInt(e.target.value) || 100)}
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                   />
+//                 </div>
+//               </div>
+//               {/* Range Visual */}
+//               <div className="mt-3 px-2">
+//                 <div className="relative h-2 bg-gray-200 rounded-full">
+//                   <div
+//                     className="absolute h-2 bg-blue-500 rounded-full"
+//                     style={{
+//                       left: `${filters.batteryLevelMin}%`,
+//                       right: `${100 - filters.batteryLevelMax}%`
+//                     }}
+//                   />
+//                 </div>
+//                 <div className="flex justify-between text-xs text-gray-500 mt-1">
+//                   <span>{filters.batteryLevelMin}%</span>
+//                   <span>{filters.batteryLevelMax}%</span>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Filtro de Status da Bateria */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 {t('lowBatteryTable.filters.batteryStatus')}
+//               </label>
+//               <div className="flex flex-wrap gap-2">
+//                 {batteryStatusOptions.map((option) => (
+//                   <button
+//                     key={option.value}
+//                     onClick={() => toggleArrayFilter('batteryStatus', option.value)}
+//                     className={`px-4 py-2 rounded-lg border-2 transition-all ${filters.batteryStatus.includes(option.value)
+//                       ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
+//                       : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+//                       }`}
+//                   >
+//                     {option.label}
+//                   </button>
+//                 ))}
+//               </div>
+//             </div>
+
+//             {/* Filtro de Status de Movimento */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 {t('lowBatteryTable.filters.motionStatus')}
+//               </label>
+//               <div className="flex flex-wrap gap-2">
+//                 {motionStatusOptions.map((option) => (
+//                   <button
+//                     key={option.value}
+//                     onClick={() => toggleArrayFilter('motionStatus', option.value)}
+//                     className={`px-4 py-2 rounded-lg border-2 transition-all ${filters.motionStatus.includes(option.value)
+//                       ? 'border-blue-500 bg-blue-50 text-blue-700'
+//                       : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+//                       }`}
+//                   >
+//                     <span className="mr-2">{option.icon}</span>
+//                     {option.label}
+//                   </button>
+//                 ))}
+//               </div>
+//             </div>
+
+//             {/* Filtro de Temperatura */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 {t('lowBatteryTable.filters.temperature')} (°C)
+//               </label>
+//               <div className="grid grid-cols-2 gap-3">
+//                 <div>
+//                   <label className="block text-xs text-gray-600 mb-1">
+//                     {t('lowBatteryTable.filters.min')}
+//                   </label>
+//                   <input
+//                     type="number"
+//                     value={filters.temperatureMin || ''}
+//                     onChange={(e) => updateFilter('temperatureMin', e.target.value ? parseFloat(e.target.value) : undefined)}
+//                     placeholder="Ex: -10"
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                   />
+//                 </div>
+//                 <div>
+//                   <label className="block text-xs text-gray-600 mb-1">
+//                     {t('lowBatteryTable.filters.max')}
+//                   </label>
+//                   <input
+//                     type="number"
+//                     value={filters.temperatureMax || ''}
+//                     onChange={(e) => updateFilter('temperatureMax', e.target.value ? parseFloat(e.target.value) : undefined)}
+//                     placeholder="Ex: 50"
+//                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+//                   />
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Filtro de Freshness */}
+//             <div>
+//               <label className="block text-sm font-medium text-gray-700 mb-2">
+//                 {t('lowBatteryTable.filters.reportFreshness')}
+//               </label>
+//               <div className="flex flex-wrap gap-2">
+//                 {reportFreshnessOptions.map((option) => (
+//                   <button
+//                     key={option.value}
+//                     onClick={() => toggleArrayFilter('reportFreshness', option.value)}
+//                     className={`px-4 py-2 rounded-lg border-2 transition-all ${filters.reportFreshness.includes(option.value)
+//                       ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
+//                       : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+//                       }`}
+//                   >
+//                     {option.label}
+//                   </button>
+//                 ))}
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Footer */}
+//           <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 flex items-center justify-between">
+//             <span className="text-sm text-gray-600">
+//               {activeFiltersCount > 0
+//                 ? t('lowBatteryTable.filters.activeFilters', { count: activeFiltersCount })
+//                 : t('lowBatteryTable.filters.noActiveFilters')}
+//             </span>
+//             <button
+//               onClick={() => setIsOpen(false)}
+//               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+//             >
+//               {t('lowBatteryTable.filters.apply')}
+//             </button>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
 
 const LowBatteryTableFilters = ({
   filters,
@@ -371,12 +661,13 @@ const LowBatteryTableFilters = ({
       {/* Botão de Filtros */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${activeFiltersCount > 0
-          ? 'bg-blue-50 border-blue-500 text-blue-700 hover:bg-blue-100'
-          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
+        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border-2 transition-all text-sm sm:text-base ${
+          activeFiltersCount > 0
+            ? 'bg-blue-50 border-blue-500 text-blue-700 hover:bg-blue-100'
+            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+        }`}
       >
-        <FunnelIcon className="h-5 w-5" />
+        <FunnelIcon className="h-4 w-4 sm:h-5 sm:w-5" />
         <span className="font-medium">
           {t('lowBatteryTable.filters.title')}
           {activeFiltersCount > 0 && ` (${activeFiltersCount})`}
@@ -385,17 +676,17 @@ const LowBatteryTableFilters = ({
 
       {/* Dropdown de Filtros */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-[600px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-x-4 top-20 sm:absolute sm:inset-x-auto sm:top-full sm:left-0 mt-2 w-auto sm:w-[600px] lg:w-[700px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[85vh] sm:max-h-[80vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-3 sm:p-4 flex items-center justify-between">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
               {t('lowBatteryTable.filters.title')}
             </h3>
             <div className="flex items-center gap-2">
               {activeFiltersCount > 0 && (
                 <button
                   onClick={onClearFilters}
-                  className="text-sm text-red-600 hover:text-red-700 font-medium"
+                  className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium"
                 >
                   {t('lowBatteryTable.filters.clearAll')}
                 </button>
@@ -410,10 +701,10 @@ const LowBatteryTableFilters = ({
           </div>
 
           {/* Filtros */}
-          <div className="p-4 space-y-6">
+          <div className="p-3 sm:p-4 space-y-4 sm:space-y-6">
             {/* Filtro de Nome */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 {t('lowBatteryTable.filters.personName')}
               </label>
               <input
@@ -421,16 +712,30 @@ const LowBatteryTableFilters = ({
                 value={filters.personName}
                 onChange={(e) => updateFilter('personName', e.target.value)}
                 placeholder={t('lowBatteryTable.filters.personNamePlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Filtro de Device UID */}
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                {t('lowBatteryTable.filters.deviceUid')}
+              </label>
+              <input
+                type="text"
+                value={filters.devUid || ''}
+                onChange={(e) => updateFilter('devUid', e.target.value)}
+                placeholder={t('lowBatteryTable.filters.deviceUidPlaceholder')}
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
               />
             </div>
 
             {/* Filtro de Nível de Bateria */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 {t('lowBatteryTable.filters.batteryLevel')}
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <div>
                   <label className="block text-xs text-gray-600 mb-1">
                     {t('lowBatteryTable.filters.min')}
@@ -441,7 +746,7 @@ const LowBatteryTableFilters = ({
                     max="100"
                     value={filters.batteryLevelMin}
                     onChange={(e) => updateFilter('batteryLevelMin', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -454,7 +759,7 @@ const LowBatteryTableFilters = ({
                     max="100"
                     value={filters.batteryLevelMax}
                     onChange={(e) => updateFilter('batteryLevelMax', parseInt(e.target.value) || 100)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -478,7 +783,7 @@ const LowBatteryTableFilters = ({
 
             {/* Filtro de Status da Bateria */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 {t('lowBatteryTable.filters.batteryStatus')}
               </label>
               <div className="flex flex-wrap gap-2">
@@ -486,10 +791,11 @@ const LowBatteryTableFilters = ({
                   <button
                     key={option.value}
                     onClick={() => toggleArrayFilter('batteryStatus', option.value)}
-                    className={`px-4 py-2 rounded-lg border-2 transition-all ${filters.batteryStatus.includes(option.value)
-                      ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
+                    className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border-2 transition-all ${
+                      filters.batteryStatus.includes(option.value)
+                        ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
                   >
                     {option.label}
                   </button>
@@ -499,7 +805,7 @@ const LowBatteryTableFilters = ({
 
             {/* Filtro de Status de Movimento */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 {t('lowBatteryTable.filters.motionStatus')}
               </label>
               <div className="flex flex-wrap gap-2">
@@ -507,12 +813,13 @@ const LowBatteryTableFilters = ({
                   <button
                     key={option.value}
                     onClick={() => toggleArrayFilter('motionStatus', option.value)}
-                    className={`px-4 py-2 rounded-lg border-2 transition-all ${filters.motionStatus.includes(option.value)
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
+                    className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border-2 transition-all ${
+                      filters.motionStatus.includes(option.value)
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
                   >
-                    <span className="mr-2">{option.icon}</span>
+                    <span className="mr-1 sm:mr-2">{option.icon}</span>
                     {option.label}
                   </button>
                 ))}
@@ -521,10 +828,10 @@ const LowBatteryTableFilters = ({
 
             {/* Filtro de Temperatura */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 {t('lowBatteryTable.filters.temperature')} (°C)
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <div>
                   <label className="block text-xs text-gray-600 mb-1">
                     {t('lowBatteryTable.filters.min')}
@@ -534,7 +841,7 @@ const LowBatteryTableFilters = ({
                     value={filters.temperatureMin || ''}
                     onChange={(e) => updateFilter('temperatureMin', e.target.value ? parseFloat(e.target.value) : undefined)}
                     placeholder="Ex: -10"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -546,7 +853,7 @@ const LowBatteryTableFilters = ({
                     value={filters.temperatureMax || ''}
                     onChange={(e) => updateFilter('temperatureMax', e.target.value ? parseFloat(e.target.value) : undefined)}
                     placeholder="Ex: 50"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -554,7 +861,7 @@ const LowBatteryTableFilters = ({
 
             {/* Filtro de Freshness */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 {t('lowBatteryTable.filters.reportFreshness')}
               </label>
               <div className="flex flex-wrap gap-2">
@@ -562,10 +869,11 @@ const LowBatteryTableFilters = ({
                   <button
                     key={option.value}
                     onClick={() => toggleArrayFilter('reportFreshness', option.value)}
-                    className={`px-4 py-2 rounded-lg border-2 transition-all ${filters.reportFreshness.includes(option.value)
-                      ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
-                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
+                    className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border-2 transition-all ${
+                      filters.reportFreshness.includes(option.value)
+                        ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
+                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
                   >
                     {option.label}
                   </button>
@@ -575,15 +883,15 @@ const LowBatteryTableFilters = ({
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-4 flex items-center justify-between">
-            <span className="text-sm text-gray-600">
+          <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0">
+            <span className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
               {activeFiltersCount > 0
                 ? t('lowBatteryTable.filters.activeFilters', { count: activeFiltersCount })
                 : t('lowBatteryTable.filters.noActiveFilters')}
             </span>
             <button
               onClick={() => setIsOpen(false)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               {t('lowBatteryTable.filters.apply')}
             </button>
@@ -1834,15 +2142,16 @@ export default function DeviceLogsView() {
   // });
 
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterOptions>({
     personName: '',
+    devUid: '',
     batteryLevelMin: 0,
     batteryLevelMax: 100,
     batteryStatus: [] as string[],
     motionStatus: [] as string[],
     reportFreshness: [] as string[],
-    temperatureMin: undefined as number | undefined,
-    temperatureMax: undefined as number | undefined,
+    temperatureMin: undefined,
+    temperatureMax: undefined,
   });
 
 
@@ -1953,6 +2262,7 @@ export default function DeviceLogsView() {
 
       // Adicionar filtros se existirem
       if (debouncedPersonName) params.append('personName', debouncedPersonName);
+      if (filters.devUid) params.append('devUid', filters.devUid);
       if (filters.batteryLevelMin !== undefined) params.append('batteryLevelMin', filters.batteryLevelMin.toString());
       if (filters.batteryLevelMax !== undefined) params.append('batteryLevelMax', filters.batteryLevelMax.toString());
       if (filters.batteryStatus.length > 0) params.append('batteryStatus', filters.batteryStatus.join(','));
@@ -2321,6 +2631,7 @@ export default function DeviceLogsView() {
     sortField,
     sortOrder,
     debouncedPersonName,
+    filters.devUid,
     filters.batteryLevelMin,
     filters.batteryLevelMax,
     filters.batteryStatus,
@@ -2347,7 +2658,7 @@ export default function DeviceLogsView() {
 
 
   // 3. ADICIONAR FUNÇÕES DE MANIPULAÇÃO DE FILTROS
-  const handleFiltersChange = (newFilters: typeof filters) => {
+  const handleFiltersChange = (newFilters: FilterOptions) => {
     setFilters(newFilters);
     setLowBatteryPage(1); // Resetar para primeira página ao filtrar
   };
@@ -2356,6 +2667,7 @@ export default function DeviceLogsView() {
   const handleClearFilters = () => {
     setFilters({
       personName: '',
+      devUid: '',
       batteryLevelMin: 0,
       batteryLevelMax: 100,
       batteryStatus: [],
