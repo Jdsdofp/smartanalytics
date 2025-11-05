@@ -469,74 +469,11 @@ export default function AssetManagementGrid() {
   // =====================================
   return (
     <div className="space-y-4">
-      {/* ✅ CARDS DE RESUMO COMPACTOS */}
-      {/* {summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-blue-700">Total</p>
-                <p className="mt-1 text-lg font-bold text-blue-900">{summary.total_devices}</p>
-              </div>
-              <SignalIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200 p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-red-700">Críticos</p>
-                <p className="mt-1 text-lg font-bold text-red-900">{summary.critical_devices}</p>
-              </div>
-              <ShieldExclamationIcon className="h-5 w-5 text-red-600" />
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-orange-700">Alto Risco</p>
-                <p className="mt-1 text-lg font-bold text-orange-900">{summary.high_risk_devices}</p>
-              </div>
-              <ExclamationTriangleIcon className="h-5 w-5 text-orange-600" />
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200 p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-yellow-700">Médio Risco</p>
-                <p className="mt-1 text-lg font-bold text-yellow-900">{summary.medium_risk_devices}</p>
-              </div>
-              <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-green-700">Baixo Risco</p>
-                <p className="mt-1 text-lg font-bold text-green-900">{summary.low_risk_devices}</p>
-              </div>
-              <CheckCircleIcon className="h-5 w-5 text-green-600" />
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 p-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-purple-700">Health Médio</p>
-                <p className="mt-1 text-lg font-bold text-purple-900">{summary.avg_health_score}</p>
-              </div>
-              <CheckCircleIcon className="h-5 w-5 text-purple-600" />
-            </div>
-          </div>
-        </div>
-      )} */}
       
       {/* ✅ TABELA UNIFICADA COM CONTROLES INTEGRADOS */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"> */}
         
+        <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col" style={{ height: '600px' }}>
         {/* ✅ CABEÇALHO DA TABELA COM CONTROLES */}
         <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -721,8 +658,9 @@ export default function AssetManagementGrid() {
               <thead className="bg-gray-50 sticky top-0 z-10">
                 <tr>
                   {/* Device ID com Filtro */}
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                    <div className="flex items-center gap-2">
+                  {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b"> */}
+                  <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b whitespace-nowrap">
+                    <div className="flex items-center gap-1">
                       <ColumnFilter column="device_id" label={t('assetManagement.table.columns.deviceId')} />
                       <button
                         onClick={() => toggleSort('device_id')}
@@ -736,14 +674,14 @@ export default function AssetManagementGrid() {
                   </th>
 
                   {/* Categoria com Filtro */}
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <ColumnFilter column="category" label={t('assetManagement.table.columns.category')} />
                     </div>
                   </th>
 
                   {/* Risco com Filtro */}
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <ColumnFilter column="risk_level" label={t('assetManagement.table.columns.risk')} />
                       <button
@@ -758,7 +696,7 @@ export default function AssetManagementGrid() {
                   </th>
 
                   {/* Health Score com Ordenação */}
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <span>{t('assetManagement.table.columns.health')}</span>
                       <button
@@ -773,28 +711,28 @@ export default function AssetManagementGrid() {
                   </th>
 
                   {/* Comunicação com Filtro */}
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <ColumnFilter column="comm_status" label={t('assetManagement.table.columns.communication')} />
                     </div>
                   </th>
 
                   {/* GPS com Filtro */}
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <ColumnFilter column="gps_status" label={t('assetManagement.table.columns.gps')} />
                     </div>
                   </th>
 
                   {/* Ação Recomendada com Filtro */}
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <ColumnFilter column="recommended_action" label={t('assetManagement.table.columns.recommendedAction')} />
                     </div>
                   </th>
 
                   {/* Problemas */}
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                  <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider border-b whitespace-nowrap">
                     {t('assetManagement.table.columns.issues')}
                   </th>
                 </tr>
@@ -805,105 +743,105 @@ export default function AssetManagementGrid() {
                   
                   return (
                     <tr key={device.device_id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+        <td className="px-2 py-2 whitespace-nowrap text-[11px] font-medium text-gray-900">
                         {device.device_id}
                       </td>
                       
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                      <td className="px-2 py-2 whitespace-nowrap">
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800">
                           {device.category}
                         </span>
                       </td>
                       
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border ${getRiskBadgeColor(device.risk_level)}`}>
+                      <td className="px-2 py-2 whitespace-nowrap">
+          <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium border ${getRiskBadgeColor(device.risk_level)}`}>
                           {getRiskIcon(device.risk_level)}
                           {device.risk_level}
                         </span>
                       </td>
                       
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 bg-gray-200 rounded-full h-2 w-16">
-                            <div
-                              className={`h-2 rounded-full ${
-                                device.health_score >= 80 ? 'bg-green-500' :
-                                device.health_score >= 60 ? 'bg-yellow-500' :
-                                device.health_score >= 40 ? 'bg-orange-500' : 'bg-red-500'
-                              }`}
-                              style={{ width: `${device.health_score}%` }}
-                            />
-                          </div>
-                          <span className={`text-xs font-semibold ${getHealthScoreColor(device.health_score)}`}>
+                      <td className="px-2 py-2 whitespace-nowrap">
+          <div className="flex items-center gap-1">
+            <div className="flex-1 bg-gray-200 rounded-full h-1.5 w-12">
+              <div
+                className={`h-1.5 rounded-full ${
+                  device.health_score >= 80 ? 'bg-green-500' :
+                  device.health_score >= 60 ? 'bg-yellow-500' :
+                  device.health_score >= 40 ? 'bg-orange-500' : 'bg-red-500'
+                }`}
+                style={{ width: `${device.health_score}%` }}
+              />
+            </div>
+            <span className={`text-[11px] font-semibold ${getHealthScoreColor(device.health_score)}`}>
                             {device.health_score}
                           </span>
                         </div>
                       </td>
                       
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="space-y-1">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${getCommStatusColor(device.comm_status)}`}>
-                            {device.comm_status === 'ACTIVE' || device.comm_status === 'RECENT' 
-                              ? <SignalIcon className="h-3 w-3" />
-                              : <SignalSlashIcon className="h-3 w-3" />
-                            }
-                            {device.comm_status}
-                          </span>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <ClockIcon className="h-3 w-3" />
+                      <td className="px-2 py-2 whitespace-nowrap">
+          <div className="space-y-0.5">
+            <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${getCommStatusColor(device.comm_status)}`}>
+              {device.comm_status === 'ACTIVE' || device.comm_status === 'RECENT' 
+                ? <SignalIcon className="h-3 w-3" />
+                : <SignalSlashIcon className="h-3 w-3" />
+              }
+              {device.comm_status}
+            </span>
+            <div className="flex items-center gap-0.5 text-[10px] text-gray-500">
+              <ClockIcon className="h-2.5 w-2.5" />
                             {device.hours_no_comm}h
                           </div>
                         </div>
                       </td>
                       
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="space-y-1">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-                            device.gps_status === 'TODAY' ? 'bg-green-100 text-green-800' :
-                            device.gps_status === 'RECENT' ? 'bg-blue-100 text-blue-800' :
-                            device.gps_status === 'OUTDATED' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            <MapPinIcon className="h-3 w-3" />
-                            {device.gps_status}
-                          </span>
-                          <div className="text-xs text-gray-500">
-                            {device.days_no_gps}d
-                          </div>
-                        </div>
-                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap">
+          <div className="space-y-0.5">
+            <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+              device.gps_status === 'TODAY' ? 'bg-green-100 text-green-800' :
+              device.gps_status === 'RECENT' ? 'bg-blue-100 text-blue-800' :
+              device.gps_status === 'OUTDATED' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-gray-100 text-gray-800'
+            }`}>
+              <MapPinIcon className="h-2.5 w-2.5" />
+              {device.gps_status}
+            </span>
+            <div className="text-[10px] text-gray-500">
+              {device.days_no_gps}d
+            </div>
+          </div>
+        </td>
                       
-                      <td className="px-4 py-3">
-                        <div className="flex items-start gap-2">
-                          <div className="mt-0.5">
-                            {getActionIcon(device.recommended_action)}
-                          </div>
-                          <div>
-                            <div className={`text-xs font-semibold ${
-                              action.type === 'REPLACE' ? 'text-red-700' :
-                              action.type === 'INSPECT' ? 'text-orange-700' :
-                              action.type === 'MAINTAIN' ? 'text-yellow-700' :
-                              action.type === 'CHECK GPS' ? 'text-blue-700' :
-                              'text-green-700'
-                            }`}>
-                              {action.type}
-                            </div>
-                            <div className="text-xs text-gray-600 max-w-xs">
-                              {action.description}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
+                      <td className="px-2 py-2">
+          <div className="flex items-start gap-1">
+            <div className="mt-0.5">
+              {getActionIcon(device.recommended_action)}
+            </div>
+            <div>
+              <div className={`text-[10px] font-semibold ${
+                action.type === 'REPLACE' ? 'text-red-700' :
+                action.type === 'INSPECT' ? 'text-orange-700' :
+                action.type === 'MAINTAIN' ? 'text-yellow-700' :
+                action.type === 'CHECK GPS' ? 'text-blue-700' :
+                'text-green-700'
+              }`}>
+                {action.type}
+              </div>
+              <div className="text-[10px] text-gray-600 max-w-xs">
+                {action.description}
+              </div>
+            </div>
+          </div>
+        </td>
                       
-                      <td className="px-4 py-3">
-                        {device.issues ? (
-                          <div className="text-xs text-gray-600 max-w-xs">
-                            {device.issues}
-                          </div>
-                        ) : (
-                          <span className="text-xs text-gray-400 italic">{t('assetManagement.table.noIssues')}</span>
-                        )}
-                      </td>
+                      <td className="px-2 py-2">
+          {device.issues ? (
+            <div className="text-[10px] text-gray-600 max-w-xs">
+              {device.issues}
+            </div>
+          ) : (
+            <span className="text-[10px] text-gray-400 italic">{t('assetManagement.table.noIssues')}</span>
+          )}
+        </td>
                     </tr>
                   );
                 })}
