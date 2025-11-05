@@ -1039,7 +1039,24 @@
       "description": "Formatted report with tables and charts"
     }
   },
-  "noData":"No data found for applied filters"
+  "noData":"No data found for applied filters",
+  "modal": {
+      "title": "Export Data",
+      "format": "Export Format",
+      "scope": "Export Scope",
+      "filteredData": "Filtered Data",
+      "filteredDescription": "{{count}} records (based on applied filters)",
+      "currentPageDescription": "{{count}} records (current page)",
+      "activeFilters": "Active filters applied",
+      "allData": "All Data",
+      "allDataDescription": "{{count}} records (complete dataset)",
+      "largeDatasetWarning": "Large dataset may take longer",
+      "willExport": "Will export",
+      "willExportFiltered": "{{count}} filtered records in {{format}} format",
+      "willExportAll": "{{count}} complete records in {{format}} format",
+      "exportButton": "Export",
+      "cancel": "Cancel"
+    }
   },
   "pagination": {
     "showing": "Showing",

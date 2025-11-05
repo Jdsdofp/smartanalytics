@@ -48,7 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         url: 'https://smartmachine.smartxhub.cloud/unified-auth',
         headers: {
           'Accept': '*/*',
-          'User-Agent': 'Flashpost',
           'Content-Type': 'application/json'
         },
         data: {

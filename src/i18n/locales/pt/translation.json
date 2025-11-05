@@ -1037,7 +1037,24 @@
       "description": "Relatório formatado com tabelas e gráficos"
     }
   },
-  "noData": "Nenhum dado encontrado para os filtros aplicados"
+  "noData": "Nenhum dado encontrado para os filtros aplicados",
+  "modal": {
+      "title": "Exportar Dados",
+      "format": "Formato de Exportação",
+      "scope": "Escopo da Exportação",
+      "filteredData": "Dados Filtrados",
+      "filteredDescription": "{{count}} registros (baseado nos filtros aplicados)",
+      "currentPageDescription": "{{count}} registros (página atual)",
+      "activeFilters": "Filtros ativos aplicados",
+      "allData": "Todos os Dados",
+      "allDataDescription": "{{count}} registros (conjunto completo)",
+      "largeDatasetWarning": "Conjunto de dados grande pode demorar",
+      "willExport": "Será exportado",
+      "willExportFiltered": "{{count}} registros filtrados no formato {{format}}",
+      "willExportAll": "{{count}} registros completos no formato {{format}}",
+      "exportButton": "Exportar",
+      "cancel": "Cancelar"
+    }
   },
   "pagination": {
     "showing": "Mostrando",

@@ -19,6 +19,9 @@ import {
   XMarkIcon,
   TableCellsIcon,
   DocumentTextIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  ArrowsUpDownIcon,
 } from '@heroicons/react/24/outline';
 import * as echarts from 'echarts';
 import type { EChartsOption } from 'echarts';
@@ -36,6 +39,7 @@ import { useCompany } from '../../hooks/useCompany';
 import AssetManagementGrid from './DataGrid/AssetManagementGrid';
 import HealthScoreDashboard from './DataGrid/HealthScoreDashboard';
 import { exportToExcel, exportToPDF } from '../../utils/exportMN0400211';
+import ExportModal from './Modal/exportModal';
 
 // =====================================
 // 📊 INTERFACES ATUALIZADAS
@@ -1459,9 +1463,117 @@ interface QuickExportButtonsProps {
   isFiltered: boolean;
 }
 
-export const QuickExportButtons = ({ data, filters }: QuickExportButtonsProps) => {
+// export const QuickExportButtons = ({ data, filters }: QuickExportButtonsProps) => {
+//   const { t, i18n } = useTranslation();
+//   const [isExporting, setIsExporting] = useState<string | null>(null);
+
+//   const getCurrentLocale = (): 'pt' | 'es' | 'en' => {
+//     const lang = i18n.language.toLowerCase();
+//     if (lang.startsWith('pt')) return 'pt';
+//     if (lang.startsWith('es')) return 'es';
+//     return 'en';
+//   };
+
+//   const handleQuickExport = async (type: 'excel' | 'pdf') => {
+//     setIsExporting(type);
+//     try {
+//       const filename = `report_battery${new Date().toISOString().split('T')[0]}`;
+//       const locale = getCurrentLocale();
+
+//       if (type === 'excel') {
+//         exportToExcel({
+//           data,
+//           filename,
+//           includeFilters: true,
+//           filters,
+//           locale
+//         });
+//       } else {
+//         exportToPDF({
+//           data,
+//           filename,
+//           title: t('lowBatteryTable.export.pdfTitle'),
+//           includeFilters: true,
+//           filters,
+//           orientation: 'landscape',
+//           locale
+//         });
+//       }
+//     } catch (error) {
+//       console.error(`Erro ao exportar ${type}:`, error);
+//       alert(t('export.error'));
+//     } finally {
+//       setIsExporting(null);
+//     }
+//   };
+
+//   return (
+//     <div className="flex items-center gap-2">
+//       {/* Botão Excel */}
+//       <button
+//         onClick={() => handleQuickExport('excel')}
+//         disabled={isExporting !== null || data.length === 0}
+//         className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${data.length === 0
+//           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+//           : 'bg-green-600 text-white hover:bg-green-700'
+//           }`}
+//         title={t('export.excel.full')}
+//       >
+//         {isExporting === 'excel' ? (
+//           <>
+//             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+//             <span className="text-sm">{t('export.exporting')}</span>
+//           </>
+//         ) : (
+//           <>
+//             <TableCellsIcon className="h-4 w-4" />
+//             <span className="text-sm">Excel</span>
+//           </>
+//         )}
+//       </button>
+
+//       {/* Botão PDF */}
+//       <button
+//         onClick={() => handleQuickExport('pdf')}
+//         disabled={isExporting !== null || data.length === 0}
+//         className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${data.length === 0
+//           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+//           : 'bg-red-600 text-white hover:bg-red-700'
+//           }`}
+//         title={t('export.pdf.title')}
+//       >
+//         {isExporting === 'pdf' ? (
+//           <>
+//             <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+//             <span className="text-sm">{t('export.exporting')}</span>
+//           </>
+//         ) : (
+//           <>
+//             <DocumentTextIcon className="h-4 w-4" />
+//             <span className="text-sm">PDF</span>
+//           </>
+//         )}
+//       </button>
+//     </div>
+//   );
+// };
+
+//
+
+
+
+export const QuickExportButtons = ({ 
+  data, 
+  filters, 
+  totalItems,
+  isFiltered 
+}: QuickExportButtonsProps) => {
   const { t, i18n } = useTranslation();
+  const { companyId } = useCompany()
   const [isExporting, setIsExporting] = useState<string | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  //@ts-ignore
+  const [pendingExportType, setPendingExportType] = useState<'excel' | 'pdf' | null>(null);
 
   const getCurrentLocale = (): 'pt' | 'es' | 'en' => {
     const lang = i18n.language.toLowerCase();
@@ -1470,27 +1582,45 @@ export const QuickExportButtons = ({ data, filters }: QuickExportButtonsProps) =
     return 'en';
   };
 
-  const handleQuickExport = async (type: 'excel' | 'pdf') => {
+  
+
+  const handleExportClick = (type: 'excel' | 'pdf') => {
+    setPendingExportType(type);
+    setShowExportModal(true);
+  };
+
+  const handleExport = async (type: 'excel' | 'pdf', exportAll: boolean) => {
     setIsExporting(type);
     try {
-      const filename = `report_battery${new Date().toISOString().split('T')[0]}`;
+      const filename = `battery_report_${new Date().toISOString().split('T')[0]}`;
       const locale = getCurrentLocale();
+
+      // Se exportar tudo, precisa buscar todos os dados
+      let dataToExport = data;
+      if (exportAll) {
+        // Aqui você fará uma chamada à API para buscar TODOS os dados
+        const response = await fetch(
+          `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/low-battery?limit=999999`
+        );
+        const result = await response.json();
+        dataToExport = result.data || [];
+      }
 
       if (type === 'excel') {
         exportToExcel({
-          data,
+          data: dataToExport,
           filename,
-          includeFilters: true,
-          filters,
+          includeFilters: !exportAll, // Só inclui filtros se não for exportação total
+          filters: exportAll ? undefined : filters,
           locale
         });
       } else {
         exportToPDF({
-          data,
+          data: dataToExport,
           filename,
           title: t('lowBatteryTable.export.pdfTitle'),
-          includeFilters: true,
-          filters,
+          includeFilters: !exportAll,
+          filters: exportAll ? undefined : filters,
           orientation: 'landscape',
           locale
         });
@@ -1500,59 +1630,79 @@ export const QuickExportButtons = ({ data, filters }: QuickExportButtonsProps) =
       alert(t('export.error'));
     } finally {
       setIsExporting(null);
+      setPendingExportType(null);
     }
   };
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Botão Excel */}
-      <button
-        onClick={() => handleQuickExport('excel')}
-        disabled={isExporting !== null || data.length === 0}
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${data.length === 0
-          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          : 'bg-green-600 text-white hover:bg-green-700'
+    <>
+      <div className="flex items-center gap-2">
+        {/* Botão Excel */}
+        <button
+          onClick={() => handleExportClick('excel')}
+          disabled={isExporting !== null || data.length === 0}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+            data.length === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-green-600 text-white hover:bg-green-700'
           }`}
-        title={t('export.excel.full')}
-      >
-        {isExporting === 'excel' ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-            <span className="text-sm">{t('export.exporting')}</span>
-          </>
-        ) : (
-          <>
-            <TableCellsIcon className="h-4 w-4" />
-            <span className="text-sm">Excel</span>
-          </>
-        )}
-      </button>
+          title={t('export.excel.full')}
+        >
+          {isExporting === 'excel' ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              <span className="text-sm">{t('export.exporting')}</span>
+            </>
+          ) : (
+            <>
+              <TableCellsIcon className="h-4 w-4" />
+              <span className="text-sm">Excel</span>
+            </>
+          )}
+        </button>
 
-      {/* Botão PDF */}
-      <button
-        onClick={() => handleQuickExport('pdf')}
-        disabled={isExporting !== null || data.length === 0}
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${data.length === 0
-          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          : 'bg-red-600 text-white hover:bg-red-700'
+        {/* Botão PDF */}
+        <button
+          onClick={() => handleExportClick('pdf')}
+          disabled={isExporting !== null || data.length === 0}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+            data.length === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-red-600 text-white hover:bg-red-700'
           }`}
-        title={t('export.pdf.title')}
-      >
-        {isExporting === 'pdf' ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-            <span className="text-sm">{t('export.exporting')}</span>
-          </>
-        ) : (
-          <>
-            <DocumentTextIcon className="h-4 w-4" />
-            <span className="text-sm">PDF</span>
-          </>
-        )}
-      </button>
-    </div>
+          title={t('export.pdf.title')}
+        >
+          {isExporting === 'pdf' ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              <span className="text-sm">{t('export.exporting')}</span>
+            </>
+          ) : (
+            <>
+              <DocumentTextIcon className="h-4 w-4" />
+              <span className="text-sm">PDF</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Modal de Exportação */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => {
+          setShowExportModal(false);
+          setPendingExportType(null);
+        }}
+        onExport={handleExport}
+        filteredCount={data.length}
+        totalCount={totalItems || 0}
+        hasActiveFilters={isFiltered}
+      />
+    </>
   );
 };
+
+
 
 
 const BatteryPieChart = ({ data }: BatteryPieChartProps) => {
@@ -2393,8 +2543,6 @@ export default function DeviceLogsView() {
   }
 
 
-
-
   const SortableHeader = ({
     field,
     children,
@@ -2403,31 +2551,42 @@ export default function DeviceLogsView() {
     field: string;
     children: React.ReactNode;
     bgClass?: string;
-  }) => (
-    <th
-      onClick={() => {
-        if (sortField === field) {
-          setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
-        } else {
-          setSortField(field);
-          setSortOrder('asc');
-        }
-        setLowBatteryPage(1);
-      }}
-      className={`px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap cursor-pointer hover:bg-opacity-80 transition-colors ${bgClass}`}
-    >
-      <div className="flex items-center gap-1">
-        {children}
-        {sortField === field && (
-          <span className="text-blue-600 font-bold text-sm">
+  }) => {
+    const isActive = sortField === field;
+    const isAsc = sortOrder === 'asc';
 
-            {sortOrder === 'asc' ? '↑' : '↓'}
-          </span>
-        )}
-      </div>
-    </th>
-  );
+    return (
+      <th
+        onClick={() => {
+          if (sortField === field) {
+            setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
+          } else {
+            setSortField(field);
+            setSortOrder('asc');
+          }
+          setLowBatteryPage(1);
+        }}
+        className={`px-2 py-2 text-left text-[10px] font-medium uppercase whitespace-nowrap cursor-pointer select-none transition-all duration-200 ${isActive
+            ? 'text-blue-700 bg-blue-50'
+            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+          } ${bgClass}`}
+      >
+        <div className="flex items-center gap-1.5 group">
+          <span className={isActive ? 'font-semibold' : ''}>{children}</span>
 
+          {isActive ? (
+            isAsc ? (
+              <ArrowUpIcon className="w-3 h-3 animate-in fade-in duration-200" />
+            ) : (
+              <ArrowDownIcon className="w-3 h-3 animate-in fade-in duration-200" />
+            )
+          ) : (
+            <ArrowsUpDownIcon className="w-3 h-3 opacity-30 group-hover:opacity-60 transition-opacity" />
+          )}
+        </div>
+      </th>
+    );
+  };
 
 
 
@@ -2648,52 +2807,51 @@ export default function DeviceLogsView() {
             </div>
           )}
 
-          {/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO ATUALIZADA COM HEALTH SCORE */}
-{/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO COM COMPONENTES */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-      {t('deviceLogs.charts.batteryDistribution')}
-    </h3>
-    <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-      <BatteryPieChart
-        data={{
-          healthy: safeParseNumber(overview?.kpis.battery_health?.healthy_devices),
-          warning: safeParseNumber(overview?.kpis.battery_health?.warning_devices),
-          critical: safeParseNumber(overview?.kpis.battery_health?.critical_devices),
-        }}
-      />
-    </div>
-  </div>
+          {/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO COM COMPONENTES */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.batteryDistribution')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <BatteryPieChart
+                  data={{
+                    healthy: safeParseNumber(overview?.kpis.battery_health?.healthy_devices),
+                    warning: safeParseNumber(overview?.kpis.battery_health?.warning_devices),
+                    critical: safeParseNumber(overview?.kpis.battery_health?.critical_devices),
+                  }}
+                />
+              </div>
+            </div>
 
-  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
-    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-      {t('deviceLogs.charts.healthScoreByCategory')}
-    </h3>
-    <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-      <div id="health-score-chart" className="w-full h-full min-w-0" />
-    </div>
-    {/* Legenda do health score */}
-    <div className="mt-4 flex flex-wrap gap-4 text-xs">
-      <div className="flex items-center gap-1">
-        <div className="w-3 h-3 bg-green-500 rounded"></div>
-        <span>80-100% {t('deviceLogs.healthScoreChart.legend.excellent')}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-        <span>60-79% {t('deviceLogs.healthScoreChart.legend.good')}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="w-3 h-3 bg-orange-500 rounded"></div>
-        <span>40-59% {t('deviceLogs.healthScoreChart.legend.fair')}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <div className="w-3 h-3 bg-red-500 rounded"></div>
-        <span>0-39% {t('deviceLogs.healthScoreChart.legend.poor')}</span>
-      </div>
-    </div>
-  </div>
-</div>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t('deviceLogs.charts.healthScoreByCategory')}
+              </h3>
+              <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
+                <div id="health-score-chart" className="w-full h-full min-w-0" />
+              </div>
+              {/* Legenda do health score */}
+              <div className="mt-4 flex flex-wrap gap-4 text-xs">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <span>80-100% {t('deviceLogs.healthScoreChart.legend.excellent')}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                  <span>60-79% {t('deviceLogs.healthScoreChart.legend.good')}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                  <span>40-59% {t('deviceLogs.healthScoreChart.legend.fair')}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-red-500 rounded"></div>
+                  <span>0-39% {t('deviceLogs.healthScoreChart.legend.poor')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
 
 
@@ -2745,41 +2903,41 @@ export default function DeviceLogsView() {
                         <thead className="bg-gray-50">
                           <tr>
                             {/* Device Info */}
-                            <th className="sticky left-0 z-10 bg-gray-50 px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap"> {t('lowBatteryTable.headers.person')}</th>
+                            <SortableHeader field="person_name" bgClass='sticky left-0 z-10 bg-gray-50 px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap'>{t('lowBatteryTable.headers.person')}</SortableHeader>
                             <SortableHeader field="dev_uid" bgClass="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap">{t('lowBatteryTable.headers.deviceUid')}</SortableHeader>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap">{t('lowBatteryTable.headers.model')}</th>
+                            <SortableHeader field="sensor_model" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap'>{t('lowBatteryTable.headers.model')}</SortableHeader>
 
                             {/* Battery Info */}
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.battery')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.status')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.score')}</th>
+                            <SortableHeader field="battery_level" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.battery')}</SortableHeader>
+                            <SortableHeader field="battery_status" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.status')}</SortableHeader>
+                            <SortableHeader field="battery_score" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.score')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.charging')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.updated')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.minAgo')}</th>
+                            <SortableHeader field="battery_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.fresh')}</th>
 
                             {/* Temperature Info */}
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.temp')}</th>
+                            <SortableHeader field="temperature" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50'>{t('lowBatteryTable.headers.temp')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.updated')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.minAgo')}</th>
+                            <SortableHeader field="temperature_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.fresh')}</th>
 
                             {/* Motion Info */}
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.motion')}</th>
+                            <SortableHeader field="motion_status" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.motion')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.value')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.updated')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.changed')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.minAgo')}</th>
+                            <SortableHeader field="motion_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.fresh')}</th>
 
                             {/* Report Info */}
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.min')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.hours')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.days')}</th>
+                            <SortableHeader field="minutes_since_report" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.min')}</SortableHeader>
+                            <SortableHeader field="hours_since_report" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.hours')}</SortableHeader>
+                            <SortableHeader field="days_since_report" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.days')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.status')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.score')}</th>
+                            <SortableHeader field="freshness_score" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.score')}</SortableHeader>
 
                             {/* GPS Info */}
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsAge')}</th>

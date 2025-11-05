@@ -332,7 +332,7 @@ export function useCompany() {
       
       // Verifica se a cor primária é branca
       if (isWhiteOrVeryLight(primaryColor) && fontTitleColor) {
-        console.log('🎨 Cor primária detectada como branca. Usando cor do título como primária.')
+        // console.log('🎨 Cor primária detectada como branca. Usando cor do título como primária.')
         
         // Aplica a cor do título como primária
         document.documentElement.style.setProperty('--color-primary', fontTitleColor)
