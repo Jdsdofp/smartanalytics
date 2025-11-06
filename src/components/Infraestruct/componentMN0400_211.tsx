@@ -661,11 +661,10 @@ const LowBatteryTableFilters = ({
       {/* Botão de Filtros */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border-2 transition-all text-sm sm:text-base ${
-          activeFiltersCount > 0
+        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border-2 transition-all text-sm sm:text-base ${activeFiltersCount > 0
             ? 'bg-blue-50 border-blue-500 text-blue-700 hover:bg-blue-100'
             : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-        }`}
+          }`}
       >
         <FunnelIcon className="h-4 w-4 sm:h-5 sm:w-5" />
         <span className="font-medium">
@@ -791,11 +790,10 @@ const LowBatteryTableFilters = ({
                   <button
                     key={option.value}
                     onClick={() => toggleArrayFilter('batteryStatus', option.value)}
-                    className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border-2 transition-all ${
-                      filters.batteryStatus.includes(option.value)
+                    className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border-2 transition-all ${filters.batteryStatus.includes(option.value)
                         ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
                         : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -813,11 +811,10 @@ const LowBatteryTableFilters = ({
                   <button
                     key={option.value}
                     onClick={() => toggleArrayFilter('motionStatus', option.value)}
-                    className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border-2 transition-all ${
-                      filters.motionStatus.includes(option.value)
+                    className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border-2 transition-all ${filters.motionStatus.includes(option.value)
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <span className="mr-1 sm:mr-2">{option.icon}</span>
                     {option.label}
@@ -869,11 +866,10 @@ const LowBatteryTableFilters = ({
                   <button
                     key={option.value}
                     onClick={() => toggleArrayFilter('reportFreshness', option.value)}
-                    className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border-2 transition-all ${
-                      filters.reportFreshness.includes(option.value)
+                    className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg border-2 transition-all ${filters.reportFreshness.includes(option.value)
                         ? `border-${option.color}-500 bg-${option.color}-50 text-${option.color}-700`
                         : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -1870,11 +1866,11 @@ interface QuickExportButtonsProps {
 
 
 
-export const QuickExportButtons = ({ 
-  data, 
-  filters, 
+export const QuickExportButtons = ({
+  data,
+  filters,
   totalItems,
-  isFiltered 
+  isFiltered
 }: QuickExportButtonsProps) => {
   const { t, i18n } = useTranslation();
   const { companyId } = useCompany()
@@ -1890,7 +1886,7 @@ export const QuickExportButtons = ({
     return 'en';
   };
 
-  
+
 
   const handleExportClick = (type: 'excel' | 'pdf') => {
     setPendingExportType(type);
@@ -1949,11 +1945,10 @@ export const QuickExportButtons = ({
         <button
           onClick={() => handleExportClick('excel')}
           disabled={isExporting !== null || data.length === 0}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-            data.length === 0
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${data.length === 0
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-green-600 text-white hover:bg-green-700'
-          }`}
+            }`}
           title={t('export.excel.full')}
         >
           {isExporting === 'excel' ? (
@@ -1973,11 +1968,10 @@ export const QuickExportButtons = ({
         <button
           onClick={() => handleExportClick('pdf')}
           disabled={isExporting !== null || data.length === 0}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-            data.length === 0
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${data.length === 0
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-red-600 text-white hover:bg-red-700'
-          }`}
+            }`}
           title={t('export.pdf.title')}
         >
           {isExporting === 'pdf' ? (
@@ -2879,8 +2873,8 @@ export default function DeviceLogsView() {
           setLowBatteryPage(1);
         }}
         className={`px-2 py-2 text-left text-[10px] font-medium uppercase whitespace-nowrap cursor-pointer select-none transition-all duration-200 ${isActive
-            ? 'text-blue-700 bg-blue-50'
-            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+          ? 'text-blue-700 bg-blue-50'
+          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
           } ${bgClass}`}
       >
         <div className="flex items-center gap-1.5 group">
@@ -3208,7 +3202,7 @@ export default function DeviceLogsView() {
             ) : (
               <>
                 {/* Tabela responsiva com scroll horizontal */}
-                <div className="overflow-auto -mx-4 sm:mx-0">
+<div className="overflow-auto -mx-4 sm:mx-0">
                   <div className="inline-block min-w-full align-middle">
                     <div className="overflow-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
                       <table className="min-w-full divide-y divide-gray-300">
@@ -3227,6 +3221,10 @@ export default function DeviceLogsView() {
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.updated')}</th>
                             <SortableHeader field="battery_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.fresh')}</th>
+
+                            {/* GPS Info */}
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsAge')}</th>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsFail')}</th>
 
                             {/* Temperature Info */}
                             <SortableHeader field="temperature" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50'>{t('lowBatteryTable.headers.temp')}</SortableHeader>
@@ -3250,16 +3248,12 @@ export default function DeviceLogsView() {
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.status')}</th>
                             <SortableHeader field="freshness_score" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.score')}</SortableHeader>
-
-                            {/* GPS Info */}
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsAge')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsFail')}</th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                           {lowBatteryData.data.length === 0 ? (
                             <tr>
-                              <td colSpan={23} className="px-6 py-4 text-center text-sm text-gray-500">
+                              <td colSpan={29} className="px-6 py-4 text-center text-sm text-gray-500">
                                 {t('lowBatteryTable.noData')}
                               </td>
                             </tr>
@@ -3342,6 +3336,26 @@ export default function DeviceLogsView() {
                                   </td>
                                   <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
                                     <span className="text-[9px]">{device.battery_freshness}</span>
+                                  </td>
+
+                                  {/* GPS Info */}
+                                  <td className="px-2 py-2 whitespace-nowrap bg-red-50">
+                                    {device.gps_age !== null ? (
+                                      <span className={`text-[10px] font-medium ${device.gps_age < 30 ? 'text-green-600' :
+                                        device.gps_age < 60 ? 'text-yellow-600' : 'text-red-600'
+                                        }`}>
+                                        {device.gps_age}m
+                                      </span>
+                                    ) : (
+                                      <span className="text-[10px] text-gray-400">–</span>
+                                    )}
+                                  </td>
+                                  <td className="px-2 py-2 whitespace-nowrap bg-red-50">
+                                    {device.loc_fail_reason_descr !== null ? (
+                                      <span className="text-[9px] text-red-600">{device.loc_fail_reason_descr}</span>
+                                    ) : (
+                                      <span className="text-[9px] text-green-600">✓ OK</span>
+                                    )}
                                   </td>
 
                                   {/* Temperature Info */}
@@ -3443,26 +3457,6 @@ export default function DeviceLogsView() {
                                         <span className="text-[9px] font-bold">{device.freshness_score}</span>
                                       </div>
                                     </div>
-                                  </td>
-
-                                  {/* GPS Info */}
-                                  <td className="px-2 py-2 whitespace-nowrap bg-red-50">
-                                    {device.gps_age !== null ? (
-                                      <span className={`text-[10px] font-medium ${device.gps_age < 30 ? 'text-green-600' :
-                                        device.gps_age < 60 ? 'text-yellow-600' : 'text-red-600'
-                                        }`}>
-                                        {device.gps_age}m
-                                      </span>
-                                    ) : (
-                                      <span className="text-[10px] text-gray-400">–</span>
-                                    )}
-                                  </td>
-                                  <td className="px-2 py-2 whitespace-nowrap bg-red-50">
-                                    {device.loc_fail_reason_descr !== null ? (
-                                      <span className="text-[9px] text-red-600">{device.loc_fail_reason_descr}</span>
-                                    ) : (
-                                      <span className="text-[9px] text-green-600">✓ OK</span>
-                                    )}
                                   </td>
                                 </tr>
                               ))}
