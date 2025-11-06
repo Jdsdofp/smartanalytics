@@ -1,70 +1,31 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { 
-  MagnifyingGlassIcon, 
-  FunnelIcon, 
-  ArrowDownTrayIcon, 
-  ExclamationTriangleIcon, 
-  CheckCircleIcon, 
-  XCircleIcon, 
-  ClockIcon, 
-  ChevronLeftIcon, 
-  ChevronRightIcon
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  ArrowDownTrayIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChartBarIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface CertificateReport {
-  item_name: string;
-  item_code: string;
-  certificate_type: string;
-  certificate_description: string;
-  category_name: string;
-  certificate_status_name: string;
-  Home_Area_city: string;
-  Home_Area_State: string;
+  id: number;
   Home_site_name: string;
-  validity_status: string;
-  days_until_expiration: number;
-  expiration_date: string;
-  issue_date: string;
-  renewal_urgency_level: string;
-  combined_risk_score: string;
-  compliance_score: number;
-  operational_impact_score: number;
-  expiration_risk_score: number;
-  ai_recommendation: string;
-  recommended_action: string;
-  action_priority: number;
-  needs_immediate_action: number;
-  recertification_probability: number;
-  renewal_probability_score: number;
-  automation_readiness_score: number;
-  pattern_confidence_score: number;
-  asset_value_at_risk: string;
-  financial_risk_value: string;
-  purchase_cost: string;
-  purchase_currency: string;
-  issuer_company_name: string;
-  issuer_reliability_score: number;
-  automation_candidate: number;
-  trend_direction: string;
-  risk_trend: string;
+  code_area: string;
+  code_zone: string;
+  certificate_description: string;
+  item_code: string;
+  item_name: string;
   brand: string;
   model: string;
   serial: string;
-  custody_name: string;
-  custody_email: string;
-  department_name: string;
-  cost_center_name: string;
-  is_expiring_this_week: number;
-  is_expiring_90_days: number;
-  is_expired: number;
-  is_high_value_asset: number;
-  is_critical_compliance: number;
-  in_optimal_renewal_window: number;
-  concurrent_renewals_same_period: number;
-  department_workload_index: number;
-  resource_availability_score: number;
-  recommended_start_date: string;
-  days_until_recommended_start: number;
+  expiration_date: string;
+  certificate_status_name: string;
 }
 
 interface PaginationInfo {
@@ -81,10 +42,28 @@ interface ApiResponse {
   pagination: PaginationInfo;
 }
 
-
+interface CriticalAnalysis {
+  totalCertificates: number;
+  approved: number;
+  expired: number;
+  expiringIn30Days: number;
+  expiringIn60Days: number;
+  expiringIn90Days: number;
+  expiringIn180Days: number;
+  critical: number;
+  warning: number;
+  safe: number;
+  averageDaysToExpiration: number;
+  sitesWithMostCertificates: Array<{ site: string; count: number }>;
+  certificateTypeDistribution: Array<{ type: string; count: number }>;
+  urgentActionRequired: number;
+  complianceRate: number;
+  riskScore: number;
+}
 
 export default function CertificateReportGrid() {
   const [data, setData] = useState<CertificateReport[]>([]);
+  const [allData, setAllData] = useState<CertificateReport[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -94,25 +73,117 @@ export default function CertificateReportGrid() {
     hasPreviousPage: false
   });
   const [loading, setLoading] = useState(true);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
-    validityStatus: 'ALL',
-    urgencyLevel: 'ALL',
-    riskTrend: 'ALL',
-    location: 'ALL',
+    status: 'ALL',
+    site: 'ALL',
     certificateType: 'ALL',
-    needsAction: 'ALL'
+    expirationRange: 'ALL'
   });
   const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({});
   const [activeColumnFilter, setActiveColumnFilter] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState('action_priority');
+  const [showAnalysis, setShowAnalysis] = useState(true);
+  const [sortBy, setSortBy] = useState('id');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportType, setExportType] = useState<'excel' | 'pdf'>('excel');
-  const companyId = 10;
+  const companyId = 610;
   const filterRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // IMPORTANTE: Declarar funções utilitárias ANTES dos useMemo
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const getDaysUntilExpiration = (expirationDate: string) => {
+    const now = new Date();
+    const expiration = new Date(expirationDate);
+    const diffTime = expiration.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const truncateText = (text: string, maxLength: number): string => {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'APPROVED':
+        return <CheckCircleIcon className="w-5 h-5 text-green-500" />;
+      case 'REJECTED':
+        return <XCircleIcon className="w-5 h-5 text-red-500" />;
+      case 'PENDING':
+        return <ClockIcon className="w-5 h-5 text-yellow-500" />;
+      default:
+        return <ClockIcon className="w-5 h-5 text-gray-500" />;
+    }
+  };
+
+  const getCriticalityBadge = (days: number) => {
+    if (days < 0) {
+      return {
+        label: 'EXPIRADO',
+        color: 'bg-red-100 text-red-800 border border-red-300',
+        icon: <XCircleIcon className="w-4 h-4" />
+      };
+    } else if (days <= 30) {
+      return {
+        label: 'CRÍTICO',
+        color: 'bg-red-100 text-red-800 border border-red-300',
+        icon: <ExclamationTriangleIcon className="w-4 h-4" />
+      };
+    } else if (days <= 90) {
+      return {
+        label: 'ATENÇÃO',
+        color: 'bg-orange-100 text-orange-800 border border-orange-300',
+        icon: <ExclamationTriangleIcon className="w-4 h-4" />
+      };
+    } else if (days <= 180) {
+      return {
+        label: 'ALERTA',
+        color: 'bg-yellow-100 text-yellow-800 border border-yellow-300',
+        icon: <ClockIcon className="w-4 h-4" />
+      };
+    } else {
+      return {
+        label: 'SEGURO',
+        color: 'bg-green-100 text-green-800 border border-green-300',
+        icon: <CheckCircleIcon className="w-4 h-4" />
+      };
+    }
+  };
+
+  const getRiskScoreColor = (score: number) => {
+    if (score > 50) return 'text-red-600';
+    if (score > 25) return 'text-orange-600';
+    return 'text-green-600';
+  };
+
+  // Buscar todos os dados para análise crítica
+  const fetchAllDataForAnalysis = async () => {
+    setLoadingAnalysis(true);
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/dashboard/${companyId}/certificates/reports?page=1&limit=999999&sortBy=${sortBy}&sortOrder=${sortOrder}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch all data');
+      }
+
+      const result: ApiResponse = await response.json();
+      setAllData(result.data);
+    } catch (error) {
+      console.error('Error fetching all data for analysis:', error);
+    } finally {
+      setLoadingAnalysis(false);
+    }
+  };
 
   const fetchData = async (page: number = 1) => {
     setLoading(true);
@@ -125,9 +196,9 @@ export default function CertificateReportGrid() {
       });
 
       const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/certificates/reports/${companyId}?${params}`
+        `http://localhost:4000/api/dashboard/${companyId}/certificates/reports?${params}`
       );
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
@@ -144,6 +215,7 @@ export default function CertificateReportGrid() {
 
   useEffect(() => {
     fetchData(1);
+    fetchAllDataForAnalysis();
   }, [itemsPerPage, sortBy, sortOrder]);
 
   useEffect(() => {
@@ -162,19 +234,43 @@ export default function CertificateReportGrid() {
 
   const filteredData = useMemo(() => {
     return data.filter(item => {
-      const matchSearch = searchTerm === '' || 
+      const matchSearch = searchTerm === '' ||
         item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.item_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.certificate_type.toLowerCase().includes(searchTerm.toLowerCase());
+        item.certificate_description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.serial.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.model.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchValidity = filters.validityStatus === 'ALL' || item.validity_status === filters.validityStatus;
-      const matchUrgency = filters.urgencyLevel === 'ALL' || item.renewal_urgency_level === filters.urgencyLevel;
-      const matchRisk = filters.riskTrend === 'ALL' || item.risk_trend === filters.riskTrend;
-      const matchLocation = filters.location === 'ALL' || item.Home_Area_city === filters.location;
-      const matchCertType = filters.certificateType === 'ALL' || item.certificate_type === filters.certificateType;
-      const matchAction = filters.needsAction === 'ALL' || 
-        (filters.needsAction === 'YES' && item.needs_immediate_action === 1) ||
-        (filters.needsAction === 'NO' && item.needs_immediate_action === 0);
+      const matchStatus = filters.status === 'ALL' || item.certificate_status_name === filters.status;
+      const matchSite = filters.site === 'ALL' || item.Home_site_name === filters.site;
+      const matchCertType = filters.certificateType === 'ALL' || item.certificate_description === filters.certificateType;
+
+      // Filtro de range de expiração
+      let matchExpirationRange = true;
+      if (filters.expirationRange !== 'ALL') {
+        const days = getDaysUntilExpiration(item.expiration_date);
+        switch (filters.expirationRange) {
+          case 'EXPIRED':
+            matchExpirationRange = days < 0;
+            break;
+          case '30_DAYS':
+            matchExpirationRange = days >= 0 && days <= 30;
+            break;
+          case '60_DAYS':
+            matchExpirationRange = days > 30 && days <= 60;
+            break;
+          case '90_DAYS':
+            matchExpirationRange = days > 60 && days <= 90;
+            break;
+          case '180_DAYS':
+            matchExpirationRange = days > 90 && days <= 180;
+            break;
+          case 'SAFE':
+            matchExpirationRange = days > 180;
+            break;
+        }
+      }
 
       const matchColumnFilters = Object.entries(columnFilters).every(([column, values]) => {
         if (values.length === 0) return true;
@@ -182,22 +278,137 @@ export default function CertificateReportGrid() {
         return values.includes(itemValue);
       });
 
-      return matchSearch && matchValidity && matchUrgency && matchRisk && matchLocation && matchCertType && matchAction && matchColumnFilters;
+      return matchSearch && matchStatus && matchSite && matchCertType && matchExpirationRange && matchColumnFilters;
     });
   }, [data, searchTerm, filters, columnFilters]);
 
   const uniqueValues = useMemo(() => ({
-    locations: Array.from(new Set(data.map(item => item.Home_Area_city))).filter(Boolean),
-    certificateTypes: Array.from(new Set(data.map(item => item.certificate_type))).filter(Boolean),
+    sites: Array.from(new Set(data.map(item => item.Home_site_name))).filter(Boolean),
+    certificateTypes: Array.from(new Set(data.map(item => item.certificate_description))).filter(Boolean),
+    statuses: Array.from(new Set(data.map(item => item.certificate_status_name))).filter(Boolean),
   }), [data]);
 
-  const stats = useMemo(() => ({
-    total: filteredData.length,
-    expired: filteredData.filter(item => item.is_expired === 1).length,
-    expiringSoon: filteredData.filter(item => item.is_expiring_90_days === 1).length,
-    needsAction: filteredData.filter(item => item.needs_immediate_action === 1).length,
-    highRisk: filteredData.filter(item => item.risk_trend === 'HIGH_RISK').length,
-  }), [filteredData]);
+  // Análise Crítica Completa
+  const criticalAnalysis = useMemo((): CriticalAnalysis => {
+    const now = new Date();
+
+    const dataToAnalyze = allData.length > 0 ? allData : data;
+
+    const expired = dataToAnalyze.filter(item => {
+      const expirationDate = new Date(item.expiration_date);
+      return expirationDate < now;
+    }).length;
+
+    const expiringIn30Days = dataToAnalyze.filter(item => {
+      const days = getDaysUntilExpiration(item.expiration_date);
+      return days >= 0 && days <= 30;
+    }).length;
+
+    const expiringIn60Days = dataToAnalyze.filter(item => {
+      const days = getDaysUntilExpiration(item.expiration_date);
+      return days > 30 && days <= 60;
+    }).length;
+
+    const expiringIn90Days = dataToAnalyze.filter(item => {
+      const days = getDaysUntilExpiration(item.expiration_date);
+      return days > 60 && days <= 90;
+    }).length;
+
+    const expiringIn180Days = dataToAnalyze.filter(item => {
+      const days = getDaysUntilExpiration(item.expiration_date);
+      return days > 90 && days <= 180;
+    }).length;
+
+    const critical = expired + expiringIn30Days;
+    const warning = expiringIn60Days + expiringIn90Days;
+    const safe = dataToAnalyze.length - critical - warning;
+
+    // Calcular média de dias até expiração
+    const totalDays = dataToAnalyze.reduce((sum, item) => {
+      return sum + Math.max(0, getDaysUntilExpiration(item.expiration_date));
+    }, 0);
+    const averageDaysToExpiration = dataToAnalyze.length > 0 ? Math.round(totalDays / dataToAnalyze.length) : 0;
+
+    // Sites com mais certificados
+    const siteCount: Record<string, number> = {};
+    dataToAnalyze.forEach(item => {
+      siteCount[item.Home_site_name] = (siteCount[item.Home_site_name] || 0) + 1;
+    });
+    const sitesWithMostCertificates = Object.entries(siteCount)
+      .map(([site, count]) => ({ site, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // Distribuição de tipos de certificado
+    const certTypeCount: Record<string, number> = {};
+    dataToAnalyze.forEach(item => {
+      certTypeCount[item.certificate_description] = (certTypeCount[item.certificate_description] || 0) + 1;
+    });
+    const certificateTypeDistribution = Object.entries(certTypeCount)
+      .map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // Ação urgente requerida
+    const urgentActionRequired = expired + expiringIn30Days;
+
+    // Taxa de compliance (certificados válidos por mais de 90 dias)
+    const compliant = dataToAnalyze.filter(item => {
+      const days = getDaysUntilExpiration(item.expiration_date);
+      return days > 90;
+    }).length;
+    const complianceRate = dataToAnalyze.length > 0 ? (compliant / dataToAnalyze.length) * 100 : 0;
+
+    // Score de risco (0-100, onde 0 é sem risco e 100 é risco máximo)
+    const expiredWeight = expired * 10;
+    const expiring30Weight = expiringIn30Days * 7;
+    const expiring60Weight = expiringIn60Days * 4;
+    const expiring90Weight = expiringIn90Days * 2;
+    const totalRiskPoints = expiredWeight + expiring30Weight + expiring60Weight + expiring90Weight;
+    const maxPossibleRisk = dataToAnalyze.length * 10;
+    const riskScore = maxPossibleRisk > 0 ? Math.min(100, (totalRiskPoints / maxPossibleRisk) * 100) : 0;
+
+    return {
+      totalCertificates: dataToAnalyze.length,
+      approved: dataToAnalyze.filter(item => item.certificate_status_name === 'APPROVED').length,
+      expired,
+      expiringIn30Days,
+      expiringIn60Days,
+      expiringIn90Days,
+      expiringIn180Days,
+      critical,
+      warning,
+      safe,
+      averageDaysToExpiration,
+      sitesWithMostCertificates,
+      certificateTypeDistribution,
+      urgentActionRequired,
+      complianceRate,
+      riskScore
+    };
+  }, [allData, data]);
+
+  const stats = useMemo(() => {
+    const now = new Date();
+    const expiringSoon = filteredData.filter(item => {
+      const expirationDate = new Date(item.expiration_date);
+      const diffTime = expirationDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays <= 90 && diffDays > 0;
+    }).length;
+
+    const expired = filteredData.filter(item => {
+      const expirationDate = new Date(item.expiration_date);
+      return expirationDate < now;
+    }).length;
+
+    return {
+      total: filteredData.length,
+      approved: filteredData.filter(item => item.certificate_status_name === 'APPROVED').length,
+      expiringSoon,
+      expired,
+    };
+  }, [filteredData]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
@@ -234,12 +445,12 @@ export default function CertificateReportGrid() {
       const newFilters = currentFilters.includes(value)
         ? currentFilters.filter(v => v !== value)
         : [...currentFilters, value];
-      
+
       if (newFilters.length === 0) {
         const { [column]: _, ...rest } = prev;
         return rest;
       }
-      
+
       return { ...prev, [column]: newFilters };
     });
   };
@@ -264,9 +475,9 @@ export default function CertificateReportGrid() {
 
   const handleExport = async (exportAll: boolean) => {
     setShowExportModal(false);
-    
+
     let dataToExport = filteredData;
-    
+
     if (exportAll) {
       try {
         const params = new URLSearchParams({
@@ -277,9 +488,9 @@ export default function CertificateReportGrid() {
         });
 
         const response = await fetch(
-          `https://apinode.smartxhub.cloud/api/dashboard/certificates/reports/${companyId}?${params}`
+          `http://localhost:4000/api/dashboard/${companyId}/certificates/reports?${params}`
         );
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch all data');
         }
@@ -302,34 +513,35 @@ export default function CertificateReportGrid() {
   const exportExcel = async (dataToExport: CertificateReport[]) => {
     import('xlsx').then(async (XLSX) => {
       const headers = [
-        'Status', 'Nome do Item', 'Código', 'Tipo de Certificado', 'Descrição',
-        'Categoria', 'Cidade', 'Estado', 'Dias até Expiração', 'Data de Expiração',
-        'Urgência', 'Risco', 'Prioridade', 'Ação Imediata', 'Recomendação IA',
-        'Ação Recomendada', 'Valor em Risco', 'Responsável', 'Email', 'Departamento'
+        'ID', 'Site', 'Área', 'Zona', 'Certificado', 'Código Item',
+        'Nome Item', 'Marca', 'Modelo', 'Serial', 'Data Expiração', 'Dias p/ Expirar', 'Status Criticidade', 'Status'
       ];
-      
-      const dataRows = dataToExport.map(item => [
-        item.validity_status,
-        item.item_name,
-        item.item_code,
-        item.certificate_type,
-        item.certificate_description,
-        item.category_name,
-        item.Home_Area_city,
-        item.Home_Area_State,
-        item.days_until_expiration,
-        formatDate(item.expiration_date),
-        item.renewal_urgency_level,
-        item.risk_trend,
-        item.action_priority,
-        item.needs_immediate_action === 1 ? 'Sim' : 'Não',
-        item.ai_recommendation,
-        item.recommended_action,
-        item.asset_value_at_risk,
-        item.custody_name,
-        item.custody_email,
-        item.department_name
-      ]);
+
+      const dataRows = dataToExport.map(item => {
+        const days = getDaysUntilExpiration(item.expiration_date);
+        let criticality = 'SEGURO';
+        if (days < 0) criticality = 'EXPIRADO';
+        else if (days <= 30) criticality = 'CRÍTICO';
+        else if (days <= 90) criticality = 'ATENÇÃO';
+        else if (days <= 180) criticality = 'ALERTA';
+
+        return [
+          item.id,
+          item.Home_site_name,
+          item.code_area,
+          item.code_zone,
+          item.certificate_description,
+          item.item_code,
+          item.item_name,
+          item.brand || '-',
+          item.model || '-',
+          item.serial,
+          formatDate(item.expiration_date),
+          days,
+          criticality,
+          item.certificate_status_name
+        ];
+      });
 
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
@@ -339,20 +551,54 @@ export default function CertificateReportGrid() {
 
       XLSX.utils.book_append_sheet(wb, ws, 'Certificados');
 
-      const summaryData = [
-        { 'Métrica': 'Total de Certificados', 'Valor': dataToExport.length },
-        { 'Métrica': 'Certificados Expirados', 'Valor': dataToExport.filter(item => item.is_expired === 1).length },
-        { 'Métrica': 'Expirando em 90 Dias', 'Valor': dataToExport.filter(item => item.is_expiring_90_days === 1).length },
-        { 'Métrica': 'Necessitam Ação', 'Valor': dataToExport.filter(item => item.needs_immediate_action === 1).length },
-        { 'Métrica': 'Alto Risco', 'Valor': dataToExport.filter(item => item.risk_trend === 'HIGH_RISK').length },
+      // Aba de Análise Crítica
+      const analysisData = [
+        { 'Métrica': 'Total de Certificados', 'Valor': criticalAnalysis.totalCertificates },
+        { 'Métrica': 'Certificados Aprovados', 'Valor': criticalAnalysis.approved },
+        { 'Métrica': '--- ANÁLISE DE RISCO ---', 'Valor': '' },
+        { 'Métrica': 'Score de Risco Geral', 'Valor': `${criticalAnalysis.riskScore.toFixed(1)}%` },
+        { 'Métrica': 'Taxa de Compliance', 'Valor': `${criticalAnalysis.complianceRate.toFixed(1)}%` },
+        { 'Métrica': 'Ação Urgente Necessária', 'Valor': criticalAnalysis.urgentActionRequired },
+        { 'Métrica': '--- DISTRIBUIÇÃO ---', 'Valor': '' },
+        { 'Métrica': 'Certificados Expirados', 'Valor': criticalAnalysis.expired },
+        { 'Métrica': 'Expirando em 30 dias', 'Valor': criticalAnalysis.expiringIn30Days },
+        { 'Métrica': 'Expirando em 60 dias', 'Valor': criticalAnalysis.expiringIn60Days },
+        { 'Métrica': 'Expirando em 90 dias', 'Valor': criticalAnalysis.expiringIn90Days },
+        { 'Métrica': 'Expirando em 180 dias', 'Valor': criticalAnalysis.expiringIn180Days },
+        { 'Métrica': '--- NÍVEIS ---', 'Valor': '' },
+        { 'Métrica': 'Nível Crítico', 'Valor': criticalAnalysis.critical },
+        { 'Métrica': 'Nível Alerta', 'Valor': criticalAnalysis.warning },
+        { 'Métrica': 'Nível Seguro', 'Valor': criticalAnalysis.safe },
+        { 'Métrica': '--- ESTATÍSTICAS ---', 'Valor': '' },
+        { 'Métrica': 'Média de Dias até Expiração', 'Valor': criticalAnalysis.averageDaysToExpiration },
         { 'Métrica': 'Data de Exportação', 'Valor': new Date().toLocaleString('pt-BR') }
       ];
 
-      const wsSummary = XLSX.utils.json_to_sheet(summaryData);
-      wsSummary['!cols'] = [{ wch: 30 }, { wch: 20 }];
-      XLSX.utils.book_append_sheet(wb, wsSummary, 'Resumo');
+      const wsAnalysis = XLSX.utils.json_to_sheet(analysisData);
+      wsAnalysis['!cols'] = [{ wch: 35 }, { wch: 25 }];
+      XLSX.utils.book_append_sheet(wb, wsAnalysis, 'Análise Crítica');
 
-      const fileName = `certificate-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+      // Aba de Sites
+      const siteData = criticalAnalysis.sitesWithMostCertificates.map(s => ({
+        'Site': s.site,
+        'Quantidade': s.count,
+        'Percentual': `${((s.count / criticalAnalysis.totalCertificates) * 100).toFixed(1)}%`
+      }));
+      const wsSites = XLSX.utils.json_to_sheet(siteData);
+      wsSites['!cols'] = [{ wch: 40 }, { wch: 15 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, wsSites, 'Top Sites');
+
+      // Aba de Tipos de Certificado
+      const certTypeData = criticalAnalysis.certificateTypeDistribution.map(c => ({
+        'Tipo de Certificado': c.type,
+        'Quantidade': c.count,
+        'Percentual': `${((c.count / criticalAnalysis.totalCertificates) * 100).toFixed(1)}%`
+      }));
+      const wsCertTypes = XLSX.utils.json_to_sheet(certTypeData);
+      wsCertTypes['!cols'] = [{ wch: 40 }, { wch: 15 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, wsCertTypes, 'Tipos de Certificado');
+
+      const fileName = `certificate-critical-report-${new Date().toISOString().split('T')[0]}.xlsx`;
       XLSX.writeFile(wb, fileName);
     }).catch(error => {
       console.error('Erro ao carregar biblioteca XLSX:', error);
@@ -360,251 +606,333 @@ export default function CertificateReportGrid() {
     });
   };
 
+  const exportPDF = async (dataToExport: CertificateReport[]) => {
+    try {
+      const { jsPDF } = await import('jspdf');
 
-const exportPDF = async (dataToExport: CertificateReport[]) => {
-  try {
-    const { jsPDF } = await import('jspdf');
-    
-    // Usar tipo específico do jsPDF
-    const doc = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4'
-    }) as import('jspdf').jsPDF;
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      }) as import('jspdf').jsPDF;
 
-    // Configurações da página - CORREÇÃO AQUI
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 10;
-    let yPosition = margin;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 10;
+      let yPosition = margin;
 
-    // Cores
-    const primaryColor = [37, 99, 235]; // Azul
-    const lightGray = [245, 247, 250];
-    const darkGray = [107, 114, 128];
+      const primaryColor = [37, 99, 235];
+      const lightGray = [245, 247, 250];
+      const darkGray = [107, 114, 128];
+      const redColor = [220, 38, 38];
+      const orangeColor = [249, 115, 22];
 
-    // Título principal
-    doc.setFontSize(20);
-    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-    doc.text('Certificate Analytics Report', margin, yPosition);
-    yPosition += 8;
+      // Título principal
+      doc.setFontSize(20);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text('Relatório Crítico de Certificados', margin, yPosition);
+      yPosition += 8;
 
-    // Subtítulo e data
-    doc.setFontSize(10);
-    doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-    doc.text('Análise Preditiva de Certificados', margin, yPosition);
-    doc.text(`Data de exportação: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, pageWidth - margin, yPosition, { align: 'right' });
-    yPosition += 15;
+      // Subtítulo e data
+      doc.setFontSize(10);
+      doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
+      doc.text('Análise Detalhada e Score de Risco', margin, yPosition);
+      doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, pageWidth - margin, yPosition, { align: 'right' });
+      yPosition += 12;
 
-    // Estatísticas
-    doc.setFontSize(9);
-    doc.setTextColor(0, 0, 0);
-    
-    const stats = [
-      `Total: ${dataToExport.length}`,
-      `Expirados: ${dataToExport.filter(item => item.is_expired === 1).length}`,
-      `Expirando em 90 dias: ${dataToExport.filter(item => item.is_expiring_90_days === 1).length}`,
-      `Ação Imediata: ${dataToExport.filter(item => item.needs_immediate_action === 1).length}`,
-      `Alto Risco: ${dataToExport.filter(item => item.risk_trend === 'HIGH_RISK').length}`
-    ];
+      // Score de Risco e Compliance
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
 
-    stats.forEach((stat, index) => {
-      const x = margin + (index * ((pageWidth - 2 * margin) / stats.length));
-      doc.text(stat, x, yPosition);
-    });
-    
-    yPosition += 12;
+      // Score de Risco
+      const riskColor = criticalAnalysis.riskScore > 50 ? redColor : criticalAnalysis.riskScore > 25 ? orangeColor : [34, 197, 94];
+      doc.setTextColor(riskColor[0], riskColor[1], riskColor[2]);
+      doc.text(`Score de Risco: ${criticalAnalysis.riskScore.toFixed(1)}%`, margin, yPosition);
 
-    // Cabeçalho da tabela
-    const headers = [
-      { text: 'Status', width: 15 },
-      { text: 'Item', width: 35 },
-      { text: 'Certificado', width: 30 },
-      { text: 'Categoria', width: 25 },
-      { text: 'Localização', width: 25 },
-      { text: 'Dias', width: 12 },
-      { text: 'Risco', width: 18 },
-      { text: 'Prior.', width: 12 },
-      { text: 'Valor Risco', width: 22 },
-      { text: 'Ação Recomendada', width: 35 }
-    ];
+      // Taxa de Compliance
+      doc.setTextColor(34, 197, 94);
+      doc.text(`Taxa de Compliance: ${criticalAnalysis.complianceRate.toFixed(1)}%`, pageWidth / 2, yPosition);
 
-    // Desenhar cabeçalho
-    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-    doc.rect(margin, yPosition, pageWidth - 2 * margin, 8, 'F');
-    
-    doc.setFontSize(8);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-
-    let xPosition = margin + 2;
-    headers.forEach(header => {
-      doc.text(header.text, xPosition, yPosition + 5);
-      xPosition += header.width;
-    });
-
-    yPosition += 10;
-    doc.setFont('helvetica', 'normal');
-
-    // Dados da tabela
-    doc.setFontSize(7);
-    doc.setTextColor(0, 0, 0);
-
-    dataToExport.forEach((item, index) => {
-      // Verificar se precisa de nova página
-      if (yPosition > pageHeight - 15) {
-        doc.addPage();
-        yPosition = margin;
-        
-        // Redesenhar cabeçalho na nova página
-        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.rect(margin, yPosition, pageWidth - 2 * margin, 8, 'F');
-        
-        doc.setFontSize(8);
-        doc.setTextColor(255, 255, 255);
-        doc.setFont('helvetica', 'bold');
-        
-        xPosition = margin + 2;
-        headers.forEach(header => {
-          doc.text(header.text, xPosition, yPosition + 5);
-          xPosition += header.width;
-        });
-        
-        yPosition += 10;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor(0, 0, 0);
+      // Ação Urgente
+      if (criticalAnalysis.urgentActionRequired > 0) {
+        doc.setTextColor(redColor[0], redColor[1], redColor[2]);
+        doc.text(`⚠ Ação Urgente: ${criticalAnalysis.urgentActionRequired} certificados`, pageWidth - margin, yPosition, { align: 'right' });
       }
 
-      // Cor de fundo alternada para linhas
-      if (index % 2 === 0) {
-        doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-        doc.rect(margin, yPosition - 3, pageWidth - 2 * margin, 6, 'F');
-      }
+      yPosition += 10;
+      doc.setFont('helvetica', 'normal');
 
-      // Dados da linha
-      const rowData = [
-        item.validity_status,
-        truncateText(item.item_name, 30),
-        truncateText(item.certificate_type, 25),
-        truncateText(item.category_name, 20),
-        truncateText(item.Home_Area_city, 20),
-        item.days_until_expiration.toString(),
-        item.risk_trend.replace('_RISK', ''),
-        item.action_priority.toString(),
-        formatCurrency(item.asset_value_at_risk, item.purchase_currency),
-        truncateText(item.recommended_action, 40)
+      // Estatísticas detalhadas
+      doc.setFontSize(9);
+      doc.setTextColor(0, 0, 0);
+
+      const statsData = [
+        `Total: ${criticalAnalysis.totalCertificates}`,
+        `Expirados: ${criticalAnalysis.expired}`,
+        `30d: ${criticalAnalysis.expiringIn30Days}`,
+        `60d: ${criticalAnalysis.expiringIn60Days}`,
+        `90d: ${criticalAnalysis.expiringIn90Days}`,
+        `180d: ${criticalAnalysis.expiringIn180Days}`,
+        `Crítico: ${criticalAnalysis.critical}`,
+        `Alerta: ${criticalAnalysis.warning}`,
+        `Seguro: ${criticalAnalysis.safe}`,
+        `Média: ${criticalAnalysis.averageDaysToExpiration}d`
       ];
 
-      xPosition = margin + 2;
-      rowData.forEach((data, colIndex) => {
-        // Configurações específicas por coluna
-        let align: "left" | "center" | "right" = "left";
-        if (colIndex === 5 || colIndex === 7) align = "center";
-        if (colIndex === 8) align = "right";
-
-        doc.text(data, xPosition, yPosition, { align });
-        xPosition += headers[colIndex].width;
+      const colWidth = (pageWidth - 2 * margin) / statsData.length;
+      statsData.forEach((stat, index) => {
+        const x = margin + (index * colWidth);
+        doc.text(stat, x, yPosition);
       });
 
-      yPosition += 6;
-    });
+      yPosition += 10;
 
-    // Adicionar página de resumo se houver dados
-    if (dataToExport.length > 0) {
+      // Cabeçalho da tabela
+      const headers = [
+        { text: 'ID', width: 12 },
+        { text: 'Item', width: 30 },
+        { text: 'Certificado', width: 28 },
+        { text: 'Site', width: 20 },
+        { text: 'Serial', width: 22 },
+        { text: 'Expiração', width: 20 },
+        { text: 'Dias', width: 12 },
+        { text: 'Criticidade', width: 22 },
+        { text: 'Status', width: 18 }
+      ];
+
+      // Desenhar cabeçalho
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.rect(margin, yPosition, pageWidth - 2 * margin, 8, 'F');
+
+      doc.setFontSize(7);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+
+      let xPosition = margin + 2;
+      headers.forEach(header => {
+        doc.text(header.text, xPosition, yPosition + 5);
+        xPosition += header.width;
+      });
+
+      yPosition += 10;
+      doc.setFont('helvetica', 'normal');
+
+      // Dados da tabela
+      doc.setFontSize(6);
+      doc.setTextColor(0, 0, 0);
+
+      dataToExport.forEach((item, index) => {
+        if (yPosition > pageHeight - 15) {
+          doc.addPage();
+          yPosition = margin;
+
+          // Redesenhar cabeçalho na nova página
+          doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+          doc.rect(margin, yPosition, pageWidth - 2 * margin, 8, 'F');
+
+          doc.setFontSize(7);
+          doc.setTextColor(255, 255, 255);
+          doc.setFont('helvetica', 'bold');
+
+          xPosition = margin + 2;
+          headers.forEach(header => {
+            doc.text(header.text, xPosition, yPosition + 5);
+            xPosition += header.width;
+          });
+
+          yPosition += 10;
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(6);
+          doc.setTextColor(0, 0, 0);
+        }
+
+        const days = getDaysUntilExpiration(item.expiration_date);
+        let criticality = 'SEGURO';
+        let criticalityColor = [34, 197, 94]; // green
+
+        if (days < 0) {
+          criticality = 'EXPIRADO';
+          criticalityColor = [220, 38, 38]; // red
+        } else if (days <= 30) {
+          criticality = 'CRÍTICO';
+          criticalityColor = [220, 38, 38]; // red
+        } else if (days <= 90) {
+          criticality = 'ATENÇÃO';
+          criticalityColor = [249, 115, 22]; // orange
+        } else if (days <= 180) {
+          criticality = 'ALERTA';
+          criticalityColor = [234, 179, 8]; // yellow
+        }
+
+        if (index % 2 === 0) {
+          doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+          doc.rect(margin, yPosition - 3, pageWidth - 2 * margin, 6, 'F');
+        }
+
+        const rowData = [
+          { text: item.id.toString(), color: [0, 0, 0] },
+          { text: truncateText(item.item_name, 25), color: [0, 0, 0] },
+          { text: truncateText(item.certificate_description, 23), color: [0, 0, 0] },
+          { text: truncateText(item.Home_site_name, 18), color: [0, 0, 0] },
+          { text: truncateText(item.serial, 18), color: [0, 0, 0] },
+          { text: formatDate(item.expiration_date), color: [0, 0, 0] },
+          { text: days.toString(), color: criticalityColor },
+          { text: criticality, color: criticalityColor },
+          { text: item.certificate_status_name, color: [0, 0, 0] }
+        ];
+
+        xPosition = margin + 2;
+        rowData.forEach((data, colIndex) => {
+          let align: "left" | "center" | "right" = "left";
+          if (colIndex === 0 || colIndex === 6) align = "center";
+
+          doc.setTextColor(data.color[0], data.color[1], data.color[2]);
+          if (colIndex === 7) doc.setFont('helvetica', 'bold');
+          doc.text(data.text, xPosition, yPosition, { align });
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(0, 0, 0);
+          xPosition += headers[colIndex].width;
+        });
+
+        yPosition += 6;
+      });
+
+      // Página de Análise Detalhada
       doc.addPage();
       yPosition = margin;
 
-      // Título do resumo
-      doc.setFontSize(16);
+      doc.setFontSize(18);
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setFont('helvetica', 'bold');
-      doc.text('Resumo Detalhado', margin, yPosition);
-      yPosition += 10;
+      doc.text('Análise Crítica Detalhada', margin, yPosition);
+      yPosition += 12;
 
-      // Estatísticas detalhadas
-      const detailedStats = [
-        ['Total de Certificados', dataToExport.length.toString()],
-        ['Certificados Expirados', dataToExport.filter(item => item.is_expired === 1).length.toString()],
-        ['Expirando em 90 Dias', dataToExport.filter(item => item.is_expiring_90_days === 1).length.toString()],
-        ['Necessitam Ação Imediata', dataToExport.filter(item => item.needs_immediate_action === 1).length.toString()],
-        ['Alto Risco', dataToExport.filter(item => item.risk_trend === 'HIGH_RISK').length.toString()],
-        ['Médio Risco', dataToExport.filter(item => item.risk_trend === 'MEDIUM_RISK').length.toString()],
-        ['Baixo Risco', dataToExport.filter(item => item.risk_trend === 'LOW_RISK').length.toString()],
-        ['Ativos de Alto Valor', dataToExport.filter(item => item.is_high_value_asset === 1).length.toString()],
-        ['Compliance Crítico', dataToExport.filter(item => item.is_critical_compliance === 1).length.toString()],
-        ['Prontos para Renovação', dataToExport.filter(item => item.in_optimal_renewal_window === 1).length.toString()]
+      // Análise de Risco
+      doc.setFontSize(14);
+      doc.text('Score de Risco e Compliance', margin, yPosition);
+      yPosition += 8;
+
+      const riskAnalysis = [
+        ['Score de Risco Geral', `${criticalAnalysis.riskScore.toFixed(1)}%`],
+        ['Taxa de Compliance', `${criticalAnalysis.complianceRate.toFixed(1)}%`],
+        ['Certificados Requerendo Ação Urgente', criticalAnalysis.urgentActionRequired.toString()],
+        ['Média de Dias até Expiração', `${criticalAnalysis.averageDaysToExpiration} dias`],
       ];
 
       doc.setFontSize(10);
       doc.setTextColor(0, 0, 0);
       doc.setFont('helvetica', 'normal');
 
-      detailedStats.forEach(([label, value], index) => {
-        if (yPosition > pageHeight - 15) {
-          doc.addPage();
-          yPosition = margin;
-        }
-
-        // Cor de fundo alternada
+      riskAnalysis.forEach(([label, value], index) => {
         if (index % 2 === 0) {
           doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
           doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 6, 'F');
         }
 
         doc.text(label, margin + 5, yPosition);
+        doc.setFont('helvetica', 'bold');
         doc.text(value, pageWidth - margin - 5, yPosition, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
         yPosition += 6;
       });
+
+      yPosition += 8;
+
+      // Distribuição por Nível de Criticidade
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Distribuição por Criticidade', margin, yPosition);
+      yPosition += 8;
+
+      const criticalityDist = [
+        ['Nível Crítico (Expirados + 30 dias)', criticalAnalysis.critical.toString(), `${((criticalAnalysis.critical / criticalAnalysis.totalCertificates) * 100).toFixed(1)}%`],
+        ['Nível Alerta (60-90 dias)', criticalAnalysis.warning.toString(), `${((criticalAnalysis.warning / criticalAnalysis.totalCertificates) * 100).toFixed(1)}%`],
+        ['Nível Seguro (>180 dias)', criticalAnalysis.safe.toString(), `${((criticalAnalysis.safe / criticalAnalysis.totalCertificates) * 100).toFixed(1)}%`],
+      ];
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+
+      criticalityDist.forEach(([label, value, percent], index) => {
+        if (index % 2 === 0) {
+          doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+          doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 6, 'F');
+        }
+
+        doc.text(label, margin + 5, yPosition);
+        doc.text(value, pageWidth / 2 + 20, yPosition);
+        doc.setFont('helvetica', 'bold');
+        doc.text(percent, pageWidth - margin - 5, yPosition, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        yPosition += 6;
+      });
+
+      yPosition += 8;
+
+      // Top 5 Sites
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Top 5 Sites com Mais Certificados', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+
+      criticalAnalysis.sitesWithMostCertificates.forEach(({ site, count }, index) => {
+        if (yPosition > pageHeight - 15) {
+          doc.addPage();
+          yPosition = margin;
+        }
+
+        if (index % 2 === 0) {
+          doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+          doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 6, 'F');
+        }
+
+        doc.text(`${index + 1}. ${truncateText(site, 50)}`, margin + 5, yPosition);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${count} (${((count / criticalAnalysis.totalCertificates) * 100).toFixed(1)}%)`, pageWidth - margin - 5, yPosition, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        yPosition += 6;
+      });
+
+      yPosition += 8;
+
+      // Top 5 Tipos de Certificado
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Top 5 Tipos de Certificados', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+
+      criticalAnalysis.certificateTypeDistribution.forEach(({ type, count }, index) => {
+        if (yPosition > pageHeight - 15) {
+          doc.addPage();
+          yPosition = margin;
+        }
+
+        if (index % 2 === 0) {
+          doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+          doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 6, 'F');
+        }
+
+        doc.text(`${index + 1}. ${truncateText(type, 50)}`, margin + 5, yPosition);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${count} (${((count / criticalAnalysis.totalCertificates) * 100).toFixed(1)}%)`, pageWidth - margin - 5, yPosition, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        yPosition += 6;
+      });
+
+      const fileName = `certificate-critical-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao exportar para PDF. Tente novamente.');
     }
-
-    // Adicionar numeração de páginas em todas as páginas - CORREÇÃO AQUI
-    // const totalPages = doc.internal.getNumberOfPages();
-    // for (let i = 1; i <= totalPages; i++) {
-    //   doc.setPage(i);
-    //   doc.setFontSize(8);
-    //   doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
-    //   doc.text(
-    //     `Página ${i} de ${totalPages}`,
-    //     pageWidth / 2,
-    //     pageHeight - 5,
-    //     { align: 'center' }
-    //   );
-    // }
-
-    // Salvar o arquivo
-    const fileName = `certificate-report-${new Date().toISOString().split('T')[0]}.pdf`;
-    doc.save(fileName);
-
-  } catch (error) {
-    console.error('Erro ao gerar PDF:', error);
-    alert('Erro ao exportar para PDF. Tente novamente.');
-  }
-};
-
-// Função auxiliar para truncar texto
-const truncateText = (text: string, maxLength: number): string => {
-  if (!text) return '';
-  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-};
-
-// Função para formatar moeda
-const formatCurrency = (value: string, currency: string): string => {
-  if (!value) return 'R$ 0,00';
-  
-  try {
-    const numericValue = parseFloat(value);
-    if (isNaN(numericValue)) return 'R$ 0,00';
-    
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: currency || 'BRL'
-    }).format(numericValue);
-  } catch {
-    return 'R$ 0,00';
-  }
-};
-
+  };
 
   const ColumnFilterDropdown = ({ column, displayName }: { column: keyof CertificateReport; displayName: string }) => {
     const [searchFilter, setSearchFilter] = useState('');
@@ -612,7 +940,7 @@ const formatCurrency = (value: string, currency: string): string => {
     const selectedValues = columnFilters[column] || [];
     const isFiltered = selectedValues.length > 0;
 
-    const filteredValues = uniqueValues.filter(value => 
+    const filteredValues = uniqueValues.filter(value =>
       value.toLowerCase().includes(searchFilter.toLowerCase())
     );
 
@@ -627,7 +955,7 @@ const formatCurrency = (value: string, currency: string): string => {
         >
           <FunnelIcon className="w-4 h-4" />
         </button>
-        
+
         {activeColumnFilter === column && (
           <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
             <div className="p-3 border-b">
@@ -645,7 +973,7 @@ const formatCurrency = (value: string, currency: string): string => {
                   </button>
                 )}
               </div>
-              
+
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
@@ -658,7 +986,7 @@ const formatCurrency = (value: string, currency: string): string => {
                 />
               </div>
             </div>
-            
+
             <div className="overflow-y-auto max-h-60 p-2">
               {filteredValues.length === 0 ? (
                 <div className="text-sm text-gray-500 p-2">Nenhum resultado</div>
@@ -680,7 +1008,7 @@ const formatCurrency = (value: string, currency: string): string => {
                 ))
               )}
             </div>
-            
+
             <div className="p-2 border-t bg-gray-50 text-xs text-gray-600">
               {isFiltered ? `${selectedValues.length} de ${uniqueValues.length} selecionado(s)` : `${uniqueValues.length} disponível(is)`}
             </div>
@@ -690,47 +1018,12 @@ const formatCurrency = (value: string, currency: string): string => {
     );
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'EXPIRED':
-        return <XCircleIcon className="w-5 h-5 text-red-500" />;
-      case 'VALID':
-        return <CheckCircleIcon className="w-5 h-5 text-green-500" />;
-      default:
-        return <ClockIcon className="w-5 h-5 text-yellow-500" />;
-    }
-  };
-
-  const getRiskBadgeColor = (risk: string) => {
-    switch (risk) {
-      case 'HIGH_RISK':
-        return 'bg-red-100 text-red-800';
-      case 'MEDIUM_RISK':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'LOW_RISK':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
-  };
-
-//   const formatCurrencys = (value: string, currency: string) => {
-//     return new Intl.NumberFormat('pt-BR', {
-//       style: 'currency',
-//       currency: currency || 'BRL'
-//     }).format(parseFloat(value));
-//   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
+          <p className="text-gray-600">Carregando análise crítica...</p>
         </div>
       </div>
     );
@@ -740,40 +1033,194 @@ const formatCurrency = (value: string, currency: string): string => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Certificate Analytics Report</h1>
-          <p className="text-gray-600">Análise preditiva de certificados</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Análise Crítica de Certificados</h1>
+          <p className="text-gray-600">Relatório detalhado com score de risco e análise preditiva</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        {/* Painel de Análise Crítica */}
+        {showAnalysis && (
+          <div className="mb-6 space-y-4">
+            {/* Score de Risco e Compliance */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg shadow-lg p-6 border-2 border-red-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-red-900">Score de Risco</span>
+                  <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
+                </div>
+                <div className={`text-4xl font-bold ${getRiskScoreColor(criticalAnalysis.riskScore)}`}>
+                  {criticalAnalysis.riskScore.toFixed(1)}%
+                </div>
+                <div className="mt-2 text-xs text-red-700">
+                  {criticalAnalysis.riskScore > 50 ? 'Risco Crítico' : criticalAnalysis.riskScore > 25 ? 'Risco Moderado' : 'Risco Baixo'}
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-lg p-6 border-2 border-green-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-green-900">Taxa de Compliance</span>
+                  <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="text-4xl font-bold text-green-600">
+                  {criticalAnalysis.complianceRate.toFixed(1)}%
+                </div>
+                <div className="mt-2 text-xs text-green-700">
+                  Certificados válidos &gt; 90 dias
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-lg p-6 border-2 border-orange-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-orange-900">Ação Urgente</span>
+                  <ClockIcon className="w-6 h-6 text-orange-600" />
+                </div>
+                <div className="text-4xl font-bold text-orange-600">
+                  {criticalAnalysis.urgentActionRequired}
+                </div>
+                <div className="mt-2 text-xs text-orange-700">
+                  Certificados requerem ação imediata
+                </div>
+              </div>
+            </div>
+
+            {/* Estatísticas Detalhadas */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                <div className="text-xs text-gray-600 mb-1">Expirados</div>
+                <div className="text-2xl font-bold text-red-600">{criticalAnalysis.expired}</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
+                <div className="text-xs text-gray-600 mb-1">30 Dias</div>
+                <div className="text-2xl font-bold text-orange-600">{criticalAnalysis.expiringIn30Days}</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+                <div className="text-xs text-gray-600 mb-1">60 Dias</div>
+                <div className="text-2xl font-bold text-yellow-600">{criticalAnalysis.expiringIn60Days}</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                <div className="text-xs text-gray-600 mb-1">90 Dias</div>
+                <div className="text-2xl font-bold text-blue-600">{criticalAnalysis.expiringIn90Days}</div>
+              </div>
+              <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                <div className="text-xs text-gray-600 mb-1">Média Dias</div>
+                <div className="text-2xl font-bold text-green-600">{criticalAnalysis.averageDaysToExpiration}</div>
+              </div>
+            </div>
+
+            {/* Distribuição por Níveis */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <ChartBarIcon className="w-5 h-5" />
+                Distribuição por Nível de Criticidade
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+                  <div className="text-3xl font-bold text-red-600">{criticalAnalysis.critical}</div>
+                  <div className="text-sm text-red-700 mt-1">Nível Crítico</div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {((criticalAnalysis.critical / criticalAnalysis.totalCertificates) * 100).toFixed(1)}% do total
+                  </div>
+                </div>
+                <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="text-3xl font-bold text-yellow-600">{criticalAnalysis.warning}</div>
+                  <div className="text-sm text-yellow-700 mt-1">Nível Alerta</div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {((criticalAnalysis.warning / criticalAnalysis.totalCertificates) * 100).toFixed(1)}% do total
+                  </div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="text-3xl font-bold text-green-600">{criticalAnalysis.safe}</div>
+                  <div className="text-sm text-green-700 mt-1">Nível Seguro</div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {((criticalAnalysis.safe / criticalAnalysis.totalCertificates) * 100).toFixed(1)}% do total
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Sites e Tipos */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Top 5 Sites</h3>
+                <div className="space-y-3">
+                  {criticalAnalysis.sitesWithMostCertificates.map((site, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span className="text-sm font-medium text-gray-700 truncate flex-1">{site.site}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-gray-900">{site.count}</span>
+                        <span className="text-xs text-gray-500">
+                          ({((site.count / criticalAnalysis.totalCertificates) * 100).toFixed(1)}%)
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Top 5 Tipos de Certificado</h3>
+                <div className="space-y-3">
+                  {criticalAnalysis.certificateTypeDistribution.map((cert, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span className="text-sm font-medium text-gray-700 truncate flex-1">{cert.type}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-gray-900">{cert.count}</span>
+                        <span className="text-xs text-gray-500">
+                          ({((cert.count / criticalAnalysis.totalCertificates) * 100).toFixed(1)}%)
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowAnalysis(false)}
+              className="w-full py-2 text-sm text-gray-600 hover:text-gray-900 flex items-center justify-center gap-2"
+            >
+              <ChevronLeftIcon className="w-4 h-4" />
+              Ocultar Análise Detalhada
+            </button>
+          </div>
+        )}
+
+        {!showAnalysis && (
+          <button
+            onClick={() => setShowAnalysis(true)}
+            className="mb-6 w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center gap-2 transition-colors"
+          >
+            <InformationCircleIcon className="w-5 h-5" />
+            Mostrar Análise Crítica Detalhada
+          </button>
+        )}
+
+        {/* Cards de Estatísticas Rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 px-4">
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm text-gray-600 mb-1">Total</div>
             <div className="text-2xl font-bold text-gray-900">{pagination.totalItems}</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Expirados</div>
-            <div className="text-2xl font-bold text-red-600">{stats.expired}</div>
+            <div className="text-sm text-gray-600 mb-1">Aprovados</div>
+            <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
             <div className="text-sm text-gray-600 mb-1">Expira 90d</div>
             <div className="text-2xl font-bold text-yellow-600">{stats.expiringSoon}</div>
           </div>
           <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Ação Imediata</div>
-            <div className="text-2xl font-bold text-orange-600">{stats.needsAction}</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="text-sm text-gray-600 mb-1">Alto Risco</div>
-            <div className="text-2xl font-bold text-red-600">{stats.highRisk}</div>
+            <div className="text-sm text-gray-600 mb-1">Expirados</div>
+            <div className="text-2xl font-bold text-red-600">{stats.expired}</div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow mb-6 p-4">
+        <div className="bg-white rounded-lg shadow mb-4 mx-4 p-4">
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1 relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Buscar..."
+                placeholder="Buscar por item, código, certificado, serial, marca ou modelo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -823,7 +1270,7 @@ const formatCurrency = (value: string, currency: string): string => {
                 <p className="text-gray-600 mb-6">
                   Escolha como deseja exportar:
                 </p>
-                
+
                 <div className="space-y-3 mb-6">
                   <button
                     onClick={() => handleExport(false)}
@@ -848,9 +1295,9 @@ const formatCurrency = (value: string, currency: string): string => {
                       <ArrowDownTrayIcon className="w-5 h-5 text-blue-600" />
                     </div>
                     <div className="text-left">
-                      <div className="font-medium text-gray-900">Todos os Dados</div>
+                      <div className="font-medium text-gray-900">Todos os Dados com Análise Completa</div>
                       <div className="text-sm text-gray-600">
-                        Exportar todos os {pagination.totalItems} registros
+                        Exportar todos os {pagination.totalItems} registros + análise crítica detalhada
                       </div>
                     </div>
                   </button>
@@ -867,56 +1314,32 @@ const formatCurrency = (value: string, currency: string): string => {
           )}
 
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
               <select
-                value={filters.validityStatus}
-                onChange={(e) => setFilters({...filters, validityStatus: e.target.value})}
+                value={filters.status}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                 className="px-3 py-2 border rounded-lg"
               >
                 <option value="ALL">Status - Todos</option>
-                <option value="VALID">Válido</option>
-                <option value="EXPIRED">Expirado</option>
-                <option value="EXPIRING_SOON">Expirando</option>
+                {uniqueValues.statuses.map(status => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
               </select>
 
               <select
-                value={filters.urgencyLevel}
-                onChange={(e) => setFilters({...filters, urgencyLevel: e.target.value})}
+                value={filters.site}
+                onChange={(e) => setFilters({ ...filters, site: e.target.value })}
                 className="px-3 py-2 border rounded-lg"
               >
-                <option value="ALL">Urgência - Todas</option>
-                <option value="EXPIRED">Expirado</option>
-                <option value="CRITICAL">Crítico</option>
-                <option value="HIGH">Alto</option>
-                <option value="MEDIUM">Médio</option>
-                <option value="LOW">Baixo</option>
-              </select>
-
-              <select
-                value={filters.riskTrend}
-                onChange={(e) => setFilters({...filters, riskTrend: e.target.value})}
-                className="px-3 py-2 border rounded-lg"
-              >
-                <option value="ALL">Risco - Todos</option>
-                <option value="HIGH_RISK">Alto</option>
-                <option value="MEDIUM_RISK">Médio</option>
-                <option value="LOW_RISK">Baixo</option>
-              </select>
-
-              <select
-                value={filters.location}
-                onChange={(e) => setFilters({...filters, location: e.target.value})}
-                className="px-3 py-2 border rounded-lg"
-              >
-                <option value="ALL">Localização - Todas</option>
-                {uniqueValues.locations.map(loc => (
-                  <option key={loc} value={loc}>{loc}</option>
+                <option value="ALL">Site - Todos</option>
+                {uniqueValues.sites.map(site => (
+                  <option key={site} value={site}>{site}</option>
                 ))}
               </select>
 
               <select
                 value={filters.certificateType}
-                onChange={(e) => setFilters({...filters, certificateType: e.target.value})}
+                onChange={(e) => setFilters({ ...filters, certificateType: e.target.value })}
                 className="px-3 py-2 border rounded-lg"
               >
                 <option value="ALL">Tipo - Todos</option>
@@ -926,210 +1349,241 @@ const formatCurrency = (value: string, currency: string): string => {
               </select>
 
               <select
-                value={filters.needsAction}
-                onChange={(e) => setFilters({...filters, needsAction: e.target.value})}
+                value={filters.expirationRange}
+                onChange={(e) => setFilters({ ...filters, expirationRange: e.target.value })}
                 className="px-3 py-2 border rounded-lg"
               >
-                <option value="ALL">Ação Imediata - Todos</option>
-                <option value="YES">Sim</option>
-                <option value="NO">Não</option>
+                <option value="ALL">Expiração - Todos</option>
+                <option value="EXPIRED">Expirados</option>
+                <option value="30_DAYS">0-30 dias</option>
+                <option value="60_DAYS">31-60 dias</option>
+                <option value="90_DAYS">61-90 dias</option>
+                <option value="180_DAYS">91-180 dias</option>
+                <option value="SAFE">&gt; 180 dias</option>
               </select>
             </div>
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b sticky top-0 z-10">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    <div className="flex items-center">
-                      Status
-                      <ColumnFilterDropdown column="validity_status" displayName="Status" />
-                    </div>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('item_name')}
-                  >
-                    <div className="flex items-center">
-                      Item {sortBy === 'item_name' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                      <ColumnFilterDropdown column="item_name" displayName="Item" />
-                    </div>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('certificate_type')}
-                  >
-                    <div className="flex items-center">
-                      Certificado {sortBy === 'certificate_type' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                      <ColumnFilterDropdown column="certificate_type" displayName="Certificado" />
-                    </div>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    <div className="flex items-center">
-                      Categoria
-                      <ColumnFilterDropdown column="category_name" displayName="Categoria" />
-                    </div>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    <div className="flex items-center">
-                      Localização
-                      <ColumnFilterDropdown column="Home_Area_city" displayName="Localização" />
-                    </div>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('days_until_expiration')}
-                  >
-                    Dias p/ Expirar {sortBy === 'days_until_expiration' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('combined_risk_score')}
-                  >
-                    <div className="flex items-center">
-                      Risco {sortBy === 'combined_risk_score' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                      <ColumnFilterDropdown column="risk_trend" displayName="Risco" />
-                    </div>
-                  </th>
-                  <th 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('action_priority')}
-                  >
-                    Prioridade {sortBy === 'action_priority' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Valor Risco</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    <div className="flex items-center">
-                      Recomendação
-                      <ColumnFilterDropdown column="recommended_action" displayName="Ação" />
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredData.map((item, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(item.validity_status)}
-                        <span className="text-sm font-medium">{item.validity_status}</span>
+        <div className="bg-white rounded-lg shadow overflow-hidden mx-4">
+          <div className="overflow-x-auto">
+            <div className="max-h-[700px] overflow-y-auto">
+              <table className="min-w-full w-full table-fixed">
+                <thead className="bg-gray-50 border-b sticky top-0 z-10">
+                  <tr>
+                    <th className="w-40 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                      <div className="flex items-center">
+                        Site
+                        <ColumnFilterDropdown column="Home_site_name" displayName="Site" />
                       </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="text-sm font-medium text-gray-900">{item.item_name}</div>
-                      <div className="text-xs text-gray-500">{item.item_code}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="text-sm font-medium text-gray-900">{item.certificate_type}</div>
-                      <div className="text-xs text-gray-500">{item.certificate_description}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="text-sm text-gray-900">{item.category_name}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="text-sm text-gray-900">{item.Home_Area_city}</div>
-                      <div className="text-xs text-gray-500">{item.Home_Area_State}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        item.days_until_expiration < 0 
-                          ? 'bg-red-100 text-red-800' 
-                          : item.days_until_expiration < 30 
-                          ? 'bg-yellow-100 text-yellow-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
-                        {item.days_until_expiration} dias
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getRiskBadgeColor(item.risk_trend)}`}>
-                        {item.risk_trend.replace('_', ' ')}
-                      </span>
-                      <div className="text-xs text-gray-500 mt-1">Score: {item.combined_risk_score}</div>
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      {item.needs_immediate_action === 1 && (
-                        <ExclamationTriangleIcon className="w-5 h-5 text-red-500 mx-auto" />
-                      )}
-                      <div className="text-xs font-medium mt-1">{item.action_priority}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {formatCurrency(item.asset_value_at_risk, item.purchase_currency)}
+                    </th>
+                    <th className="w-80 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                      <div className="flex items-center">
+                        Área / Zona
                       </div>
-                    </td>
-                    <td className="px-4 py-4 max-w-xs">
-                      <div className="text-sm text-gray-700 truncate" title={item.ai_recommendation}>
-                        {item.ai_recommendation}
+                    </th>
+                    <th
+                      className="w-48 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('certificate_description')}
+                    >
+                      <div className="flex items-center">
+                        Certificado {sortBy === 'certificate_description' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                        <ColumnFilterDropdown column="certificate_description" displayName="Certificado" />
                       </div>
-                      <div className="text-xs text-blue-600 font-medium mt-1">{item.recommended_action}</div>
-                    </td>
+                    </th>
+                    <th className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                      <div className="flex items-center">
+                        Código
+                      </div>
+                    </th>
+                    <th
+                      className="w-64 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('item_name')}
+                    >
+                      <div className="flex items-center">
+                        Item {sortBy === 'item_name' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                        <ColumnFilterDropdown column="item_name" displayName="Item" />
+                      </div>
+                    </th>
+                    <th className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                      <div className="flex items-center">
+                        Marca
+                        <ColumnFilterDropdown column="brand" displayName="Marca" />
+                      </div>
+                    </th>
+                    <th className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                      <div className="flex items-center">
+                        Modelo
+                        <ColumnFilterDropdown column="model" displayName="Modelo" />
+                      </div>
+                    </th>
+                    <th className="w-40 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                      <div className="flex items-center">
+                        Serial
+                        <ColumnFilterDropdown column="serial" displayName="Serial" />
+                      </div>
+                    </th>
+                    <th
+                      className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      onClick={() => handleSort('expiration_date')}
+                    >
+                      Expiração {sortBy === 'expiration_date' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                    </th>
+                    <th className="w-28 px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase">
+                      Dias p/ Expirar
+                    </th>
+                    <th className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                      <div className="flex items-center">
+                        Status
+                        <ColumnFilterDropdown column="certificate_status_name" displayName="Status" />
+                      </div>
+                    </th>
+                    <th className="w-32 px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase">
+                      Criticidade
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {filteredData.map((item, index) => {
+                    const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+                    const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
+
+                    return (
+                      <tr
+                        key={item.id}
+                        className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                          }`}
+                      >
+                        <td className="px-6 py-5">
+                          <div className="text-sm font-medium text-gray-900">{item.Home_site_name}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="space-y-1">
+                            <div className="text-xs font-semibold text-gray-800 leading-tight">{item.code_area}</div>
+                            <div className="text-xs text-gray-600 leading-tight">{item.code_zone}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm font-medium text-gray-900 leading-relaxed">{item.certificate_description}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm font-mono font-medium text-gray-900 bg-gray-100 px-2 py-1 rounded inline-block">
+                            {item.item_code}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm font-medium text-gray-900 leading-tight">{item.item_name}</div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm text-gray-700">
+                            {item.brand || <span className="text-gray-400 italic">-</span>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm text-gray-700">
+                            {item.model || <span className="text-gray-400 italic">-</span>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="text-sm font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded inline-block">
+                            {item.serial}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{formatDate(item.expiration_date)}</div>
+                        </td>
+                        <td className="px-6 py-5 text-center">
+                          <span className={`inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-bold ${daysUntilExpiration < 0
+                              ? 'bg-red-100 text-red-800 border border-red-200'
+                              : daysUntilExpiration < 30
+                                ? 'bg-orange-100 text-orange-800 border border-orange-200'
+                                : daysUntilExpiration < 90
+                                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                                  : daysUntilExpiration < 180
+                                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                    : 'bg-green-100 text-green-800 border border-green-200'
+                            }`}>
+                            {daysUntilExpiration} dias
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(item.certificate_status_name)}
+                            <span className="text-sm font-medium">{item.certificate_status_name}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 text-center">
+                          <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold shadow-sm ${criticalityBadge.color}`}>
+                            {criticalityBadge.icon}
+                            {criticalityBadge.label}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {filteredData.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500">Nenhum certificado encontrado.</p>
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                <ExclamationTriangleIcon className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-gray-500 text-lg font-medium">Nenhum certificado encontrado.</p>
+              <p className="text-gray-400 text-sm mt-2">Tente ajustar os filtros de busca</p>
             </div>
           )}
 
-          <div className="bg-gray-50 px-4 py-3 border-t">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
                   onClick={() => handlePageChange(pagination.currentPage - 1)}
                   disabled={!pagination.hasPreviousPage}
-                  className={`px-4 py-2 border rounded-md ${
-                    pagination.hasPreviousPage
-                      ? 'text-gray-700 bg-white hover:bg-gray-50'
-                      : 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                  }`}
+                  className={`px-4 py-2 border rounded-lg font-medium transition-all ${pagination.hasPreviousPage
+                      ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300 shadow-sm'
+                      : 'text-gray-400 bg-gray-100 cursor-not-allowed border-gray-200'
+                    }`}
                 >
                   Anterior
                 </button>
                 <button
                   onClick={() => handlePageChange(pagination.currentPage + 1)}
                   disabled={!pagination.hasNextPage}
-                  className={`ml-3 px-4 py-2 border rounded-md ${
-                    pagination.hasNextPage
-                      ? 'text-gray-700 bg-white hover:bg-gray-50'
-                      : 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                  }`}
+                  className={`ml-3 px-4 py-2 border rounded-lg font-medium transition-all ${pagination.hasNextPage
+                      ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300 shadow-sm'
+                      : 'text-gray-400 bg-gray-100 cursor-not-allowed border-gray-200'
+                    }`}
                 >
                   Próxima
                 </button>
               </div>
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-gray-700 font-medium">
                     Mostrando{' '}
-                    <span className="font-medium">
+                    <span className="font-bold text-blue-600">
                       {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}
                     </span>{' '}
                     até{' '}
-                    <span className="font-medium">
+                    <span className="font-bold text-blue-600">
                       {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)}
                     </span>{' '}
                     de{' '}
-                    <span className="font-medium">{pagination.totalItems}</span> resultados
+                    <span className="font-bold text-gray-900">{pagination.totalItems}</span> resultados
                   </p>
                 </div>
                 <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                  <nav className="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={!pagination.hasPreviousPage}
-                      className={`relative inline-flex items-center px-2 py-2 rounded-l-md border ${
-                        pagination.hasPreviousPage
-                          ? 'text-gray-500 bg-white hover:bg-gray-50'
-                          : 'text-gray-300 bg-gray-100 cursor-not-allowed'
-                      }`}
+                      className={`relative inline-flex items-center px-3 py-2 rounded-l-lg border font-medium transition-all ${pagination.hasPreviousPage
+                          ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300'
+                          : 'text-gray-300 bg-gray-100 cursor-not-allowed border-gray-200'
+                        }`}
                     >
                       <ChevronLeftIcon className="h-5 w-5" />
                     </button>
@@ -1150,11 +1604,10 @@ const formatCurrency = (value: string, currency: string): string => {
                         <button
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                            pagination.currentPage === pageNumber
-                              ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                          }`}
+                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-semibold transition-all ${pagination.currentPage === pageNumber
+                              ? 'z-10 bg-blue-600 border-blue-600 text-white shadow-md'
+                              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                            }`}
                         >
                           {pageNumber}
                         </button>
@@ -1164,11 +1617,10 @@ const formatCurrency = (value: string, currency: string): string => {
                     <button
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={!pagination.hasNextPage}
-                      className={`relative inline-flex items-center px-2 py-2 rounded-r-md border ${
-                        pagination.hasNextPage
-                          ? 'text-gray-500 bg-white hover:bg-gray-50'
-                          : 'text-gray-300 bg-gray-100 cursor-not-allowed'
-                      }`}
+                      className={`relative inline-flex items-center px-3 py-2 rounded-r-lg border font-medium transition-all ${pagination.hasNextPage
+                          ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300'
+                          : 'text-gray-300 bg-gray-100 cursor-not-allowed border-gray-200'
+                        }`}
                     >
                       <ChevronRightIcon className="h-5 w-5" />
                     </button>

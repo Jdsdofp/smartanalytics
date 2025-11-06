@@ -1223,7 +1223,7 @@ export default function PredictiveCertificateAnalysis() {
 
 
       {activeTab === 'report' && (
-        <div className="mb-4">
+        <div className="mb-1">
           <CertificateReportGrid />
         </div>
       )
