@@ -7,6 +7,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import CertificateReportGrid from './Reports/reportMN0400_411';
+import { useCompany } from '../../hooks/useCompany';
 
 // import '../../../fullcalendar-custom.css';
 
@@ -59,8 +60,7 @@ interface ApiResponse {
 }
 
 export default function PredictiveCertificateAnalysis() {
-  const company_id = sessionStorage.getItem('companyData') ? JSON.parse(sessionStorage.getItem('companyData') || '{}') : null;
-  const companyId = company_id?.details?.company_id;
+  const { companyId } = useCompany()
   
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [data, setData] = useState<ApiResponse | null>(null);

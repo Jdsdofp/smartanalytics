@@ -12,6 +12,7 @@ import {
   ChartBarIcon,
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
+import { useCompany } from '../../../hooks/useCompany';
 
 interface CertificateReport {
   id: number;
@@ -90,7 +91,7 @@ export default function CertificateReportGrid() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportType, setExportType] = useState<'excel' | 'pdf'>('excel');
-  const companyId = 610;
+  const { companyId } = useCompany()
   const filterRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // IMPORTANTE: Declarar funções utilitárias ANTES dos useMemo
