@@ -196,7 +196,7 @@ export default function CertificateReportGrid() {
       });
 
       const response = await fetch(
-        `http://localhost:4000/api/dashboard/${companyId}/certificates/reports?${params}`
+        `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
       );
 
       if (!response.ok) {
