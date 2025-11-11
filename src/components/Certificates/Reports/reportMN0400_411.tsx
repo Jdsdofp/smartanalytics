@@ -169,7 +169,7 @@ export default function CertificateReportGrid() {
     setLoadingAnalysis(true);
     try {
       const response = await fetch(
-        `http://localhost:4000/api/dashboard/${companyId}/certificates/reports?page=1&limit=999999&sortBy=${sortBy}&sortOrder=${sortOrder}`
+        `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?page=1&limit=999999&sortBy=${sortBy}&sortOrder=${sortOrder}`
       );
 
       if (!response.ok) {
