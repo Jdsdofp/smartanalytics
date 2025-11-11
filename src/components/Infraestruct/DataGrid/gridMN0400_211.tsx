@@ -1008,9 +1008,7 @@ const RawDataExplorer: React.FC = () => {
     }, [isDeviceUidDropdownOpen]);
 
     // 🆕 FILTRO DOS DEVICE_UIDS BASEADO NA BUSCA
-    const filteredDeviceUids = availableDeviceUids.filter(deviceUid =>
-        deviceUid.toLowerCase().includes(deviceUidSearchTerm.toLowerCase())
-    );
+    // Computado no FilterBar para evitar declaração duplicada/remota aqui.
 
     // Chame no useEffect
     useEffect(() => {
