@@ -8,7 +8,7 @@ import Assets from './pages/Analytics/Assets';
 import People from './pages/Analytics/Peoples';
 import MN0400_013 from './pages/Analytics/Assets/MN0400_013';
 import MN0400_12 from './pages/Analytics/Assets/MN0400_12';
-import MN0400_411 from './pages/Analytics/Certificates/MN0400_411';
+import MN0400_411 from './pages/Analytics/Certificates/MN0400_511';
 import MN0400_412 from './pages/Analytics/Certificates/MN0400_412';
 import MN0400_413 from './pages/Analytics/Certificates/MN0400_413';
 import "./i18n";
@@ -71,7 +71,7 @@ function App() {
 
       {/* Remova o ApolloProvider individual daqui */}
       <Route
-        path="/MN0400_411"
+        path="/MN0400_511"
         element={
           <PrivateRoute>
             <MN0400_411 />

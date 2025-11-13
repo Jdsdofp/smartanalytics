@@ -901,7 +901,7 @@ const RawDataExplorer: React.FC = () => {
     const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
     const [activeTab, setActiveTab] = useState<string>('gps');
     const [data, setData] = useState<any[]>([]);
-    const { company } = useCompany()
+    const { companyId } = useCompany()
 
     // 🆕 ADICIONE ESTES ESTADOS
     const [sortBy, setSortBy] = useState<string>('');
@@ -930,7 +930,7 @@ const RawDataExplorer: React.FC = () => {
         setLoadingDeviceUids(true);
         try {
             const response = await fetch(
-                `https://apinode.smartxhub.cloud/api/dashboard/devices/${company?.company_id}/device/list`
+                `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/device/list`
             );
 
             if (!response.ok) {
@@ -951,7 +951,7 @@ const RawDataExplorer: React.FC = () => {
         } finally {
             setLoadingDeviceUids(false);
         }
-    }, [company?.company_id]);
+    }, [companyId]);
 
 
         // 🆕 FUNÇÕES PARA MANIPULAR O SELECT DE DEVICE_UID
@@ -1020,7 +1020,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'gps',
             label: t('rawDataExplorer.tabs.gps'),
             icon: MapPinIcon,
-            endpoint: `/api/dashboard/devices/${company?.company_id}/raw/gps-reports`,
+            endpoint: `/api/dashboard/devices/${companyId}/raw/gps-reports`,
             exportTable: 'device_gps_report_monitoring',
             columns: [],
             filters: [
@@ -1034,7 +1034,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'events',
             label: t('rawDataExplorer.tabs.events'),
             icon: ExclamationTriangleIcon,
-            endpoint: `/api/dashboard/devices/${company?.company_id}/raw/events`,
+            endpoint: `/api/dashboard/devices/${companyId}/raw/events`,
             exportTable: 'device_events_management',
             columns: [],
             filters: [
@@ -1048,7 +1048,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'scanning',
             label: t('rawDataExplorer.tabs.scanning'),
             icon: SignalIcon,
-            endpoint: `/api/dashboard/devices/${company?.company_id}/raw/scanning`,
+            endpoint: `/api/dashboard/devices/${companyId}/raw/scanning`,
             exportTable: 'device_scanning_monitoring',
             columns: [],
             filters: [
@@ -1062,7 +1062,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'configuration',
             label: t('rawDataExplorer.tabs.configuration'),
             icon: Cog6ToothIcon,
-            endpoint: `/api/dashboard/devices/${company?.company_id}/raw/configuration`,
+            endpoint: `/api/dashboard/devices/${companyId}/raw/configuration`,
             exportTable: 'device_configuration_management',
             columns: [],
             filters: [
@@ -1076,7 +1076,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'errors',
             label: t('rawDataExplorer.tabs.errors'),
             icon: XCircleIcon,
-            endpoint: `/api/dashboard/devices/${company?.company_id}/raw/gps-errors`,
+            endpoint: `/api/dashboard/devices/${companyId}/raw/gps-errors`,
             exportTable: 'device_gps_error_management',
             columns: [],
             filters: [
@@ -1090,7 +1090,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'heartbeats',
             label: t('rawDataExplorer.tabs.heartbeats'),
             icon: BoltIcon,
-            endpoint: `/api/dashboard/devices/${company?.company_id}/heartbeats/raw`,
+            endpoint: `/api/dashboard/devices/${companyId}/heartbeats/raw`,
             exportTable: 'device_heartbeat',
             columns: [],
             filters: [
@@ -1104,7 +1104,7 @@ const RawDataExplorer: React.FC = () => {
             id: 'scannedBeacons',
             label: t('rawDataExplorer.tabs.scannedBeacons'),
             icon: RssIcon,
-            endpoint: `/api/dashboard/devices/${company?.company_id}/scanned-beacons/raw`,
+            endpoint: `/api/dashboard/devices/${companyId}/scanned-beacons/raw`,
             exportTable: 'device_scanned_beacons_list',
             columns: [],
             filters: [

@@ -45,7 +45,7 @@ function Header({ onMenuClick }: HeaderProps) {
             {logo ? (
               <img
                 src="/logo10.png"
-                alt={company?.full_name || t('header.logoAlt')}
+                alt={company?.details?.full_name || t('header.logoAlt')}
                 className="h-15 w-auto max-w-[120px] object-contain"
               />
             ) : (

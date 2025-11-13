@@ -24,7 +24,7 @@ export default function Home() {
                     {t('home.welcome', { name: user?.name })}
                   </h2>
                   <p className="text-white/90">
-                    {company?.full_name} | {user?.role}
+                    {company?.details?.full_name} | {user?.role}
                   </p>
                 </div>
 
@@ -54,7 +54,7 @@ export default function Home() {
                   </div>
 
                   {/* Card Empresa */}
-                  <div className="card-company bg-white dark:bg-gray-900 fade-in">
+                  {/* <div className="card-company bg-white dark:bg-gray-900 fade-in">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-xl font-semibold text-company-primary">
                         {t('home.company')}
@@ -65,7 +65,7 @@ export default function Home() {
                     </div>
                     <div className="space-y-2 text-sm">
                       <p className="text-gray-600 dark:text-gray-400">
-                        <strong>{t('home.name')}:</strong> {company?.full_name}
+                        <strong>{t('home.name')}:</strong> {company?.details?.full_name}
                       </p>
                       <p className="text-gray-600 dark:text-gray-400">
                         <strong>{t('home.city')}:</strong> {company?.def_city}
@@ -74,7 +74,7 @@ export default function Home() {
                         <strong>{t('home.state')}:</strong> {company?.def_state}
                       </p>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Card Status */}
                   <div className="p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow fade-in">
@@ -129,7 +129,7 @@ export default function Home() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
                     <p><strong>{t('home.companyId')}:</strong> {user?.companyId}</p>
                     <p><strong>{t('home.webKey')}:</strong> {user?.webKey?.substring(0, 20)}...</p>
-                    <p><strong>{t('home.address')}:</strong> {company?.def_address1}</p>
+                    {/* <p><strong>{t('home.address')}:</strong> {company?.def_address1}</p> */}
                   </div>
                 </div>
               </div>

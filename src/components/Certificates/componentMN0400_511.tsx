@@ -6,7 +6,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
-import CertificateReportGrid from './Reports/reportMN0400_411';
+import CertificateReportGrid from './Reports/reportMN0400_511';
 import { useCompany } from '../../hooks/useCompany';
 
 // import '../../../fullcalendar-custom.css';
