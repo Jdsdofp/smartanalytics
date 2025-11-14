@@ -1,4 +1,4 @@
-// // src/components/layout/Menu.tsx
+// src/components/layout/Menu.tsx
 import { useState, useEffect, useMemo } from 'react'
 import {
   ChartBarIcon,
@@ -48,16 +48,6 @@ export interface MenuItemProps {
   permissionCode?: string
 }
 
-
-  const hasActiveChild = (children: MenuItemProps[] | undefined, currentPath: string): boolean => {
-  if (!children) return false
-  return children.some((child) =>
-    child.path === currentPath ||
-    hasActiveChild(child.children, currentPath)
-  )
-}
-
-
 function MenuItem({
   icon: Icon,
   label,
@@ -76,16 +66,13 @@ function MenuItem({
   onToggle?: (path: string, isOpen: boolean) => void,
   currentPath?: string,
   openItems?: Set<string>
-  }) {
+}) {
   const [showPopover, setShowPopover] = useState(false)
   const [popoverPosition, setPopoverPosition] = useState({ top: 100, left: 0 })
 
   const hasChildren = children && children.length > 0
   const isActive = path === currentPath
-  const isChildActive = hasActiveChild(children, currentPath!)
-
   const isOpen = path ? openItems?.has(path) : false
-
 
   if (hidden) return null
 
@@ -94,10 +81,8 @@ function MenuItem({
   const handleClick = () => {
     if (disabled) return
 
-    // CORREÇÃO: Se estiver colapsado e tiver filhos, só abre o popover, não navega
-    if (collapsed && level === 0 && hasChildren) {
-      // Não faz nada - o popover será mostrado no hover
-      setShowPopover(v => !v)
+    // Se está collapsed e tem filhos no nível 0, não faz nada (popover é controlado por hover)
+    if (collapsed && hasChildren && level === 0) {
       return
     }
 
@@ -106,7 +91,8 @@ function MenuItem({
       if (onToggle && path) {
         onToggle(path, newState)
       }
-    } else if (path) {
+    } else if (path && !hasChildren) {
+      // Só navega se não tiver filhos
       navigate(path)
     }
     onClick?.()
@@ -125,6 +111,22 @@ function MenuItem({
 
   const paddingLeft = level === 0 ? 'px-4' : level === 1 ? 'pl-8' : 'pl-12'
 
+  // Verifica se algum filho está ativo
+  const hasActiveChild = useMemo(() => {
+    if (!children) return false
+    const checkChildren = (items: MenuItemProps[]): boolean => {
+      return items.some(item => {
+        if (item.path === currentPath) return true
+        if (item.children) return checkChildren(item.children)
+        return false
+      })
+    }
+    return checkChildren(children)
+  }, [children, currentPath])
+
+  // Define se deve mostrar como ativo no modo collapsed
+  const showAsActive = isActive || (collapsed && hasActiveChild)
+
   return (
     <>
       <div
@@ -140,7 +142,7 @@ function MenuItem({
                      transition-colors group relative text-sm
                      ${disabled
               ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'
-              : isActive || isChildActive
+              : showAsActive
                 ? 'text-white bg-company-primary'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer'
             }`}
@@ -240,9 +242,6 @@ function PopoverSubmenu({ item, currentPath }: { item: MenuItemProps, currentPat
   const navigate = useNavigate()
   const isActive = item.path === currentPath
 
-
-
-
   return (
     <div>
       <button
@@ -250,26 +249,26 @@ function PopoverSubmenu({ item, currentPath }: { item: MenuItemProps, currentPat
           if (item.disabled) return
 
           if (hasChildren) {
-        setIsOpen(!isOpen)
+            setIsOpen(!isOpen)
           } else if (item.path) {
-        navigate(item.path)
+            navigate(item.path)
           }
           item.onClick?.()
         }}
         disabled={item.disabled}
         className={`w-full flex items-center justify-between gap-3 px-4 py-2.5 transition-colors text-left
-           ${item.disabled
-        ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'
-        : isActive
-          ? 'text-company-primary bg-company-primary bg-opacity-10'
-          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                   ${item.disabled
+            ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'
+            : isActive
+              ? 'text-company-primary bg-company-primary bg-opacity-10'
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
       >
         <div className="flex items-center gap-3">
-          <item.icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-company-primary' : ''}`} />
-          <span className={`text-sm font-medium ${isActive ? 'text-company-primary' : ''}`}>{item.label}</span>
+          <item.icon className="w-4 h-4 flex-shrink-0" />
+          <span className="text-sm font-medium">{item.label}</span>
         </div>
-        {hasChildren && !item.disabled && <ChevronDownIcon className={`w-4 h-4 transition-transform ${isActive ? 'text-company-primary' : ''} ${isOpen ? 'rotate-180' : ''}`} />}
+        {hasChildren && !item.disabled && <ChevronDownIcon className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />}
       </button>
 
       {hasChildren && (
@@ -574,7 +573,6 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
       ]
     },
   ]
-  
 
   // Filtra o menu de acordo com as permissões do usuário
   const menuItems = useMemo(() => {
