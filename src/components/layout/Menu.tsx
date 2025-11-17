@@ -440,7 +440,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
         {
           icon: ServerIcon, label: 'Site Survey', path: '/MN0400_210', children: [
             { icon: ChartBarIcon, label: 'Device Logs & Monitoring', path: '/MN0400_211', permissionCode: 'MN0500_110' },
-            { icon: ChartBarIcon, label: 'Overall Equipment Effectiveness', path: '/MN0400_212', permissionCode: 'MN0400_511' }
+            { icon: ChartBarIcon, label: 'Overall Equipment Effectiveness', path: '/MN0400_212', permissionCode: 'MN0400_212' }
           ]
         },
       ]
