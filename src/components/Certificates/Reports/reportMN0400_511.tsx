@@ -93,6 +93,10 @@ export default function CertificateReportGrid() {
   const [exportType, setExportType] = useState<'excel' | 'pdf'>('excel');
   const { companyId } = useCompany()
   const filterRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [dateFilter, setDateFilter] = useState({
+    startDate: '',
+    endDate: ''
+  });
 
   // IMPORTANTE: Declarar funções utilitárias ANTES dos useMemo
   const formatDate = (dateString: string) => {
@@ -196,6 +200,14 @@ export default function CertificateReportGrid() {
         sortOrder
       });
 
+      // Adicionar filtros de data se existirem
+      if (dateFilter.startDate) {
+        params.append('startDate', dateFilter.startDate);
+      }
+      if (dateFilter.endDate) {
+        params.append('endDate', dateFilter.endDate);
+      }
+
       const response = await fetch(
         `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
       );
@@ -218,6 +230,22 @@ export default function CertificateReportGrid() {
     fetchData(1);
     fetchAllDataForAnalysis();
   }, [itemsPerPage, sortBy, sortOrder]);
+
+
+  // 4. Função para aplicar o filtro de data
+  const handleDateFilterApply = () => {
+    fetchData(1);
+  };
+
+
+  // 5. Função para limpar o filtro de data
+  const handleDateFilterClear = () => {
+    setDateFilter({
+      startDate: '',
+      endDate: ''
+    });
+  };
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1032,7 +1060,7 @@ export default function CertificateReportGrid() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Análise Crítica de Certificados</h1>
           <p className="text-gray-600">Relatório detalhado com score de risco e análise preditiva</p>
@@ -1315,54 +1343,136 @@ export default function CertificateReportGrid() {
           )}
 
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="px-3 py-2 border rounded-lg"
-              >
-                <option value="ALL">Status - Todos</option>
-                {uniqueValues.statuses.map(status => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                <select
+                  value={filters.status}
+                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                  className="px-3 py-2 border rounded-lg"
+                >
+                  <option value="ALL">Status - Todos</option>
+                  {uniqueValues.statuses.map(status => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
 
-              <select
-                value={filters.site}
-                onChange={(e) => setFilters({ ...filters, site: e.target.value })}
-                className="px-3 py-2 border rounded-lg"
-              >
-                <option value="ALL">Site - Todos</option>
-                {uniqueValues.sites.map(site => (
-                  <option key={site} value={site}>{site}</option>
-                ))}
-              </select>
+                <select
+                  value={filters.site}
+                  onChange={(e) => setFilters({ ...filters, site: e.target.value })}
+                  className="px-3 py-2 border rounded-lg"
+                >
+                  <option value="ALL">Site - Todos</option>
+                  {uniqueValues.sites.map(site => (
+                    <option key={site} value={site}>{site}</option>
+                  ))}
+                </select>
 
-              <select
-                value={filters.certificateType}
-                onChange={(e) => setFilters({ ...filters, certificateType: e.target.value })}
-                className="px-3 py-2 border rounded-lg"
-              >
-                <option value="ALL">Tipo - Todos</option>
-                {uniqueValues.certificateTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
+                <select
+                  value={filters.certificateType}
+                  onChange={(e) => setFilters({ ...filters, certificateType: e.target.value })}
+                  className="px-3 py-2 border rounded-lg"
+                >
+                  <option value="ALL">Tipo - Todos</option>
+                  {uniqueValues.certificateTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
 
-              <select
-                value={filters.expirationRange}
-                onChange={(e) => setFilters({ ...filters, expirationRange: e.target.value })}
-                className="px-3 py-2 border rounded-lg"
-              >
-                <option value="ALL">Expiração - Todos</option>
-                <option value="EXPIRED">Expirados</option>
-                <option value="30_DAYS">0-30 dias</option>
-                <option value="60_DAYS">31-60 dias</option>
-                <option value="90_DAYS">61-90 dias</option>
-                <option value="180_DAYS">91-180 dias</option>
-                <option value="SAFE">&gt; 180 dias</option>
-              </select>
-            </div>
+                <select
+                  value={filters.expirationRange}
+                  onChange={(e) => setFilters({ ...filters, expirationRange: e.target.value })}
+                  className="px-3 py-2 border rounded-lg"
+                >
+                  <option value="ALL">Expiração - Todos</option>
+                  <option value="EXPIRED">Expirados</option>
+                  <option value="30_DAYS">0-30 dias</option>
+                  <option value="60_DAYS">31-60 dias</option>
+                  <option value="90_DAYS">61-90 dias</option>
+                  <option value="180_DAYS">91-180 dias</option>
+                  <option value="SAFE">&gt; 180 dias</option>
+                </select>
+              </div>
+
+              {/* Versão simples com hora */}
+              <div className="border-t pt-4">
+                <div className="mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Filtrar por Data de Expiração
+                  </label>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Data Inicial</label>
+                    <input
+                      type="datetime-local"
+                      value={dateFilter.startDate}
+                      onChange={(e) => setDateFilter({ ...dateFilter, startDate: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                      max={dateFilter.endDate || undefined}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Data Final</label>
+                    <input
+                      type="datetime-local"
+                      value={dateFilter.endDate}
+                      onChange={(e) => setDateFilter({ ...dateFilter, endDate: e.target.value })}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                      min={dateFilter.startDate || undefined}
+                      disabled={!dateFilter.startDate}
+                    />
+                    {!dateFilter.startDate && (
+                      <p className="text-xs text-gray-500 mt-1">Selecione a data inicial primeiro</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleDateFilterApply}
+                      disabled={!dateFilter.startDate || !dateFilter.endDate}
+                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${dateFilter.startDate && dateFilter.endDate
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                      title={!dateFilter.startDate || !dateFilter.endDate ? 'Preencha ambas as datas' : ''}
+                    >
+                      Aplicar
+                    </button>
+
+                    {(dateFilter.startDate || dateFilter.endDate) && (
+                      <button
+                        onClick={handleDateFilterClear}
+                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                      >
+                        Limpar
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Indicador visual do filtro ativo */}
+                {dateFilter.startDate && dateFilter.endDate && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-blue-800">
+                        <ClockIcon className="w-4 h-4" />
+                        <span className="font-medium">
+                          Filtrando certificados que expiram entre {new Date(dateFilter.startDate).toLocaleString('pt-BR')} e {new Date(dateFilter.endDate).toLocaleString('pt-BR')}
+                        </span>
+                      </div>
+                      <button
+                        onClick={handleDateFilterClear}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        Remover filtro
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </>
           )}
         </div>
 
@@ -1378,11 +1488,13 @@ export default function CertificateReportGrid() {
                         <ColumnFilterDropdown column="Home_site_name" displayName="Site" />
                       </div>
                     </th>
-                    <th className="w-80 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
-                      <div className="flex items-center">
-                        Área / Zona
-                      </div>
+                    <th className="w-40 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                      Área
                     </th>
+                    <th className="w-40 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                      Zona
+                    </th>
+
                     <th
                       className="w-48 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
                       onClick={() => handleSort('certificate_description')}
@@ -1459,11 +1571,19 @@ export default function CertificateReportGrid() {
                           <div className="text-sm font-medium text-gray-900">{item.Home_site_name}</div>
                         </td>
                         <td className="px-6 py-5">
-                          <div className="space-y-1">
-                            <div className="text-xs font-semibold text-gray-800 leading-tight">{item.code_area}</div>
-                            <div className="text-xs text-gray-600 leading-tight">{item.code_zone}</div>
+                          <div className="text-xs font-semibold text-gray-800 leading-tight">
+                            {item.code_area}
                           </div>
                         </td>
+
+                        <td className="px-6 py-5">
+                          <div className="text-xs text-gray-600 leading-tight">
+                            {item.code_zone}
+                          </div>
+                        </td>
+
+
+
                         <td className="px-6 py-5">
                           <div className="text-sm font-medium text-gray-900 leading-relaxed">{item.certificate_description}</div>
                         </td>
@@ -1491,18 +1611,20 @@ export default function CertificateReportGrid() {
                           </div>
                         </td>
                         <td className="px-6 py-5 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{formatDate(item.expiration_date)}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {formatDate(item.expiration_date)} {new Date(item.expiration_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
                         </td>
                         <td className="px-6 py-5 text-center">
                           <span className={`inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-bold ${daysUntilExpiration < 0
-                              ? 'bg-red-100 text-red-800 border border-red-200'
-                              : daysUntilExpiration < 30
-                                ? 'bg-orange-100 text-orange-800 border border-orange-200'
-                                : daysUntilExpiration < 90
-                                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                                  : daysUntilExpiration < 180
-                                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                                    : 'bg-green-100 text-green-800 border border-green-200'
+                            ? 'bg-red-100 text-red-800 border border-red-200'
+                            : daysUntilExpiration < 30
+                              ? 'bg-orange-100 text-orange-800 border border-orange-200'
+                              : daysUntilExpiration < 90
+                                ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                                : daysUntilExpiration < 180
+                                  ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                  : 'bg-green-100 text-green-800 border border-green-200'
                             }`}>
                             {daysUntilExpiration} dias
                           </span>
@@ -1544,8 +1666,8 @@ export default function CertificateReportGrid() {
                   onClick={() => handlePageChange(pagination.currentPage - 1)}
                   disabled={!pagination.hasPreviousPage}
                   className={`px-4 py-2 border rounded-lg font-medium transition-all ${pagination.hasPreviousPage
-                      ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300 shadow-sm'
-                      : 'text-gray-400 bg-gray-100 cursor-not-allowed border-gray-200'
+                    ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300 shadow-sm'
+                    : 'text-gray-400 bg-gray-100 cursor-not-allowed border-gray-200'
                     }`}
                 >
                   Anterior
@@ -1554,8 +1676,8 @@ export default function CertificateReportGrid() {
                   onClick={() => handlePageChange(pagination.currentPage + 1)}
                   disabled={!pagination.hasNextPage}
                   className={`ml-3 px-4 py-2 border rounded-lg font-medium transition-all ${pagination.hasNextPage
-                      ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300 shadow-sm'
-                      : 'text-gray-400 bg-gray-100 cursor-not-allowed border-gray-200'
+                    ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300 shadow-sm'
+                    : 'text-gray-400 bg-gray-100 cursor-not-allowed border-gray-200'
                     }`}
                 >
                   Próxima
@@ -1582,8 +1704,8 @@ export default function CertificateReportGrid() {
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={!pagination.hasPreviousPage}
                       className={`relative inline-flex items-center px-3 py-2 rounded-l-lg border font-medium transition-all ${pagination.hasPreviousPage
-                          ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300'
-                          : 'text-gray-300 bg-gray-100 cursor-not-allowed border-gray-200'
+                        ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300'
+                        : 'text-gray-300 bg-gray-100 cursor-not-allowed border-gray-200'
                         }`}
                     >
                       <ChevronLeftIcon className="h-5 w-5" />
@@ -1606,8 +1728,8 @@ export default function CertificateReportGrid() {
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
                           className={`relative inline-flex items-center px-4 py-2 border text-sm font-semibold transition-all ${pagination.currentPage === pageNumber
-                              ? 'z-10 bg-blue-600 border-blue-600 text-white shadow-md'
-                              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                            ? 'z-10 bg-blue-600 border-blue-600 text-white shadow-md'
+                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                             }`}
                         >
                           {pageNumber}
@@ -1619,8 +1741,8 @@ export default function CertificateReportGrid() {
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={!pagination.hasNextPage}
                       className={`relative inline-flex items-center px-3 py-2 rounded-r-lg border font-medium transition-all ${pagination.hasNextPage
-                          ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300'
-                          : 'text-gray-300 bg-gray-100 cursor-not-allowed border-gray-200'
+                        ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300'
+                        : 'text-gray-300 bg-gray-100 cursor-not-allowed border-gray-200'
                         }`}
                     >
                       <ChevronRightIcon className="h-5 w-5" />
