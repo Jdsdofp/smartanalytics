@@ -33,6 +33,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { filterMenuByPermissions } from '../../utils/menuPermissions'
 import { usePermissions } from '../../hooks/usePermissions'
 
+
 export interface MenuItemProps {
   icon: React.ComponentType<{ className?: string }>
   label: string
@@ -515,7 +516,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           { icon: ClockIcon, label: 'Days to Expiration Analysis', path: '/MN0400_422', permissionCode: 'MN0400_422' },
           { icon: ChartPieIcon, label: 'Renewal Pipeline Status', path: '/MN0400_423', permissionCode: 'MN0400_423' },
           { icon: DocumentTextIcon, label: 'Renewal Cycle Time', path: '/MN0400_424', permissionCode: 'MN0400_424' },
-          { icon: BellAlertIcon, label: 'Alert & Notification History', path: '/MN0400_425', permissionCode: 'MN0400_425'}
+          { icon: BellAlertIcon, label: 'Alert & Notification History', path: '/MN0400_425', permissionCode: 'MN0400_425' }
         ]
       },
       {
@@ -567,7 +568,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           { icon: TableCellsIcon, label: 'Critical Certificate Register', path: '/MN0400_462', permissionCode: 'MN0400_462' },
           { icon: DocumentChartBarIcon, label: 'Quality Assurance Metrics', path: '/MN0400_463', permissionCode: 'MN0400_463' },
           { icon: ChartBarIcon, label: 'Regulatory Compliance Score', path: '/MN0400_464', permissionCode: 'MN0400_464' },
-          { icon: DocumentTextIcon, label: 'Incident & Violation Tracking', path: '/MN0400_465', permissionCode: 'MN0400_465'}
+          { icon: DocumentTextIcon, label: 'Incident & Violation Tracking', path: '/MN0400_465', permissionCode: 'MN0400_465' }
         ]
       }
       ]
@@ -632,6 +633,13 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
 
   const menuWidth = getMenuWidth()
 
+  const companyLogoBase64 = company?.details?.logo ?? ''
+  const decode1 = companyLogoBase64 ? atob(companyLogoBase64) : ''
+  const finalBase64 = decode1;
+
+
+
+
   return (
     <>
       {isOpen && <div className="lg:hidden fixed inset-0 bg-black/50 z-40" onClick={onClose} />}
@@ -639,9 +647,19 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
       <aside className={`fixed lg:static top-0 left-0 z-40 h-screen lg:h-auto bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 lg:translate-x-0 flex-shrink-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} ${menuWidth}`}>
         <div className="flex flex-col h-full lg:h-screen lg:sticky lg:top-0">
           <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+
+            <img
+              src={`data:image/png;base64,${finalBase64}`}
+              alt="logo"
+              className="w-20 h-20 object-contain"
+            />
+
+
+
+
             {!collapsed && <h2 className="text-lg font-bold truncate text-company-primary">{company?.details.full_name || 'Menu'}</h2>}
             <div className="flex items-center gap-2 ml-auto">
-              <button onClick={() => setCollapsed(!collapsed)} title={collapsed ? 'Expandir menu' : 'Recolher menu'} className="hidden lg:block p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0 text-company-primary">
+              <button onClick={() => setCollapsed(!collapsed)} title={collapsed ? 'Expandir menu' : 'Recolher menu'} className={collapsed ? `ml-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0 bg-company-primary text-white` : `hidden lg:block p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0 text-company-primary`}>
                 {collapsed ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}
               </button>
               <button onClick={onClose} title="Fechar menu" className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0">
