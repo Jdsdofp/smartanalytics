@@ -14,6 +14,7 @@ import MN0400_413 from './pages/Analytics/Certificates/MN0400_413';
 import "./i18n";
 import MN0400_312 from './pages/Analytics/Locations/MN0400_312';
 import MN0400_211 from './pages/Analytics/Infraestrict/MN0400_211';
+import PocSwift from './pages/PocSwift';
 
 function App() {
 
@@ -108,6 +109,13 @@ function App() {
           <MN0400_211/>
         </PrivateRoute>
       }/>
+
+      <Route path="/poc-swift" element={
+        <PrivateRoute>
+          <PocSwift />
+        </PrivateRoute>
+      }/>
+
     </Routes>
 
   );
