@@ -111,9 +111,9 @@ function App() {
       }/>
 
       <Route path="/poc-swift" element={
-        <PrivateRoute>
+        <>
           <PocSwift />
-        </PrivateRoute>
+        </>
       }/>
 
     </Routes>
