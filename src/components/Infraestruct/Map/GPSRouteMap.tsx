@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -81,6 +81,16 @@ interface GPSPoint {
   gps_latitude: string | number;
   gps_longitude: string | number;
   gps_accuracy: number;
+}
+
+interface GPSFilters {
+  dev_eui: string[];
+  start_date: string;
+  end_date: string;
+  valid_gps_only: boolean;
+  max_accuracy: string;
+  min_accuracy: string;
+  latest_only?: boolean;
 }
 
 // Componente para ajustar o mapa aos bounds
@@ -212,9 +222,9 @@ function AutoZoom({
 
     const shouldApplyZoom = () => {
       if (!lastPositionRef.current) return true;
-      
+
       const distance = L.latLng(position).distanceTo(L.latLng(lastPositionRef.current));
-      
+
       // Aplicar zoom apenas se a distância for significativa
       return distance > 10; // Apenas se mover mais de 10 metros
     };
@@ -233,13 +243,13 @@ function AutoZoom({
       zoomTimeoutRef.current = setTimeout(() => {
         const targetZoom = getOptimalZoom();
         const duration = isPlaying ? 1.0 : 1.5;
-        
+
         map.setView(position, targetZoom, {
           animate: true,
           duration,
           easeLinearity: 0.25
         });
-        
+
         lastPositionRef.current = position;
       }, isPlaying ? 100 : 0);
     }
@@ -342,11 +352,10 @@ function ZoomControls({
           {/* Botão de Auto Zoom */}
           <button
             onClick={() => onAutoZoomToggle(!autoZoomEnabled)}
-            className={`flex items-center justify-center w-10 h-10 transition-colors border-b border-gray-200 ${
-              autoZoomEnabled 
-                ? 'bg-green-100 text-green-700 hover:bg-green-200' 
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`flex items-center justify-center w-10 h-10 transition-colors border-b border-gray-200 ${autoZoomEnabled
+              ? 'bg-green-100 text-green-700 hover:bg-green-200'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
             title={autoZoomEnabled ? t('gpsRouteMap.player.autoZoomDisable') : t('gpsRouteMap.player.autoZoomEnable')}
           >
             <div className="flex flex-col items-center">
@@ -387,20 +396,18 @@ function ZoomControls({
                     onMapTypeChange(type);
                     setShowMapTypes(false);
                   }}
-                  className={`w-full text-left px-3 py-2 text-sm rounded-md transition-all duration-200 flex items-center gap-3 ${
-                    mapType === type 
-                      ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200' 
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                  className={`w-full text-left px-3 py-2 text-sm rounded-md transition-all duration-200 flex items-center gap-3 ${mapType === type
+                    ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200'
+                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
                 >
-                  <div className={`w-3 h-3 rounded-full border-2 ${
-                    mapType === type ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-400'
-                  }`}></div>
+                  <div className={`w-3 h-3 rounded-full border-2 ${mapType === type ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-400'
+                    }`}></div>
                   <span>{MAP_TYPES[type].name}</span>
                 </button>
               ))}
             </div>
-            
+
             {/* Legenda de Status do Auto Zoom */}
             <div className="mt-3 pt-3 border-t border-gray-200">
               <div className="flex items-center justify-between text-xs text-gray-600">
@@ -592,16 +599,27 @@ function DraggableRouteMarker({
 
 const GPSRouteMapLeaflet = () => {
   const { t } = useTranslation();
-  const {companyId} = useCompany()
+  const { companyId } = useCompany()
   const [data, setData] = useState<GPSPoint[]>([]);
   const [loading, setLoading] = useState(false);
-  const [devEui, setDevEui] = useState('20635F0241000AB7');
+
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [maxAccuracy, setMaxAccuracy] = useState('');
   const [limit, setLimit] = useState(200);
   const [showFilters, setShowFilters] = useState(false);
-  
+
+  // Filtros
+  const [filters, setFilters] = useState<GPSFilters>({
+    dev_eui: [],
+    start_date: '',
+    end_date: '',
+    valid_gps_only: true,
+    max_accuracy: '100',
+    min_accuracy: '',
+    latest_only: false,
+  });
+
   // Estados para o player da rota
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPointIndex, setCurrentPointIndex] = useState(0);
@@ -609,22 +627,53 @@ const GPSRouteMapLeaflet = () => {
   const [progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
+  // @ts-ignore
   const [shouldApplyPlayerZoom, setShouldApplyPlayerZoom] = useState(false);
   const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('streets');
   const playbackIntervalRef = useRef<any | null>(null);
 
+  // Search term select
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Lista de dispositivos disponíveis
+  const [availableDevices, setAvailableDevices] = useState<string[]>([]);
+  const [loadingDevices, setLoadingDevices] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Paleta de cores distintas para múltiplos dispositivos
+  const DEVICE_COLORS = [
+    '#3b82f6', // blue-500
+    '#ef4444', // red-500
+    '#10b981', // green-500
+    '#f59e0b', // amber-500
+    '#8b5cf6', // violet-500
+    '#ec4899', // pink-500
+    '#14b8a6', // teal-500
+    '#f97316', // orange-500
+    '#6366f1', // indigo-500
+    '#84cc16', // lime-500
+  ];
+
+  const getDeviceColor = (devEui: string, allDevices: string[]): string => {
+    const index = allDevices.indexOf(devEui);
+    return DEVICE_COLORS[index % DEVICE_COLORS.length];
+  };
+
+
   const fetchGPSRoute = async () => {
-    if (!devEui) {
+    // Usar os dispositivos selecionados nos filtros
+    const selectedDevices = filters.dev_eui;
+
+    if (selectedDevices.length === 0) {
       alert(t('gpsRouteMap.alerts.noDeviceEUI'));
       return;
     }
 
-    console.warn(shouldApplyPlayerZoom)
-
     setLoading(true);
     try {
+      const deviceToSearch = selectedDevices[0];
       const params = new URLSearchParams({
-        dev_eui: devEui,
+        dev_eui: deviceToSearch,
         limit: limit.toString(),
         sortBy: 'timestamp',
         sortOrder: 'ASC',
@@ -663,50 +712,80 @@ const GPSRouteMapLeaflet = () => {
     setLimit(200);
   };
 
+  // Buscar lista de dispositivos disponíveis
+  const fetchAvailableDevices = useCallback(async () => {
+    setLoadingDevices(true);
+    try {
+      const response = await fetch(
+        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/device/list`
+      );
+
+      if (!response.ok) {
+        throw new Error('Falha ao carregar lista de dispositivos');
+      }
+
+      const result = await response.json();
+
+      if (result.success && Array.isArray(result.data)) {
+        setAvailableDevices(result.data);
+      }
+    } catch (err) {
+      console.error('Error fetching available devices:', err);
+      // Não mostrar erro ao usuário, apenas log
+    } finally {
+      setLoadingDevices(false);
+    }
+  }, []);
+
+  // Carregar lista de dispositivos ao montar componente
+  useEffect(() => {
+    fetchAvailableDevices();
+  }, [fetchAvailableDevices]);
+
 
   // Funções do player da rota
-const startPlayback = () => {
-  if (validData.length === 0) return;
+  const startPlayback = () => {
+    if (validData.length === 0) return;
 
-  setIsPlaying(true);
-  setShouldApplyPlayerZoom(true); // Habilitar zoom do player
-  playbackIntervalRef.current = setInterval(() => {
-    setCurrentPointIndex(prev => {
-      const nextIndex = prev + 1;
-      if (nextIndex >= validData.length) {
-        stopPlayback();
-        return prev;
-      }
-      setProgress((nextIndex / (validData.length - 1)) * 100);
-      return nextIndex;
-    });
-  }, 1000 / playbackSpeed);
-};
+    setIsPlaying(true);
+    setShouldApplyPlayerZoom(true); // Habilitar zoom do player
+    playbackIntervalRef.current = setInterval(() => {
+      setCurrentPointIndex(prev => {
+        const nextIndex = prev + 1;
+        if (nextIndex >= validData.length) {
+          stopPlayback();
+          return prev;
+        }
+        setProgress((nextIndex / (validData.length - 1)) * 100);
+        return nextIndex;
+      });
+    }, 1000 / playbackSpeed);
+  };
 
-const pausePlayback = () => {
-  setIsPlaying(false);
-  if (playbackIntervalRef.current) {
-    clearInterval(playbackIntervalRef.current);
-    playbackIntervalRef.current = null;
-  }
-};
+  const pausePlayback = () => {
+    setIsPlaying(false);
+    if (playbackIntervalRef.current) {
+      clearInterval(playbackIntervalRef.current);
+      playbackIntervalRef.current = null;
+    }
+  };
 
-const stopPlayback = () => {
-  setIsPlaying(false);
-  setShouldApplyPlayerZoom(false); // Desabilitar zoom do player
-  setCurrentPointIndex(0);
-  setProgress(0);
-  if (playbackIntervalRef.current) {
-    clearInterval(playbackIntervalRef.current);
-    playbackIntervalRef.current = null;
-  }
-};
+  const stopPlayback = () => {
+    setIsPlaying(false);
+    setShouldApplyPlayerZoom(false); // Desabilitar zoom do player
+    setCurrentPointIndex(0);
+    setProgress(0);
+    if (playbackIntervalRef.current) {
+      clearInterval(playbackIntervalRef.current);
+      playbackIntervalRef.current = null;
+    }
+  };
 
-const resetPlayer = () => {
-  stopPlayback();
-  setCurrentPointIndex(0);
-  setProgress(0);
-};
+  const resetPlayer = () => {
+    stopPlayback();
+    setCurrentPointIndex(0);
+    setProgress(0);
+  };
 
   const goToPoint = (index: number) => {
     const newIndex = Math.max(0, Math.min(index, validData.length - 1));
@@ -779,6 +858,68 @@ const resetPlayer = () => {
   const defaultCenter: [number, number] = [-2.4833, -44.2167];
   const center = positions.length > 0 ? positions[0] : defaultCenter;
 
+
+  // =====================================
+  // 🎨 HANDLERS DE FILTROS
+  // =====================================
+  const toggleDevice = (devEui: string) => {
+    setFilters((prev) => {
+      const isSelected = prev.dev_eui.includes(devEui);
+      return {
+        ...prev,
+        dev_eui: isSelected
+          ? prev.dev_eui.filter((d) => d !== devEui)
+          : [...prev.dev_eui, devEui],
+      };
+    });
+  };
+
+  const selectAllDevices = () => {
+    setFilters((prev) => ({
+      ...prev,
+      dev_eui: [...availableDevices],
+    }));
+  };
+
+  const deselectAllDevices = () => {
+    setFilters((prev) => ({
+      ...prev,
+      dev_eui: [],
+    }));
+  };
+
+  const handleRemoveDevEui = (devEui: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      dev_eui: prev.dev_eui.filter((d) => d !== devEui),
+    }));
+  };
+
+  // Fechar dropdown ao clicar fora - VERSÃO CORRIGIDA
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      // Verifica se o clique foi fora do dropdown
+      const dropdownElement = document.querySelector('.dropdown-container');
+      if (dropdownElement && !dropdownElement.contains(target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]); // Mantenha a dependência para recriar o listener quando necessário
+
+
+  // Adicione esta constante depois dos estados principais
+  const filteredDevices = availableDevices.filter(devEui =>
+    devEui.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
       {/* Header */}
@@ -816,22 +957,200 @@ const resetPlayer = () => {
       </div>
 
       {/* Filters */}
+      <div className="relative dropdown-container">
+        <button
+          type="button"
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          disabled={loadingDevices || availableDevices.length === 0}
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
+        >
+          <span className="text-sm text-gray-700">
+            {filters.dev_eui.length === 0
+              ? t('gpsMap.filters.selectDevices')
+              : `${filters.dev_eui.length} dispositivo(s) selecionado(s)`}
+          </span>
+          <svg
+            className={`w-5 h-5 text-gray-400 transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* Dropdown Menu */}
+        {isDropdownOpen && (
+          <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-hidden">
+            {/* Header com search e ações */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-3 space-y-2">
+              {/* Search Input */}
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar dev_eui..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <XMarkIcon className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Ações */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={selectAllDevices}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    {t('gpsMap.filters.selectAll')}
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <button
+                    type="button"
+                    onClick={deselectAllDevices}
+                    className="text-xs text-red-600 hover:text-red-800 font-medium"
+                  >
+                    {t('gpsMap.filters.clear')}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={fetchAvailableDevices}
+                  disabled={loadingDevices}
+                  className="text-xs text-gray-500 hover:text-gray-700"
+                  title="Recarregar"
+                >
+                  <ArrowPathIcon className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Lista de dispositivos filtrados */}
+            <div className="overflow-y-auto max-h-64">
+              {filteredDevices.length === 0 ? (
+                <div className="px-4 py-8 text-center text-sm text-gray-500">
+                  {searchTerm ? 'Nenhum dispositivo encontrado' : t('gpsMap.filters.noDevices')}
+                </div>
+              ) : (
+                filteredDevices.map((devEui) => {
+                  const isSelected = filters.dev_eui.includes(devEui);
+                  const color = getDeviceColor(devEui, filters.dev_eui);
+
+                  return (
+                    <label
+                      key={devEui}
+                      className={`flex items-center px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 ${isSelected ? 'bg-blue-50' : 'border-l-transparent'
+                        }`}
+                      style={{
+                        borderLeftColor: isSelected ? color : 'transparent',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleDevice(devEui)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                      />
+                      <span className="ml-3 flex items-center gap-2 flex-1">
+                        {isSelected && (
+                          <span
+                            className="w-3 h-3 rounded-full ring-2 ring-white"
+                            style={{ backgroundColor: color }}
+                          />
+                        )}
+                        <span
+                          className={`text-sm font-mono ${isSelected ? 'font-semibold text-gray-900' : 'text-gray-700'
+                            }`}
+                        >
+                          {devEui}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Footer com contador e informações de filtro */}
+            <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-600">
+                  {filteredDevices.length} de {availableDevices.length} dispositivos
+                  {searchTerm && ` (filtrado)`}
+                </p>
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Limpar filtro
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Restante do código dos dispositivos selecionados permanece igual */}
+      {filters.dev_eui.length > 0 && (
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">
+              Selecionados ({filters.dev_eui.length})
+            </span>
+            <button
+              onClick={deselectAllDevices}
+              className="text-xs text-red-600 hover:text-red-800 font-medium"
+            >
+              {t('gpsMap.filters.removeAll')}
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 max-h-32 overflow-y-auto">
+            {filters.dev_eui.map((devEui) => {
+              const color = getDeviceColor(devEui, filters.dev_eui);
+              return (
+                <span
+                  key={devEui}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 shadow-sm hover:shadow-md transition-shadow"
+                  style={{ borderColor: color }}
+                >
+                  <span
+                    className="w-3 h-3 rounded-full ring-2 ring-white"
+                    style={{ backgroundColor: color }}
+                  ></span>
+                  <span className="font-mono font-semibold text-gray-700">
+                    {devEui}
+                  </span>
+                  <button
+                    onClick={() => handleRemoveDevEui(devEui)}
+                    className="hover:bg-red-50 rounded-full p-1 transition-colors group"
+                    title="Remover"
+                  >
+                    <XMarkIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-600" />
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {showFilters && (
         <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                <MagnifyingGlassIcon className="h-4 w-4 inline mr-1" />
-                {t('gpsRouteMap.filters.deviceEUI')}
-              </label>
-              <input
-                type="text"
-                value={devEui}
-                onChange={(e) => setDevEui(e.target.value)}
-                placeholder="20635F0241000AB7"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+
+
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1095,12 +1414,12 @@ const resetPlayer = () => {
             className="rounded-lg shadow-md"
           >
             {/* TileLayer dinâmico baseado no mapType */}
-                <TileLayer
-                  attribution={MAP_TYPES[mapType].attribution}
-                  // url={MAP_TYPES[mapType].url}
-                  url={MAP_TYPES[mapType].url}
-                  maxNativeZoom={MAP_TYPES[mapType].maxNativeZoom}  // ✅ Zoom do servidor
-                  maxZoom={MAP_TYPES[mapType].maxZoom}              // ✅ Zoom máximo permitido
+            <TileLayer
+              attribution={MAP_TYPES[mapType].attribution}
+              // url={MAP_TYPES[mapType].url}
+              url={MAP_TYPES[mapType].url}
+              maxNativeZoom={MAP_TYPES[mapType].maxNativeZoom}  // ✅ Zoom do servidor
+              maxZoom={MAP_TYPES[mapType].maxZoom}              // ✅ Zoom máximo permitido
             />
 
             {/* Controles customizados com todas as props */}
@@ -1134,7 +1453,7 @@ const resetPlayer = () => {
               />
             )}
 
-            
+
 
             {/* Setas indicando direção */}
             {positions.length > 1 && <RouteArrows positions={positions} />}

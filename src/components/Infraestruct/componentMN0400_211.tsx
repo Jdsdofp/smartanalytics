@@ -33,7 +33,7 @@ import 'leaflet-polylinedecorator';
 import RawDataExplorer from './DataGrid/gridMN0400_211';
 import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
-// import GPSRouteMapLeaflet from './Map/GPSRouteMap';
+import GPSRouteMapLeaflet from './Map/GPSRouteMap';
 import GPSMapViewer from './Map/GPSMapViewer';
 import { useCompany } from '../../hooks/useCompany';
 import AssetManagementGrid from './DataGrid/AssetManagementGrid';
@@ -44,6 +44,8 @@ import ExportModal from './Modal/exportModal';
 // =====================================
 // 📊 INTERFACES ATUALIZADAS
 // =====================================
+
+
 interface DashboardOverview {
   kpis: {
     uptime: {
@@ -69,6 +71,8 @@ interface DashboardOverview {
       percentage: string;
     }>;
   };
+  
+  
   device_alerts: {
     active_sos_count: number;
     active_sos_list: any[];
@@ -3509,7 +3513,7 @@ export default function DeviceLogsView() {
 
           <AssetManagementGrid />
           <HealthScoreDashboard companyId={companyId} />
-          {/* <GPSRouteMapLeaflet /> */}
+          
         </div>
       )}
 
@@ -3640,7 +3644,10 @@ export default function DeviceLogsView() {
               />
             </div>
           )}
+
+          <GPSRouteMapLeaflet /> 
         </div>
+
       )}
 
       {activeTab === 'events' && (
