@@ -3233,23 +3233,23 @@ export default function DeviceLogsView() {
                             {/* Temperature Info */}
                             <SortableHeader field="temperature" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50'>{t('lowBatteryTable.headers.temp')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.updated')}</th>
-                            <SortableHeader field="temperature_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.fresh')}</th>
+                            {/* <SortableHeader field="temperature_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.fresh')}</th> */}
 
                             {/* Motion Info */}
-                            {/* <SortableHeader field="motion_status" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.motion')}</SortableHeader>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.value')}</th>
+                             <SortableHeader field="motion_status" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.motion')}</SortableHeader>
+                            {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.value')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.updated')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.changed')}</th>
                             <SortableHeader field="motion_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader> */}
-                            <SortableHeader field="motion_freshness" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.motion')}</SortableHeader>
+                            <SortableHeader field="motion_freshness" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.fresh')}</SortableHeader>
                             {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.motion')}</th> */}
 
                             {/* Report Info */}
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
+                            {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
                             <SortableHeader field="minutes_since_report" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.min')}</SortableHeader>
                             <SortableHeader field="hours_since_report" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.hours')}</SortableHeader>
-                            <SortableHeader field="days_since_report" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.days')}</SortableHeader>
+                            <SortableHeader field="days_since_report" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.days')}</SortableHeader> */}
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.status')}</th>
                             <SortableHeader field="freshness_score" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.score')}</SortableHeader>
@@ -3377,21 +3377,21 @@ export default function DeviceLogsView() {
                                       <div className="text-gray-500">{new Date(device.temperature_last_updated).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
                                     </div>
                                   </td>
-                                  <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
+                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
                                     <span className="text-[10px] text-gray-600">{device.temperature_minutes_ago}m</span>
                                   </td>
                                   <td className="px-2 py-2 whitespace-nowrap bg-blue-50">
                                     <span className="text-[9px]">{device.temperature_freshness}</span>
-                                  </td>
+                                  </td> */}
 
                                   {/* Motion Info */}
-                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                   <td className="px-2 py-2 whitespace-nowrap bg-green-50">
                                     <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-medium ${device.motion_status === 'MOVING' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'
                                       }`}>
                                       {device.motion_status === 'MOVING' ? '🏃' : '⏸️'}
                                     </span>
                                   </td>
-                                  <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-green-50">
                                     <span className="text-[10px] text-gray-600">{device.motion_status_numeric}</span>
                                   </td>
                                   <td className="px-2 py-2 whitespace-nowrap bg-green-50">
@@ -3414,7 +3414,7 @@ export default function DeviceLogsView() {
                                   </td>
 
                                   {/* Report Info */}
-                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
                                     <div className="text-[9px]">
                                       <div className="text-gray-900">{new Date(device.last_report_datetime).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
                                       <div className="text-gray-500">{new Date(device.last_report_datetime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
@@ -3428,7 +3428,7 @@ export default function DeviceLogsView() {
                                   </td>
                                   <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
                                     <span className="text-[10px] text-gray-600">{device.days_since_report}d</span>
-                                  </td>
+                                  </td> */}
                                   <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
                                     <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] ${device.report_freshness === 'REAL_TIME' ? 'bg-green-100 text-green-800' :
                                       device.report_freshness === 'RECENT' ? 'bg-blue-100 text-blue-800' :
