@@ -3524,6 +3524,7 @@ export default function DeviceLogsView() {
 
       {activeTab === 'devices' && (
         <div className="space-y-6">
+          <GPSRouteMapLeaflet />
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -3536,6 +3537,8 @@ export default function DeviceLogsView() {
               />
             </div>
           </div>
+
+          
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -3646,7 +3649,7 @@ export default function DeviceLogsView() {
             </div>
           )}
 
-          <GPSRouteMapLeaflet />
+          
         </div>
 
       )}

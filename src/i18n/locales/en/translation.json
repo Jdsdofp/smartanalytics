@@ -565,7 +565,7 @@
   },
   "gpsRouteMap": {
     "title": "GPS Route Map",
-    "subtitle": "Visualize device route with Leaflet",
+    "subtitle": "Visualize device route",
     "filters": {
       "showFilters": "Filters",
       "load": "Load",

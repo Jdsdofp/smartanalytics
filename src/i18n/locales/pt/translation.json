@@ -563,7 +563,7 @@
   },
   "gpsRouteMap": {
     "title": "Mapa de Rota GPS",
-    "subtitle": "Visualize a rota do dispositivo com Leaflet",
+    "subtitle": "Visualize a rota do dispositivo",
     "filters": {
       "showFilters": "Filtros",
       "load": "Carregar",
