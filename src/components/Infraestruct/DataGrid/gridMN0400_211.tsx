@@ -135,11 +135,11 @@ const FilterBar: React.FC<FilterBarProps> = ({
 }) => {
     const { t } = useTranslation();
     const [showFilters, setShowFilters] = useState(false);
-   
+
     const filteredDeviceUids = availableDeviceUids.filter(deviceUid =>
         deviceUid.toLowerCase().includes(deviceUidSearchTerm.toLowerCase())
     );
-    
+
     return (
         <div className="bg-white border-b border-gray-200">
             <div className="px-6 py-4">
@@ -167,209 +167,6 @@ const FilterBar: React.FC<FilterBarProps> = ({
                     <p className="mt-1 text-sm text-gray-500">
                         {t('rawDataExplorer.filters.globalSearchHint')}
                     </p>
-                </div>
-
-
-
-                {/* 🆕 SELECT DE DEVICE_UID */}
-                <div className="device-uid-dropdown-container mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Device UID
-                        {loadingDeviceUids && (
-                            <span className="ml-2 text-xs text-gray-500 animate-pulse">
-                                (carregando...)
-                            </span>
-                        )}
-                    </label>
-
-                    {/* Dropdown Button */}
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={onToggleDeviceUidDropdown}
-                            disabled={loadingDeviceUids || availableDeviceUids.length === 0}
-                            className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
-                        >
-                            <span className="text-sm text-gray-700">
-                                {(activeFilters.device_uid || []).length === 0
-                                    ? "Selecione Device UID(s)"
-                                    : `${(activeFilters.device_uid || []).length} Device UID(s) selecionado(s)`}
-                            </span>
-                            <svg
-                                className={`w-5 h-5 text-gray-400 transition-transform ${isDeviceUidDropdownOpen ? 'transform rotate-180' : ''}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-
-                        {/* Dropdown Menu */}
-                        {isDeviceUidDropdownOpen && (
-                            <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-hidden">
-                                {/* Header com search e ações */}
-                                <div className="sticky top-0 bg-white border-b border-gray-200 p-3 space-y-2">
-                                    {/* Search Input */}
-                                    <div className="relative">
-                                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                        <input
-                                            type="text"
-                                            placeholder="Pesquisar device_uid..."
-                                            value={deviceUidSearchTerm}
-                                            onChange={(e) => onDeviceUidSearchTermChange(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            onClick={(e) => e.stopPropagation()}
-                                        />
-                                        {deviceUidSearchTerm && (
-                                            <button
-                                                onClick={() => onDeviceUidSearchTermChange('')}
-                                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                            >
-                                                <XMarkIcon className="h-4 w-4" />
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {/* Ações */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={onSelectAllDeviceUids}
-                                                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                                            >
-                                                Selecionar todos
-                                            </button>
-                                            <span className="text-gray-300">|</span>
-                                            <button
-                                                type="button"
-                                                onClick={onDeselectAllDeviceUids}
-                                                className="text-xs text-red-600 hover:text-red-800 font-medium"
-                                            >
-                                                Limpar
-                                            </button>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={onFetchAvailableDeviceUids}
-                                            disabled={loadingDeviceUids}
-                                            className="text-xs text-gray-500 hover:text-gray-700"
-                                            title="Recarregar"
-                                        >
-                                            <ArrowPathIcon className={`h-4 w-4 ${loadingDeviceUids ? 'animate-spin' : ''}`} />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Lista de device_uids filtrados */}
-                                <div className="overflow-y-auto max-h-64">
-                                    {filteredDeviceUids.length === 0 ? (
-                                        <div className="px-4 py-8 text-center text-sm text-gray-500">
-                                            {deviceUidSearchTerm ? 'Nenhum device_uid encontrado' : 'Nenhum device_uid disponível'}
-                                        </div>
-                                    ) : (
-                                        filteredDeviceUids.map((deviceUid) => {
-                                            const isSelected = (activeFilters.device_uid || []).includes(deviceUid);
-
-                                            return (
-                                                <label
-                                                    key={deviceUid}
-                                                    className={`flex items-center px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 ${
-                                                        isSelected ? 'bg-blue-50' : 'border-l-transparent'
-                                                    }`}
-                                                    style={{
-                                                        borderLeftColor: isSelected ? '#3b82f6' : 'transparent',
-                                                    }}
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isSelected}
-                                                        onChange={() => onToggleDeviceUid(deviceUid)}
-                                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                                                    />
-                                                    <span className="ml-3 flex items-center gap-2 flex-1">
-                                                        {isSelected && (
-                                                            <span
-                                                                className="w-3 h-3 rounded-full ring-2 ring-white"
-                                                                style={{ backgroundColor: '#3b82f6' }}
-                                                            />
-                                                        )}
-                                                        <span
-                                                            className={`text-sm font-mono ${
-                                                                isSelected ? 'font-semibold text-gray-900' : 'text-gray-700'
-                                                            }`}
-                                                        >
-                                                            {deviceUid}
-                                                        </span>
-                                                    </span>
-                                                </label>
-                                            );
-                                        })
-                                    )}
-                                </div>
-
-                                {/* Footer com contador */}
-                                <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-xs text-gray-600">
-                                            {filteredDeviceUids.length} de {availableDeviceUids.length} device_uids
-                                            {deviceUidSearchTerm && ' (filtrado)'}
-                                        </p>
-                                        {deviceUidSearchTerm && (
-                                            <button
-                                                onClick={() => onDeviceUidSearchTermChange('')}
-                                                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                                            >
-                                                Limpar filtro
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Device UIDs selecionados */}
-                    {(activeFilters.device_uid || []).length > 0 && (
-                        <div className="mt-3">
-                            <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-gray-700">
-                                    Selecionados ({(activeFilters.device_uid || []).length})
-                                </span>
-                                <button
-                                    onClick={onDeselectAllDeviceUids}
-                                    className="text-xs text-red-600 hover:text-red-800 font-medium"
-                                >
-                                    Remover todos
-                                </button>
-                            </div>
-                            <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 max-h-32 overflow-y-auto">
-                                {(activeFilters.device_uid || []).map((deviceUid: string) => (
-                                    <span
-                                        key={deviceUid}
-                                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 shadow-sm hover:shadow-md transition-shadow"
-                                        style={{ borderColor: '#3b82f6' }}
-                                    >
-                                        <span
-                                            className="w-3 h-3 rounded-full ring-2 ring-white"
-                                            style={{ backgroundColor: '#3b82f6' }}
-                                        ></span>
-                                        <span className="font-mono font-semibold text-gray-700">
-                                            {deviceUid}
-                                        </span>
-                                        <button
-                                            onClick={() => onRemoveDeviceUid(deviceUid)}
-                                            className="hover:bg-red-50 rounded-full p-1 transition-colors group"
-                                            title="Remover"
-                                        >
-                                            <XMarkIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-600" />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -404,6 +201,204 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
                 {showFilters && (
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* 🆕 SELECT DE DEVICE_UID */}
+                        <div className="device-uid-dropdown-container mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Device UID
+                                {loadingDeviceUids && (
+                                    <span className="ml-2 text-xs text-gray-500 animate-pulse">
+                                        (carregando...)
+                                    </span>
+                                )}
+                            </label>
+
+                            {/* Dropdown Button */}
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={onToggleDeviceUidDropdown}
+                                    disabled={loadingDeviceUids || availableDeviceUids.length === 0}
+                                    className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                >
+                                    <span className="text-sm text-gray-700">
+                                        {(activeFilters.device_uid || []).length === 0
+                                            ? "Selecione Device UID(s)"
+                                            : `${(activeFilters.device_uid || []).length} Device UID(s) selecionado(s)`}
+                                    </span>
+                                    <svg
+                                        className={`w-5 h-5 text-gray-400 transition-transform ${isDeviceUidDropdownOpen ? 'transform rotate-180' : ''}`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                {/* Dropdown Menu */}
+                                {isDeviceUidDropdownOpen && (
+                                    <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-hidden">
+                                        {/* Header com search e ações */}
+                                        <div className="sticky top-0 bg-white border-b border-gray-200 p-3 space-y-2">
+                                            {/* Search Input */}
+                                            <div className="relative">
+                                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                                <input
+                                                    type="text"
+                                                    placeholder="Pesquisar device_uid..."
+                                                    value={deviceUidSearchTerm}
+                                                    onChange={(e) => onDeviceUidSearchTermChange(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                                {deviceUidSearchTerm && (
+                                                    <button
+                                                        onClick={() => onDeviceUidSearchTermChange('')}
+                                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                    >
+                                                        <XMarkIcon className="h-4 w-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {/* Ações */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={onSelectAllDeviceUids}
+                                                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                                    >
+                                                        Selecionar todos
+                                                    </button>
+                                                    <span className="text-gray-300">|</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={onDeselectAllDeviceUids}
+                                                        className="text-xs text-red-600 hover:text-red-800 font-medium"
+                                                    >
+                                                        Limpar
+                                                    </button>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={onFetchAvailableDeviceUids}
+                                                    disabled={loadingDeviceUids}
+                                                    className="text-xs text-gray-500 hover:text-gray-700"
+                                                    title="Recarregar"
+                                                >
+                                                    <ArrowPathIcon className={`h-4 w-4 ${loadingDeviceUids ? 'animate-spin' : ''}`} />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Lista de device_uids filtrados */}
+                                        <div className="overflow-y-auto max-h-64">
+                                            {filteredDeviceUids.length === 0 ? (
+                                                <div className="px-4 py-8 text-center text-sm text-gray-500">
+                                                    {deviceUidSearchTerm ? 'Nenhum device_uid encontrado' : 'Nenhum device_uid disponível'}
+                                                </div>
+                                            ) : (
+                                                filteredDeviceUids.map((deviceUid) => {
+                                                    const isSelected = (activeFilters.device_uid || []).includes(deviceUid);
+
+                                                    return (
+                                                        <label
+                                                            key={deviceUid}
+                                                            className={`flex items-center px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 ${isSelected ? 'bg-blue-50' : 'border-l-transparent'
+                                                                }`}
+                                                            style={{
+                                                                borderLeftColor: isSelected ? '#3b82f6' : 'transparent',
+                                                            }}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isSelected}
+                                                                onChange={() => onToggleDeviceUid(deviceUid)}
+                                                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                                            />
+                                                            <span className="ml-3 flex items-center gap-2 flex-1">
+                                                                {isSelected && (
+                                                                    <span
+                                                                        className="w-3 h-3 rounded-full ring-2 ring-white"
+                                                                        style={{ backgroundColor: '#3b82f6' }}
+                                                                    />
+                                                                )}
+                                                                <span
+                                                                    className={`text-sm font-mono ${isSelected ? 'font-semibold text-gray-900' : 'text-gray-700'
+                                                                        }`}
+                                                                >
+                                                                    {deviceUid}
+                                                                </span>
+                                                            </span>
+                                                        </label>
+                                                    );
+                                                })
+                                            )}
+                                        </div>
+
+                                        {/* Footer com contador */}
+                                        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
+                                            <div className="flex items-center justify-between">
+                                                <p className="text-xs text-gray-600">
+                                                    {filteredDeviceUids.length} de {availableDeviceUids.length} device_uids
+                                                    {deviceUidSearchTerm && ' (filtrado)'}
+                                                </p>
+                                                {deviceUidSearchTerm && (
+                                                    <button
+                                                        onClick={() => onDeviceUidSearchTermChange('')}
+                                                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                                    >
+                                                        Limpar filtro
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Device UIDs selecionados */}
+                            {(activeFilters.device_uid || []).length > 0 && (
+                                <div className="mt-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm font-medium text-gray-700">
+                                            Selecionados ({(activeFilters.device_uid || []).length})
+                                        </span>
+                                        <button
+                                            onClick={onDeselectAllDeviceUids}
+                                            className="text-xs text-red-600 hover:text-red-800 font-medium"
+                                        >
+                                            Remover todos
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 max-h-32 overflow-y-auto">
+                                        {(activeFilters.device_uid || []).map((deviceUid: string) => (
+                                            <span
+                                                key={deviceUid}
+                                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 shadow-sm hover:shadow-md transition-shadow"
+                                                style={{ borderColor: '#3b82f6' }}
+                                            >
+                                                <span
+                                                    className="w-3 h-3 rounded-full ring-2 ring-white"
+                                                    style={{ backgroundColor: '#3b82f6' }}
+                                                ></span>
+                                                <span className="font-mono font-semibold text-gray-700">
+                                                    {deviceUid}
+                                                </span>
+                                                <button
+                                                    onClick={() => onRemoveDeviceUid(deviceUid)}
+                                                    className="hover:bg-red-50 rounded-full p-1 transition-colors group"
+                                                    title="Remover"
+                                                >
+                                                    <XMarkIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-600" />
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         {filters.map((filter) => (
                             <div key={filter.key}>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -453,45 +448,16 @@ const FilterBar: React.FC<FilterBarProps> = ({
                         ))}
                     </div>
                 )}
-                
-
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                        >
-                            <FunnelIcon className="h-5 w-5" />
-                            {t('rawDataExplorer.filters.advancedFilters')}
-                            {Object.keys(activeFilters).filter(key => key !== 'search_text').length > 0 && (
-                                <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-600 rounded-full">
-                                    {Object.keys(activeFilters).filter(key => key !== 'search_text').length}
-                                </span>
-                            )}
-                        </button>
-
-                        <div className="text-sm text-gray-600">
-                            💡 <strong>{t('rawDataExplorer.filters.tip')}:</strong> {t('rawDataExplorer.filters.tipMessage')}
-                        </div>
-                    </div>
-
-                    {Object.keys(activeFilters).length > 0 && (
-                        <button
-                            onClick={onClearFilters}
-                            className="text-sm text-gray-600 hover:text-gray-900"
-                        >
-                            {t('rawDataExplorer.filters.clearGlobalFilters')}
-                        </button>
-                    )}
-                </div>
 
                 {showFilters && (
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
                         {filters.map((filter) => (
                             <div key={filter.key}>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {t(`rawDataExplorer.filters.fields.${filter.key}`, filter.label)}
                                 </label>
+
                                 {filter.type === 'text' && (
                                     <input
                                         type="text"
@@ -579,7 +545,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
                 
             </div>
-        </div> */}
+    </div> */}
 
 
 
@@ -918,14 +884,14 @@ const RawDataExplorer: React.FC = () => {
     const [filters, setFilters] = useState<Record<string, any>>({});
     const [exporting, setExporting] = useState(false);
 
-     // 🆕 ADICIONE ESTES ESTADOS PARA O SELECT DE DEVICE_UID
+    // 🆕 ADICIONE ESTES ESTADOS PARA O SELECT DE DEVICE_UID
     const [availableDeviceUids, setAvailableDeviceUids] = useState<string[]>([]);
     const [loadingDeviceUids, setLoadingDeviceUids] = useState(false);
     const [isDeviceUidDropdownOpen, setIsDeviceUidDropdownOpen] = useState(false);
     const [deviceUidSearchTerm, setDeviceUidSearchTerm] = useState('');
 
 
-        // 🆕 FUNÇÃO PARA BUSCAR DEVICE_UIDS DISPONÍVEIS
+    // 🆕 FUNÇÃO PARA BUSCAR DEVICE_UIDS DISPONÍVEIS
     const fetchAvailableDeviceUids = useCallback(async () => {
         setLoadingDeviceUids(true);
         try {
@@ -954,19 +920,19 @@ const RawDataExplorer: React.FC = () => {
     }, [companyId]);
 
 
-        // 🆕 FUNÇÕES PARA MANIPULAR O SELECT DE DEVICE_UID
+    // 🆕 FUNÇÕES PARA MANIPULAR O SELECT DE DEVICE_UID
     const toggleDeviceUid = (deviceUid: string) => {
         setFilters((prev) => {
-            const currentDeviceUids = prev.device_uid || [];
+            const currentDeviceUids = prev.dev_eui || [];
             const isSelected = currentDeviceUids.includes(deviceUid);
-            
+
             const newDeviceUids = isSelected
                 ? currentDeviceUids.filter((d: string) => d !== deviceUid)
                 : [...currentDeviceUids, deviceUid];
-            
+
             return {
                 ...prev,
-                device_uid: newDeviceUids,
+                dev_eui: newDeviceUids,
             };
         });
     };
@@ -974,7 +940,7 @@ const RawDataExplorer: React.FC = () => {
     const selectAllDeviceUids = () => {
         setFilters((prev) => ({
             ...prev,
-            device_uid: [...availableDeviceUids],
+            dev_eui: [...availableDeviceUids],
         }));
     };
 
@@ -1412,16 +1378,16 @@ const RawDataExplorer: React.FC = () => {
                 onClearFilters={handleClearFilters}
                 // 🆕 PROPS PARA DEVICE_UID
                 availableDeviceUids={availableDeviceUids}
-                    loadingDeviceUids={loadingDeviceUids}
-                    isDeviceUidDropdownOpen={isDeviceUidDropdownOpen}
-                    deviceUidSearchTerm={deviceUidSearchTerm}
-                    onDeviceUidSearchTermChange={setDeviceUidSearchTerm}
-                    onToggleDeviceUidDropdown={() => setIsDeviceUidDropdownOpen(!isDeviceUidDropdownOpen)}
-                    onToggleDeviceUid={toggleDeviceUid}
-                    onSelectAllDeviceUids={selectAllDeviceUids}
-                    onDeselectAllDeviceUids={deselectAllDeviceUids}
-                    onRemoveDeviceUid={handleRemoveDeviceUid}
-                    onFetchAvailableDeviceUids={fetchAvailableDeviceUids}
+                loadingDeviceUids={loadingDeviceUids}
+                isDeviceUidDropdownOpen={isDeviceUidDropdownOpen}
+                deviceUidSearchTerm={deviceUidSearchTerm}
+                onDeviceUidSearchTermChange={setDeviceUidSearchTerm}
+                onToggleDeviceUidDropdown={() => setIsDeviceUidDropdownOpen(!isDeviceUidDropdownOpen)}
+                onToggleDeviceUid={toggleDeviceUid}
+                onSelectAllDeviceUids={selectAllDeviceUids}
+                onDeselectAllDeviceUids={deselectAllDeviceUids}
+                onRemoveDeviceUid={handleRemoveDeviceUid}
+                onFetchAvailableDeviceUids={fetchAvailableDeviceUids}
             />
 
             <ActiveFilters
@@ -1429,7 +1395,7 @@ const RawDataExplorer: React.FC = () => {
                 onRemove={(key) => handleFilterChange(key, '')}
             />
 
-            
+
             <DataTable
                 data={data}
                 loading={loading}
@@ -1439,7 +1405,7 @@ const RawDataExplorer: React.FC = () => {
                 sortBy={sortBy}              // 🆕 ADICIONE
                 sortOrder={sortOrder}        // 🆕 ADICIONE
             />
-        
+
 
 
             {!loading && data.length > 0 && (

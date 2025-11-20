@@ -372,7 +372,7 @@ L.Icon.Default.mergeOptions({
 // =====================================
 // 📊 INTERFACES
 // =====================================
-// 📊 INTERFACES
+
 interface GPSPoint {
   dev_eui: string;
   timestamp: string;
@@ -867,7 +867,6 @@ const GPSMapViewer = () => {
         {showFilters && (
           <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
             <div className="space-y-4">
-              {/* Dev EUI - Dropdown com Checkboxes */}
               {/* Dev EUI - Dropdown com Search e Checkboxes */}
               <div className="dropdown-container">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
