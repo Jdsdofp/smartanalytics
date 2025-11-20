@@ -103,7 +103,7 @@ export default function Home() {
                   </div>
 
                   {/* Cards adicionais */}
-                  {[4, 5, 6].map((i) => (
+                  {/* {[4, 5, 6].map((i) => (
                     <div
                       key={i}
                       className="p-6 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow fade-in"
@@ -118,7 +118,7 @@ export default function Home() {
                         {t('home.access')}
                       </button>
                     </div>
-                  ))}
+                  ))} */}
                 </div>
 
                 {/* Informações técnicas */}

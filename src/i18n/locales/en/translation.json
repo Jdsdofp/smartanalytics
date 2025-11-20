@@ -929,7 +929,7 @@
     "recentGps": "With recent GPS"
   },
   "lowBatteryTable": {
-    "title": "Low Battery Alerts",
+    "title": "Devices Status",
     "loading": "Loading data...",
     "headers": {
       "person": "Person",

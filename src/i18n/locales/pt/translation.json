@@ -927,7 +927,7 @@
     "recentGps": "Com GPS recente"
   },
   "lowBatteryTable": {
-    "title": "Alertas de Bateria Baixa",
+    "title": "Status Dispositivos",
     "loading": "Carregando dados...",
     "headers": {
       "person": "Pessoa",
