@@ -917,7 +917,7 @@
     "safetyQuality": "Safety & Quality",
     "engineering": "Engineering",
     "logistics": "Logistics",
-    "equipmentStatus": "Equipment Status",
+    "equipmentStatus": "Hearthbeat Status",
     "recentActivity": "Recent Activity",
     "gpsCoverage": "GPS Coverage",
     "quickMetrics": "Quick Metrics",

@@ -915,7 +915,7 @@
     "safetyQuality": "Seguridad y Calidad",
     "engineering": "Ingeniería",
     "logistics": "Logística",
-    "equipmentStatus": "Estado de los Equipos",
+    "equipmentStatus": "Estado de latido",
     "recentActivity": "Actividad Reciente",
     "gpsCoverage": "Cobertura GPS",
     "quickMetrics": "Métricas Rápidas",
