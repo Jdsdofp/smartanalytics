@@ -1,5 +1,5 @@
 // src/components/DeviceLogsView.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   SignalIcon,
   SignalSlashIcon,
@@ -1423,51 +1423,116 @@ const MapModal = ({ device, isOpen, onClose }: MapModalProps) => {
   );
 };
 
+type SortConfig = {
+  key: string;
+  direction: 'asc' | 'desc';
+} | null
 
 const DataTable = ({
   columns,
   data,
-  emptyMessage = 'Nenhum dado disponível'
+  emptyMessage = 'Nenhum dado disponível',
+  sortableColumns = []
 }: {
-  columns: Array<{ key: string; label: string; render?: (value: any, row: any) => React.ReactNode }>;
+  columns: Array<{
+    key: string;
+    label: string;
+    render?: (value: any, row: any) => React.ReactNode;
+    sortValue?: (row: any) => any;
+  }>;
   data: any[];
   emptyMessage?: string;
+  sortableColumns?: string[];
 }) => {
+  const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+
+  const handleSort = (key: string) => {
+    if (!sortableColumns.includes(key)) return;
+
+    setSortConfig((current) => {
+      if (current?.key === key) {
+        return current.direction === 'asc'
+          ? { key, direction: 'desc' }
+          : null;
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
+  const sortedData = useMemo(() => {
+    if (!sortConfig) return data;
+
+    const sorted = [...data].sort((a, b) => {
+      const column = columns.find(col => col.key === sortConfig.key);
+      const aValue = column?.sortValue ? column.sortValue(a) : a[sortConfig.key];
+      const bValue = column?.sortValue ? column.sortValue(b) : b[sortConfig.key];
+
+      if (aValue < bValue) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+
+    return sorted;
+  }, [data, sortConfig, columns]);
+
+  const getSortIcon = (key: string) => {
+    if (!sortableColumns.includes(key)) return null;
+
+    if (sortConfig?.key !== key) {
+      return <span className="ml-1 text-gray-400">⇅</span>;
+    }
+
+    return sortConfig.direction === 'asc'
+      ? <span className="ml-1">↑</span>
+      : <span className="ml-1">↓</span>;
+  };
+
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-300">
-        <thead className="bg-gray-50">
-          <tr>
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                {col.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {data.length === 0 ? (
+    <div className="overflow-x-auto border border-gray-300 rounded-lg">
+      <div className="overflow-y-auto max-h-[600px]">
+        <table className="min-w-full divide-y divide-gray-300">
+          <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
-              <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500">
-                {emptyMessage}
-              </td>
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  onClick={() => handleSort(col.key)}
+                  className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 ${sortableColumns.includes(col.key) ? 'cursor-pointer hover:bg-gray-100 select-none' : ''
+                    }`}
+                >
+                  <div className="flex items-center">
+                    {col.label}
+                    {getSortIcon(col.key)}
+                  </div>
+                </th>
+              ))}
             </tr>
-          ) : (
-            data.map((row, idx) => (
-              <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                {columns.map((col) => (
-                  <td key={col.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {col.render ? col.render(row[col.key], row) : row[col.key]}
-                  </td>
-                ))}
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {sortedData.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500">
+                  {emptyMessage}
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              sortedData.map((row, idx) => (
+                <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                  {columns.map((col) => (
+                    <td key={col.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {col.render ? col.render(row[col.key], row) : row[col.key]}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
@@ -3206,11 +3271,11 @@ export default function DeviceLogsView() {
             ) : (
               <>
                 {/* Tabela responsiva com scroll horizontal */}
-                <div className="overflow-auto -mx-4 sm:mx-0">
+                <div className="overflow-auto -mx-4 sm:mx-0 max-h-[600px]">
                   <div className="inline-block min-w-full align-middle">
-                    <div className="overflow-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                    <div className="shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
                       <table className="min-w-full divide-y divide-gray-300">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-gray-50 sticky top-0 z-20">
                           <tr>
                             {/* Device Info */}
                             <SortableHeader field="person_name" bgClass='sticky left-0 z-10 bg-gray-50 px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap'>{t('lowBatteryTable.headers.person')}</SortableHeader>
@@ -3237,7 +3302,7 @@ export default function DeviceLogsView() {
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.fresh')}</th> */}
 
                             {/* Motion Info */}
-                             <SortableHeader field="motion_status" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.motion')}</SortableHeader>
+                            <SortableHeader field="motion_status" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.motion')}</SortableHeader>
                             {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.value')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.updated')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.changed')}</th>
@@ -3385,7 +3450,7 @@ export default function DeviceLogsView() {
                                   </td> */}
 
                                   {/* Motion Info */}
-                                   <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                  <td className="px-2 py-2 whitespace-nowrap bg-green-50">
                                     <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-medium ${device.motion_status === 'MOVING' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'
                                       }`}>
                                       {device.motion_status === 'MOVING' ? '🏃' : '⏸️'}
@@ -3538,15 +3603,13 @@ export default function DeviceLogsView() {
             </div>
           </div>
 
-          
-
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <DevicePhoneMobileIcon className="h-6 w-6" />
               {t('deviceLogs.deviceMotion.title', { count: filteredMotionDevices.length })}
             </h3>
 
-            <div className="overflow-y-auto max-h-[600px]">
+            <div className="overflow-y-hidden max-h-[600px]">
               <DataTable
                 columns={[
                   { key: 'dev_eui', label: t('deviceLogs.tables.deviceEui') },
@@ -3554,6 +3617,7 @@ export default function DeviceLogsView() {
                   {
                     key: 'dynamic_motion_state',
                     label: t('deviceLogs.tables.state'),
+                    sortValue: (row) => row.dynamic_motion_state, // Valor usado para ordenação
                     render: (val) => (
                       <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${val === 'MOVING' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                         }`}>
@@ -3564,12 +3628,13 @@ export default function DeviceLogsView() {
                   {
                     key: 'battery_level',
                     label: t('deviceLogs.tables.battery'),
+                    sortValue: (row) => row.battery_level, // Valor numérico para ordenação
                     render: (val) => (
                       <div className="flex items-center gap-2">
                         <div className="w-16 bg-gray-200 rounded-full h-2">
                           <div
                             className={`h-2 rounded-full ${val >= 30 ? 'bg-green-500' :
-                              val >= 20 ? 'bg-yellow-500' : 'bg-red-500'
+                                val >= 20 ? 'bg-yellow-500' : 'bg-red-500'
                               }`}
                             style={{ width: `${val}%` }}
                           />
@@ -3608,6 +3673,7 @@ export default function DeviceLogsView() {
                 ]}
                 data={filteredMotionDevices}
                 emptyMessage={t('deviceLogs.tables.noDevicesFound')}
+                sortableColumns={['dynamic_motion_state', 'battery_level']} // Colunas que podem ser ordenadas
               />
             </div>
           </div>
@@ -3649,7 +3715,7 @@ export default function DeviceLogsView() {
             </div>
           )}
 
-          
+
         </div>
 
       )}

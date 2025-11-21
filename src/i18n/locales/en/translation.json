@@ -801,6 +801,22 @@
       "records": "{{count}} records",
       "previous": "Previous",
       "next": "Next"
+    },
+    "gpsMap": {
+      "markers": {
+        "viewDetails": "View Details"
+      },
+      "popup": {
+        "unknownWorker": "Unidentified worker",
+        "locale": "en-US",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "accuracy": "Accuracy",
+        "battery": "Battery",
+        "status": "Status",
+        "moving": "Moving",
+        "stopped": "Stopped"
+      }
     }
   },
   "assetManagement": {
@@ -991,58 +1007,58 @@
       "notAvailable": "–"
     },
     "filters": {
-    "title": "Filters",
-    "clearAll": "Clear All",
-    "apply": "Apply",
-    "personName": "Person Name",
-    "deviceUid": "Device UID",
-    "deviceUidPlaceholder": "Enter Device UID...",
-    "personNamePlaceholder": "Enter name...",
-    "batteryLevel": "Battery Level (%)",
-    "min": "Min",
-    "max": "Max",
-    "batteryStatus": "Battery Status",
-    "motionStatus": "Motion Status",
-    "temperature": "Temperature",
-    "reportFreshness": "Data Freshness",
-    "statuses": {
-      "critical": "Critical",
-      "warning": "Warning",
-      "healthy": "Healthy"
+      "title": "Filters",
+      "clearAll": "Clear All",
+      "apply": "Apply",
+      "personName": "Person Name",
+      "deviceUid": "Device UID",
+      "deviceUidPlaceholder": "Enter Device UID...",
+      "personNamePlaceholder": "Enter name...",
+      "batteryLevel": "Battery Level (%)",
+      "min": "Min",
+      "max": "Max",
+      "batteryStatus": "Battery Status",
+      "motionStatus": "Motion Status",
+      "temperature": "Temperature",
+      "reportFreshness": "Data Freshness",
+      "statuses": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "healthy": "Healthy"
+      },
+      "motion": {
+        "moving": "Moving",
+        "static": "Static"
+      },
+      "freshness": {
+        "realTime": "Real Time",
+        "recent": "Recent",
+        "stale": "Stale"
+      },
+      "activeFilters": "{{count}} active filter(s)",
+      "noActiveFilters": "No active filters"
     },
-    "motion": {
-      "moving": "Moving",
-      "static": "Static"
+    "export": {
+      "title": "Export",
+      "exporting": "Exporting...",
+      "error": "Error exporting data. Please try again.",
+      "selectFormat": "Select export format",
+      "recordsToExport": "{{count}} record(s) will be exported",
+      "tip": "Active filters will be included in the export",
+      "pdfTitle": "Low Battery Alerts Report",
+      "excel": {
+        "full": "Full Excel",
+        "fullDescription": "All data with detailed columns and filters tab",
+        "summary": "Summary Excel",
+        "summaryDescription": "Consolidated statistics and key metrics"
+      },
+      "pdf": {
+        "title": "PDF",
+        "description": "Formatted report with tables and charts"
+      }
     },
-    "freshness": {
-      "realTime": "Real Time",
-      "recent": "Recent",
-      "stale": "Stale"
-    },
-    "activeFilters": "{{count}} active filter(s)",
-    "noActiveFilters": "No active filters"
-  },
-   "export": {
-    "title": "Export",
-    "exporting": "Exporting...",
-    "error": "Error exporting data. Please try again.",
-    "selectFormat": "Select export format",
-    "recordsToExport": "{{count}} record(s) will be exported",
-    "tip": "Active filters will be included in the export",
-    "pdfTitle": "Low Battery Alerts Report",
-    "excel": {
-      "full": "Full Excel",
-      "fullDescription": "All data with detailed columns and filters tab",
-      "summary": "Summary Excel",
-      "summaryDescription": "Consolidated statistics and key metrics"
-    },
-    "pdf": {
-      "title": "PDF",
-      "description": "Formatted report with tables and charts"
-    }
-  },
-  "noData":"No data found for applied filters",
-  "modal": {
+    "noData": "No data found for applied filters",
+    "modal": {
       "title": "Export Data",
       "format": "Export Format",
       "scope": "Export Scope",

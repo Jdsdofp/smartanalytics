@@ -799,6 +799,22 @@
       "records": "{{count}} registros",
       "previous": "Anterior",
       "next": "Siguiente"
+    },
+    "gpsMap": {
+      "markers": {
+        "viewDetails": "Ver Detalles"
+      },
+      "popup": {
+        "unknownWorker": "Trabajador no identificado",
+        "locale": "es-ES",
+        "latitude": "Latitud",
+        "longitude": "Longitud",
+        "accuracy": "Precisión",
+        "battery": "Batería",
+        "status": "Estado",
+        "moving": "En movimiento",
+        "stopped": "Detenido"
+      }
     }
   },
   "assetManagement": {
@@ -926,7 +942,7 @@
     "activeDevices": "Dispositivos activos",
     "recentGps": "Con GPS reciente"
   },
-   "lowBatteryTable": {
+  "lowBatteryTable": {
     "title": "Estado de los dispositivos",
     "loading": "Cargando datos...",
     "headers": {
@@ -988,59 +1004,59 @@
       "ok": "✓ OK",
       "notAvailable": "–"
     },
-      "filters": {
-    "title": "Filtros",
-    "clearAll": "Limpiar Todo",
-    "apply": "Aplicar",
-    "personName": "Nombre de la Persona",
-    "deviceUid": "Despositivo UID",
-    "deviceUidPlaceholder": "Ingrese el Device UID...",
-    "personNamePlaceholder": "Ingrese el nombre...",
-    "batteryLevel": "Nivel de Batería (%)",
-    "min": "Mín",
-    "max": "Máx",
-    "batteryStatus": "Estado de la Batería",
-    "motionStatus": "Estado de Movimiento",
-    "temperature": "Temperatura",
-    "reportFreshness": "Actualización de Datos",
-    "statuses": {
-      "critical": "Crítico",
-      "warning": "Advertencia",
-      "healthy": "Saludable"
+    "filters": {
+      "title": "Filtros",
+      "clearAll": "Limpiar Todo",
+      "apply": "Aplicar",
+      "personName": "Nombre de la Persona",
+      "deviceUid": "Despositivo UID",
+      "deviceUidPlaceholder": "Ingrese el Device UID...",
+      "personNamePlaceholder": "Ingrese el nombre...",
+      "batteryLevel": "Nivel de Batería (%)",
+      "min": "Mín",
+      "max": "Máx",
+      "batteryStatus": "Estado de la Batería",
+      "motionStatus": "Estado de Movimiento",
+      "temperature": "Temperatura",
+      "reportFreshness": "Actualización de Datos",
+      "statuses": {
+        "critical": "Crítico",
+        "warning": "Advertencia",
+        "healthy": "Saludable"
+      },
+      "motion": {
+        "moving": "En Movimiento",
+        "static": "Estático"
+      },
+      "freshness": {
+        "realTime": "Tiempo Real",
+        "recent": "Reciente",
+        "stale": "Desactualizado"
+      },
+      "activeFilters": "{{count}} filtro(s) activo(s)",
+      "noActiveFilters": "No hay filtros activos"
     },
-    "motion": {
-      "moving": "En Movimiento",
-      "static": "Estático"
-    },
-    "freshness": {
-      "realTime": "Tiempo Real",
-      "recent": "Reciente",
-      "stale": "Desactualizado"
-    },
-    "activeFilters": "{{count}} filtro(s) activo(s)",
-    "noActiveFilters": "No hay filtros activos"
-  },
     "export": {
-    "title": "Exportar",
-    "exporting": "Exportando...",
-    "error": "Error al exportar datos. Por favor, intente nuevamente.",
-    "selectFormat": "Seleccionar formato de exportación",
-    "recordsToExport": "{{count}} registro(s) será(n) exportado(s)",
-    "tip": "Los filtros activos se incluirán en la exportación",
-    "pdfTitle": "Reporte de Alertas de Batería Baja",
-    "excel": {
-      "full": "Excel Completo",
-      "fullDescription": "Todos los datos con columnas detalladas y pestaña de filtros",
-      "summary": "Excel Resumen",
-      "summaryDescription": "Estadísticas consolidadas y métricas principales"
+      "title": "Exportar",
+      "exporting": "Exportando...",
+      "error": "Error al exportar datos. Por favor, intente nuevamente.",
+      "selectFormat": "Seleccionar formato de exportación",
+      "recordsToExport": "{{count}} registro(s) será(n) exportado(s)",
+      "tip": "Los filtros activos se incluirán en la exportación",
+      "pdfTitle": "Reporte de Alertas de Batería Baja",
+      "excel": {
+        "full": "Excel Completo",
+        "fullDescription": "Todos los datos con columnas detalladas y pestaña de filtros",
+        "summary": "Excel Resumen",
+        "summaryDescription": "Estadísticas consolidadas y métricas principales"
+      },
+      "pdf": {
+        "title": "PDF",
+        "description": "Reporte formateado con tablas y gráficos"
+      }
     },
-    "pdf": {
-      "title": "PDF",
-      "description": "Reporte formateado con tablas y gráficos"
-    }
-  },
-  "noData":"No se encontraron datos para los filtros aplicados",
-  "modal": {
+    "noData": "No se encontraron datos para los filtros aplicados",
+    "modal": {
       "title": "Exportar Datos",
       "format": "Formato de Exportación",
       "scope": "Alcance de Exportación",
