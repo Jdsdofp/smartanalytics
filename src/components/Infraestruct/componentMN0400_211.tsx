@@ -3634,7 +3634,7 @@ export default function DeviceLogsView() {
                         <div className="w-16 bg-gray-200 rounded-full h-2">
                           <div
                             className={`h-2 rounded-full ${val >= 30 ? 'bg-green-500' :
-                                val >= 20 ? 'bg-yellow-500' : 'bg-red-500'
+                              val >= 20 ? 'bg-yellow-500' : 'bg-red-500'
                               }`}
                             style={{ width: `${val}%` }}
                           />

@@ -888,11 +888,10 @@ const GPSRouteMapLeaflet = () => {
                           handleSelectDevice(devEui);
                           setIsDropdownOpen(false);
                         }}
-                        className={`flex items-center w-full px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 text-left ${
-                          isSelected 
-                            ? 'bg-blue-50 border-l-blue-600' 
+                        className={`flex items-center w-full px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 text-left ${isSelected
+                            ? 'bg-blue-50 border-l-blue-600'
                             : 'border-l-transparent'
-                        }`}
+                          }`}
                       >
                         <span className="flex items-center gap-2 flex-1">
                           {isSelected && (
@@ -901,11 +900,10 @@ const GPSRouteMapLeaflet = () => {
                             />
                           )}
                           <span
-                            className={`text-sm font-mono ${
-                              isSelected 
-                                ? 'font-semibold text-gray-900' 
+                            className={`text-sm font-mono ${isSelected
+                                ? 'font-semibold text-gray-900'
                                 : 'text-gray-700'
-                            }`}
+                              }`}
                           >
                             {devEui}
                           </span>

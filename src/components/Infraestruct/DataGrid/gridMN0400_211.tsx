@@ -19,6 +19,7 @@ import {
     ChevronUpIcon,
     ChevronDownIcon,
     ArrowsUpDownIcon,
+    HeartIcon,
 } from '@heroicons/react/24/outline';
 import { useCompany } from '../../../hooks/useCompany';
 
@@ -297,8 +298,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
                                                                 onToggleDeviceUidDropdown();
                                                             }}
                                                             className={`flex items-center w-full px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 text-left ${isSelected
-                                                                    ? 'bg-blue-50 border-l-blue-600'
-                                                                    : 'border-l-transparent'
+                                                                ? 'bg-blue-50 border-l-blue-600'
+                                                                : 'border-l-transparent'
                                                                 }`}
                                                         >
                                                             <span className="flex items-center gap-2 flex-1">
@@ -310,8 +311,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
                                                                 )}
                                                                 <span
                                                                     className={`text-sm font-mono ${isSelected
-                                                                            ? 'font-semibold text-gray-900'
-                                                                            : 'text-gray-700'
+                                                                        ? 'font-semibold text-gray-900'
+                                                                        : 'text-gray-700'
                                                                         }`}
                                                                 >
                                                                     {deviceUid}
@@ -918,7 +919,333 @@ const RawDataExplorer: React.FC = () => {
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
             ],
-        }
+        },
+        // 🆕 ADICIONE ESTA NOVA CONFIGURAÇÃO
+        gpsDecisionLog: {
+            id: 'gpsDecisionLog',
+            label: t('rawDataExplorer.tabs.gpsDecisionLog'),
+            icon: MapPinIcon, // ou use outro ícone como ClockIcon, DocumentMagnifyingGlassIcon
+            endpoint: `/api/dashboard/devices/${companyId}/gps-decision-log/raw`,
+            exportTable: 'device_gps_decision_log',
+            columns: [],
+            filters: [
+                {
+                    key: 'device_id',
+                    label: t('rawDataExplorer.filters.fields.device_id'),
+                    type: 'text'
+                },
+                {
+                    key: 'position_source',
+                    label: t('rawDataExplorer.filters.fields.position_source'),
+                    type: 'select',
+                    options: [
+                        { value: 'GPS', label: 'GPS' },
+                        { value: 'BLE', label: 'BLE' },
+                        { value: 'HYBRID', label: 'Hybrid' }
+                    ]
+                },
+                {
+                    key: 'environment',
+                    label: t('rawDataExplorer.filters.fields.environment'),
+                    type: 'select',
+                    options: [
+                        { value: 'indoor', label: 'Indoor' },
+                        { value: 'outdoor', label: 'Outdoor' },
+                        { value: 'unknown', label: 'Unknown' }
+                    ]
+                },
+                {
+                    key: 'device_status',
+                    label: t('rawDataExplorer.filters.fields.device_status'),
+                    type: 'select',
+                    options: [
+                        { value: 'ONLINE', label: 'Online' },
+                        { value: 'OFFLINE', label: 'Offline' }
+                    ]
+                },
+                {
+                    key: 'is_moving',
+                    label: t('rawDataExplorer.filters.fields.is_moving'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'is_blocked',
+                    label: t('rawDataExplorer.filters.fields.is_blocked'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'is_beacon_chosen',
+                    label: t('rawDataExplorer.filters.fields.is_beacon_chosen'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'area_code',
+                    label: t('rawDataExplorer.filters.fields.area_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'zone_code',
+                    label: t('rawDataExplorer.filters.fields.zone_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'start_date',
+                    label: t('rawDataExplorer.filters.fields.start_date'),
+                    type: 'date'
+                },
+                {
+                    key: 'end_date',
+                    label: t('rawDataExplorer.filters.fields.end_date'),
+                    type: 'date'
+                },
+            ],
+        },
+         // 🆕 ADICIONE ESTA NOVA CONFIGURAÇÃO
+    streamingApi: {
+        id: 'streamingApi',
+        label: t('rawDataExplorer.tabs.streamingApi'),
+        icon: RssIcon, // ou use outro ícone como SignalIcon, ArrowPathIcon
+        endpoint: `/api/dashboard/devices/${companyId}/streaming-api/raw`,
+        exportTable: 'device_streaming_api',
+        columns: [],
+        filters: [
+            { 
+                key: 'event_type', 
+                label: t('rawDataExplorer.filters.fields.event_type'), 
+                type: 'select',
+                options: [
+                    { value: 'Smartx_Location_update', label: 'Location Update' },
+                    { value: 'Smartx_Alert', label: 'Alert' },
+                    { value: 'Smartx_Device_Status', label: 'Device Status' }
+                ]
+            },
+            { 
+                key: 'code', 
+                label: t('rawDataExplorer.filters.fields.code'), 
+                type: 'text' 
+            },
+            { 
+                key: 'serial', 
+                label: t('rawDataExplorer.filters.fields.serial'), 
+                type: 'text' 
+            },
+            { 
+                key: 'person_name', 
+                label: t('rawDataExplorer.filters.fields.person_name'), 
+                type: 'text' 
+            },
+            { 
+                key: 'zone_current_code', 
+                label: t('rawDataExplorer.filters.fields.zone_current_code'), 
+                type: 'text' 
+            },
+            { 
+                key: 'area_current_code', 
+                label: t('rawDataExplorer.filters.fields.area_current_code'), 
+                type: 'text' 
+            },
+            { 
+                key: 'category_name', 
+                label: t('rawDataExplorer.filters.fields.category_name'), 
+                type: 'text' 
+            },
+            { 
+                key: 'alarmed', 
+                label: t('rawDataExplorer.filters.fields.alarmed'), 
+                type: 'select',
+                options: [
+                    { value: '1', label: 'Sim' },
+                    { value: '0', label: 'Não' }
+                ]
+            },
+            { 
+                key: 'assigned', 
+                label: t('rawDataExplorer.filters.fields.assigned'), 
+                type: 'select',
+                options: [
+                    { value: '1', label: 'Sim' },
+                    { value: '0', label: 'Não' }
+                ]
+            },
+            { 
+                key: 'zone_home_code', 
+                label: t('rawDataExplorer.filters.fields.zone_home_code'), 
+                type: 'text' 
+            },
+            { 
+                key: 'area_home_code', 
+                label: t('rawDataExplorer.filters.fields.area_home_code'), 
+                type: 'text' 
+            },
+            { 
+                key: 'start_date', 
+                label: t('rawDataExplorer.filters.fields.start_date'), 
+                type: 'date' 
+            },
+            { 
+                key: 'end_date', 
+                label: t('rawDataExplorer.filters.fields.end_date'), 
+                type: 'date' 
+            },
+        ],
+    },
+    // 🆕 ADICIONE ESTA NOVA CONFIGURAÇÃO
+    sensorHealth: {
+        id: 'sensorHealth',
+        label: t('rawDataExplorer.tabs.sensorHealth'),
+        icon: HeartIcon, // ou use ShieldCheckIcon, ChartBarIcon
+        endpoint: `/api/dashboard/devices/${companyId}/sensor-health/raw`,
+        exportTable: 'echart_sensor_health_issues',
+        columns: [],
+        filters: [
+            { 
+                key: 'sensor_id', 
+                label: t('rawDataExplorer.filters.fields.sensor_id'), 
+                type: 'text' 
+            },
+            { 
+                key: 'person_code', 
+                label: t('rawDataExplorer.filters.fields.person_code'), 
+                type: 'text' 
+            },
+            { 
+                key: 'person_name', 
+                label: t('rawDataExplorer.filters.fields.person_name'), 
+                type: 'text' 
+            },
+            { 
+                key: 'sensor_model', 
+                label: t('rawDataExplorer.filters.fields.sensor_model'), 
+                type: 'select',
+                options: [
+                    { value: 'SENSOR_Asset', label: 'Asset' },
+                    { value: 'SENSOR_Person', label: 'Person' },
+                    { value: 'SENSOR_Vehicle', label: 'Vehicle' }
+                ]
+            },
+            { 
+                key: 'sensor_state', 
+                label: t('rawDataExplorer.filters.fields.sensor_state'), 
+                type: 'select',
+                options: [
+                    { value: 'ACTIVE', label: 'Active' },
+                    { value: 'INACTIVE', label: 'Inactive' },
+                    { value: 'NOT_DEFINED', label: 'Not Defined' }
+                ]
+            },
+            { 
+                key: 'severity', 
+                label: t('rawDataExplorer.filters.fields.severity'), 
+                type: 'select',
+                options: [
+                    { value: 'CRITICAL', label: 'Critical' },
+                    { value: 'WARNING', label: 'Warning' },
+                    { value: 'NORMAL', label: 'Normal' }
+                ]
+            },
+            { 
+                key: 'alert_level', 
+                label: t('rawDataExplorer.filters.fields.alert_level'), 
+                type: 'select',
+                options: [
+                    { value: 'CRITICAL', label: 'Critical' },
+                    { value: 'HIGH', label: 'High' },
+                    { value: 'MEDIUM', label: 'Medium' },
+                    { value: 'LOW', label: 'Low' },
+                    { value: 'NORMAL', label: 'Normal' }
+                ]
+            },
+            { 
+                key: 'has_communication_issue', 
+                label: t('rawDataExplorer.filters.fields.has_communication_issue'), 
+                type: 'select',
+                options: [
+                    { value: '1', label: 'Sim' },
+                    { value: '0', label: 'Não' }
+                ]
+            },
+            { 
+                key: 'has_battery_issue', 
+                label: t('rawDataExplorer.filters.fields.has_battery_issue'), 
+                type: 'select',
+                options: [
+                    { value: '1', label: 'Sim' },
+                    { value: '0', label: 'Não' }
+                ]
+            },
+            { 
+                key: 'has_heartbeat_issue', 
+                label: t('rawDataExplorer.filters.fields.has_heartbeat_issue'), 
+                type: 'select',
+                options: [
+                    { value: '1', label: 'Sim' },
+                    { value: '0', label: 'Não' }
+                ]
+            },
+            { 
+                key: 'battery_status', 
+                label: t('rawDataExplorer.filters.fields.battery_status'), 
+                type: 'select',
+                options: [
+                    { value: 'GOOD', label: 'Good' },
+                    { value: 'LOW', label: 'Low' },
+                    { value: 'CRITICAL', label: 'Critical' }
+                ]
+            },
+            { 
+                key: 'temperature_category', 
+                label: t('rawDataExplorer.filters.fields.temperature_category'), 
+                type: 'select',
+                options: [
+                    { value: 'COLD', label: 'Cold' },
+                    { value: 'NORMAL', label: 'Normal' },
+                    { value: 'WARM', label: 'Warm' },
+                    { value: 'HOT', label: 'Hot' }
+                ]
+            },
+            { 
+                key: 'motion_status', 
+                label: t('rawDataExplorer.filters.fields.motion_status'), 
+                type: 'select',
+                options: [
+                    { value: 'IN MOTION', label: 'In Motion' },
+                    { value: 'STATIONARY', label: 'Stationary' }
+                ]
+            },
+            { 
+                key: 'current_zone_code', 
+                label: t('rawDataExplorer.filters.fields.current_zone_code'), 
+                type: 'text' 
+            },
+            { 
+                key: 'current_area_code', 
+                label: t('rawDataExplorer.filters.fields.current_area_code'), 
+                type: 'text' 
+            },
+            { 
+                key: 'start_date', 
+                label: t('rawDataExplorer.filters.fields.start_date'), 
+                type: 'date' 
+            },
+            { 
+                key: 'end_date', 
+                label: t('rawDataExplorer.filters.fields.end_date'), 
+                type: 'date' 
+            },
+        ],
+    },
     };
 
     const currentConfig = tableConfigs[activeTab];
@@ -1073,6 +1400,12 @@ const RawDataExplorer: React.FC = () => {
             scanning: { active: 'text-blue-600', inactive: 'text-blue-400' },
             configuration: { active: 'text-gray-600', inactive: 'text-gray-400' },
             errors: { active: 'text-orange-600', inactive: 'text-orange-400' },
+            // 🆕 ADICIONE ESTA LINHA
+            gpsDecisionLog: { active: 'text-indigo-600', inactive: 'text-indigo-400' },
+            // 🆕 ADICIONE ESTA LINHA
+            streamingApi: { active: 'text-teal-600', inactive: 'text-teal-400' },
+                    sensorHealth: { active: 'text-pink-600', inactive: 'text-pink-400' },
+
         };
 
         return isActive ? colors[id]?.active : colors[id]?.inactive;

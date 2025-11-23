@@ -152,22 +152,26 @@
       "regular": "REGULAR 🟠"
     }
   },
-  "rawDataExplorer": {
+"rawDataExplorer": {
     "title": "Explorador de Dados Brutos",
     "refresh": "Atualizar",
     "activeFilters": "Filtros ativos",
     "tabs": {
       "gps": "Relatórios GPS",
       "events": "Eventos",
-      "scanning": "Escaneamento",
+      "scanning": "Digitalização",
       "heartbeats": "Heartbeats",
-      "scannedBeacons": "Beacons escaneados",
+      "scannedBeacons": "Beacons Escaneados",
       "configuration": "Configuração",
-      "errors": "Erros GPS"
+      "errors": "Erros GPS",
+      "gpsDecisionLog": "Log de Decisões GPS",
+      "streamingApi": "API de Streaming",
+            "sensorHealth": "Saúde do Sensor"
+
     },
     "filters": {
       "globalSearchPlaceholder": "🔍 Busca global rápida...",
-      "globalSearchHint": "Use busca global ou filtros individuais em cada coluna da tabela",
+      "globalSearchHint": "Use a busca global ou filtros individuais em cada coluna da tabela",
       "advancedFilters": "Filtros Avançados",
       "tip": "Dica",
       "tipMessage": "Use filtros em cada coluna da tabela para buscas específicas",
@@ -175,7 +179,7 @@
       "all": "Todos",
       "filterBy": "Filtrar por {{field}}",
       "fields": {
-        "dev_eui": "Device EUI",
+        "dev_eui": "EUI do Dispositivo",
         "customer_name": "Cliente",
         "start_date": "Data de Início",
         "end_date": "Data de Término",
@@ -184,21 +188,56 @@
         "battery_min": "Bateria Mínima (%)",
         "battery_max": "Bateria Máxima (%)",
         "tracking_mode": "Modo de Rastreamento",
-        "error_type": "Tipo de Erro"
+        "error_type": "Tipo de Erro",
+        "code": "Código",
+        "serial": "Serial",
+        "person_name": "Nome da Pessoa",
+        "zone_current_code": "Zona Atual",
+        "area_current_code": "Área Atual",
+        "category_name": "Categoria",
+        "alarmed": "Com Alarme",
+        "assigned": "Atribuído",
+        "zone_home_code": "Zona de Origem",
+        "area_home_code": "Área de Origem",
+        "device_id": "ID do Dispositivo",
+        "position_source": "Fonte da Posição",
+        "environment": "Ambiente",
+        "device_status": "Status do Dispositivo",
+        "is_moving": "Está em Movimento",
+        "is_blocked": "Está Bloqueado",
+        "is_beacon_chosen": "Beacon Escolhido",
+        "area_code": "Código da Área",
+        "zone_code": "Código da Zona",
+        "sensor_id": "ID do Sensor",
+        "person_code": "Código da Pessoa",
+        "sensor_model": "Modelo do Sensor",
+        "sensor_state": "Estado do Sensor",
+        "severity": "Gravidade",
+        "alert_level": "Nível de Alerta",
+        "has_communication_issue": "Problema de Comunicação",
+        "has_battery_issue": "Problema de Bateria",
+        "has_heartbeat_issue": "Problema de Heartbeat",
+        "battery_status": "Estado da Bateria",
+        "temperature_category": "Temperatura",
+        "motion_status": "Estado de Movimento",
+        "current_zone_code": "Zona Atual",
+        "current_area_code": "Área Atual"
       },
       "options": {
         "SOS_MODE_START": "Início SOS",
         "SOS_MODE_END": "Fim SOS",
         "MOTION_START": "Início de Movimento",
         "MOTION_END": "Fim de Movimento",
-        "GEOFENCE_ENTRY": "Entrada na Geocerca",
-        "GEOFENCE_EXIT": "Saída da Geocerca",
-        "MOTION_TRACKING": "Rastreamento por Movimento",
-        "PERMANENT_TRACKING": "Rastreamento Permanente"
+        "GEOFENCE_ENTRY": "Entrada em Geofence",
+        "GEOFENCE_EXIT": "Saída de Geofence",
+        "MOTION_TRACKING": "Rastreamento de Movimento",
+        "PERMANENT_TRACKING": "Rastreamento Permanente",
+        "yesOnly": "Sim, apenas GPS válido",
+        "all": "Todos os registros"
       }
     },
     "pagination": {
-      "showing": "Mostrando {{start}} - {{end}} de {{total}} registros",
+      "showing": "Exibindo {{start}} - {{end}} de {{total}} registros",
       "perPage": "{{count}} por página",
       "first": "Primeira",
       "previous": "Anterior",
@@ -211,7 +250,7 @@
       "activeFilters": "Filtros ativos: {{count}}",
       "clearAllFilters": "Limpar todos os filtros",
       "filterColumn": "Filtrar {{column}}...",
-      "showingRecords": "Mostrando {{count}} registro(s)",
+      "showingRecords": "Exibindo {{count}} registro(s)",
       "filteredLocally": "filtrado localmente"
     },
     "export": {
@@ -241,7 +280,7 @@
     "refreshing": "Atualizando...",
     "updateData": "Atualizando dados...",
     "searchPlaceholder": {
-      "devices": "Buscar por Dispositivo ou Cliente..."
+      "devices": "Pesquisar por Dispositivo ou Cliente..."
     },
     "alerts": {
       "sos": "Alertas SOS",
@@ -250,7 +289,7 @@
     },
     "tabs": {
       "overview": "Visão Geral",
-      "mapview": "Visão Mapa",
+      "mapview": "Visualização do Mapa",
       "devices": "Dispositivos",
       "events": "Eventos",
       "network": "Rede",
@@ -276,7 +315,7 @@
       }
     },
     "charts": {
-      "batteryDistribution": "Distribuição do Estado da Bateria",
+      "batteryDistribution": "Distribuição do Status da Bateria",
       "gpsAccuracy": "Distribuição da Precisão GPS",
       "eventDistribution": "Distribuição de Tipos de Evento",
       "healthScoreByCategory": "Pontuação de Saúde por Categoria"
@@ -289,7 +328,7 @@
       },
       "legend": {
         "excellent": "Excelente",
-        "good": "Bom",
+        "good": "Boa",
         "fair": "Regular",
         "poor": "Ruim"
       },
@@ -302,7 +341,7 @@
       "minutesAgo": "há {{minutes}} min"
     },
     "tables": {
-      "deviceEui": "Device EUI",
+      "deviceEui": "EUI do Dispositivo",
       "customer": "Cliente",
       "startTime": "Hora de Início",
       "timeElapsed": "Tempo Decorrido",
@@ -316,7 +355,7 @@
       "noDevicesFound": "Nenhum dispositivo encontrado"
     },
     "deviceMotion": {
-      "title": "Estado de Movimento ({{count}} dispositivos)",
+      "title": "Status de Movimento do Dispositivo ({{count}} dispositivos)",
       "moving": "Em Movimento",
       "static": "Estático"
     },
@@ -859,7 +898,7 @@
     "table": {
       "columns": {
         "deviceId": "Device ID",
-        "category": "Categoria",
+        "category": "Status",
         "risk": "Risco",
         "health": "Health",
         "communication": "Comunicação",
