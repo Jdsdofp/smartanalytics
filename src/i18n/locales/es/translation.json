@@ -699,6 +699,7 @@
       "reload": "Recargar",
       "noDevices": "No hay dispositivos disponibles",
       "selected": "Seleccionados ({{count}})",
+      "select": "Seleccionado",
       "removeAll": "Eliminar todos",
       "remove": "Eliminar",
       "startDate": "Fecha Inicial",
@@ -712,7 +713,8 @@
       "latestOnlyNew": "NUEVO",
       "applyFilters": "Aplicar Filtros",
       "searching": "Buscando...",
-      "clear": "Limpiar"
+      "clear": "Limpiar",
+      "devicesCountPagination": "{{count}} de {{total}} dispositivos"
     },
     "stats": {
       "totalPoints": "Total Puntos",

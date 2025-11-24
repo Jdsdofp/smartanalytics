@@ -814,7 +814,7 @@ const GPSRouteMapLeaflet = () => {
             className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
           >
             <span className="text-sm text-gray-700 truncate">
-              {filters.dev_eui || "Selecione um dispositivo"}
+              {filters.dev_eui || t('assetManagement.searchPlaceholder')}
             </span>
             <svg
               className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ml-2 ${isDropdownOpen ? 'transform rotate-180' : ''}`}
@@ -835,7 +835,7 @@ const GPSRouteMapLeaflet = () => {
                   <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Pesquisar dev_eui..."
+                    placeholder={t('assetManagement.searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -857,7 +857,7 @@ const GPSRouteMapLeaflet = () => {
                     onClick={handleClearDevice}
                     className="text-xs text-red-600 hover:text-red-800 font-medium"
                   >
-                    Limpar seleção
+                    {t('gpsMap.filters.clear')}
                   </button>
                   <button
                     type="button"
@@ -918,8 +918,11 @@ const GPSRouteMapLeaflet = () => {
               <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-gray-600">
-                    {filteredDevices.length} de {availableDevices.length} dispositivos
-                    {searchTerm && ' (filtrado)'}
+                      {t('gpsMap.filters.devicesCountPagination', {
+                      count: filteredDevices.length,
+                      total: availableDevices.length
+                    })}
+                      {searchTerm && t('assetManagement.filtered')}
                   </p>
                   {searchTerm && (
                     <button
@@ -940,13 +943,13 @@ const GPSRouteMapLeaflet = () => {
           <div className="mt-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">
-                Selecionado
+                 {t('gpsMap.filters.select')}
               </span>
               <button
                 onClick={handleClearDevice}
                 className="text-xs text-red-600 hover:text-red-800 font-medium"
               >
-                Remover
+                {t('gpsMap.filters.remove')}
               </button>
             </div>
             <div className="p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200">

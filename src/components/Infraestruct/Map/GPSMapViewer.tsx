@@ -857,7 +857,7 @@ const GPSMapViewer = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
               >
                 <FunnelIcon className="h-5 w-5" />
-                {showFilters ? 'Ocultar' : 'Mostrar'} Filtros
+                {showFilters ? t('gpsMap.filters.hide') : t('gpsMap.filters.show')}
               </button>
             </div>
           </div>
@@ -890,7 +890,7 @@ const GPSMapViewer = () => {
                     <span className="text-sm text-gray-700">
                       {filters.dev_eui.length === 0
                         ? t('gpsMap.filters.selectDevices')
-                        : `${filters.dev_eui.length} dispositivo(s) selecionado(s)`}
+                        : t('gpsMap.filters.devicesSelected', { count: filters.dev_eui.length })}
                     </span>
                     <svg
                       className={`w-5 h-5 text-gray-400 transition-transform ${isDropdownOpen ? 'transform rotate-180' : ''}`}
@@ -912,7 +912,7 @@ const GPSMapViewer = () => {
                           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <input
                             type="text"
-                            placeholder="Pesquisar dev_eui..."
+                            placeholder={t('assetManagement.searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1009,8 +1009,11 @@ const GPSMapViewer = () => {
                       <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-gray-600">
-                            {filteredDevices.length} de {availableDevices.length} dispositivos
-                            {searchTerm && ` (filtrado)`}
+                            {t('assetManagement.devicesCount', {
+                              filtered: filteredDevices.length,
+                              total: availableDevices.length
+                            })}
+                            {searchTerm && t('assetManagement.filtered')}
                           </p>
                           {searchTerm && (
                             <button

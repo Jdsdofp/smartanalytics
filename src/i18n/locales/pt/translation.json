@@ -153,7 +153,7 @@
     }
   },
 "rawDataExplorer": {
-    "title": "Explorador de Dados Brutos",
+    "title": "Telemetria do Dispositivo",
     "refresh": "Atualizar",
     "activeFilters": "Filtros ativos",
     "tabs": {
@@ -699,6 +699,7 @@
       "reload": "Recarregar",
       "noDevices": "Nenhum dispositivo disponível",
       "selected": "Selecionados ({{count}})",
+      "select": "Selecionado",
       "removeAll": "Remover todos",
       "remove": "Remover",
       "startDate": "Data Inicial",
@@ -712,7 +713,8 @@
       "latestOnlyNew": "NOVO",
       "applyFilters": "Aplicar Filtros",
       "searching": "Buscando...",
-      "clear": "Limpar"
+      "clear": "Limpar",
+      "devicesCountPagination": "{{count}} de {{total}} dispositivos"
     },
     "stats": {
       "totalPoints": "Total Pontos",

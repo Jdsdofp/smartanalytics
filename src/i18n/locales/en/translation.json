@@ -153,7 +153,7 @@
     }
   },
   "rawDataExplorer": {
-    "title": "Raw Data Explorer",
+    "title": "Device Telemetry Center",
     "refresh": "Refresh",
     "activeFilters": "Active filters",
     "tabs": {
@@ -693,12 +693,14 @@
       "devices": "Devices (DEV_EUI)",
       "loadingDevices": "Loading...",
       "selectDevices": "Select devices...",
+      "devicesSelected": "{{count}} selected device",
       "selectedCount": "{{count}} device(s) selected",
       "selectAll": "Select all",
       "clearAll": "Clear all",
       "reload": "Reload",
       "noDevices": "No devices available",
       "selected": "Selected ({{count}})",
+      "select": "Selected",
       "removeAll": "Remove all",
       "remove": "Remove",
       "startDate": "Start Date",
@@ -712,7 +714,8 @@
       "latestOnlyNew": "NEW",
       "applyFilters": "Apply Filters",
       "searching": "Searching...",
-      "clear": "Clear"
+      "clear": "Clear",
+      "devicesCountPagination": "{{count}} de {{total}} devices"
     },
     "stats": {
       "totalPoints": "Total Points",
@@ -859,7 +862,7 @@
   "assetManagement": {
     "title": "Health Monitoring",
     "loading": "Loading...",
-    "devicesCount": "{{count}} of {{total}} devices",
+    "devicesCount": "{{filtered}} of {{total}} devices",
     "filtered": "(filtered)",
     "sortedBy": "Sorted by:",
     "searchPlaceholder": "Search devices...",
