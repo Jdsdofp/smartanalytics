@@ -16,12 +16,12 @@ import {
     Cog6ToothIcon,
     XCircleIcon,
     BoltIcon,
-    ChevronUpIcon,    // 🆕 ADICIONE
-    ChevronDownIcon,  // 🆕 ADICIONE
-    ArrowsUpDownIcon, // 🆕 ADICIONE
+    ChevronUpIcon,
+    ChevronDownIcon,
+    ArrowsUpDownIcon,
+    HeartIcon,
 } from '@heroicons/react/24/outline';
 import { useCompany } from '../../../hooks/useCompany';
-// import GPSRouteMap from '../Map/GPSRouteMap';
 
 // =====================================
 // 📊 INTERFACES E TIPOS
@@ -38,7 +38,7 @@ interface Column {
 interface TableConfig {
     id: string;
     label: string;
-    icon: React.ComponentType<{ className?: string }>; // ✅ Mudou de string para ComponentType
+    icon: React.ComponentType<{ className?: string }>;
     endpoint: string;
     exportTable: string;
     columns: Column[];
@@ -84,10 +84,8 @@ interface FilterBarProps {
     deviceUidSearchTerm: string;
     onDeviceUidSearchTermChange: (term: string) => void;
     onToggleDeviceUidDropdown: () => void;
-    onToggleDeviceUid: (deviceUid: string) => void;
-    onSelectAllDeviceUids: () => void;
-    onDeselectAllDeviceUids: () => void;
-    onRemoveDeviceUid: (deviceUid: string) => void;
+    onSelectDeviceUid: (deviceUid: string) => void;
+    onClearDeviceUid: () => void;
     onFetchAvailableDeviceUids: () => void;
 }
 
@@ -110,9 +108,9 @@ interface DataTableProps {
     loading: boolean;
     onColumnFiltersChange: (filters: Record<string, string>) => void;
     currentColumnFilters: Record<string, string>;
-    onSort: (column: string) => void;          // 🆕 ADICIONE
-    sortBy: string;                             // 🆕 ADICIONE
-    sortOrder: 'ASC' | 'DESC';                 // 🆕 ADICIONE
+    onSort: (column: string) => void;
+    sortBy: string;
+    sortOrder: 'ASC' | 'DESC';
 }
 
 // Filter Bar Component
@@ -127,10 +125,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
     deviceUidSearchTerm,
     onDeviceUidSearchTermChange,
     onToggleDeviceUidDropdown,
-    onToggleDeviceUid,
-    onSelectAllDeviceUids,
-    onDeselectAllDeviceUids,
-    onRemoveDeviceUid,
+    onSelectDeviceUid,
+    onClearDeviceUid,
     onFetchAvailableDeviceUids
 }) => {
     const { t } = useTranslation();
@@ -177,9 +173,9 @@ const FilterBar: React.FC<FilterBarProps> = ({
                         >
                             <FunnelIcon className="h-5 w-5" />
                             {t('rawDataExplorer.filters.advancedFilters')}
-                            {Object.keys(activeFilters).filter(key => key !== 'search_text' && key !== 'device_uid').length > 0 && (
+                            {Object.keys(activeFilters).filter(key => key !== 'search_text' && key !== 'dev_eui').length > 0 && (
                                 <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-600 rounded-full">
-                                    {Object.keys(activeFilters).filter(key => key !== 'search_text' && key !== 'device_uid').length}
+                                    {Object.keys(activeFilters).filter(key => key !== 'search_text' && key !== 'dev_eui').length}
                                 </span>
                             )}
                         </button>
@@ -201,7 +197,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
 
                 {showFilters && (
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* 🆕 SELECT DE DEVICE_UID */}
+                        {/* 🆕 SELECT ÚNICO DE DEV_EUI */}
                         <div className="device-uid-dropdown-container mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Device UID
@@ -220,13 +216,13 @@ const FilterBar: React.FC<FilterBarProps> = ({
                                     disabled={loadingDeviceUids || availableDeviceUids.length === 0}
                                     className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
                                 >
-                                    <span className="text-sm text-gray-700">
-                                        {(activeFilters.device_uid || []).length === 0
-                                            ? "Selecione Device UID(s)"
-                                            : `${(activeFilters.device_uid || []).length} Device UID(s) selecionado(s)`}
+                                    <span className="text-sm text-gray-700 truncate">
+                                        {activeFilters.dev_eui
+                                            ? activeFilters.dev_eui
+                                            : "Selecione um Device UID"}
                                     </span>
                                     <svg
-                                        className={`w-5 h-5 text-gray-400 transition-transform ${isDeviceUidDropdownOpen ? 'transform rotate-180' : ''}`}
+                                        className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ml-2 ${isDeviceUidDropdownOpen ? 'transform rotate-180' : ''}`}
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -245,7 +241,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                                                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                                                 <input
                                                     type="text"
-                                                    placeholder="Pesquisar device_uid..."
+                                                    placeholder="Pesquisar dev_eui..."
                                                     value={deviceUidSearchTerm}
                                                     onChange={(e) => onDeviceUidSearchTermChange(e.target.value)}
                                                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -266,18 +262,10 @@ const FilterBar: React.FC<FilterBarProps> = ({
                                                 <div className="flex items-center gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={onSelectAllDeviceUids}
-                                                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                                                    >
-                                                        Selecionar todos
-                                                    </button>
-                                                    <span className="text-gray-300">|</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={onDeselectAllDeviceUids}
+                                                        onClick={onClearDeviceUid}
                                                         className="text-xs text-red-600 hover:text-red-800 font-medium"
                                                     >
-                                                        Limpar
+                                                        Limpar seleção
                                                     </button>
                                                 </div>
                                                 <button
@@ -292,32 +280,29 @@ const FilterBar: React.FC<FilterBarProps> = ({
                                             </div>
                                         </div>
 
-                                        {/* Lista de device_uids filtrados */}
+                                        {/* Lista de dev_eui filtrados */}
                                         <div className="overflow-y-auto max-h-64">
                                             {filteredDeviceUids.length === 0 ? (
                                                 <div className="px-4 py-8 text-center text-sm text-gray-500">
-                                                    {deviceUidSearchTerm ? 'Nenhum device_uid encontrado' : 'Nenhum device_uid disponível'}
+                                                    {deviceUidSearchTerm ? 'Nenhum dev_eui encontrado' : 'Nenhum dev_eui disponível'}
                                                 </div>
                                             ) : (
                                                 filteredDeviceUids.map((deviceUid) => {
-                                                    const isSelected = (activeFilters.device_uid || []).includes(deviceUid);
+                                                    const isSelected = activeFilters.dev_eui === deviceUid;
 
                                                     return (
-                                                        <label
+                                                        <button
                                                             key={deviceUid}
-                                                            className={`flex items-center px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 ${isSelected ? 'bg-blue-50' : 'border-l-transparent'
-                                                                }`}
-                                                            style={{
-                                                                borderLeftColor: isSelected ? '#3b82f6' : 'transparent',
+                                                            onClick={() => {
+                                                                onSelectDeviceUid(deviceUid);
+                                                                onToggleDeviceUidDropdown();
                                                             }}
+                                                            className={`flex items-center w-full px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 text-left ${isSelected
+                                                                ? 'bg-blue-50 border-l-blue-600'
+                                                                : 'border-l-transparent'
+                                                                }`}
                                                         >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={isSelected}
-                                                                onChange={() => onToggleDeviceUid(deviceUid)}
-                                                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                                                            />
-                                                            <span className="ml-3 flex items-center gap-2 flex-1">
+                                                            <span className="flex items-center gap-2 flex-1">
                                                                 {isSelected && (
                                                                     <span
                                                                         className="w-3 h-3 rounded-full ring-2 ring-white"
@@ -325,13 +310,15 @@ const FilterBar: React.FC<FilterBarProps> = ({
                                                                     />
                                                                 )}
                                                                 <span
-                                                                    className={`text-sm font-mono ${isSelected ? 'font-semibold text-gray-900' : 'text-gray-700'
+                                                                    className={`text-sm font-mono ${isSelected
+                                                                        ? 'font-semibold text-gray-900'
+                                                                        : 'text-gray-700'
                                                                         }`}
                                                                 >
                                                                     {deviceUid}
                                                                 </span>
                                                             </span>
-                                                        </label>
+                                                        </button>
                                                     );
                                                 })
                                             )}
@@ -341,7 +328,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                                         <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
                                             <div className="flex items-center justify-between">
                                                 <p className="text-xs text-gray-600">
-                                                    {filteredDeviceUids.length} de {availableDeviceUids.length} device_uids
+                                                    {filteredDeviceUids.length} de {availableDeviceUids.length} dev_eui
                                                     {deviceUidSearchTerm && ' (filtrado)'}
                                                 </p>
                                                 {deviceUidSearchTerm && (
@@ -358,106 +345,51 @@ const FilterBar: React.FC<FilterBarProps> = ({
                                 )}
                             </div>
 
-                            {/* Device UIDs selecionados */}
-                            {(activeFilters.device_uid || []).length > 0 && (
+                            {/* Dev_eui selecionado */}
+                            {activeFilters.dev_eui && (
                                 <div className="mt-3">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-sm font-medium text-gray-700">
-                                            Selecionados ({(activeFilters.device_uid || []).length})
+                                            Selecionado
                                         </span>
                                         <button
-                                            onClick={onDeselectAllDeviceUids}
+                                            onClick={onClearDeviceUid}
                                             className="text-xs text-red-600 hover:text-red-800 font-medium"
                                         >
-                                            Remover todos
+                                            Remover
                                         </button>
                                     </div>
-                                    <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 max-h-32 overflow-y-auto">
-                                        {(activeFilters.device_uid || []).map((deviceUid: string) => (
+                                    <div className="p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                                        <span
+                                            className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 shadow-sm"
+                                            style={{ borderColor: '#3b82f6' }}
+                                        >
                                             <span
-                                                key={deviceUid}
-                                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 shadow-sm hover:shadow-md transition-shadow"
-                                                style={{ borderColor: '#3b82f6' }}
-                                            >
-                                                <span
-                                                    className="w-3 h-3 rounded-full ring-2 ring-white"
-                                                    style={{ backgroundColor: '#3b82f6' }}
-                                                ></span>
-                                                <span className="font-mono font-semibold text-gray-700">
-                                                    {deviceUid}
-                                                </span>
-                                                <button
-                                                    onClick={() => onRemoveDeviceUid(deviceUid)}
-                                                    className="hover:bg-red-50 rounded-full p-1 transition-colors group"
-                                                    title="Remover"
-                                                >
-                                                    <XMarkIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-600" />
-                                                </button>
+                                                className="w-3 h-3 rounded-full ring-2 ring-white"
+                                                style={{ backgroundColor: '#3b82f6' }}
+                                            ></span>
+                                            <span className="font-mono font-semibold text-gray-700">
+                                                {activeFilters.dev_eui}
                                             </span>
-                                        ))}
+                                            <button
+                                                onClick={onClearDeviceUid}
+                                                className="hover:bg-red-50 rounded-full p-1 transition-colors group"
+                                                title="Remover"
+                                            >
+                                                <XMarkIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-600" />
+                                            </button>
+                                        </span>
                                     </div>
                                 </div>
                             )}
                         </div>
-                        {filters.map((filter) => (
+
+                        {/* Outros filtros (se houver) */}
+                        {filters.filter(f => f.key !== 'dev_eui').map((filter) => (
                             <div key={filter.key}>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {t(`rawDataExplorer.filters.fields.${filter.key}`, filter.label)}
                                 </label>
-                                {filter.type === 'text' && (
-                                    <input
-                                        type="text"
-                                        value={activeFilters[filter.key] || ''}
-                                        onChange={(e) => onFilterChange(filter.key, e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder={t('rawDataExplorer.filters.filterBy', { field: t(`rawDataExplorer.filters.fields.${filter.key}`, filter.label).toLowerCase() })}
-                                    />
-                                )}
-                                {filter.type === 'select' && (
-                                    <select
-                                        value={activeFilters[filter.key] || ''}
-                                        onChange={(e) => onFilterChange(filter.key, e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        <option value="">{t('rawDataExplorer.filters.all')}</option>
-                                        {filter.options?.map((opt) => (
-                                            <option key={opt.value} value={opt.value}>
-                                                {t(`rawDataExplorer.filters.options.${opt.value}`, opt.label)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
-                                {filter.type === 'date' && (
-                                    <input
-                                        type="date"
-                                        value={activeFilters[filter.key] || ''}
-                                        onChange={(e) => onFilterChange(filter.key, e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                )}
-                                {filter.type === 'number' && (
-                                    <input
-                                        type="number"
-                                        value={activeFilters[filter.key] || ''}
-                                        onChange={(e) => onFilterChange(filter.key, e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder={t(`rawDataExplorer.filters.fields.${filter.key}`, filter.label)}
-                                    />
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {showFilters && (
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-                        {filters.map((filter) => (
-                            <div key={filter.key}>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {t(`rawDataExplorer.filters.fields.${filter.key}`, filter.label)}
-                                </label>
-
                                 {filter.type === 'text' && (
                                     <input
                                         type="text"
@@ -506,55 +438,6 @@ const FilterBar: React.FC<FilterBarProps> = ({
         </div>
     );
 };
-
-
-
-
-
-
-
-
-
-{/* <div className="bg-white border-b border-gray-200">
-            <div className="px-6 py-4">
-                <div className="mb-4">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            value={activeFilters.search_text || ''}
-                            onChange={(e) => onFilterChange('search_text', e.target.value)}
-                            placeholder={t('rawDataExplorer.filters.globalSearchPlaceholder')}
-                            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-                        </div>
-                        {activeFilters.search_text && (
-                            <button
-                                onClick={() => onFilterChange('search_text', '')}
-                                className="absolute inset-y-0 right-0 flex items-center pr-3"
-                            >
-                                <XMarkIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                            </button>
-                        )}
-                    </div>
-                    <p className="mt-1 text-sm text-gray-500">
-                        {t('rawDataExplorer.filters.globalSearchHint')}
-                    </p>
-                </div>
-
-                
-            </div>
-    </div> */}
-
-
-
-
-
-
-
-
-
 
 // Active Filters Display
 const ActiveFilters: React.FC<ActiveFiltersProps> = ({ filters, onRemove }) => {
@@ -661,9 +544,9 @@ const DataTable: React.FC<DataTableProps> = ({
     loading,
     onColumnFiltersChange,
     currentColumnFilters,
-    onSort,      // 🆕 ADICIONE
-    sortBy,      // 🆕 ADICIONE
-    sortOrder,   // 🆕 ADICIONE
+    onSort,
+    sortBy,
+    sortOrder,
 }) => {
     const { t } = useTranslation();
     const [localColumnFilters, setLocalColumnFilters] = useState<Record<string, string>>({});
@@ -775,7 +658,6 @@ const DataTable: React.FC<DataTableProps> = ({
                             >
                                 <div className="flex flex-col gap-1">
                                     <div className="flex items-center justify-between">
-                                        {/* 🆕 BOTÃO DE ORDENAÇÃO */}
                                         <button
                                             onClick={() => onSort(col)}
                                             className="flex items-center gap-1 hover:text-blue-600 transition-colors"
@@ -867,14 +749,10 @@ const RawDataExplorer: React.FC = () => {
     const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
     const [activeTab, setActiveTab] = useState<string>('gps');
     const [data, setData] = useState<any[]>([]);
-    const { companyId } = useCompany()
+    const { companyId } = useCompany();
 
-    // 🆕 ADICIONE ESTES ESTADOS
     const [sortBy, setSortBy] = useState<string>('');
-    const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC')
-
-    
-
+    const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
 
     const [pagination, setPagination] = useState<PaginationState>({
         current_page: 1,
@@ -886,14 +764,11 @@ const RawDataExplorer: React.FC = () => {
     const [filters, setFilters] = useState<Record<string, any>>({});
     const [exporting, setExporting] = useState(false);
 
-    // 🆕 ADICIONE ESTES ESTADOS PARA O SELECT DE DEVICE_UID
     const [availableDeviceUids, setAvailableDeviceUids] = useState<string[]>([]);
     const [loadingDeviceUids, setLoadingDeviceUids] = useState(false);
     const [isDeviceUidDropdownOpen, setIsDeviceUidDropdownOpen] = useState(false);
     const [deviceUidSearchTerm, setDeviceUidSearchTerm] = useState('');
 
-
-    // 🆕 FUNÇÃO PARA BUSCAR DEVICE_UIDS DISPONÍVEIS
     const fetchAvailableDeviceUids = useCallback(async () => {
         setLoadingDeviceUids(true);
         try {
@@ -910,7 +785,6 @@ const RawDataExplorer: React.FC = () => {
             if (result.success && Array.isArray(result.data)) {
                 setAvailableDeviceUids(result.data);
             } else {
-                // Fallback caso a API não retorne no formato esperado
                 setAvailableDeviceUids([]);
             }
         } catch (err) {
@@ -921,46 +795,20 @@ const RawDataExplorer: React.FC = () => {
         }
     }, [companyId]);
 
+    const handleSelectDeviceUid = (deviceUid: string) => {
+        setFilters((prev) => ({
+            ...prev,
+            dev_eui: deviceUid,
+        }));
+    };
 
-    // 🆕 FUNÇÕES PARA MANIPULAR O SELECT DE DEVICE_UID
-    const toggleDeviceUid = (deviceUid: string) => {
+    const handleClearDeviceUid = () => {
         setFilters((prev) => {
-            const currentDeviceUids = prev.dev_eui || [];
-            const isSelected = currentDeviceUids.includes(deviceUid);
-
-            const newDeviceUids = isSelected
-                ? currentDeviceUids.filter((d: string) => d !== deviceUid)
-                : [...currentDeviceUids, deviceUid];
-
-            return {
-                ...prev,
-                dev_eui: newDeviceUids,
-            };
+            const { dev_eui, ...rest } = prev;
+            return rest;
         });
     };
 
-    const selectAllDeviceUids = () => {
-        setFilters((prev) => ({
-            ...prev,
-            dev_eui: [...availableDeviceUids],
-        }));
-    };
-
-    const deselectAllDeviceUids = () => {
-        setFilters((prev) => ({
-            ...prev,
-            device_uid: [],
-        }));
-    };
-
-    const handleRemoveDeviceUid = (deviceUid: string) => {
-        setFilters((prev) => ({
-            ...prev,
-            device_uid: (prev.device_uid || []).filter((d: string) => d !== deviceUid),
-        }));
-    };
-
-    // Fechar dropdown ao clicar fora
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
@@ -975,10 +823,6 @@ const RawDataExplorer: React.FC = () => {
         }
     }, [isDeviceUidDropdownOpen]);
 
-    // 🆕 FILTRO DOS DEVICE_UIDS BASEADO NA BUSCA
-    // Computado no FilterBar para evitar declaração duplicada/remota aqui.
-
-    // Chame no useEffect
     useEffect(() => {
         fetchAvailableDeviceUids();
     }, [fetchAvailableDeviceUids]);
@@ -992,7 +836,6 @@ const RawDataExplorer: React.FC = () => {
             exportTable: 'device_gps_report_monitoring',
             columns: [],
             filters: [
-                { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
                 { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
@@ -1006,7 +849,6 @@ const RawDataExplorer: React.FC = () => {
             exportTable: 'device_events_management',
             columns: [],
             filters: [
-                { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
                 { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
@@ -1020,7 +862,6 @@ const RawDataExplorer: React.FC = () => {
             exportTable: 'device_scanning_monitoring',
             columns: [],
             filters: [
-                { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
                 { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
@@ -1034,7 +875,6 @@ const RawDataExplorer: React.FC = () => {
             exportTable: 'device_configuration_management',
             columns: [],
             filters: [
-                { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
                 { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
@@ -1048,7 +888,6 @@ const RawDataExplorer: React.FC = () => {
             exportTable: 'device_gps_error_management',
             columns: [],
             filters: [
-                { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
                 { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
@@ -1062,7 +901,6 @@ const RawDataExplorer: React.FC = () => {
             exportTable: 'device_heartbeat',
             columns: [],
             filters: [
-                { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
                 { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
@@ -1076,14 +914,338 @@ const RawDataExplorer: React.FC = () => {
             exportTable: 'device_scanned_beacons_list',
             columns: [],
             filters: [
-                { key: 'dev_eui', label: t('rawDataExplorer.filters.fields.dev_eui'), type: 'text' },
                 { key: 'customer_name', label: t('rawDataExplorer.filters.fields.customer_name'), type: 'text' },
                 { key: 'beacon_id', label: t('rawDataExplorer.filters.fields.beacon_id'), type: 'text' },
                 { key: 'start_date', label: t('rawDataExplorer.filters.fields.start_date'), type: 'date' },
                 { key: 'end_date', label: t('rawDataExplorer.filters.fields.end_date'), type: 'date' },
             ],
-        }
-
+        },
+        // 🆕 ADICIONE ESTA NOVA CONFIGURAÇÃO
+        gpsDecisionLog: {
+            id: 'gpsDecisionLog',
+            label: t('rawDataExplorer.tabs.gpsDecisionLog'),
+            icon: MapPinIcon, // ou use outro ícone como ClockIcon, DocumentMagnifyingGlassIcon
+            endpoint: `/api/dashboard/devices/${companyId}/gps-decision-log/raw`,
+            exportTable: 'device_gps_decision_log',
+            columns: [],
+            filters: [
+                {
+                    key: 'device_id',
+                    label: t('rawDataExplorer.filters.fields.device_id'),
+                    type: 'text'
+                },
+                {
+                    key: 'position_source',
+                    label: t('rawDataExplorer.filters.fields.position_source'),
+                    type: 'select',
+                    options: [
+                        { value: 'GPS', label: 'GPS' },
+                        { value: 'BLE', label: 'BLE' },
+                        { value: 'HYBRID', label: 'Hybrid' }
+                    ]
+                },
+                {
+                    key: 'environment',
+                    label: t('rawDataExplorer.filters.fields.environment'),
+                    type: 'select',
+                    options: [
+                        { value: 'indoor', label: 'Indoor' },
+                        { value: 'outdoor', label: 'Outdoor' },
+                        { value: 'unknown', label: 'Unknown' }
+                    ]
+                },
+                {
+                    key: 'device_status',
+                    label: t('rawDataExplorer.filters.fields.device_status'),
+                    type: 'select',
+                    options: [
+                        { value: 'ONLINE', label: 'Online' },
+                        { value: 'OFFLINE', label: 'Offline' }
+                    ]
+                },
+                {
+                    key: 'is_moving',
+                    label: t('rawDataExplorer.filters.fields.is_moving'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'is_blocked',
+                    label: t('rawDataExplorer.filters.fields.is_blocked'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'is_beacon_chosen',
+                    label: t('rawDataExplorer.filters.fields.is_beacon_chosen'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'area_code',
+                    label: t('rawDataExplorer.filters.fields.area_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'zone_code',
+                    label: t('rawDataExplorer.filters.fields.zone_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'start_date',
+                    label: t('rawDataExplorer.filters.fields.start_date'),
+                    type: 'date'
+                },
+                {
+                    key: 'end_date',
+                    label: t('rawDataExplorer.filters.fields.end_date'),
+                    type: 'date'
+                },
+            ],
+        },
+        // 🆕 ADICIONE ESTA NOVA CONFIGURAÇÃO
+        streamingApi: {
+            id: 'streamingApi',
+            label: t('rawDataExplorer.tabs.streamingApi'),
+            icon: RssIcon, // ou use outro ícone como SignalIcon, ArrowPathIcon
+            endpoint: `/api/dashboard/devices/${companyId}/streaming-api/raw`,
+            exportTable: 'device_streaming_api',
+            columns: [],
+            filters: [
+                {
+                    key: 'event_type',
+                    label: t('rawDataExplorer.filters.fields.event_type'),
+                    type: 'select',
+                    options: [
+                        { value: 'Smartx_Location_update', label: 'Location Update' },
+                        { value: 'Smartx_Alert', label: 'Alert' },
+                        { value: 'Smartx_Device_Status', label: 'Device Status' }
+                    ]
+                },
+                {
+                    key: 'code',
+                    label: t('rawDataExplorer.filters.fields.code'),
+                    type: 'text'
+                },
+                {
+                    key: 'serial',
+                    label: t('rawDataExplorer.filters.fields.serial'),
+                    type: 'text'
+                },
+                {
+                    key: 'person_name',
+                    label: t('rawDataExplorer.filters.fields.person_name'),
+                    type: 'text'
+                },
+                {
+                    key: 'zone_current_code',
+                    label: t('rawDataExplorer.filters.fields.zone_current_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'area_current_code',
+                    label: t('rawDataExplorer.filters.fields.area_current_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'category_name',
+                    label: t('rawDataExplorer.filters.fields.category_name'),
+                    type: 'text'
+                },
+                {
+                    key: 'alarmed',
+                    label: t('rawDataExplorer.filters.fields.alarmed'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'assigned',
+                    label: t('rawDataExplorer.filters.fields.assigned'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'zone_home_code',
+                    label: t('rawDataExplorer.filters.fields.zone_home_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'area_home_code',
+                    label: t('rawDataExplorer.filters.fields.area_home_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'start_date',
+                    label: t('rawDataExplorer.filters.fields.start_date'),
+                    type: 'date'
+                },
+                {
+                    key: 'end_date',
+                    label: t('rawDataExplorer.filters.fields.end_date'),
+                    type: 'date'
+                },
+            ],
+        },
+        // 🆕 ADICIONE ESTA NOVA CONFIGURAÇÃO
+        sensorHealth: {
+            id: 'sensorHealth',
+            label: t('rawDataExplorer.tabs.sensorHealth'),
+            icon: HeartIcon, // ou use ShieldCheckIcon, ChartBarIcon
+            endpoint: `/api/dashboard/devices/${companyId}/sensor-health/raw`,
+            exportTable: 'echart_sensor_health_issues',
+            columns: [],
+            filters: [
+                {
+                    key: 'sensor_id',
+                    label: t('rawDataExplorer.filters.fields.sensor_id'),
+                    type: 'text'
+                },
+                {
+                    key: 'person_code',
+                    label: t('rawDataExplorer.filters.fields.person_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'person_name',
+                    label: t('rawDataExplorer.filters.fields.person_name'),
+                    type: 'text'
+                },
+                {
+                    key: 'sensor_model',
+                    label: t('rawDataExplorer.filters.fields.sensor_model'),
+                    type: 'select',
+                    options: [
+                        { value: 'SENSOR_Asset', label: 'Asset' },
+                        { value: 'SENSOR_Person', label: 'Person' },
+                        { value: 'SENSOR_Vehicle', label: 'Vehicle' }
+                    ]
+                },
+                {
+                    key: 'sensor_state',
+                    label: t('rawDataExplorer.filters.fields.sensor_state'),
+                    type: 'select',
+                    options: [
+                        { value: 'ACTIVE', label: 'Active' },
+                        { value: 'INACTIVE', label: 'Inactive' },
+                        { value: 'NOT_DEFINED', label: 'Not Defined' }
+                    ]
+                },
+                {
+                    key: 'severity',
+                    label: t('rawDataExplorer.filters.fields.severity'),
+                    type: 'select',
+                    options: [
+                        { value: 'CRITICAL', label: 'Critical' },
+                        { value: 'WARNING', label: 'Warning' },
+                        { value: 'NORMAL', label: 'Normal' }
+                    ]
+                },
+                {
+                    key: 'alert_level',
+                    label: t('rawDataExplorer.filters.fields.alert_level'),
+                    type: 'select',
+                    options: [
+                        { value: 'CRITICAL', label: 'Critical' },
+                        { value: 'HIGH', label: 'High' },
+                        { value: 'MEDIUM', label: 'Medium' },
+                        { value: 'LOW', label: 'Low' },
+                        { value: 'NORMAL', label: 'Normal' }
+                    ]
+                },
+                {
+                    key: 'has_communication_issue',
+                    label: t('rawDataExplorer.filters.fields.has_communication_issue'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'has_battery_issue',
+                    label: t('rawDataExplorer.filters.fields.has_battery_issue'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'has_heartbeat_issue',
+                    label: t('rawDataExplorer.filters.fields.has_heartbeat_issue'),
+                    type: 'select',
+                    options: [
+                        { value: '1', label: 'Sim' },
+                        { value: '0', label: 'Não' }
+                    ]
+                },
+                {
+                    key: 'battery_status',
+                    label: t('rawDataExplorer.filters.fields.battery_status'),
+                    type: 'select',
+                    options: [
+                        { value: 'GOOD', label: 'Good' },
+                        { value: 'LOW', label: 'Low' },
+                        { value: 'CRITICAL', label: 'Critical' }
+                    ]
+                },
+                {
+                    key: 'temperature_category',
+                    label: t('rawDataExplorer.filters.fields.temperature_category'),
+                    type: 'select',
+                    options: [
+                        { value: 'COLD', label: 'Cold' },
+                        { value: 'NORMAL', label: 'Normal' },
+                        { value: 'WARM', label: 'Warm' },
+                        { value: 'HOT', label: 'Hot' }
+                    ]
+                },
+                {
+                    key: 'motion_status',
+                    label: t('rawDataExplorer.filters.fields.motion_status'),
+                    type: 'select',
+                    options: [
+                        { value: 'IN MOTION', label: 'In Motion' },
+                        { value: 'STATIONARY', label: 'Stationary' }
+                    ]
+                },
+                {
+                    key: 'current_zone_code',
+                    label: t('rawDataExplorer.filters.fields.current_zone_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'current_area_code',
+                    label: t('rawDataExplorer.filters.fields.current_area_code'),
+                    type: 'text'
+                },
+                {
+                    key: 'start_date',
+                    label: t('rawDataExplorer.filters.fields.start_date'),
+                    type: 'date'
+                },
+                {
+                    key: 'end_date',
+                    label: t('rawDataExplorer.filters.fields.end_date'),
+                    type: 'date'
+                },
+            ],
+        },
     };
 
     const currentConfig = tableConfigs[activeTab];
@@ -1091,7 +1253,6 @@ const RawDataExplorer: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            // ✅ Garante valores padrão caso pagination esteja undefined
             const currentPage = pagination?.current_page || 1;
             const perPage = pagination?.per_page || 50;
 
@@ -1101,7 +1262,6 @@ const RawDataExplorer: React.FC = () => {
                 ...filters,
             });
 
-            // 🆕 ADICIONE SORT
             if (sortBy) {
                 params.append('sortBy', sortBy);
                 params.append('sortOrder', sortOrder);
@@ -1111,7 +1271,6 @@ const RawDataExplorer: React.FC = () => {
                 params.append('column_filters', JSON.stringify(columnFilters));
             }
 
-            //https://api-dashboards-u1oh.onrender.com
             const response = await fetch(`https://apinode.smartxhub.cloud${currentConfig.endpoint}?${params}`);
             const result: PaginatedResponse = await response.json();
 
@@ -1133,12 +1292,10 @@ const RawDataExplorer: React.FC = () => {
                 limit: '999999',
             });
 
-            // 🆕 ADICIONE SORT NA EXPORTAÇÃO
             if (sortBy) {
                 params.append('sortBy', sortBy);
                 params.append('sortOrder', sortOrder);
             }
-
 
             if (Object.keys(columnFilters).length > 0) {
                 params.append('column_filters', JSON.stringify(columnFilters));
@@ -1243,24 +1400,26 @@ const RawDataExplorer: React.FC = () => {
             scanning: { active: 'text-blue-600', inactive: 'text-blue-400' },
             configuration: { active: 'text-gray-600', inactive: 'text-gray-400' },
             errors: { active: 'text-orange-600', inactive: 'text-orange-400' },
+            // 🆕 ADICIONE ESTA LINHA
+            gpsDecisionLog: { active: 'text-indigo-600', inactive: 'text-indigo-400' },
+            // 🆕 ADICIONE ESTA LINHA
+            streamingApi: { active: 'text-teal-600', inactive: 'text-teal-400' },
+            sensorHealth: { active: 'text-pink-600', inactive: 'text-pink-400' },
+
         };
 
         return isActive ? colors[id]?.active : colors[id]?.inactive;
     };
 
-    // 🆕 ADICIONE ESTA FUNÇÃO
     const handleSort = (column: string) => {
         if (sortBy === column) {
-            // Se já está ordenando por esta coluna, inverte a ordem
             setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
         } else {
-            // Nova coluna, começa com ASC
             setSortBy(column);
             setSortOrder('ASC');
         }
         setPagination(prev => ({ ...prev, current_page: 1 }));
     };
-
 
     return (
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
@@ -1350,8 +1509,8 @@ const RawDataExplorer: React.FC = () => {
                                     setActiveTab(config.id);
                                     setFilters({});
                                     setColumnFilters({});
-                                    setSortBy('');        // 🆕 ADICIONE
-                                    setSortOrder('DESC'); // 🆕 ADICIONE
+                                    setSortBy('');
+                                    setSortOrder('DESC');
                                     setPagination(prev => ({ ...prev, current_page: 1 }));
                                 }}
                                 className={`
@@ -1378,17 +1537,14 @@ const RawDataExplorer: React.FC = () => {
                 activeFilters={filters}
                 onFilterChange={handleFilterChange}
                 onClearFilters={handleClearFilters}
-                // 🆕 PROPS PARA DEVICE_UID
                 availableDeviceUids={availableDeviceUids}
                 loadingDeviceUids={loadingDeviceUids}
                 isDeviceUidDropdownOpen={isDeviceUidDropdownOpen}
                 deviceUidSearchTerm={deviceUidSearchTerm}
                 onDeviceUidSearchTermChange={setDeviceUidSearchTerm}
                 onToggleDeviceUidDropdown={() => setIsDeviceUidDropdownOpen(!isDeviceUidDropdownOpen)}
-                onToggleDeviceUid={toggleDeviceUid}
-                onSelectAllDeviceUids={selectAllDeviceUids}
-                onDeselectAllDeviceUids={deselectAllDeviceUids}
-                onRemoveDeviceUid={handleRemoveDeviceUid}
+                onSelectDeviceUid={handleSelectDeviceUid}
+                onClearDeviceUid={handleClearDeviceUid}
                 onFetchAvailableDeviceUids={fetchAvailableDeviceUids}
             />
 
@@ -1397,18 +1553,15 @@ const RawDataExplorer: React.FC = () => {
                 onRemove={(key) => handleFilterChange(key, '')}
             />
 
-
             <DataTable
                 data={data}
                 loading={loading}
                 onColumnFiltersChange={handleColumnFiltersChange}
                 currentColumnFilters={columnFilters}
-                onSort={handleSort}          // 🆕 ADICIONE
-                sortBy={sortBy}              // 🆕 ADICIONE
-                sortOrder={sortOrder}        // 🆕 ADICIONE
+                onSort={handleSort}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
             />
-
-
 
             {!loading && data.length > 0 && (
                 <Pagination

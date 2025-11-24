@@ -163,7 +163,10 @@
       "heartbeats": "Heartbeats",
       "scannedBeacons": "Scanned Beacons",
       "configuration": "Configuration",
-      "errors": "GPS Errors"
+      "errors": "GPS Errors",
+      "gpsDecisionLog": "GPS Decision",
+      "streamingApi": "Streaming API",
+      "sensorHealth": "Sensor Health"
     },
     "filters": {
       "globalSearchPlaceholder": "🔍 Quick global search...",
@@ -184,7 +187,41 @@
         "battery_min": "Minimum Battery (%)",
         "battery_max": "Maximum Battery (%)",
         "tracking_mode": "Tracking Mode",
-        "error_type": "Error Type"
+        "error_type": "Error Type",
+        "code": "Code",
+        "serial": "Serial",
+        "person_name": "Person Name",
+        "zone_current_code": "Current Zone",
+        "area_current_code": "Current Area",
+        "category_name": "Category",
+        "alarmed": "Alarmed",
+        "assigned": "Assigned",
+        "zone_home_code": "Home Zone",
+        "area_home_code": "Home Area",
+        "device_id": "Device ID",
+        "position_source": "Position Source",
+        "environment": "Environment",
+        "device_status": "Device Status",
+        "is_moving": "Is Moving",
+        "is_blocked": "Is Blocked",
+        "is_beacon_chosen": "Beacon Chosen",
+        "area_code": "Area Code",
+        "zone_code": "Zone Code",
+        "sensor_id": "Sensor ID",
+        "person_code": "Person Code",
+        "sensor_model": "Sensor Model",
+        "sensor_state": "Sensor State",
+        "severity": "Severity",
+        "alert_level": "Alert Level",
+        "has_communication_issue": "Communication Issue",
+        "has_battery_issue": "Battery Issue",
+        "has_heartbeat_issue": "Heartbeat Issue",
+        "battery_status": "Battery Status",
+        "temperature_category": "Temperature",
+        "motion_status": "Motion Status",
+        "current_zone_code": "Current Zone",
+        "current_area_code": "Current Area"
+
       },
       "options": {
         "SOS_MODE_START": "SOS Start",
@@ -257,7 +294,7 @@
       "events": "Events",
       "network": "Network",
       "customers": "Customers",
-      "rawData": "Raw Data"
+      "rawData": "Processed Database"
     },
     "kpis": {
       "deviceUptime": {
@@ -801,6 +838,22 @@
       "records": "{{count}} records",
       "previous": "Previous",
       "next": "Next"
+    },
+    "gpsMap": {
+      "markers": {
+        "viewDetails": "View Details"
+      },
+      "popup": {
+        "unknownWorker": "Unidentified worker",
+        "locale": "en-US",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "accuracy": "Accuracy",
+        "battery": "Battery",
+        "status": "Status",
+        "moving": "Moving",
+        "stopped": "Stopped"
+      }
     }
   },
   "assetManagement": {
@@ -845,7 +898,7 @@
     "table": {
       "columns": {
         "deviceId": "Device ID",
-        "category": "Category",
+        "category": "Status",
         "risk": "Risk",
         "health": "Health",
         "communication": "Communication",
@@ -991,58 +1044,58 @@
       "notAvailable": "–"
     },
     "filters": {
-    "title": "Filters",
-    "clearAll": "Clear All",
-    "apply": "Apply",
-    "personName": "Person Name",
-    "deviceUid": "Device UID",
-    "deviceUidPlaceholder": "Enter Device UID...",
-    "personNamePlaceholder": "Enter name...",
-    "batteryLevel": "Battery Level (%)",
-    "min": "Min",
-    "max": "Max",
-    "batteryStatus": "Battery Status",
-    "motionStatus": "Motion Status",
-    "temperature": "Temperature",
-    "reportFreshness": "Data Freshness",
-    "statuses": {
-      "critical": "Critical",
-      "warning": "Warning",
-      "healthy": "Healthy"
+      "title": "Filters",
+      "clearAll": "Clear All",
+      "apply": "Apply",
+      "personName": "Person Name",
+      "deviceUid": "Device UID",
+      "deviceUidPlaceholder": "Enter Device UID...",
+      "personNamePlaceholder": "Enter name...",
+      "batteryLevel": "Battery Level (%)",
+      "min": "Min",
+      "max": "Max",
+      "batteryStatus": "Battery Status",
+      "motionStatus": "Motion Status",
+      "temperature": "Temperature",
+      "reportFreshness": "Data Freshness",
+      "statuses": {
+        "critical": "Critical",
+        "warning": "Warning",
+        "healthy": "Healthy"
+      },
+      "motion": {
+        "moving": "Moving",
+        "static": "Static"
+      },
+      "freshness": {
+        "realTime": "Real Time",
+        "recent": "Recent",
+        "stale": "Stale"
+      },
+      "activeFilters": "{{count}} active filter(s)",
+      "noActiveFilters": "No active filters"
     },
-    "motion": {
-      "moving": "Moving",
-      "static": "Static"
+    "export": {
+      "title": "Export",
+      "exporting": "Exporting...",
+      "error": "Error exporting data. Please try again.",
+      "selectFormat": "Select export format",
+      "recordsToExport": "{{count}} record(s) will be exported",
+      "tip": "Active filters will be included in the export",
+      "pdfTitle": "Low Battery Alerts Report",
+      "excel": {
+        "full": "Full Excel",
+        "fullDescription": "All data with detailed columns and filters tab",
+        "summary": "Summary Excel",
+        "summaryDescription": "Consolidated statistics and key metrics"
+      },
+      "pdf": {
+        "title": "PDF",
+        "description": "Formatted report with tables and charts"
+      }
     },
-    "freshness": {
-      "realTime": "Real Time",
-      "recent": "Recent",
-      "stale": "Stale"
-    },
-    "activeFilters": "{{count}} active filter(s)",
-    "noActiveFilters": "No active filters"
-  },
-   "export": {
-    "title": "Export",
-    "exporting": "Exporting...",
-    "error": "Error exporting data. Please try again.",
-    "selectFormat": "Select export format",
-    "recordsToExport": "{{count}} record(s) will be exported",
-    "tip": "Active filters will be included in the export",
-    "pdfTitle": "Low Battery Alerts Report",
-    "excel": {
-      "full": "Full Excel",
-      "fullDescription": "All data with detailed columns and filters tab",
-      "summary": "Summary Excel",
-      "summaryDescription": "Consolidated statistics and key metrics"
-    },
-    "pdf": {
-      "title": "PDF",
-      "description": "Formatted report with tables and charts"
-    }
-  },
-  "noData":"No data found for applied filters",
-  "modal": {
+    "noData": "No data found for applied filters",
+    "modal": {
       "title": "Export Data",
       "format": "Export Format",
       "scope": "Export Scope",
