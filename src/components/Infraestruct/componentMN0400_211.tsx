@@ -3039,7 +3039,7 @@ export default function DeviceLogsView() {
 
       {/* Tabs de Navegação */}
       <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8 overflow-x-auto">
+  <nav className="-mb-px flex space-x-8 max-[856px]:overflow-x-auto">
           {[
             { id: 'overview', label: t('deviceLogs.tabs.overview'), icon: ChartBarIcon },
             { id: 'mapview', label: t('deviceLogs.tabs.mapview'), icon: MapIcon },
@@ -3408,7 +3408,7 @@ export default function DeviceLogsView() {
                                     <span className="text-[9px]">{device.battery_freshness}</span>
                                   </td>
 
-                                  {/* GPS Info */}
+                                  {/* GPS Info */}  
                                   <td className="px-2 py-2 whitespace-nowrap bg-red-50">
                                     {device.gps_age !== null ? (
                                       <span className={`text-[10px] font-medium ${device.gps_age < 30 ? 'text-green-600' :

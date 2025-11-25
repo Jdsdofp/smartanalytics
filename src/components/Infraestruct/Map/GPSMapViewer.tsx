@@ -32,36 +32,109 @@ import { useCompany } from '../../../hooks/useCompany';
 // =====================================
 
 // Criar ícone personalizado para trabalhador
-const createWorkerIcon = (color: string = '#3b82f6') => {
+// const createWorkerIcon = (color: string = '#3b82f6') => {
+//   return L.divIcon({
+//     html: `
+//       <div style="
+//         position: relative;
+//         width: 32px;
+//         height: 32px;
+//         background-color: ${color};
+//         border: 3px solid white;
+//         border-radius: 50% 50% 50% 0;
+//         transform: rotate(-45deg);
+//         box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+//         display: flex;
+//         align-items: center;
+//         justify-content: center;
+//       ">
+//         <div style="
+//           transform: rotate(45deg);
+//           color: white;
+//           font-weight: bold;
+//           font-size: 16px;
+//           margin-top: -2px;
+//         ">👷</div>
+//       </div>
+//     `,
+//     className: 'custom-worker-icon',
+//     iconSize: [32, 32],
+//     iconAnchor: [16, 32],
+//     popupAnchor: [0, -32],
+//   });
+// };
+
+// Criar ícone personalizado para trabalhador com foto
+const createWorkerIcon = (color: string = '#3b82f6', photoUrl?: string, userName?: string) => {
   return L.divIcon({
     html: `
       <div style="
         position: relative;
-        width: 32px;
-        height: 32px;
+        width: 42px;
+        height: 42px;
         background-color: ${color};
         border: 3px solid white;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
       ">
+        ${photoUrl ? `
+          <img 
+            src="${photoUrl}" 
+            alt="${userName || 'Worker'}"
+            style="
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            "
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          />
+          <div style="
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: ${color};
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+          ">👷</div>
+        ` : `
+          <div style="
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+          ">👷</div>
+        `}
         <div style="
-          transform: rotate(45deg);
-          color: white;
-          font-weight: bold;
-          font-size: 16px;
-          margin-top: -2px;
-        ">👷</div>
+          position: absolute;
+          bottom: -2px;
+          right: -2px;
+          width: 12px;
+          height: 12px;
+          background-color: ${color};
+          border: 2px solid white;
+          border-radius: 50%;
+        "></div>
       </div>
     `,
     className: 'custom-worker-icon',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
+    iconSize: [42, 42],
+    iconAnchor: [21, 42],
+    popupAnchor: [0, -42],
   });
+};
+
+// Função para obter a URL da foto do usuário
+const getUserPhotoUrl = (point: GPSPoint): string | undefined => {
+  if (point.Image_hash) {
+    return `https://smartmachine.smartxhub.cloud/imagem/${point.Image_hash}`;
+  }
+  return undefined;
 };
 
 // // Ícone para trabalhador em movimento...
@@ -1477,13 +1550,17 @@ const GPSMapViewer = () => {
               {validData.map((point, index) => {
                 // ✨ Modo latest_only - mostrar todos os pontos como "última posição"
                 if (filters.latest_only) {
+                  // const deviceColor = getDeviceColor(point.dev_eui, uniqueDevices);
                   const deviceColor = getDeviceColor(point.dev_eui, uniqueDevices);
+                  const photoUrl = getUserPhotoUrl(point);
+                  const userName = point.Item_Name || t('gpsMap.gpsMap.popup.unknownWorker');
 
                   return (
                     <Marker
                       key={`latest-${point.dev_eui}`}
                       position={[point.gps_latitude, point.gps_longitude]}
-                      icon={createWorkerIcon(deviceColor)}
+                      // icon={createWorkerIcon(deviceColor)}
+                          icon={createWorkerIcon(deviceColor, photoUrl, userName)}
                     >
                       <Popup>
                         <div className="p-2 min-w-[240px] max-w-[280px]">
@@ -1950,309 +2027,309 @@ const GPSMapViewer = () => {
         )}
       </div>
       {/* Modal de Detalhes */}
-      {isModalOpen && selectedPoint && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-          <div
-            className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+      {/* Modal de Detalhes */}
+{isModalOpen && selectedPoint && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+    <div
+      className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Header do Modal */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MapPinIcon className="h-6 w-6 text-white" />
+            <div>
+              <h3 className="text-lg font-bold text-white">{t('gpsMap.modal.title')}</h3>
+              <p className="text-blue-100 text-sm">
+                {t('gpsMap.modal.subtitle')}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="text-white hover:text-blue-200 transition-colors p-1 rounded-full hover:bg-white hover:bg-opacity-20"
           >
-            {/* Header do Modal */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <MapPinIcon className="h-6 w-6 text-white" />
-                  <div>
-                    <h3 className="text-lg font-bold text-white">Detalhes do Trabalhador</h3>
-                    <p className="text-blue-100 text-sm">
-                      Informações completas da localização
-                    </p>
-                  </div>
+            <XMarkIcon className="h-6 w-6" />
+          </button>
+        </div>
+      </div>
+
+      {/* Conteúdo do Modal */}
+      <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
+        <div className="p-6">
+          {/* Cabeçalho com informações do usuário */}
+          <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-200">
+            <div className="flex-shrink-0">
+              {selectedPoint.Image_hash ? (
+                <img
+                  src={`https://smartmachine.smartxhub.cloud/imagem/${selectedPoint.Image_hash}`}
+                  alt={selectedPoint.Item_Name || t('gpsMap.modal.defaultUserName')}
+                  className="w-16 h-16 rounded-full object-cover border-4 border-gray-300 shadow-lg"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-blue-100 border-4 border-blue-300 flex items-center justify-center shadow-lg">
+                  <span className="text-2xl">👷</span>
                 </div>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-white hover:text-blue-200 transition-colors p-1 rounded-full hover:bg-white hover:bg-opacity-20"
-                >
-                  <XMarkIcon className="h-6 w-6" />
-                </button>
-              </div>
+              )}
             </div>
 
-            {/* Conteúdo do Modal */}
-            <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-              <div className="p-6">
-                {/* Cabeçalho com informações do usuário */}
-                <div className="flex items-center gap-4 mb-6 pb-4 border-b border-gray-200">
-                  <div className="flex-shrink-0">
-                    {selectedPoint.Image_hash ? (
-                      <img
-                        src={`https://smartmachine.smartxhub.cloud/imagem/${selectedPoint.Image_hash}`}
-                        alt={selectedPoint.Item_Name || 'Usuário'}
-                        className="w-16 h-16 rounded-full object-cover border-4 border-gray-300 shadow-lg"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-blue-100 border-4 border-blue-300 flex items-center justify-center shadow-lg">
-                        <span className="text-2xl">👷</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <h2 className="text-xl font-bold text-gray-900">
-                      {selectedPoint.Item_Name || 'Trabalhador não identificado'}
-                    </h2>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div
-                        className="w-3 h-3 rounded-full border-2 border-white shadow-sm"
-                        style={{
-                          backgroundColor: getDeviceColor(selectedPoint.dev_eui, uniqueDevices)
-                        }}
-                      />
-                      <code className="text-sm text-gray-600 font-mono">
-                        {selectedPoint.dev_eui}
-                      </code>
-                    </div>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                      <span>📅 {new Date(selectedPoint.timestamp).toLocaleDateString('pt-BR')}</span>
-                      <span>🕒 {new Date(selectedPoint.timestamp).toLocaleTimeString('pt-BR')}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Grid de Informações */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Coluna 1: Informações de Localização */}
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                      <MapPinIcon className="h-5 w-5 text-blue-500" />
-                      {t('gpsMap.modal.location')}
-                    </h4>
-
-                    <div className="space-y-3">
-                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Latitude</label>
-                            <p className="text-lg font-mono text-gray-900 font-bold">
-                              {selectedPoint.gps_latitude}
-                            </p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Longitude</label>
-                            <p className="text-lg font-mono text-gray-900 font-bold">
-                              {selectedPoint.gps_longitude}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <label className="text-sm font-medium text-gray-600 mb-2 block">{t('gpsMap.modal.gpsAccuracy')}</label>
-                        <div className="flex items-center justify-between">
-                          <span className={`px-3 py-2 rounded-full text-sm font-medium ${selectedPoint.gps_accuracy < 10 ? 'bg-green-100 text-green-800 border border-green-200' :
-                            selectedPoint.gps_accuracy < 25 ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
-                              'bg-red-100 text-red-800 border border-red-200'
-                            }`}>
-                            {selectedPoint.gps_accuracy} metros
-                          </span>
-                          <div className="text-right">
-                            <div className="text-xs text-gray-500">{t('gpsMap.modal.quality')}</div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {selectedPoint.gps_accuracy < 10 ? '🎯 Excelente' :
-                                selectedPoint.gps_accuracy < 25 ? `✅ ${t('gpsMap.modal.good')}` : `⚠️ ${t('gpsMap.modal.regular')}`}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Coluna 2: Informações do Dispositivo */}
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                      <BoltIcon className="h-5 w-5 text-yellow-500" />
-                      {t('gpsMap.modal.deviceStatus')}
-                    </h4>
-
-                    <div className="space-y-3">
-                      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <label className="text-sm font-medium text-gray-600">{t('gpsMap.modal.readingTime')}</label>
-                        <p className="text-lg font-medium text-gray-900">
-                          {new Date(selectedPoint.timestamp).toLocaleDateString('pt-BR', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </p>
-                        <p className="text-md text-gray-600 font-medium">
-                          {new Date(selectedPoint.timestamp).toLocaleTimeString('pt-BR')}
-                        </p>
-                      </div>
-
-                      {selectedPoint.battery_level && (
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                          <div className="flex items-center justify-between mb-2">
-                            <label className="text-sm font-medium text-gray-600">Nível da Bateria</label>
-                            <span className={`text-sm font-bold ${selectedPoint.battery_level > 50 ? 'text-green-600' :
-                              selectedPoint.battery_level > 20 ? 'text-yellow-600' : 'text-red-600'
-                              }`}>
-                              {selectedPoint.battery_level}%
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 bg-gray-200 rounded-full h-3">
-                              <div
-                                className={`h-3 rounded-full ${selectedPoint.battery_level > 50 ? 'bg-green-500' :
-                                  selectedPoint.battery_level > 20 ? 'bg-yellow-500' : 'bg-red-500'
-                                  }`}
-                                style={{ width: `${selectedPoint.battery_level}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {selectedPoint.battery_level > 50 ? '🔋 Bateria em bom estado' :
-                              selectedPoint.battery_level > 20 ? '⚡ Bateria moderada' : '🪫 Bateria fraca - recarregar'}
-                          </div>
-                        </div>
-                      )}
-
-                      {selectedPoint.dynamic_motion_state && (
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                          <label className="text-sm font-medium text-gray-600 mb-2 block">Status de Movimento</label>
-                          <div className="flex items-center gap-3">
-                            {selectedPoint.dynamic_motion_state === 'MOVING' ? (
-                              <>
-                                <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                                <span className="text-green-700 font-medium text-lg">🚶 Em movimento</span>
-                              </>
-                            ) : (
-                              <>
-                                <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-                                <span className="text-gray-700 text-lg">🛑 Parado</span>
-                              </>
-                            )}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {selectedPoint.dynamic_motion_state === 'MOVING'
-                              ? 'O dispositivo está se movendo ativamente'
-                              : 'O dispositivo está parado há algum tempo'
-                            }
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Informações Técnicas Expandidas */}
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">{t('gpsMap.modal.technicalInfo')}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <label className="text-gray-600 font-medium">DEV_EUI</label>
-                      <p className="font-mono text-gray-900 truncate" title={selectedPoint.dev_eui}>
-                        {selectedPoint.dev_eui}
-                      </p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <label className="text-gray-600 font-medium">Timestamp Original</label>
-                      <p className="text-gray-900 font-mono text-xs">
-                        {new Date(selectedPoint.timestamp).toISOString()}
-                      </p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <label className="text-gray-600 font-medium">ID do Registro</label>
-                      <p className="text-gray-900 font-mono">
-                        #{selectedPoint?.id || 'N/A'}
-                      </p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <label className="text-gray-600 font-medium">Status da Conexão</label>
-                      <p className="text-green-600 font-medium flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                        Online
-                      </p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <label className="text-gray-600 font-medium">Tipo de Dispositivo</label>
-                      <p className="text-gray-900">Tracker GPS</p>
-                    </div>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <label className="text-gray-600 font-medium">Última Atualização</label>
-                      <p className="text-gray-900">
-                        {new Date(selectedPoint.timestamp).toLocaleString('pt-BR')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Coordenadas para Copiar */}
-                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h5 className="font-medium text-blue-900 mb-2">Coordenadas para compartilhamento</h5>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 bg-white px-3 py-2 rounded border border-blue-300 text-sm text-gray-700 font-mono">
-                      {selectedPoint.gps_latitude}, {selectedPoint.gps_longitude}
-                    </code>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(`${selectedPoint.gps_latitude}, ${selectedPoint.gps_longitude}`);
-                        // Você pode adicionar um toast de confirmação aqui
-                      }}
-                      className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
-                    >
-                      Copiar
-                    </button>
-                  </div>
-                </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-gray-900">
+                {selectedPoint.Item_Name || t('gpsMap.modal.unnamedWorker')}
+              </h2>
+              <div className="flex items-center gap-2 mt-1">
+                <div
+                  className="w-3 h-3 rounded-full border-2 border-white shadow-sm"
+                  style={{
+                    backgroundColor: getDeviceColor(selectedPoint.dev_eui, uniqueDevices)
+                  }}
+                />
+                <code className="text-sm text-gray-600 font-mono">
+                  {selectedPoint.dev_eui}
+                </code>
               </div>
-              {/* Footer do Modal */}
-              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-                <div className="flex justify-between items-center">
-                  <div className="text-sm text-gray-600">
-                    {t('gpsMap.modal.updatedAt')} {new Date(selectedPoint.timestamp).toLocaleString('pt-BR')}
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setIsModalOpen(false)}
-                      className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      {t('gpsMap.modal.close')}
-                    </button>
-                    <button
-                      onClick={() => {
-                        // ⭐ EXPORTAR PARA PDF COM GRÁFICOS
-                        exportGPSPointToPDF(selectedPoint);
-                      }}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="w-4 h-4"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-                        />
-                      </svg>
-                      {t('gpsMap.modal.exportPDF')}
-                    </button>
-                  </div>
-                </div>
+              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                <span>📅 {new Date(selectedPoint.timestamp).toLocaleDateString('pt-BR')}</span>
+                <span>🕒 {new Date(selectedPoint.timestamp).toLocaleTimeString('pt-BR')}</span>
               </div>
             </div>
           </div>
 
+          {/* Grid de Informações */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Coluna 1: Informações de Localização */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <MapPinIcon className="h-5 w-5 text-blue-500" />
+                {t('gpsMap.modal.location')}
+              </h4>
+
+              <div className="space-y-3">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">{t('gpsMap.modal.latitude')}</label>
+                      <p className="text-lg font-mono text-gray-900 font-bold">
+                        {selectedPoint.gps_latitude}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">{t('gpsMap.modal.longitude')}</label>
+                      <p className="text-lg font-mono text-gray-900 font-bold">
+                        {selectedPoint.gps_longitude}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <label className="text-sm font-medium text-gray-600 mb-2 block">{t('gpsMap.modal.gpsAccuracy')}</label>
+                  <div className="flex items-center justify-between">
+                    <span className={`px-3 py-2 rounded-full text-sm font-medium ${selectedPoint.gps_accuracy < 10 ? 'bg-green-100 text-green-800 border border-green-200' :
+                      selectedPoint.gps_accuracy < 25 ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                        'bg-red-100 text-red-800 border border-red-200'
+                      }`}>
+                      {selectedPoint.gps_accuracy} {t('gpsMap.modal.meters')}
+                    </span>
+                    <div className="text-right">
+                      <div className="text-xs text-gray-500">{t('gpsMap.modal.quality')}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {selectedPoint.gps_accuracy < 10 ? t('gpsMap.modal.excellent') :
+                          selectedPoint.gps_accuracy < 25 ? t('gpsMap.modal.good') : t('gpsMap.modal.regular')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Coluna 2: Informações do Dispositivo */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <BoltIcon className="h-5 w-5 text-yellow-500" />
+                {t('gpsMap.modal.deviceStatus')}
+              </h4>
+
+              <div className="space-y-3">
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <label className="text-sm font-medium text-gray-600">{t('gpsMap.modal.readingTime')}</label>
+                  <p className="text-lg font-medium text-gray-900">
+                    {new Date(selectedPoint.timestamp).toLocaleDateString('pt-BR', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                  <p className="text-md text-gray-600 font-medium">
+                    {new Date(selectedPoint.timestamp).toLocaleTimeString('pt-BR')}
+                  </p>
+                </div>
+
+                {selectedPoint.battery_level && (
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-gray-600">{t('gpsMap.modal.batteryLevel')}</label>
+                      <span className={`text-sm font-bold ${selectedPoint.battery_level > 50 ? 'text-green-600' :
+                        selectedPoint.battery_level > 20 ? 'text-yellow-600' : 'text-red-600'
+                        }`}>
+                        {selectedPoint.battery_level}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 bg-gray-200 rounded-full h-3">
+                        <div
+                          className={`h-3 rounded-full ${selectedPoint.battery_level > 50 ? 'bg-green-500' :
+                            selectedPoint.battery_level > 20 ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}
+                          style={{ width: `${selectedPoint.battery_level}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {selectedPoint.battery_level > 50 ? t('gpsMap.modal.batteryGood') :
+                        selectedPoint.battery_level > 20 ? t('gpsMap.modal.batteryModerate') : t('gpsMap.modal.batteryLow')}
+                    </div>
+                  </div>
+                )}
+
+                {selectedPoint.dynamic_motion_state && (
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <label className="text-sm font-medium text-gray-600 mb-2 block">{t('gpsMap.modal.motionStatus')}</label>
+                    <div className="flex items-center gap-3">
+                      {selectedPoint.dynamic_motion_state === 'MOVING' ? (
+                        <>
+                          <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                          <span className="text-green-700 font-medium text-lg">{t('gpsMap.modal.moving')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+                          <span className="text-gray-700 text-lg">{t('gpsMap.modal.stopped')}</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {selectedPoint.dynamic_motion_state === 'MOVING'
+                        ? t('gpsMap.modal.movingDescription')
+                        : t('gpsMap.modal.stoppedDescription')
+                      }
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Informações Técnicas Expandidas */}
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <h4 className="text-lg font-semibold text-gray-900 mb-3">{t('gpsMap.modal.technicalInfo')}</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <label className="text-gray-600 font-medium">DEV_EUI</label>
+                <p className="font-mono text-gray-900 truncate" title={selectedPoint.dev_eui}>
+                  {selectedPoint.dev_eui}
+                </p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <label className="text-gray-600 font-medium">{t('gpsMap.modal.originalTimestamp')}</label>
+                <p className="text-gray-900 font-mono text-xs">
+                  {new Date(selectedPoint.timestamp).toISOString()}
+                </p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <label className="text-gray-600 font-medium">{t('gpsMap.modal.recordId')}</label>
+                <p className="text-gray-900 font-mono">
+                  #{selectedPoint?.id || t('gpsMap.modal.notAvailable')}
+                </p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <label className="text-gray-600 font-medium">{t('gpsMap.modal.connectionStatus')}</label>
+                <p className="text-green-600 font-medium flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  {t('gpsMap.modal.online')}
+                </p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <label className="text-gray-600 font-medium">{t('gpsMap.modal.deviceType')}</label>
+                <p className="text-gray-900">{t('gpsMap.modal.gpsTracker')}</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <label className="text-gray-600 font-medium">{t('gpsMap.modal.lastUpdate')}</label>
+                <p className="text-gray-900">
+                  {new Date(selectedPoint.timestamp).toLocaleString('pt-BR')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Coordenadas para Copiar */}
+          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h5 className="font-medium text-blue-900 mb-2">{t('gpsMap.modal.shareCoordinates')}</h5>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 bg-white px-3 py-2 rounded border border-blue-300 text-sm text-gray-700 font-mono">
+                {selectedPoint.gps_latitude}, {selectedPoint.gps_longitude}
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${selectedPoint.gps_latitude}, ${selectedPoint.gps_longitude}`);
+                  // Você pode adicionar um toast de confirmação aqui
+                }}
+                className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+              >
+                {t('gpsMap.modal.copy')}
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+
+        {/* Footer do Modal */}
+        <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-600">
+              {t('gpsMap.modal.updatedAt')} {new Date(selectedPoint.timestamp).toLocaleString('pt-BR')}
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                {t('gpsMap.modal.close')}
+              </button>
+              <button
+                onClick={() => {
+                  exportGPSPointToPDF(selectedPoint);
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                  />
+                </svg>
+                {t('gpsMap.modal.exportPDF')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
     </>
 
