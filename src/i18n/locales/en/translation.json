@@ -884,7 +884,7 @@
         "all": "All status",
         "active": "Active",
         "recent": "Recent",
-        "stale": "Stale",
+        "stale": "Offline",
         "critical": "Critical",
         "noData": "No Data"
       },
@@ -1020,13 +1020,13 @@
       "fresh": "🟢 Fresh",
       "recent": "🟡 Recent",
       "old": "🟠 Old",
-      "stale": "🔴 Stale"
+      "stale": "🔴 Offline"
     },
     "reportStatus": {
       "active": "🟢 Active",
       "recent": "🟡 Recent",
       "delayed": "🟠 Delayed",
-      "lost": "🔴 Lost",
+      "lost": "🔴 Offline",
       "realTime": "REAL TIME",
       "recentData": "RECENT"
     },
@@ -1073,7 +1073,7 @@
       "freshness": {
         "realTime": "Real Time",
         "recent": "Recent",
-        "stale": "Stale"
+        "stale": "Offline"
       },
       "activeFilters": "{{count}} active filter(s)",
       "noActiveFilters": "No active filters"
