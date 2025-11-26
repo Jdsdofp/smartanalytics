@@ -1102,19 +1102,11 @@ export default function CertificateReportGrid() {
     );
   };
 
-  if (loading || loadingAnalysis) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando análise crítica...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+
       <div className="w-full">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Análise Crítica de Certificados</h1>
@@ -1601,26 +1593,27 @@ export default function CertificateReportGrid() {
 
 
         <div className="bg-white rounded-lg shadow overflow-hidden mx-4">
+
           <div className="overflow-x-auto">
-            <div className="max-h-[700px] overflow-y-auto">
+            <div className="max-h-[550px] overflow-y-auto">
+
               <table className="min-w-full w-full table-fixed">
                 <thead className="bg-gray-50 border-b sticky top-0 z-10">
                   <tr>
-                    <th className="w-40 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-48 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
                       <div className="flex items-center">
                         Site
                         <ColumnFilterDropdown column="Home_site_name" displayName="Site" />
                       </div>
                     </th>
-                    <th className="w-40 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-48 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
                       Área
                     </th>
-                    <th className="w-40 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-48 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
                       Zona
                     </th>
-
                     <th
-                      className="w-48 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      className="w-56 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide cursor-pointer hover:bg-gray-100"
                       onClick={() => handleSort('certificate_description')}
                     >
                       <div className="flex items-center">
@@ -1628,13 +1621,13 @@ export default function CertificateReportGrid() {
                         <ColumnFilterDropdown column="certificate_description" displayName="Certificado" />
                       </div>
                     </th>
-                    <th className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-40 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
                       <div className="flex items-center">
                         Código
                       </div>
                     </th>
                     <th
-                      className="w-64 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      className="w-72 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide cursor-pointer hover:bg-gray-100"
                       onClick={() => handleSort('item_name')}
                     >
                       <div className="flex items-center">
@@ -1642,154 +1635,186 @@ export default function CertificateReportGrid() {
                         <ColumnFilterDropdown column="item_name" displayName="Item" />
                       </div>
                     </th>
-                    <th className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-40 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
                       <div className="flex items-center">
                         Marca
                         <ColumnFilterDropdown column="brand" displayName="Marca" />
                       </div>
                     </th>
-                    <th className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-40 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
                       <div className="flex items-center">
                         Modelo
                         <ColumnFilterDropdown column="model" displayName="Modelo" />
                       </div>
                     </th>
-                    <th className="w-40 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-48 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
                       <div className="flex items-center">
                         Serial
                         <ColumnFilterDropdown column="serial" displayName="Serial" />
                       </div>
                     </th>
                     <th
-                      className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                      className="w-40 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide cursor-pointer hover:bg-gray-100"
                       onClick={() => handleSort('expiration_date')}
                     >
                       Expiração {sortBy === 'expiration_date' && (sortOrder === 'ASC' ? '↑' : '↓')}
                     </th>
-                    <th className="w-28 px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-32 px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wide">
                       Dias p/ Expirar
                     </th>
-                    <th className="w-32 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-40 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
                       <div className="flex items-center">
                         Status
                         <ColumnFilterDropdown column="certificate_status_name" displayName="Status" />
                       </div>
                     </th>
-                    <th className="w-32 px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase">
+                    <th className="w-36 px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wide">
                       Criticidade
                     </th>
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {filteredData.map((item, index) => {
-                    const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
-                    const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
+                  {/* Loading no meio da tabela */}
+                  {(loading || loadingAnalysis) ? (
+                    <tr>
+                      <td colSpan={13} className="px-3 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center">
+                          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                          <p className="text-gray-600 text-sm font-medium">
+                            {loadingAnalysis ? 'Carregando análise crítica...' : 'Carregando certificados...'}
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : filteredData.length === 0 ? (
+                    <tr>
+                      <td colSpan={13} className="px-3 py-8 text-center">
+                        <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 mb-2">
+                          <ExclamationTriangleIcon className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <p className="text-gray-500 text-xs font-medium">Nenhum certificado encontrado.</p>
+                        <p className="text-gray-400 text-xs mt-1">Tente ajustar os filtros de busca</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredData.map((item, index) => {
+                      const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+                      const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
 
-                    return (
-                      <tr
-                        key={item.id}
-                        className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                          }`}
-                      >
-                        <td className="px-6 py-5">
-                          <div className="text-sm font-medium text-gray-900">{item.Home_site_name}</div>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="text-xs font-semibold text-gray-800 leading-tight">
-                            {item.code_area}
-                          </div>
-                        </td>
-
-                        <td className="px-6 py-5">
-                          <div className="text-xs text-gray-600 leading-tight">
-                            {item.code_zone}
-                          </div>
-                        </td>
-
-
-
-                        <td className="px-6 py-5">
-                          <div className="text-sm font-medium text-gray-900 leading-relaxed">{item.certificate_description}</div>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="text-sm font-mono font-medium text-gray-900 bg-gray-100 px-2 py-1 rounded inline-block">
-                            {item.item_code}
-                          </div>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="text-sm font-medium text-gray-900 leading-tight">{item.item_name}</div>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="text-sm text-gray-700">
-                            {item.brand || <span className="text-gray-400 italic">-</span>}
-                          </div>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="text-sm text-gray-700">
-                            {item.model || <span className="text-gray-400 italic">-</span>}
-                          </div>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="text-sm font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded inline-block">
-                            {item.serial}
-                          </div>
-                        </td>
-                        <td className="px-6 py-5 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {formatDate(item.expiration_date)} {new Date(item.expiration_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                        </td>
-                        <td className="px-6 py-5 text-center">
-                          <span className={`inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-bold ${daysUntilExpiration < 0
-                            ? 'bg-red-100 text-red-800 border border-red-200'
-                            : daysUntilExpiration < 30
-                              ? 'bg-orange-100 text-orange-800 border border-orange-200'
-                              : daysUntilExpiration < 90
-                                ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                                : daysUntilExpiration < 180
-                                  ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                                  : 'bg-green-100 text-green-800 border border-green-200'
-                            }`}>
-                            {daysUntilExpiration} dias
-                          </span>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="flex items-center gap-2">
-                            {getStatusIcon(item.certificate_status_name)}
-                            <span className="text-sm font-medium">{item.certificate_status_name}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-5 text-center">
-                          <span className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold shadow-sm ${criticalityBadge.color}`}>
-                            {criticalityBadge.icon}
-                            {criticalityBadge.label}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                      return (
+                        <tr
+                          key={item.id}
+                          className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                            }`}
+                        >
+                          {/* ... células da tabela ... */}
+                          <td className="px-3 py-2">
+                            <div className="text-xs font-medium text-gray-900 leading-none">{item.Home_site_name}</div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="text-xs font-semibold text-gray-800 leading-none">
+                              {item.code_area}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="text-xs text-gray-600 leading-none">
+                              {item.code_zone}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="text-xs font-medium text-gray-900 leading-none">{item.certificate_description}</div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="text-xs font-mono font-medium text-gray-900 bg-gray-100 px-1.5 py-0.5 rounded inline-block leading-none">
+                              {item.item_code}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="text-xs font-medium text-gray-900 leading-none">{item.item_name}</div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="text-xs text-gray-700 leading-none">
+                              {item.brand || <span className="text-gray-400 italic">-</span>}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="text-xs text-gray-700 leading-none">
+                              {item.model || <span className="text-gray-400 italic">-</span>}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="text-xs font-mono text-gray-900 bg-gray-100 px-1.5 py-0.5 rounded inline-block leading-none">
+                              {item.serial}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            <div className="text-xs font-medium text-gray-900 leading-none">
+                              {formatDate(item.expiration_date)} {new Date(item.expiration_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 text-center">
+                            <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-bold leading-none ${daysUntilExpiration < 0
+                              ? 'bg-red-100 text-red-800 border border-red-200'
+                              : daysUntilExpiration < 30
+                                ? 'bg-orange-100 text-orange-800 border border-orange-200'
+                                : daysUntilExpiration < 90
+                                  ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                                  : daysUntilExpiration < 180
+                                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                    : 'bg-green-100 text-green-800 border border-green-200'
+                              }`}>
+                              {daysUntilExpiration} dias
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-1.5">
+                              {getStatusIcon(item.certificate_status_name)}
+                              <span className="text-xs font-medium leading-none">{item.certificate_status_name}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 text-center">
+                            <span className={`inline-flex items-center justify-center gap-1 px-1.5 py-1 rounded text-xs font-bold shadow-sm leading-none ${criticalityBadge.color}`}>
+                              {criticalityBadge.icon}
+                              {criticalityBadge.label}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
 
           {filteredData.length === 0 && (
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                <ExclamationTriangleIcon className="w-8 h-8 text-gray-400" />
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 mb-2">
+                <ExclamationTriangleIcon className="w-5 h-5 text-gray-400" />
               </div>
-              <p className="text-gray-500 text-lg font-medium">Nenhum certificado encontrado.</p>
-              <p className="text-gray-400 text-sm mt-2">Tente ajustar os filtros de busca</p>
+              {
+                loading || loadingAnalysis && (
+                  <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                      <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <p className="text-gray-600">Carregando análise crítica...</p>
+                    </div>
+                  </div>
+                )
+              }
+              <p className="text-gray-500 text-xs font-medium">Nenhum certificado encontrado.</p>
+              <p className="text-gray-400 text-xs mt-1">Tente ajustar os filtros de busca</p>
             </div>
           )}
 
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-t border-gray-200">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-2 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
                   onClick={() => handlePageChange(pagination.currentPage - 1)}
                   disabled={!pagination.hasPreviousPage}
-                  className={`px-4 py-2 border rounded-lg font-medium transition-all ${pagination.hasPreviousPage
+                  className={`px-3 py-1.5 border rounded text-xs font-medium transition-all ${pagination.hasPreviousPage
                     ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300 shadow-sm'
                     : 'text-gray-400 bg-gray-100 cursor-not-allowed border-gray-200'
                     }`}
@@ -1799,7 +1824,7 @@ export default function CertificateReportGrid() {
                 <button
                   onClick={() => handlePageChange(pagination.currentPage + 1)}
                   disabled={!pagination.hasNextPage}
-                  className={`ml-3 px-4 py-2 border rounded-lg font-medium transition-all ${pagination.hasNextPage
+                  className={`ml-2 px-3 py-1.5 border rounded text-xs font-medium transition-all ${pagination.hasNextPage
                     ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300 shadow-sm'
                     : 'text-gray-400 bg-gray-100 cursor-not-allowed border-gray-200'
                     }`}
@@ -1809,7 +1834,7 @@ export default function CertificateReportGrid() {
               </div>
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm text-gray-700 font-medium">
+                  <p className="text-xs text-gray-700 font-medium">
                     Mostrando{' '}
                     <span className="font-bold text-blue-600">
                       {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}
@@ -1827,12 +1852,12 @@ export default function CertificateReportGrid() {
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={!pagination.hasPreviousPage}
-                      className={`relative inline-flex items-center px-3 py-2 rounded-l-lg border font-medium transition-all ${pagination.hasPreviousPage
+                      className={`relative inline-flex items-center px-2 py-1 rounded-l-lg border text-xs font-medium transition-all ${pagination.hasPreviousPage
                         ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300'
                         : 'text-gray-300 bg-gray-100 cursor-not-allowed border-gray-200'
                         }`}
                     >
-                      <ChevronLeftIcon className="h-5 w-5" />
+                      <ChevronLeftIcon className="h-3 w-3" />
                     </button>
 
                     {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
@@ -1851,7 +1876,7 @@ export default function CertificateReportGrid() {
                         <button
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-semibold transition-all ${pagination.currentPage === pageNumber
+                          className={`relative inline-flex items-center px-2 py-1 border text-xs font-semibold transition-all ${pagination.currentPage === pageNumber
                             ? 'z-10 bg-blue-600 border-blue-600 text-white shadow-md'
                             : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                             }`}
@@ -1864,12 +1889,12 @@ export default function CertificateReportGrid() {
                     <button
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={!pagination.hasNextPage}
-                      className={`relative inline-flex items-center px-3 py-2 rounded-r-lg border font-medium transition-all ${pagination.hasNextPage
+                      className={`relative inline-flex items-center px-2 py-1 rounded-r-lg border text-xs font-medium transition-all ${pagination.hasNextPage
                         ? 'text-gray-700 bg-white hover:bg-gray-50 border-gray-300'
                         : 'text-gray-300 bg-gray-100 cursor-not-allowed border-gray-200'
                         }`}
                     >
-                      <ChevronRightIcon className="h-5 w-5" />
+                      <ChevronRightIcon className="h-3 w-3" />
                     </button>
                   </nav>
                 </div>

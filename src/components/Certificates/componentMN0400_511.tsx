@@ -8,6 +8,7 @@ import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import CertificateReportGrid from './Reports/reportMN0400_511';
 import { useCompany } from '../../hooks/useCompany';
+import { t } from 'i18next';
 
 // import '../../../fullcalendar-custom.css';
 
@@ -701,20 +702,28 @@ export default function PredictiveCertificateAnalysis() {
 
   if (!certificateData) return null;
 
+  const tabs = [
+  { key: 'overview', translation: t('predictiveCertificateAnalysis.tabs.overview') },
+  { key: 'risk-analysis', translation: t('predictiveCertificateAnalysis.tabs.riskAnalysis') },
+  { key: 'trends', translation: t('predictiveCertificateAnalysis.tabs.trends') },
+  { key: 'calendar', translation: t('predictiveCertificateAnalysis.tabs.calendar') },
+  { key: 'report', translation: t('predictiveCertificateAnalysis.tabs.report') }
+];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-slate-800 mb-2">Certificate Management Analytics</h1>
-        <p className="text-slate-600">Predictive analysis for {certificateData.total.toLocaleString()} certificates</p>
+        <h1 className="text-4xl font-bold text-slate-800 mb-2">{t('predictiveCertificateAnalysis.title')}</h1>
+        <p className="text-slate-600">{t(`predictiveCertificateAnalysis.subtitle`, {total: certificateData.total.toLocaleString()})}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-600 text-sm font-medium">Expired Certificates</p>
+              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.expiredCertificates')}</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">{certificateData.expired.toLocaleString()}</p>
-              <p className="text-red-600 text-xs mt-1">{((certificateData.expired / certificateData.total) * 100).toFixed(1)}% of Total</p>
+              <p className="text-red-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.ofTotal', {percentage: ((certificateData.expired / certificateData.total) * 100).toFixed(1)})}</p>
             </div>
             <div className="bg-red-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -727,9 +736,9 @@ export default function PredictiveCertificateAnalysis() {
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-600 text-sm font-medium">Valid Certificates</p>
+              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.validCertificates')}</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">{certificateData.approved.toLocaleString()}</p>
-              <p className="text-green-600 text-xs mt-1">{((certificateData.approved / certificateData.total) * 100).toFixed(1)}% of Total</p>
+              <p className="text-green-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.ofTotal', {percentage: ((certificateData.approved / certificateData.total) * 100).toFixed(1)})}</p>
             </div>
             <div className="bg-green-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -742,9 +751,9 @@ export default function PredictiveCertificateAnalysis() {
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-600 text-sm font-medium">High Risk Items</p>
+              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.highRiskItems')}</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">{certificateData.highRisk.toLocaleString()}</p>
-              <p className="text-orange-600 text-xs mt-1">{((certificateData.highRisk / certificateData.total) * 100).toFixed(1)}% of Total</p>
+              <p className="text-orange-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.ofTotal', { percentage:((certificateData.highRisk / certificateData.total) * 100).toFixed(1)})}</p>
             </div>
             <div className="bg-orange-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -757,9 +766,9 @@ export default function PredictiveCertificateAnalysis() {
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-600 text-sm font-medium">Financial Risk</p>
+              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.financialRisk')}</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">${(certificateData.totalFinancialRisk / 1000).toFixed(0)}K</p>
-              <p className="text-blue-600 text-xs mt-1">Assets at Risk</p>
+              <p className="text-blue-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.assetsAtRisk')}</p>
             </div>
             <div className="bg-blue-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -773,46 +782,47 @@ export default function PredictiveCertificateAnalysis() {
       <div className="mb-6">
         <div className="border-b border-slate-200">
           <nav className="flex space-x-8">
-            {['overview', 'risk-analysis', 'trends', 'calendar', 'report'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                  }`}
-              >
-                {tab.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-              </button>
-            ))}
-          </nav>
+  {tabs.map(tab => (
+    <button
+      key={tab.key}
+      onClick={() => setActiveTab(tab.key)}
+      className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+        activeTab === tab.key
+          ? 'border-blue-500 text-blue-600'
+          : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+      }`}
+    >
+      {tab.translation}
+    </button>
+  ))}
+</nav>
         </div>
       </div>
 
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Certificate Status Distribution</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.charts.certificateStatusDistribution')}</h3>
             <div ref={statusChartRef} className="w-full h-80"></div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Risk Level Distribution</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.charts.riskLevelDistribution')}</h3>
             <div ref={riskChartRef} className="w-full h-80"></div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6 lg:col-span-2">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Expiration Timeline by Month</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.charts.expirationTimeline')}</h3>
             <div ref={timelineChartRef} className="w-full h-80"></div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Department Performance</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.charts.departmentPerformance')}</h3>
             <div ref={departmentChartRef} className="w-full h-80"></div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Financial Risk by Category</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.charts.financialRiskByCategory')}</h3>
             <div ref={costChartRef} className="w-full h-80"></div>
           </div>
         </div>
@@ -821,12 +831,12 @@ export default function PredictiveCertificateAnalysis() {
       {activeTab === 'risk-analysis' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-6 lg:col-span-2">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Days Until Expiration Distribution</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.charts.daysUntilExpiration')}</h3>
             <div ref={expirationChartRef} className="w-full h-80"></div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Brand Reliability Scores</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.charts.brandReliability')}</h3>
             <div ref={issuerChartRef} className="w-full h-80"></div>
           </div>
 
@@ -834,21 +844,21 @@ export default function PredictiveCertificateAnalysis() {
             <h3 className="text-lg font-semibold text-slate-800 mb-4">Critical Insights</h3>
             <div className="space-y-4">
               <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded">
-                <p className="text-sm font-semibold text-red-800">Critical Alert</p>
+                <p className="text-sm font-semibold text-red-800">{t('predictiveCertificateAnalysis.insights.criticalAlert')}</p>
                 <p className="text-sm text-red-700 mt-1">{certificateData.expired.toLocaleString()} certificates are expired and require immediate renewal</p>
               </div>
               <div className="p-4 bg-orange-50 border-l-4 border-orange-500 rounded">
-                <p className="text-sm font-semibold text-orange-800">High Priority</p>
+                <p className="text-sm font-semibold text-orange-800">{t('predictiveCertificateAnalysis.insights.highPriority')}</p>
                 <p className="text-sm text-orange-700 mt-1">{certificateData.expiring90Days.toLocaleString()} certificates expiring within 90 days</p>
               </div>
               <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
-                <p className="text-sm font-semibold text-blue-800">Strategic Insight</p>
+                <p className="text-sm font-semibold text-blue-800">{t('predictiveCertificateAnalysis.insights.strategicInsight')}</p>
                 <p className="text-sm text-blue-700 mt-1">
                   {certificateData.departments[0]?.name || 'N/A'} has highest renewal workload ({certificateData.departments[0]?.count.toLocaleString() || 0} certificates)
                 </p>
               </div>
               <div className="p-4 bg-purple-50 border-l-4 border-purple-500 rounded">
-                <p className="text-sm font-semibold text-purple-800">High Risk</p>
+                <p className="text-sm font-semibold text-purple-800">{t('predictiveCertificateAnalysis.insights.highRisk')}</p>
                 <p className="text-sm text-purple-700 mt-1">{certificateData.highRisk.toLocaleString()} certificates classified as high risk requiring attention</p>
               </div>
             </div>
@@ -859,31 +869,31 @@ export default function PredictiveCertificateAnalysis() {
       {activeTab === 'trends' && (
         <div className="grid grid-cols-1 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Renewal Urgency Trend (6-Week Forecast)</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.charts.renewalUrgencyTrend')}</h3>
             <div ref={trendChartRef} className="w-full h-96"></div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h4 className="text-md font-semibold text-slate-800 mb-4">Predicted Outcomes</h4>
+              <h4 className="text-md font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.trends.predictedOutcomes')}</h4>
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-slate-50 rounded">
-                  <span className="text-sm text-slate-700">Renewal Success Rate</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.trends.renewalSuccessRate')}</span>
                   <span className="text-sm font-bold text-green-600">{certificateData.avgRenewalProbability.toFixed(1)}%</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-slate-50 rounded">
-                  <span className="text-sm text-slate-700">Automation Candidates</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.trends.automationCandidates')}</span>
                   <span className="text-sm font-bold text-blue-600">{Math.round(certificateData.total * 0.15)}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-slate-50 rounded">
-                  <span className="text-sm text-slate-700">Avg. Renewal Time</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.trends.avgRenewalTime')}</span>
                   <span className="text-sm font-bold text-purple-600">45 days</span>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h4 className="text-md font-semibold text-slate-800 mb-4">Top Recommendations</h4>
+              <h4 className="text-md font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.trends.topRecommendations')}</h4>
               <ul className="space-y-2">
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
@@ -909,7 +919,7 @@ export default function PredictiveCertificateAnalysis() {
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h4 className="text-md font-semibold text-slate-800 mb-4">Compliance Score</h4>
+              <h4 className="text-md font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.trends.complianceScore')}</h4>
               <div className="flex flex-col items-center justify-center h-full">
                 <div className="relative w-32 h-32">
                   <svg className="transform -rotate-90 w-32 h-32">
@@ -923,7 +933,7 @@ export default function PredictiveCertificateAnalysis() {
                     </span>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600 mt-4 text-center">Current compliance rate</p>
+                <p className="text-sm text-slate-600 mt-4 text-center">{t('predictiveCertificateAnalysis.trends.currentComplianceRate')}</p>
               </div>
             </div>
           </div>
@@ -935,7 +945,7 @@ export default function PredictiveCertificateAnalysis() {
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <h3 className="text-lg font-semibold text-slate-800">
-                Certificate Expiration Calendar
+                {t('predictiveCertificateAnalysis.calendar.certificateExpirationCalendar')}
               </h3>
 
               <div className="flex gap-2">
@@ -1165,7 +1175,7 @@ export default function PredictiveCertificateAnalysis() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h4 className="text-sm font-medium text-slate-600 mb-2">This Week</h4>
+              <h4 className="text-sm font-medium text-slate-600 mb-2">{t('predictiveCertificateAnalysis.calendar.thisWeek')}</h4>
               <p className="text-3xl font-bold text-slate-800">
                 {certificateData.calendarEvents?.filter((e: any) => {
                   const eventDate = new Date(e.start);
@@ -1174,11 +1184,11 @@ export default function PredictiveCertificateAnalysis() {
                   return eventDate >= now && eventDate <= weekFromNow;
                 }).length || 0}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Certificates expiring</p>
+              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.calendar.certificatesExpiring')}</p>
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h4 className="text-sm font-medium text-slate-600 mb-2">This Month</h4>
+              <h4 className="text-sm font-medium text-slate-600 mb-2">{t('predictiveCertificateAnalysis.calendar.thisMonth')}</h4>
               <p className="text-3xl font-bold text-slate-800">
                 {certificateData.calendarEvents?.filter((e: any) => {
                   const eventDate = new Date(e.start);
@@ -1187,23 +1197,23 @@ export default function PredictiveCertificateAnalysis() {
                   return eventDate >= now && eventDate <= monthFromNow;
                 }).length || 0}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Certificates expiring</p>
+              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.calendar.certificatesExpiring')}</p>
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h4 className="text-sm font-medium text-slate-600 mb-2">Next 90 Days</h4>
+              <h4 className="text-sm font-medium text-slate-600 mb-2">{t('predictiveCertificateAnalysis.calendar.next90Days')}</h4>
               <p className="text-3xl font-bold text-slate-800">
                 {certificateData.expiring90Days}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Certificates expiring</p>
+              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.calendar.certificatesExpiring')}</p>
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h4 className="text-sm font-medium text-slate-600 mb-2">Already Expired</h4>
+              <h4 className="text-sm font-medium text-slate-600 mb-2">{t('predictiveCertificateAnalysis.calendar.alreadyExpired')}</h4>
               <p className="text-3xl font-bold text-red-600">
                 {certificateData.expired}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Needs immediate action</p>
+              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.calendar.needsImmediateAction')}</p>
             </div>
           </div>
         </div>
@@ -1223,19 +1233,19 @@ export default function PredictiveCertificateAnalysis() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-4 bg-slate-50 rounded-lg">
             <p className="text-2xl font-bold text-slate-800">{certificateData.total.toLocaleString()}</p>
-            <p className="text-sm text-slate-600">Total Certificates</p>
+            <p className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.quickStats.totalCertificates')}</p>
           </div>
           <div className="text-center p-4 bg-slate-50 rounded-lg">
             <p className="text-2xl font-bold text-slate-800">{certificateData.certificateTypes.length}</p>
-            <p className="text-sm text-slate-600">Certificate Types</p>
+            <p className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.quickStats.certificateTypes')}</p>
           </div>
           <div className="text-center p-4 bg-slate-50 rounded-lg">
             <p className="text-2xl font-bold text-slate-800">{certificateData.departments.length}</p>
-            <p className="text-sm text-slate-600">Departments</p>
+            <p className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.quickStats.departments')}</p>
           </div>
           <div className="text-center p-4 bg-slate-50 rounded-lg">
             <p className="text-2xl font-bold text-slate-800">{certificateData.highRisk.toLocaleString()}</p>
-            <p className="text-sm text-slate-600">High Risk Items</p>
+            <p className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.quickStats.highRiskItems')}</p>
           </div>
         </div>
       </div>

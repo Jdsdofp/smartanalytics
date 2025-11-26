@@ -1191,5 +1191,112 @@
         "gpsOutdated": "Equipamentos sem GPS há +4 dias"
       }
     }
-  }
+  },
+  "predictiveCertificateAnalysis": {
+      "title": "Análise de Gestão de Certificados",
+      "subtitle": "Análise preditiva para {{total}} certificados",
+      
+      "kpi": {
+        "expiredCertificates": "Certificados Expirados",
+        "validCertificates": "Certificados Válidos",
+        "highRiskItems": "Itens de Alto Risco",
+        "financialRisk": "Risco Financeiro",
+        "ofTotal": "{{percentage}}% do Total",
+        "assetsAtRisk": "Ativos em Risco"
+      },
+      
+      "tabs": {
+        "overview": "Visão Geral",
+        "riskAnalysis": "Análise de Risco",
+        "trends": "Tendências",
+        "calendar": "Calendário",
+        "report": "Relatório"
+      },
+      
+      "charts": {
+        "certificateStatusDistribution": "Distribuição de Status dos Certificados",
+        "riskLevelDistribution": "Distribuição de Níveis de Risco",
+        "expirationTimeline": "Cronograma de Expiração por Mês",
+        "departmentPerformance": "Desempenho por Departamento",
+        "financialRiskByCategory": "Risco Financeiro por Categoria",
+        "daysUntilExpiration": "Distribuição de Dias até a Expiração",
+        "brandReliability": "Pontuações de Confiabilidade da Marca",
+        "renewalUrgencyTrend": "Tendência de Urgência de Renovação (Previsão 6 Semanas)"
+      },
+      
+      "calendar": {
+        "certificateExpirationCalendar": "Calendário de Expiração de Certificados",
+        "day": "Dia",
+        "week": "Semana",
+        "month": "Mês",
+        "year": "Ano",
+        "expired": "Expirados",
+        "expiringSoon": "Expirando em Breve (0-30 dias)",
+        "expiring": "Expirando (31-90 dias)",
+        "valid": "Válidos",
+        "clearFilter": "Limpar Filtro",
+        "thisWeek": "Esta Semana",
+        "thisMonth": "Este Mês",
+        "next90Days": "Próximos 90 Dias",
+        "alreadyExpired": "Já Expirados",
+        "certificatesExpiring": "Certificados expirando",
+        "needsImmediateAction": "Necessita ação imediata"
+      },
+      
+      "status": {
+        "expired": "Expirado",
+        "approved": "Aprovado",
+        "pending": "Pendente",
+        "expiring_0_30": "Expirando 0-30 Dias",
+        "expiring_31_90": "Expirando 31-90 Dias",
+        "valid": "Válido"
+      },
+      
+      "risk": {
+        "highRisk": "Alto Risco",
+        "mediumRisk": "Risco Médio",
+        "lowRisk": "Baixo Risco"
+      },
+      
+      "insights": {
+        "criticalAlert": "Alerta Crítico",
+        "highPriority": "Alta Prioridade",
+        "strategicInsight": "Insight Estratégico",
+        "highRisk": "Alto Risco"
+      },
+      
+      "trends": {
+        "urgentRenewals": "Renovações Urgentes",
+        "plannedRenewals": "Renovações Planejadas",
+        "futureRenewals": "Renovações Futuras",
+        "predictedOutcomes": "Resultados Previstos",
+        "renewalSuccessRate": "Taxa de Sucesso de Renovação",
+        "automationCandidates": "Candidatos à Automação",
+        "avgRenewalTime": "Tempo Méd. Renovação",
+        "topRecommendations": "Principais Recomendações",
+        "complianceScore": "Pontuação de Conformidade",
+        "currentComplianceRate": "Taxa de conformidade atual"
+      },
+      
+      "table": {
+        "certificate": "Certificado",
+        "department": "Departamento",
+        "brand": "Marca",
+        "expirationDate": "Data de Expiração",
+        "daysToExpiration": "Dias até Expiração",
+        "riskScore": "Pontuação de Risco",
+        "status": "Status",
+        "noCertificatesFound": "Nenhum certificado encontrado para este filtro"
+      },
+      
+      "quickStats": {
+        "totalCertificates": "Total de Certificados",
+        "certificateTypes": "Tipos de Certificado",
+        "departments": "Departamentos",
+        "highRiskItems": "Itens de Alto Risco"
+      },
+      
+      "loading": "Carregando dados dos certificados...",
+      "error": "Erro ao carregar dados"
+    }
 }
