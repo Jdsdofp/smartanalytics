@@ -61,7 +61,7 @@ interface ApiResponse {
 
 export default function PredictiveCertificateAnalysis() {
   const { companyId } = useCompany()
-  
+
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,11 +87,11 @@ export default function PredictiveCertificateAnalysis() {
       try {
         setLoading(true);
         const response = await fetch(`https://apinode.smartxhub.cloud/api/dashboard/certificates/${companyId}`);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const result = await response.json();
         setData(result);
 
@@ -115,7 +115,7 @@ export default function PredictiveCertificateAnalysis() {
   const handleEventClick = (clickInfo: any) => {
     const event = clickInfo.event;
     const props = event.extendedProps;
-    
+
     alert(`
       Certificate: ${event.title}
       Status: ${props.status}
@@ -153,7 +153,7 @@ export default function PredictiveCertificateAnalysis() {
   // Filtrar eventos baseado no filtro selecionado
   const getFilteredEvents = () => {
     if (!certificateData?.calendarEvents) return [];
-    
+
     if (!selectedFilter) return certificateData.calendarEvents;
 
     return certificateData.calendarEvents.filter(event => {
@@ -232,9 +232,9 @@ export default function PredictiveCertificateAnalysis() {
             value: item.value,
             name: item.name,
             itemStyle: {
-              color: item.name === 'Expired' ? '#ef4444' 
-                   : item.name === 'Approved' ? '#10b981' 
-                   : '#f59e0b'
+              color: item.name === 'Expired' ? '#ef4444'
+                : item.name === 'Approved' ? '#10b981'
+                  : '#f59e0b'
             }
           }))
         }]
@@ -286,7 +286,7 @@ export default function PredictiveCertificateAnalysis() {
       echarts.dispose(timelineChartRef.current);
       const chart = echarts.init(timelineChartRef.current);
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            
+
       const expirationByMonth = certificateData.expirationByMonth as Record<string, any>;
 
       const expiredData = months.map((_, i) => {
@@ -420,20 +420,20 @@ export default function PredictiveCertificateAnalysis() {
         series: [{
           type: 'treemap',
           data: [
-            { 
-              name: 'High Value Assets', 
-              value: certificateData.totalFinancialRisk * 0.67, 
-              itemStyle: { color: '#ef4444' } 
+            {
+              name: 'High Value Assets',
+              value: certificateData.totalFinancialRisk * 0.67,
+              itemStyle: { color: '#ef4444' }
             },
-            { 
-              name: 'Medium Cost Items', 
-              value: certificateData.totalFinancialRisk * 0.25, 
-              itemStyle: { color: '#f59e0b' } 
+            {
+              name: 'Medium Cost Items',
+              value: certificateData.totalFinancialRisk * 0.25,
+              itemStyle: { color: '#f59e0b' }
             },
-            { 
-              name: 'Low Cost Items', 
-              value: certificateData.totalFinancialRisk * 0.08, 
-              itemStyle: { color: '#10b981' } 
+            {
+              name: 'Low Cost Items',
+              value: certificateData.totalFinancialRisk * 0.08,
+              itemStyle: { color: '#10b981' }
             }
           ],
           label: {
@@ -454,7 +454,7 @@ export default function PredictiveCertificateAnalysis() {
       echarts.dispose(expirationChartRef.current);
       const chart = echarts.init(expirationChartRef.current);
       const ranges = certificateData.daysToExpirationRanges;
-      
+
       chart.setOption({
         tooltip: {
           trigger: 'axis'
@@ -547,25 +547,25 @@ export default function PredictiveCertificateAnalysis() {
     if (trendChartRef.current) {
       echarts.dispose(trendChartRef.current);
       const chart = echarts.init(trendChartRef.current);
-      
-      const hasRenewalData = certificateData.renewalTrend && 
-                             certificateData.renewalTrend.urgent.length > 0;
 
-      const urgentData = hasRenewalData 
-        ? certificateData.renewalTrend.urgent 
-        : [certificateData.expired, certificateData.expired, certificateData.expired, 
-           certificateData.expired, certificateData.expired, certificateData.expired];
-      
-      const plannedData = hasRenewalData 
-        ? certificateData.renewalTrend.planned 
-        : [certificateData.expiring90Days, certificateData.expiring90Days, 
-           certificateData.expiring90Days, certificateData.expiring90Days, 
-           certificateData.expiring90Days, certificateData.expiring90Days];
-      
-      const futureData = hasRenewalData 
-        ? certificateData.renewalTrend.future 
-        : [certificateData.approved, certificateData.approved, certificateData.approved, 
-           certificateData.approved, certificateData.approved, certificateData.approved];
+      const hasRenewalData = certificateData.renewalTrend &&
+        certificateData.renewalTrend.urgent.length > 0;
+
+      const urgentData = hasRenewalData
+        ? certificateData.renewalTrend.urgent
+        : [certificateData.expired, certificateData.expired, certificateData.expired,
+        certificateData.expired, certificateData.expired, certificateData.expired];
+
+      const plannedData = hasRenewalData
+        ? certificateData.renewalTrend.planned
+        : [certificateData.expiring90Days, certificateData.expiring90Days,
+        certificateData.expiring90Days, certificateData.expiring90Days,
+        certificateData.expiring90Days, certificateData.expiring90Days];
+
+      const futureData = hasRenewalData
+        ? certificateData.renewalTrend.future
+        : [certificateData.approved, certificateData.approved, certificateData.approved,
+        certificateData.approved, certificateData.approved, certificateData.approved];
 
       chart.setOption({
         tooltip: {
@@ -601,7 +601,7 @@ export default function PredictiveCertificateAnalysis() {
             type: 'line',
             data: urgentData,
             itemStyle: { color: '#ef4444' },
-            areaStyle: { 
+            areaStyle: {
               opacity: 0.3,
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: 'rgba(239, 68, 68, 0.5)' },
@@ -618,7 +618,7 @@ export default function PredictiveCertificateAnalysis() {
             type: 'line',
             data: plannedData,
             itemStyle: { color: '#f59e0b' },
-            areaStyle: { 
+            areaStyle: {
               opacity: 0.3,
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: 'rgba(245, 158, 11, 0.5)' },
@@ -635,7 +635,7 @@ export default function PredictiveCertificateAnalysis() {
             type: 'line',
             data: futureData,
             itemStyle: { color: '#10b981' },
-            areaStyle: { 
+            areaStyle: {
               opacity: 0.3,
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: 'rgba(16, 185, 129, 0.5)' },
@@ -667,8 +667,8 @@ export default function PredictiveCertificateAnalysis() {
     }, 100);
 
     return () => {
-      [statusChartRef, riskChartRef, timelineChartRef, departmentChartRef, 
-       costChartRef, expirationChartRef, issuerChartRef, trendChartRef
+      [statusChartRef, riskChartRef, timelineChartRef, departmentChartRef,
+        costChartRef, expirationChartRef, issuerChartRef, trendChartRef
       ].forEach(ref => {
         if (ref.current) {
           echarts.dispose(ref.current);
@@ -714,7 +714,7 @@ export default function PredictiveCertificateAnalysis() {
             <div>
               <p className="text-slate-600 text-sm font-medium">Expired Certificates</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">{certificateData.expired.toLocaleString()}</p>
-              <p className="text-red-600 text-xs mt-1">{((certificateData.expired/certificateData.total)*100).toFixed(1)}% of Total</p>
+              <p className="text-red-600 text-xs mt-1">{((certificateData.expired / certificateData.total) * 100).toFixed(1)}% of Total</p>
             </div>
             <div className="bg-red-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -729,7 +729,7 @@ export default function PredictiveCertificateAnalysis() {
             <div>
               <p className="text-slate-600 text-sm font-medium">Valid Certificates</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">{certificateData.approved.toLocaleString()}</p>
-              <p className="text-green-600 text-xs mt-1">{((certificateData.approved/certificateData.total)*100).toFixed(1)}% of Total</p>
+              <p className="text-green-600 text-xs mt-1">{((certificateData.approved / certificateData.total) * 100).toFixed(1)}% of Total</p>
             </div>
             <div className="bg-green-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -744,7 +744,7 @@ export default function PredictiveCertificateAnalysis() {
             <div>
               <p className="text-slate-600 text-sm font-medium">High Risk Items</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">{certificateData.highRisk.toLocaleString()}</p>
-              <p className="text-orange-600 text-xs mt-1">{((certificateData.highRisk/certificateData.total)*100).toFixed(1)}% of Total</p>
+              <p className="text-orange-600 text-xs mt-1">{((certificateData.highRisk / certificateData.total) * 100).toFixed(1)}% of Total</p>
             </div>
             <div className="bg-orange-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -758,7 +758,7 @@ export default function PredictiveCertificateAnalysis() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-slate-600 text-sm font-medium">Financial Risk</p>
-              <p className="text-3xl font-bold text-slate-800 mt-2">${(certificateData.totalFinancialRisk/1000).toFixed(0)}K</p>
+              <p className="text-3xl font-bold text-slate-800 mt-2">${(certificateData.totalFinancialRisk / 1000).toFixed(0)}K</p>
               <p className="text-blue-600 text-xs mt-1">Assets at Risk</p>
             </div>
             <div className="bg-blue-100 p-3 rounded-full">
@@ -777,11 +777,10 @@ export default function PredictiveCertificateAnalysis() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
+                  }`}
               >
                 {tab.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
               </button>
@@ -916,11 +915,11 @@ export default function PredictiveCertificateAnalysis() {
                   <svg className="transform -rotate-90 w-32 h-32">
                     <circle cx="64" cy="64" r="56" stroke="#e5e7eb" strokeWidth="12" fill="none" />
                     <circle cx="64" cy="64" r="56" stroke="#3b82f6" strokeWidth="12" fill="none"
-                      strokeDasharray={`${(certificateData.approved/certificateData.total) * 351.86} 351.86`} />
+                      strokeDasharray={`${(certificateData.approved / certificateData.total) * 351.86} 351.86`} />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-2xl font-bold text-slate-800">
-                      {Math.round((certificateData.approved/certificateData.total) * 100)}%
+                      {Math.round((certificateData.approved / certificateData.total) * 100)}%
                     </span>
                   </div>
                 </div>
@@ -938,45 +937,41 @@ export default function PredictiveCertificateAnalysis() {
               <h3 className="text-lg font-semibold text-slate-800">
                 Certificate Expiration Calendar
               </h3>
-              
+
               <div className="flex gap-2">
                 <button
                   onClick={() => changeCalendarView('day')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    calendarView === 'day'
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${calendarView === 'day'
                       ? 'bg-blue-600 text-white'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   Day
                 </button>
                 <button
                   onClick={() => changeCalendarView('week')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    calendarView === 'week'
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${calendarView === 'week'
                       ? 'bg-blue-600 text-white'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   Week
                 </button>
                 <button
                   onClick={() => changeCalendarView('month')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    calendarView === 'month'
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${calendarView === 'month'
                       ? 'bg-blue-600 text-white'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   Month
                 </button>
                 <button
                   onClick={() => changeCalendarView('year')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    calendarView === 'year'
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${calendarView === 'year'
                       ? 'bg-blue-600 text-white'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
+                    }`}
                 >
                   Year
                 </button>
@@ -986,47 +981,43 @@ export default function PredictiveCertificateAnalysis() {
             <div className="flex flex-wrap gap-4 mb-6">
               <button
                 onClick={() => handleLegendClick('expired')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                  selectedFilter === 'expired'
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${selectedFilter === 'expired'
                     ? 'bg-red-100 ring-2 ring-red-500'
                     : 'hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <div className="w-4 h-4 rounded bg-red-500"></div>
                 <span className="text-sm text-slate-600 font-medium">Expired</span>
               </button>
-              
+
               <button
                 onClick={() => handleLegendClick('expiring-soon')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                  selectedFilter === 'expiring-soon'
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${selectedFilter === 'expiring-soon'
                     ? 'bg-orange-100 ring-2 ring-orange-500'
                     : 'hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <div className="w-4 h-4 rounded bg-orange-500"></div>
                 <span className="text-sm text-slate-600 font-medium">Expiring Soon (0-30 days)</span>
               </button>
-              
+
               <button
                 onClick={() => handleLegendClick('expiring')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                  selectedFilter === 'expiring'
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${selectedFilter === 'expiring'
                     ? 'bg-yellow-100 ring-2 ring-yellow-400'
                     : 'hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <div className="w-4 h-4 rounded bg-yellow-400"></div>
                 <span className="text-sm text-slate-600 font-medium">Expiring (31-90 days)</span>
               </button>
-              
+
               <button
                 onClick={() => handleLegendClick('valid')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
-                  selectedFilter === 'valid'
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${selectedFilter === 'valid'
                     ? 'bg-green-100 ring-2 ring-green-500'
                     : 'hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <div className="w-4 h-4 rounded bg-green-500"></div>
                 <span className="text-sm text-slate-600 font-medium">Valid</span>
@@ -1133,30 +1124,27 @@ export default function PredictiveCertificateAnalysis() {
                             {new Date(event.start).toLocaleDateString('pt-BR')}
                           </td>
                           <td className="px-4 py-3 text-sm">
-                            <span className={`font-semibold ${
-                              event.extendedProps?.daysToExpiration < 0 ? 'text-red-600' :
-                              event.extendedProps?.daysToExpiration <= 30 ? 'text-orange-600' :
-                              event.extendedProps?.daysToExpiration <= 90 ? 'text-yellow-600' :
-                              'text-green-600'
-                            }`}>
+                            <span className={`font-semibold ${event.extendedProps?.daysToExpiration < 0 ? 'text-red-600' :
+                                event.extendedProps?.daysToExpiration <= 30 ? 'text-orange-600' :
+                                  event.extendedProps?.daysToExpiration <= 90 ? 'text-yellow-600' :
+                                    'text-green-600'
+                              }`}>
                               {event.extendedProps?.daysToExpiration} days
                             </span>
                           </td>
                           <td className="px-4 py-3 text-sm">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              event.extendedProps?.riskScore >= 70 ? 'bg-red-100 text-red-800' :
-                              event.extendedProps?.riskScore >= 40 ? 'bg-orange-100 text-orange-800' :
-                              'bg-green-100 text-green-800'
-                            }`}>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${event.extendedProps?.riskScore >= 70 ? 'bg-red-100 text-red-800' :
+                                event.extendedProps?.riskScore >= 40 ? 'bg-orange-100 text-orange-800' :
+                                  'bg-green-100 text-green-800'
+                              }`}>
                               {event.extendedProps?.riskScore || 'N/A'}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-sm">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                              event.extendedProps?.status?.toLowerCase() === 'expired' ? 'bg-red-100 text-red-800' :
-                              event.extendedProps?.status?.toLowerCase() === 'approved' ? 'bg-green-100 text-green-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }`}>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${event.extendedProps?.status?.toLowerCase() === 'expired' ? 'bg-red-100 text-red-800' :
+                                event.extendedProps?.status?.toLowerCase() === 'approved' ? 'bg-green-100 text-green-800' :
+                                  'bg-yellow-100 text-yellow-800'
+                              }`}>
                               {event.extendedProps?.status || 'N/A'}
                             </span>
                           </td>

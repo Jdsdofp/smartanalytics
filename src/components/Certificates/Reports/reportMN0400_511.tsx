@@ -62,6 +62,13 @@ interface CriticalAnalysis {
   riskScore: number;
 }
 
+// No início do arquivo, adicionar interface
+interface CertificateFilters {
+  statuses: string[];
+  sites: string[];
+  descriptions: string[];
+}
+
 export default function CertificateReportGrid() {
   const [data, setData] = useState<CertificateReport[]>([]);
   const [allData, setAllData] = useState<CertificateReport[]>([]);
@@ -98,9 +105,39 @@ export default function CertificateReportGrid() {
     endDate: ''
   });
 
+
+  // Adicionar junto com os outros estados
+  const [availableFilters, setAvailableFilters] = useState<CertificateFilters>({
+    statuses: [],
+    sites: [],
+    descriptions: []
+  });
+  const [loadingFilters, setLoadingFilters] = useState(true);
+
   // IMPORTANTE: Declarar funções utilitárias ANTES dos useMemo
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  // Adicionar função para buscar filtros da API
+  const fetchFilters = async () => {
+    setLoadingFilters(true);
+    try {
+      const response = await fetch(
+        `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/filters`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch filters');
+      }
+
+      const result = await response.json();
+      setAvailableFilters(result.data);
+    } catch (error) {
+      console.error('Error fetching filters:', error);
+    } finally {
+      setLoadingFilters(false);
+    }
   };
 
   const getDaysUntilExpiration = (expirationDate: string) => {
@@ -208,6 +245,22 @@ export default function CertificateReportGrid() {
         params.append('endDate', dateFilter.endDate);
       }
 
+      // **ADICIONAR FILTROS AQUI**
+      // Filtro de Status
+      if (filters.status !== 'ALL') {
+        params.append('certificateStatus', filters.status);
+      }
+
+      // Filtro de Site
+      if (filters.site !== 'ALL') {
+        params.append('homeSiteName', filters.site);
+      }
+
+      // Filtro de Tipo de Certificado
+      if (filters.certificateType !== 'ALL') {
+        params.append('certificateDescription', filters.certificateType);
+      }
+
       const response = await fetch(
         `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
       );
@@ -229,7 +282,9 @@ export default function CertificateReportGrid() {
   useEffect(() => {
     fetchData(1);
     fetchAllDataForAnalysis();
-  }, [itemsPerPage, sortBy, sortOrder]);
+    fetchFilters(); // Adicionar esta linha
+
+  }, [itemsPerPage, sortBy, sortOrder, filters.status, filters.site, filters.certificateType]);
 
 
   // 4. Função para aplicar o filtro de data
@@ -310,7 +365,7 @@ export default function CertificateReportGrid() {
       return matchSearch && matchStatus && matchSite && matchCertType && matchExpirationRange && matchColumnFilters;
     });
   }, [data, searchTerm, filters, columnFilters]);
-
+  //@ts-ignore
   const uniqueValues = useMemo(() => ({
     sites: Array.from(new Set(data.map(item => item.Home_site_name))).filter(Boolean),
     certificateTypes: Array.from(new Set(data.map(item => item.certificate_description))).filter(Boolean),
@@ -1345,43 +1400,59 @@ export default function CertificateReportGrid() {
           {showFilters && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                {/* Filtro de Status - usando dados da API */}
                 <select
                   value={filters.status}
                   onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                  className="px-3 py-2 border rounded-lg"
+                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ALL">Status - Todos</option>
-                  {uniqueValues.statuses.map(status => (
-                    <option key={status} value={status}>{status}</option>
-                  ))}
+                  {loadingFilters ? (
+                    <option disabled>Carregando...</option>
+                  ) : (
+                    availableFilters.statuses.map(status => (
+                      <option key={status} value={status}>{status}</option>
+                    ))
+                  )}
                 </select>
 
+                {/* Filtro de Site - usando dados da API */}
                 <select
                   value={filters.site}
                   onChange={(e) => setFilters({ ...filters, site: e.target.value })}
-                  className="px-3 py-2 border rounded-lg"
+                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ALL">Site - Todos</option>
-                  {uniqueValues.sites.map(site => (
-                    <option key={site} value={site}>{site}</option>
-                  ))}
+                  {loadingFilters ? (
+                    <option disabled>Carregando...</option>
+                  ) : (
+                    availableFilters.sites.map(site => (
+                      <option key={site} value={site}>{site}</option>
+                    ))
+                  )}
                 </select>
 
+                {/* Filtro de Tipo de Certificado - usando dados da API */}
                 <select
                   value={filters.certificateType}
                   onChange={(e) => setFilters({ ...filters, certificateType: e.target.value })}
-                  className="px-3 py-2 border rounded-lg"
+                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ALL">Tipo - Todos</option>
-                  {uniqueValues.certificateTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
+                  {loadingFilters ? (
+                    <option disabled>Carregando...</option>
+                  ) : (
+                    availableFilters.descriptions.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))
+                  )}
                 </select>
 
+                {/* Filtro de Range de Expiração - mantém como estava */}
                 <select
                   value={filters.expirationRange}
                   onChange={(e) => setFilters({ ...filters, expirationRange: e.target.value })}
-                  className="px-3 py-2 border rounded-lg"
+                  className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ALL">Expiração - Todos</option>
                   <option value="EXPIRED">Expirados</option>
@@ -1393,88 +1464,141 @@ export default function CertificateReportGrid() {
                 </select>
               </div>
 
-              {/* Versão simples com hora */}
+              {/* Contador de filtros disponíveis */}
+              {!loadingFilters && (
+                <div className="px-4 py-2 bg-blue-50 border-t border-blue-200">
+                  <p className="text-xs text-blue-700">
+                    <span className="font-semibold">{availableFilters.statuses.length}</span> status disponíveis •
+                    <span className="font-semibold ml-2">{availableFilters.sites.length}</span> sites disponíveis •
+                    <span className="font-semibold ml-2">{availableFilters.descriptions.length}</span> tipos de certificado disponíveis
+                  </p>
+                </div>
+              )}
+
+              {/* Mantém a seção de filtro de data como estava */}
               <div className="border-t pt-4">
                 <div className="mb-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Filtrar por Data de Expiração
                   </label>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">Data Inicial</label>
-                    <input
-                      type="datetime-local"
-                      value={dateFilter.startDate}
-                      onChange={(e) => setDateFilter({ ...dateFilter, startDate: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      max={dateFilter.endDate || undefined}
-                    />
-                  </div>
+                {/* ... resto do código de filtro de data permanece igual ... */}
 
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">Data Final</label>
-                    <input
-                      type="datetime-local"
-                      value={dateFilter.endDate}
-                      onChange={(e) => setDateFilter({ ...dateFilter, endDate: e.target.value })}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      min={dateFilter.startDate || undefined}
-                      disabled={!dateFilter.startDate}
-                    />
-                    {!dateFilter.startDate && (
-                      <p className="text-xs text-gray-500 mt-1">Selecione a data inicial primeiro</p>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleDateFilterApply}
-                      disabled={!dateFilter.startDate || !dateFilter.endDate}
-                      className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${dateFilter.startDate && dateFilter.endDate
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
-                      title={!dateFilter.startDate || !dateFilter.endDate ? 'Preencha ambas as datas' : ''}
-                    >
-                      Aplicar
-                    </button>
-
-                    {(dateFilter.startDate || dateFilter.endDate) && (
-                      <button
-                        onClick={handleDateFilterClear}
-                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
-                      >
-                        Limpar
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Indicador visual do filtro ativo */}
-                {dateFilter.startDate && dateFilter.endDate && (
-                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm text-blue-800">
-                        <ClockIcon className="w-4 h-4" />
-                        <span className="font-medium">
-                          Filtrando certificados que expiram entre {new Date(dateFilter.startDate).toLocaleString('pt-BR')} e {new Date(dateFilter.endDate).toLocaleString('pt-BR')}
-                        </span>
-                      </div>
-                      <button
-                        onClick={handleDateFilterClear}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        Remover filtro
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
-
+              <div className="px-4 pb-4">
+                <button
+                  onClick={() => {
+                    setFilters({
+                      status: 'ALL',
+                      site: 'ALL',
+                      certificateType: 'ALL',
+                      expirationRange: 'ALL'
+                    });
+                    handleDateFilterClear();
+                  }}
+                  className="w-full px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <XCircleIcon className="w-4 h-4" />
+                  Limpar Todos os Filtros
+                </button>
+              </div>
             </>
           )}
+
+          {showFilters && (
+            <div className="flex items-center gap-2 text-sm">
+              {(filters.status !== 'ALL' || filters.site !== 'ALL' || filters.certificateType !== 'ALL' || filters.expirationRange !== 'ALL') && (
+                <span className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                  <FunnelIcon className="w-3 h-3" />
+                  Filtros ativos
+                </span>
+              )}
+            </div>
+
+
+          )}
+          {/* Versão simples com hora */}
+          <div className="border-t pt-4">
+            <div className="mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filtrar por Data de Expiração
+              </label>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Data Inicial</label>
+                <input
+                  type="datetime-local"
+                  value={dateFilter.startDate}
+                  onChange={(e) => setDateFilter({ ...dateFilter, startDate: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  max={dateFilter.endDate || undefined}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Data Final</label>
+                <input
+                  type="datetime-local"
+                  value={dateFilter.endDate}
+                  onChange={(e) => setDateFilter({ ...dateFilter, endDate: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  min={dateFilter.startDate || undefined}
+                  disabled={!dateFilter.startDate}
+                />
+                {/* {!dateFilter.startDate && (
+                      <p className="text-xs text-gray-500 mt-1">Selecione a data inicial primeiro</p>
+                    )} */}
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDateFilterApply}
+                  disabled={!dateFilter.startDate || !dateFilter.endDate}
+                  className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${dateFilter.startDate && dateFilter.endDate
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  title={!dateFilter.startDate || !dateFilter.endDate ? 'Preencha ambas as datas' : ''}
+                >
+                  Aplicar
+                </button>
+
+                {(dateFilter.startDate || dateFilter.endDate) && (
+                  <button
+                    onClick={handleDateFilterClear}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Indicador visual do filtro ativo */}
+            {dateFilter.startDate && dateFilter.endDate && (
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-blue-800">
+                    <ClockIcon className="w-4 h-4" />
+                    <span className="font-medium">
+                      Filtrando certificados que expiram entre {new Date(dateFilter.startDate).toLocaleString('pt-BR')} e {new Date(dateFilter.endDate).toLocaleString('pt-BR')}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleDateFilterClear}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    Remover filtro
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
+
+
 
         <div className="bg-white rounded-lg shadow overflow-hidden mx-4">
           <div className="overflow-x-auto">
