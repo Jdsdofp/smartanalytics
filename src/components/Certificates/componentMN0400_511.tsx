@@ -787,8 +787,8 @@ export default function PredictiveCertificateAnalysis() {
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.key
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                   }`}
               >
                 {tab.translation}
@@ -897,7 +897,7 @@ export default function PredictiveCertificateAnalysis() {
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
                   <span className="text-sm text-slate-700">
-                    {t('predictiveCertificateAnalysis.trends.prioritizeRenewal', {certificateType: certificateData.certificateTypes[0]?.name})}
+                    {t('predictiveCertificateAnalysis.trends.prioritizeRenewal', { certificateType: certificateData.certificateTypes[0]?.name })}
                   </span>
                 </li>
                 <li className="flex items-start">
@@ -907,7 +907,7 @@ export default function PredictiveCertificateAnalysis() {
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
                   <span className="text-sm text-slate-700">
-                    {t('predictiveCertificateAnalysis.trends.reviewWorkflows', {department: certificateData.departments[0]?.name})}
+                    {t('predictiveCertificateAnalysis.trends.reviewWorkflows', { department: certificateData.departments[0]?.name })}
                     {/* Review {certificateData.departments[0]?.name || 'department'} workflows */}
                   </span>
                 </li>

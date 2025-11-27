@@ -67,7 +67,145 @@ interface CertificateFilters {
   statuses: string[];
   sites: string[];
   descriptions: string[];
+  zones: Array<{ code: string; label: string }>;
+  areas: Array<{ code: string; label: string }>;
 }
+
+
+// Adicione este componente antes do componente principal
+const SearchableSelect = ({ 
+  label, 
+  value, 
+  onChange, 
+  options, 
+  loading 
+}: { 
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ code: string; label: string }> | string[];  // ATUALIZAR tipo
+  loading: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Normalizar options para sempre trabalhar com objetos
+  const normalizedOptions = options.map(opt => 
+    typeof opt === 'string' ? { code: opt, label: opt } : opt
+  );
+
+  const filteredOptions = normalizedOptions.filter(option =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getDisplayValue = () => {
+    if (value === 'ALL') return `${label} - Todos`;
+    const selected = normalizedOptions.find(opt => opt.code === value);
+    return selected ? selected.label : value;
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-left flex items-center justify-between"
+      >
+        <span className="truncate text-sm">{getDisplayValue()}</span>
+        <ChevronRightIcon 
+          className={`w-4 h-4 transition-transform flex-shrink-0 ${isOpen ? 'rotate-90' : ''}`} 
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-hidden">
+          {/* Campo de pesquisa */}
+          <div className="p-3 border-b sticky top-0 bg-white">
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder={`Buscar ${label.toLowerCase()}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+
+          {/* Lista de opções */}
+          <div className="overflow-y-auto max-h-60">
+            {loading ? (
+              <div className="px-3 py-4 text-center text-sm text-gray-500">
+                Carregando...
+              </div>
+            ) : (
+              <>
+                {/* Opção "Todos" */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange('ALL');
+                    setIsOpen(false);
+                    setSearchTerm('');
+                  }}
+                  className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                    value === 'ALL' ? 'bg-blue-50 text-blue-700 font-medium' : ''
+                  }`}
+                >
+                  Todos
+                </button>
+
+                {/* Opções filtradas */}
+                {filteredOptions.length === 0 ? (
+                  <div className="px-3 py-4 text-center text-sm text-gray-500">
+                    Nenhum resultado encontrado
+                  </div>
+                ) : (
+                  filteredOptions.map((option) => (
+                    <button
+                      key={option.code}
+                      type="button"
+                      onClick={() => {
+                        onChange(option.code);  // ENVIA APENAS O CÓDIGO
+                        setIsOpen(false);
+                        setSearchTerm('');
+                      }}
+                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                        value === option.code ? 'bg-blue-50 text-blue-700 font-medium' : ''
+                      }`}
+                    >
+                      {option.label}  {/* MOSTRA O LABEL FORMATADO */}
+                    </button>
+                  ))
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Contador */}
+          <div className="px-3 py-2 border-t bg-gray-50 text-xs text-gray-600">
+            {filteredOptions.length} de {normalizedOptions.length} disponível(is)
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 export default function CertificateReportGrid() {
   const [data, setData] = useState<CertificateReport[]>([]);
@@ -87,7 +225,9 @@ export default function CertificateReportGrid() {
     status: 'ALL',
     site: 'ALL',
     certificateType: 'ALL',
-    expirationRange: 'ALL'
+    expirationRange: 'ALL',
+    zone: 'ALL',
+    area: 'ALL'
   });
   const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({});
   const [activeColumnFilter, setActiveColumnFilter] = useState<string | null>(null);
@@ -110,7 +250,9 @@ export default function CertificateReportGrid() {
   const [availableFilters, setAvailableFilters] = useState<CertificateFilters>({
     statuses: [],
     sites: [],
-    descriptions: []
+    descriptions: [],
+    zones: [],
+    areas: []
   });
   const [loadingFilters, setLoadingFilters] = useState(true);
 
@@ -261,6 +403,16 @@ export default function CertificateReportGrid() {
         params.append('certificateDescription', filters.certificateType);
       }
 
+// Filtro de Zona - ENVIA APENAS O CÓDIGO
+    if (filters.zone !== 'ALL') {
+      params.append('homeZoneCode', filters.zone);  // Envia o código
+    }
+
+    // Filtro de Área - ENVIA APENAS O CÓDIGO
+    if (filters.area !== 'ALL') {
+      params.append('homeArea', filters.area);  // Envia o código
+    }
+
       const response = await fetch(
         `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
       );
@@ -284,7 +436,7 @@ export default function CertificateReportGrid() {
     fetchAllDataForAnalysis();
     fetchFilters(); // Adicionar esta linha
 
-  }, [itemsPerPage, sortBy, sortOrder, filters.status, filters.site, filters.certificateType]);
+  }, [itemsPerPage, sortBy, sortOrder, filters.status, filters.site, filters.certificateType, filters.zone, filters.area]);
 
 
   // 4. Função para aplicar o filtro de data
@@ -1424,6 +1576,24 @@ export default function CertificateReportGrid() {
                   )}
                 </select>
 
+                {/* SUBSTITUIR: Filtro de Zona com pesquisa */}
+                <SearchableSelect
+                  label="Zona"
+                  value={filters.zone}
+                  onChange={(value) => setFilters({ ...filters, zone: value })}
+                  options={availableFilters.zones}
+                  loading={loadingFilters}
+                />
+
+                {/* SUBSTITUIR: Filtro de Área com pesquisa */}
+                <SearchableSelect
+                  label="Área"
+                  value={filters.area}
+                  onChange={(value) => setFilters({ ...filters, area: value })}
+                  options={availableFilters.areas}
+                  loading={loadingFilters}
+                />
+
                 {/* Filtro de Tipo de Certificado - usando dados da API */}
                 <select
                   value={filters.certificateType}
@@ -1462,6 +1632,8 @@ export default function CertificateReportGrid() {
                   <p className="text-xs text-blue-700">
                     <span className="font-semibold">{availableFilters.statuses.length}</span> status disponíveis •
                     <span className="font-semibold ml-2">{availableFilters.sites.length}</span> sites disponíveis •
+                    <span className="font-semibold ml-2">{availableFilters.zones.length}</span> zonas disponíveis •
+                    <span className="font-semibold ml-2">{availableFilters.areas.length}</span> áreas disponíveis •
                     <span className="font-semibold ml-2">{availableFilters.descriptions.length}</span> tipos de certificado disponíveis
                   </p>
                 </div>
@@ -1484,7 +1656,9 @@ export default function CertificateReportGrid() {
                       status: 'ALL',
                       site: 'ALL',
                       certificateType: 'ALL',
-                      expirationRange: 'ALL'
+                      expirationRange: 'ALL',
+                      zone: 'ALL',
+                      area: 'ALL'
                     });
                     handleDateFilterClear();
                   }}
