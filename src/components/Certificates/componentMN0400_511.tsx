@@ -703,18 +703,18 @@ export default function PredictiveCertificateAnalysis() {
   if (!certificateData) return null;
 
   const tabs = [
-  { key: 'overview', translation: t('predictiveCertificateAnalysis.tabs.overview') },
-  { key: 'risk-analysis', translation: t('predictiveCertificateAnalysis.tabs.riskAnalysis') },
-  { key: 'trends', translation: t('predictiveCertificateAnalysis.tabs.trends') },
-  { key: 'calendar', translation: t('predictiveCertificateAnalysis.tabs.calendar') },
-  { key: 'report', translation: t('predictiveCertificateAnalysis.tabs.report') }
-];
+    { key: 'overview', translation: t('predictiveCertificateAnalysis.tabs.overview') },
+    { key: 'risk-analysis', translation: t('predictiveCertificateAnalysis.tabs.riskAnalysis') },
+    { key: 'trends', translation: t('predictiveCertificateAnalysis.tabs.trends') },
+    { key: 'calendar', translation: t('predictiveCertificateAnalysis.tabs.calendar') },
+    { key: 'report', translation: t('predictiveCertificateAnalysis.tabs.report') }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-slate-800 mb-2">{t('predictiveCertificateAnalysis.title')}</h1>
-        <p className="text-slate-600">{t(`predictiveCertificateAnalysis.subtitle`, {total: certificateData.total.toLocaleString()})}</p>
+        <p className="text-slate-600">{t(`predictiveCertificateAnalysis.subtitle`, { total: certificateData.total.toLocaleString() })}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -723,7 +723,7 @@ export default function PredictiveCertificateAnalysis() {
             <div>
               <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.expiredCertificates')}</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">{certificateData.expired.toLocaleString()}</p>
-              <p className="text-red-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.ofTotal', {percentage: ((certificateData.expired / certificateData.total) * 100).toFixed(1)})}</p>
+              <p className="text-red-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.ofTotal', { percentage: ((certificateData.expired / certificateData.total) * 100).toFixed(1) })}</p>
             </div>
             <div className="bg-red-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -738,7 +738,7 @@ export default function PredictiveCertificateAnalysis() {
             <div>
               <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.validCertificates')}</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">{certificateData.approved.toLocaleString()}</p>
-              <p className="text-green-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.ofTotal', {percentage: ((certificateData.approved / certificateData.total) * 100).toFixed(1)})}</p>
+              <p className="text-green-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.ofTotal', { percentage: ((certificateData.approved / certificateData.total) * 100).toFixed(1) })}</p>
             </div>
             <div className="bg-green-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -753,7 +753,7 @@ export default function PredictiveCertificateAnalysis() {
             <div>
               <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.highRiskItems')}</p>
               <p className="text-3xl font-bold text-slate-800 mt-2">{certificateData.highRisk.toLocaleString()}</p>
-              <p className="text-orange-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.ofTotal', { percentage:((certificateData.highRisk / certificateData.total) * 100).toFixed(1)})}</p>
+              <p className="text-orange-600 text-xs mt-1">{t('predictiveCertificateAnalysis.kpi.ofTotal', { percentage: ((certificateData.highRisk / certificateData.total) * 100).toFixed(1) })}</p>
             </div>
             <div className="bg-orange-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -782,20 +782,19 @@ export default function PredictiveCertificateAnalysis() {
       <div className="mb-6">
         <div className="border-b border-slate-200">
           <nav className="flex space-x-8">
-  {tabs.map(tab => (
-    <button
-      key={tab.key}
-      onClick={() => setActiveTab(tab.key)}
-      className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-        activeTab === tab.key
-          ? 'border-blue-500 text-blue-600'
-          : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-      }`}
-    >
-      {tab.translation}
-    </button>
-  ))}
-</nav>
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.key
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                  }`}
+              >
+                {tab.translation}
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
 
@@ -841,25 +840,25 @@ export default function PredictiveCertificateAnalysis() {
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Critical Insights</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.insights.title')}</h3>
             <div className="space-y-4">
               <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded">
                 <p className="text-sm font-semibold text-red-800">{t('predictiveCertificateAnalysis.insights.criticalAlert')}</p>
-                <p className="text-sm text-red-700 mt-1">{certificateData.expired.toLocaleString()} certificates are expired and require immediate renewal</p>
+                <p className="text-sm text-red-700 mt-1"> {t('predictiveCertificateAnalysis.insights.expiredCertificates', { count: certificateData.expired })}</p>
               </div>
               <div className="p-4 bg-orange-50 border-l-4 border-orange-500 rounded">
                 <p className="text-sm font-semibold text-orange-800">{t('predictiveCertificateAnalysis.insights.highPriority')}</p>
-                <p className="text-sm text-orange-700 mt-1">{certificateData.expiring90Days.toLocaleString()} certificates expiring within 90 days</p>
+                <p className="text-sm text-orange-700 mt-1">{t('predictiveCertificateAnalysis.insights.expiringCertificates', { count: certificateData.expiring90Days })}</p>
               </div>
               <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
                 <p className="text-sm font-semibold text-blue-800">{t('predictiveCertificateAnalysis.insights.strategicInsight')}</p>
                 <p className="text-sm text-blue-700 mt-1">
-                  {certificateData.departments[0]?.name || 'N/A'} has highest renewal workload ({certificateData.departments[0]?.count.toLocaleString() || 0} certificates)
+                  {t('predictiveCertificateAnalysis.insights.workload', { department: certificateData.departments[0]?.name || 'N/A', count: certificateData.departments[0]?.count || 0 })}
                 </p>
               </div>
               <div className="p-4 bg-purple-50 border-l-4 border-purple-500 rounded">
                 <p className="text-sm font-semibold text-purple-800">{t('predictiveCertificateAnalysis.insights.highRisk')}</p>
-                <p className="text-sm text-purple-700 mt-1">{certificateData.highRisk.toLocaleString()} certificates classified as high risk requiring attention</p>
+                <p className="text-sm text-purple-700 mt-1">{t('predictiveCertificateAnalysis.insights.highRiskCertificates', { count: certificateData.highRisk })}</p>
               </div>
             </div>
           </div>
@@ -898,22 +897,23 @@ export default function PredictiveCertificateAnalysis() {
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
                   <span className="text-sm text-slate-700">
-                    Prioritize {certificateData.certificateTypes[0]?.name || 'certificate'} renewal
+                    {t('predictiveCertificateAnalysis.trends.prioritizeRenewal', {certificateType: certificateData.certificateTypes[0]?.name})}
                   </span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
-                  <span className="text-sm text-slate-700">Implement automated reminders for 90-day window</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.trends.implementReminders')}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
                   <span className="text-sm text-slate-700">
-                    Review {certificateData.departments[0]?.name || 'department'} workflows
+                    {t('predictiveCertificateAnalysis.trends.reviewWorkflows', {department: certificateData.departments[0]?.name})}
+                    {/* Review {certificateData.departments[0]?.name || 'department'} workflows */}
                   </span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
-                  <span className="text-sm text-slate-700">Schedule bulk renewals for Q4</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.trends.scheduleBulkRenewals')}</span>
                 </li>
               </ul>
             </div>
@@ -952,8 +952,8 @@ export default function PredictiveCertificateAnalysis() {
                 <button
                   onClick={() => changeCalendarView('day')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${calendarView === 'day'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                 >
                   Day
@@ -961,8 +961,8 @@ export default function PredictiveCertificateAnalysis() {
                 <button
                   onClick={() => changeCalendarView('week')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${calendarView === 'week'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                 >
                   Week
@@ -970,8 +970,8 @@ export default function PredictiveCertificateAnalysis() {
                 <button
                   onClick={() => changeCalendarView('month')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${calendarView === 'month'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                 >
                   Month
@@ -979,8 +979,8 @@ export default function PredictiveCertificateAnalysis() {
                 <button
                   onClick={() => changeCalendarView('year')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${calendarView === 'year'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                 >
                   Year
@@ -992,8 +992,8 @@ export default function PredictiveCertificateAnalysis() {
               <button
                 onClick={() => handleLegendClick('expired')}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${selectedFilter === 'expired'
-                    ? 'bg-red-100 ring-2 ring-red-500'
-                    : 'hover:bg-slate-50'
+                  ? 'bg-red-100 ring-2 ring-red-500'
+                  : 'hover:bg-slate-50'
                   }`}
               >
                 <div className="w-4 h-4 rounded bg-red-500"></div>
@@ -1003,8 +1003,8 @@ export default function PredictiveCertificateAnalysis() {
               <button
                 onClick={() => handleLegendClick('expiring-soon')}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${selectedFilter === 'expiring-soon'
-                    ? 'bg-orange-100 ring-2 ring-orange-500'
-                    : 'hover:bg-slate-50'
+                  ? 'bg-orange-100 ring-2 ring-orange-500'
+                  : 'hover:bg-slate-50'
                   }`}
               >
                 <div className="w-4 h-4 rounded bg-orange-500"></div>
@@ -1014,8 +1014,8 @@ export default function PredictiveCertificateAnalysis() {
               <button
                 onClick={() => handleLegendClick('expiring')}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${selectedFilter === 'expiring'
-                    ? 'bg-yellow-100 ring-2 ring-yellow-400'
-                    : 'hover:bg-slate-50'
+                  ? 'bg-yellow-100 ring-2 ring-yellow-400'
+                  : 'hover:bg-slate-50'
                   }`}
               >
                 <div className="w-4 h-4 rounded bg-yellow-400"></div>
@@ -1025,8 +1025,8 @@ export default function PredictiveCertificateAnalysis() {
               <button
                 onClick={() => handleLegendClick('valid')}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${selectedFilter === 'valid'
-                    ? 'bg-green-100 ring-2 ring-green-500'
-                    : 'hover:bg-slate-50'
+                  ? 'bg-green-100 ring-2 ring-green-500'
+                  : 'hover:bg-slate-50'
                   }`}
               >
                 <div className="w-4 h-4 rounded bg-green-500"></div>
@@ -1135,25 +1135,25 @@ export default function PredictiveCertificateAnalysis() {
                           </td>
                           <td className="px-4 py-3 text-sm">
                             <span className={`font-semibold ${event.extendedProps?.daysToExpiration < 0 ? 'text-red-600' :
-                                event.extendedProps?.daysToExpiration <= 30 ? 'text-orange-600' :
-                                  event.extendedProps?.daysToExpiration <= 90 ? 'text-yellow-600' :
-                                    'text-green-600'
+                              event.extendedProps?.daysToExpiration <= 30 ? 'text-orange-600' :
+                                event.extendedProps?.daysToExpiration <= 90 ? 'text-yellow-600' :
+                                  'text-green-600'
                               }`}>
                               {event.extendedProps?.daysToExpiration} days
                             </span>
                           </td>
                           <td className="px-4 py-3 text-sm">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${event.extendedProps?.riskScore >= 70 ? 'bg-red-100 text-red-800' :
-                                event.extendedProps?.riskScore >= 40 ? 'bg-orange-100 text-orange-800' :
-                                  'bg-green-100 text-green-800'
+                              event.extendedProps?.riskScore >= 40 ? 'bg-orange-100 text-orange-800' :
+                                'bg-green-100 text-green-800'
                               }`}>
                               {event.extendedProps?.riskScore || 'N/A'}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-sm">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${event.extendedProps?.status?.toLowerCase() === 'expired' ? 'bg-red-100 text-red-800' :
-                                event.extendedProps?.status?.toLowerCase() === 'approved' ? 'bg-green-100 text-green-800' :
-                                  'bg-yellow-100 text-yellow-800'
+                              event.extendedProps?.status?.toLowerCase() === 'approved' ? 'bg-green-100 text-green-800' :
+                                'bg-yellow-100 text-yellow-800'
                               }`}>
                               {event.extendedProps?.status || 'N/A'}
                             </span>
@@ -1229,7 +1229,7 @@ export default function PredictiveCertificateAnalysis() {
       }
 
       <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Quick Statistics</h3>
+        <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.quickStats.quickStatistics')}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-4 bg-slate-50 rounded-lg">
             <p className="text-2xl font-bold text-slate-800">{certificateData.total.toLocaleString()}</p>

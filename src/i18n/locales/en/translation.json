@@ -1159,110 +1159,123 @@
     }
   },
   "predictiveCertificateAnalysis": {
-      "title": "Certificate Management Analytics",
-      "subtitle": "Predictive analysis for {{total}} certificates",
-      
-      "kpi": {
-        "expiredCertificates": "Expired Certificates",
-        "validCertificates": "Valid Certificates",
-        "highRiskItems": "High Risk Items",
-        "financialRisk": "Financial Risk",
-        "ofTotal": "{{percentage}}% of Total",
-        "assetsAtRisk": "Assets at Risk"
-      },
-      
-      "tabs": {
-        "overview": "Overview",
-        "riskAnalysis": "Risk Analysis",
-        "trends": "Trends",
-        "calendar": "Calendar",
-        "report": "Report"
-      },
-      
-      "charts": {
-        "certificateStatusDistribution": "Certificate Status Distribution",
-        "riskLevelDistribution": "Risk Level Distribution",
-        "expirationTimeline": "Expiration Timeline by Month",
-        "departmentPerformance": "Department Performance",
-        "financialRiskByCategory": "Financial Risk by Category",
-        "daysUntilExpiration": "Days Until Expiration Distribution",
-        "brandReliability": "Brand Reliability Scores",
-        "renewalUrgencyTrend": "Renewal Urgency Trend (6-Week Forecast)"
-      },
-      
-      "calendar": {
-        "certificateExpirationCalendar": "Certificate Expiration Calendar",
-        "day": "Day",
-        "week": "Week",
-        "month": "Month",
-        "year": "Year",
-        "expired": "Expired",
-        "expiringSoon": "Expiring Soon (0-30 days)",
-        "expiring": "Expiring (31-90 days)",
-        "valid": "Valid",
-        "clearFilter": "Clear Filter",
-        "thisWeek": "This Week",
-        "thisMonth": "This Month",
-        "next90Days": "Next 90 Days",
-        "alreadyExpired": "Already Expired",
-        "certificatesExpiring": "Certificates expiring",
-        "needsImmediateAction": "Needs immediate action"
-      },
-      
-      "status": {
-        "expired": "Expired",
-        "approved": "Approved",
-        "pending": "Pending",
-        "expiring_0_30": "Expiring 0-30 Days",
-        "expiring_31_90": "Expiring 31-90 Days",
-        "valid": "Valid"
-      },
-      
-      "risk": {
-        "highRisk": "High Risk",
-        "mediumRisk": "Medium Risk",
-        "lowRisk": "Low Risk"
-      },
-      
-      "insights": {
-        "criticalAlert": "Critical Alert",
-        "highPriority": "High Priority",
-        "strategicInsight": "Strategic Insight",
-        "highRisk": "High Risk"
-      },
-      
-      "trends": {
-        "urgentRenewals": "Urgent Renewals",
-        "plannedRenewals": "Planned Renewals",
-        "futureRenewals": "Future Renewals",
-        "predictedOutcomes": "Predicted Outcomes",
-        "renewalSuccessRate": "Renewal Success Rate",
-        "automationCandidates": "Automation Candidates",
-        "avgRenewalTime": "Avg. Renewal Time",
-        "topRecommendations": "Top Recommendations",
-        "complianceScore": "Compliance Score",
-        "currentComplianceRate": "Current compliance rate"
-      },
-      
-      "table": {
-        "certificate": "Certificate",
-        "department": "Department",
-        "brand": "Brand",
-        "expirationDate": "Expiration Date",
-        "daysToExpiration": "Days to Expiration",
-        "riskScore": "Risk Score",
-        "status": "Status",
-        "noCertificatesFound": "No certificates found for this filter"
-      },
-      
-      "quickStats": {
-        "totalCertificates": "Total Certificates",
-        "certificateTypes": "Certificate Types",
-        "departments": "Departments",
-        "highRiskItems": "High Risk Items"
-      },
-      
-      "loading": "Loading certificate data...",
-      "error": "Error loading data"
-    }
+    "title": "Certificate Management Analytics",
+    "subtitle": "Predictive analysis for {{total}} certificates",
+
+    "kpi": {
+      "expiredCertificates": "Expired Certificates",
+      "validCertificates": "Valid Certificates",
+      "highRiskItems": "High Risk Items",
+      "financialRisk": "Financial Risk",
+      "ofTotal": "{{percentage}}% of Total",
+      "assetsAtRisk": "Assets at Risk"
+    },
+
+    "tabs": {
+      "overview": "Overview",
+      "riskAnalysis": "Risk Analysis",
+      "trends": "Trends",
+      "calendar": "Calendar",
+      "report": "Report"
+    },
+
+    "charts": {
+      "certificateStatusDistribution": "Certificate Status Distribution",
+      "riskLevelDistribution": "Risk Level Distribution",
+      "expirationTimeline": "Expiration Timeline by Month",
+      "departmentPerformance": "Department Performance",
+      "financialRiskByCategory": "Financial Risk by Category",
+      "daysUntilExpiration": "Days Until Expiration Distribution",
+      "brandReliability": "Brand Reliability Scores",
+      "renewalUrgencyTrend": "Renewal Urgency Trend (6-Week Forecast)"
+    },
+
+    "calendar": {
+      "certificateExpirationCalendar": "Certificate Expiration Calendar",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year",
+      "expired": "Expired",
+      "expiringSoon": "Expiring Soon (0-30 days)",
+      "expiring": "Expiring (31-90 days)",
+      "valid": "Valid",
+      "clearFilter": "Clear Filter",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "next90Days": "Next 90 Days",
+      "alreadyExpired": "Already Expired",
+      "certificatesExpiring": "Certificates expiring",
+      "needsImmediateAction": "Needs immediate action"
+    },
+
+    "status": {
+      "expired": "Expired",
+      "approved": "Approved",
+      "pending": "Pending",
+      "expiring_0_30": "Expiring 0-30 Days",
+      "expiring_31_90": "Expiring 31-90 Days",
+      "valid": "Valid"
+    },
+
+    "risk": {
+      "highRisk": "High Risk",
+      "mediumRisk": "Medium Risk",
+      "lowRisk": "Low Risk"
+    },
+
+    "insights": {
+      "criticalAlert": "Critical Alert",
+      "highPriority": "High Priority",
+      "strategicInsight": "Strategic Insight",
+      "highRisk": "High Risk",
+      "title": "Critical Insights",
+      "expiredCertificates": "{{count}} certificates are expired and require immediate renewal",
+      "expiringCertificates": "{{count}} certificates expiring within 90 days",
+      "workload": "{{department}} has highest renewal workload ({{count}} certificates)",
+      "highRiskCertificates": "{{count}} certificates classified as high risk requiring attention",
+      "notApplicable": "N/A"
+    },
+
+    "trends": {
+      "urgentRenewals": "Urgent Renewals",
+      "plannedRenewals": "Planned Renewals",
+      "futureRenewals": "Future Renewals",
+      "predictedOutcomes": "Predicted Outcomes",
+      "renewalSuccessRate": "Renewal Success Rate",
+      "automationCandidates": "Automation Candidates",
+      "avgRenewalTime": "Avg. Renewal Time",
+      "topRecommendations": "Top Recommendations",
+      "complianceScore": "Compliance Score",
+      "currentComplianceRate": "Current compliance rate",
+      "prioritizeRenewal": "Prioritize {{certificateType}} renewal",
+      "implementReminders": "Implement automated reminders for 90-day window",
+      "reviewWorkflows": "Review {{department}} workflows",
+      "scheduleBulkRenewals": "Schedule bulk renewals for Q4",
+      "certificate": "certificate",
+      "department": "department"
+    },
+
+    "table": {
+      "certificate": "Certificate",
+      "department": "Department",
+      "brand": "Brand",
+      "expirationDate": "Expiration Date",
+      "daysToExpiration": "Days to Expiration",
+      "riskScore": "Risk Score",
+      "status": "Status",
+      "noCertificatesFound": "No certificates found for this filter"
+    },
+
+    "quickStats": {
+      "quickStatistics": "Quick Statistics",
+      "totalCertificates": "Total Certificates",
+      "certificateTypes": "Certificate Types",
+      "departments": "Departments",
+      "highRiskItems": "High Risk Items"
+    },
+
+    "loading": "Loading certificate data...",
+    "error": "Error loading data"
+  }
 }
