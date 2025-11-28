@@ -10,7 +10,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChartBarIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { useCompany } from '../../../hooks/useCompany';
 
@@ -73,13 +74,13 @@ interface CertificateFilters {
 
 
 // Adicione este componente antes do componente principal
-const SearchableSelect = ({ 
-  label, 
-  value, 
-  onChange, 
-  options, 
-  loading 
-}: { 
+const SearchableSelect = ({
+  label,
+  value,
+  onChange,
+  options,
+  loading
+}: {
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -91,7 +92,7 @@ const SearchableSelect = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Normalizar options para sempre trabalhar com objetos
-  const normalizedOptions = options.map(opt => 
+  const normalizedOptions = options.map(opt =>
     typeof opt === 'string' ? { code: opt, label: opt } : opt
   );
 
@@ -124,8 +125,8 @@ const SearchableSelect = ({
         className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white text-left flex items-center justify-between"
       >
         <span className="truncate text-sm">{getDisplayValue()}</span>
-        <ChevronRightIcon 
-          className={`w-4 h-4 transition-transform flex-shrink-0 ${isOpen ? 'rotate-90' : ''}`} 
+        <ChevronRightIcon
+          className={`w-4 h-4 transition-transform flex-shrink-0 ${isOpen ? 'rotate-90' : ''}`}
         />
       </button>
 
@@ -162,9 +163,8 @@ const SearchableSelect = ({
                     setIsOpen(false);
                     setSearchTerm('');
                   }}
-                  className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
-                    value === 'ALL' ? 'bg-blue-50 text-blue-700 font-medium' : ''
-                  }`}
+                  className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${value === 'ALL' ? 'bg-blue-50 text-blue-700 font-medium' : ''
+                    }`}
                 >
                   Todos
                 </button>
@@ -184,9 +184,8 @@ const SearchableSelect = ({
                         setIsOpen(false);
                         setSearchTerm('');
                       }}
-                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
-                        value === option.code ? 'bg-blue-50 text-blue-700 font-medium' : ''
-                      }`}
+                      className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${value === option.code ? 'bg-blue-50 text-blue-700 font-medium' : ''
+                        }`}
                     >
                       {option.label}  {/* MOSTRA O LABEL FORMATADO */}
                     </button>
@@ -244,6 +243,229 @@ export default function CertificateReportGrid() {
     startDate: '',
     endDate: ''
   });
+
+  const [showExportProgramacaoMenu, setShowExportProgramacaoMenu] = useState(false);
+
+  // 2. Função para formatar data de execução (1 ano antes da validade)
+  const getExecutionDate = (expirationDate: string) => {
+    const date = new Date(expirationDate);
+    date.setFullYear(date.getFullYear() - 1);
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  // 3. Função para exportar Excel no formato Programação de Calibração
+  const exportProgramacaoExcel = async (dataToExport: CertificateReport[]) => {
+    import('xlsx').then(async (XLSX) => {
+      const headers = [
+        'Nº. Patrimônio', 'Código', 'Descrição', 'Departamento', 'Fabricante',
+        'Modelo', 'Nº. Série', 'Comodato', 'Dt. Execução', 'Dt. Validade', 'Não Conf.', 'Fornecedor'
+      ];
+
+      const dataRows = dataToExport.map(item => [
+        '---',
+        item.item_code,
+        item.item_name,
+        item.code_area,
+        item.brand || '---',
+        item.model || '---',
+        item.serial || '---',
+        'Não',
+        getExecutionDate(item.expiration_date),
+        formatDate(item.expiration_date),
+        '---',
+        '---'
+      ]);
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
+
+      const colWidths = headers.map(() => ({ wch: 20 }));
+      ws['!cols'] = colWidths;
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Programação Calibração');
+
+      const fileName = `programacao-calibracao-${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+    }).catch(error => {
+      console.error('Erro ao carregar biblioteca XLSX:', error);
+      alert('Erro ao exportar para Excel.');
+    });
+  };
+
+  // 4. Função para exportar PDF no formato Programação de Calibração
+  const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      }) as import('jspdf').jsPDF;
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 10;
+      let yPosition = margin;
+
+      // Título
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PROGRAMAÇÃO DE CALIBRAÇÃO', margin, yPosition);
+      yPosition += 8;
+
+      // Data e Informações
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(new Date().toLocaleDateString('pt-BR'), margin, yPosition);
+      yPosition += 5;
+
+      const currentDate = new Date();
+      const nextYear = new Date(currentDate);
+      nextYear.setFullYear(currentDate.getFullYear() + 1);
+
+      doc.text(
+        `Período: ${currentDate.getMonth() + 1}/${currentDate.getFullYear()} a ${nextYear.getMonth() + 1}/${nextYear.getFullYear()}, Ordenação: Código, Quant. Registros: ${dataToExport.length}`,
+        margin,
+        yPosition
+      );
+      yPosition += 5;
+
+      doc.text('Filtros: Controlado: Sim', margin, yPosition);
+      yPosition += 8;
+
+      // Cabeçalho da Tabela
+      const headers = [
+        'Nº. Patrim.',
+        'Código',
+        'Descrição',
+        'Departamento',
+        'Fabricante',
+        'Modelo',
+        'Nº. Série',
+        'Comod.',
+        'Dt. Exec.',
+        'Dt. Valid.',
+        'N. Conf.',
+        'Fornec.'
+      ];
+
+      const colWidths = [15, 18, 35, 40, 22, 22, 25, 12, 18, 18, 12, 20];
+
+      // Desenhar cabeçalho
+      doc.setFillColor(220, 220, 220);
+      doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'bold');
+
+      let xPosition = margin + 1;
+      headers.forEach((header, index) => {
+        doc.text(header, xPosition, yPosition);
+        xPosition += colWidths[index];
+      });
+
+      yPosition += 6;
+
+      // Dados
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+
+      // @ts-ignore
+      dataToExport.forEach((item, index) => {
+        if (yPosition > pageHeight - 20) {
+          doc.addPage();
+          yPosition = margin;
+
+          // Redesenhar cabeçalho
+          doc.setFillColor(220, 220, 220);
+          doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(7);
+          xPosition = margin + 1;
+          headers.forEach((header, index) => {
+            doc.text(header, xPosition, yPosition);
+            xPosition += colWidths[index];
+          });
+          yPosition += 6;
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(6);
+        }
+
+        xPosition = margin + 1;
+        const rowData = [
+          '---',
+          item.item_code,
+          item.item_name.substring(0, 30),
+          item.code_area.substring(0, 35),
+          item.brand || '---',
+          item.model || '---',
+          item.serial || '---',
+          'Não',
+          getExecutionDate(item.expiration_date),
+          formatDate(item.expiration_date),
+          '---',
+          '---'
+        ];
+
+        rowData.forEach((text, colIndex) => {
+          const maxWidth = colWidths[colIndex] - 2;
+          const lines = doc.splitTextToSize(text, maxWidth);
+          doc.text(lines[0], xPosition, yPosition);
+          xPosition += colWidths[colIndex];
+        });
+
+        yPosition += 5;
+      });
+
+      // Rodapé
+      doc.setFontSize(7);
+      doc.text(`Pág. 1 / 1`, pageWidth - margin - 15, pageHeight - 5);
+
+      doc.save(`programacao-calibracao-${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao exportar para PDF.');
+    }
+  };
+
+  // 5. Handler para exportação no formato Programação
+  const handleExportProgramacao = async (format: 'excel' | 'pdf', exportAll: boolean) => {
+    setShowExportProgramacaoMenu(false);
+
+    let dataToExport = filteredData;
+
+    if (exportAll) {
+      try {
+        const params = new URLSearchParams({
+          page: '1',
+          limit: '999999',
+          sortBy: 'item_code',  // Ordenar por código para o relatório
+          sortOrder: 'ASC'
+        });
+
+        const response = await fetch(
+          `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch all data');
+        }
+
+        const result: ApiResponse = await response.json();
+        dataToExport = result.data;
+      } catch (error) {
+        console.error('Error fetching all data:', error);
+        alert('Erro ao buscar todos os dados. Exportando dados visíveis.');
+      }
+    }
+
+    if (format === 'excel') {
+      await exportProgramacaoExcel(dataToExport);
+    } else {
+      await exportProgramacaoPDF(dataToExport);
+    }
+  };
 
 
   // Adicionar junto com os outros estados
@@ -403,15 +625,15 @@ export default function CertificateReportGrid() {
         params.append('certificateDescription', filters.certificateType);
       }
 
-// Filtro de Zona - ENVIA APENAS O CÓDIGO
-    if (filters.zone !== 'ALL') {
-      params.append('homeZoneCode', filters.zone);  // Envia o código
-    }
+      // Filtro de Zona - ENVIA APENAS O CÓDIGO
+      if (filters.zone !== 'ALL') {
+        params.append('homeZoneCode', filters.zone);  // Envia o código
+      }
 
-    // Filtro de Área - ENVIA APENAS O CÓDIGO
-    if (filters.area !== 'ALL') {
-      params.append('homeArea', filters.area);  // Envia o código
-    }
+      // Filtro de Área - ENVIA APENAS O CÓDIGO
+      if (filters.area !== 'ALL') {
+        params.append('homeArea', filters.area);  // Envia o código
+      }
 
       const response = await fetch(
         `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
@@ -1536,6 +1758,86 @@ export default function CertificateReportGrid() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => setShowExportProgramacaoMenu(!showExportProgramacaoMenu)}
+            className="relative flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg"
+          >
+            <DocumentTextIcon className="w-5 h-5" />
+            Programação
+          </button>
+
+          {showExportProgramacaoMenu && (
+            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="font-semibold text-gray-900 mb-1">Programação de Calibração</h3>
+                <p className="text-xs text-gray-600">Exportar no formato padrão de programação</p>
+              </div>
+
+              <div className="p-3 space-y-2">
+                <button
+                  onClick={() => handleExportProgramacao('excel', false)}
+                  className="w-full flex items-start gap-3 p-3 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors"
+                >
+                  <DocumentTextIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-left">
+                    <div className="font-medium text-gray-900 text-sm">Excel - Dados Filtrados</div>
+                    <div className="text-xs text-gray-600">
+                      {filteredData.length} registros visíveis
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleExportProgramacao('excel', true)}
+                  className="w-full flex items-start gap-3 p-3 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors"
+                >
+                  <DocumentTextIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-left">
+                    <div className="font-medium text-gray-900 text-sm">Excel - Todos os Dados</div>
+                    <div className="text-xs text-gray-600">
+                      {pagination.totalItems} registros totais
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleExportProgramacao('pdf', false)}
+                  className="w-full flex items-start gap-3 p-3 border-2 border-gray-200 rounded-lg hover:border-red-500 hover:bg-red-50 transition-colors"
+                >
+                  <DocumentTextIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-left">
+                    <div className="font-medium text-gray-900 text-sm">PDF - Dados Filtrados</div>
+                    <div className="text-xs text-gray-600">
+                      {filteredData.length} registros visíveis
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleExportProgramacao('pdf', true)}
+                  className="w-full flex items-start gap-3 p-3 border-2 border-gray-200 rounded-lg hover:border-red-500 hover:bg-red-50 transition-colors"
+                >
+                  <DocumentTextIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-left">
+                    <div className="font-medium text-gray-900 text-sm">PDF - Todos os Dados</div>
+                    <div className="text-xs text-gray-600">
+                      {pagination.totalItems} registros totais
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <div className="p-3 border-t border-gray-200">
+                <button
+                  onClick={() => setShowExportProgramacaoMenu(false)}
+                  className="w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium"
+                >
+                  Fechar
                 </button>
               </div>
             </div>
