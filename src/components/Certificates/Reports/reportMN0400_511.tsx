@@ -1675,8 +1675,8 @@ export default function CertificateReportGrid() {
                     <button
                       onClick={() => setShowFilters(!showFilters)}
                       className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg ${showFilters
-                          ? 'bg-white text-blue-700 shadow-white/20'
-                          : 'bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white hover:bg-white/15'
+                        ? 'bg-white text-blue-700 shadow-white/20'
+                        : 'bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white hover:bg-white/15'
                         }`}
                     >
                       <FunnelIcon className="w-5 h-5" />
@@ -1716,9 +1716,14 @@ export default function CertificateReportGrid() {
                         <span className="hidden lg:inline">Programação</span>
                       </button>
 
-                      {/* Menu Dropdown Programação - MELHORADO */}
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+                                        {/* Menu Dropdown Programação - MELHORADO */}
                       {showExportProgramacaoMenu && (
-                        <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border-2 border-purple-200 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-2xl border-2 border-purple-200 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                           {/* Header do Menu */}
                           <div className="bg-gradient-to-r from-purple-500 to-violet-600 p-5">
                             <h3 className="font-bold text-white text-lg flex items-center gap-2">
@@ -1806,10 +1811,6 @@ export default function CertificateReportGrid() {
                           </div>
                         </div>
                       )}
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* Modal de Exportação - MELHORADO */}
               {showExportModal && (
@@ -2081,8 +2082,8 @@ export default function CertificateReportGrid() {
                           onClick={handleDateFilterApply}
                           disabled={!dateFilter.startDate || !dateFilter.endDate}
                           className={`flex-1 px-5 py-3 rounded-xl font-bold transition-all transform ${dateFilter.startDate && dateFilter.endDate
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:scale-105'
-                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:scale-105'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                             }`}
                           title={!dateFilter.startDate || !dateFilter.endDate ? 'Preencha ambas as datas' : ''}
                         >
