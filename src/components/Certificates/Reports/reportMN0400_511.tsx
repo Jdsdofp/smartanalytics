@@ -1257,25 +1257,25 @@ export default function CertificateReportGrid() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6">
 
-      <div className="w-full">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Análise Crítica de Certificados</h1>
-          <p className="text-gray-600">Relatório detalhado com score de risco e análise preditiva</p>
+      <div className="w-full max-w-full overflow-x-hidden ">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">Análise Crítica de Certificados</h1>
+          <p className="text-sm sm:text-base text-gray-600">Relatório detalhado com score de risco e análise preditiva</p>
         </div>
 
         {/* Painel de Análise Crítica */}
         {showAnalysis && (
-          <div className="mb-6 space-y-4">
+          <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
             {/* Score de Risco e Compliance */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg shadow-lg p-6 border-2 border-red-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-red-200">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-red-900">Score de Risco</span>
-                  <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
+                  <span className="text-xs sm:text-sm font-medium text-red-900">Score de Risco</span>
+                  <ExclamationTriangleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
                 </div>
-                <div className={`text-4xl font-bold ${getRiskScoreColor(criticalAnalysis.riskScore)}`}>
+                <div className={`text-3xl sm:text-4xl font-bold ${getRiskScoreColor(criticalAnalysis.riskScore)}`}>
                   {criticalAnalysis.riskScore.toFixed(1)}%
                 </div>
                 <div className="mt-2 text-xs text-red-700">
@@ -1283,12 +1283,12 @@ export default function CertificateReportGrid() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-lg p-6 border-2 border-green-200">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-green-200">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-green-900">Taxa de Compliance</span>
-                  <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                  <span className="text-xs sm:text-sm font-medium text-green-900">Taxa de Compliance</span>
+                  <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                 </div>
-                <div className="text-4xl font-bold text-green-600">
+                <div className="text-3xl sm:text-4xl font-bold text-green-600">
                   {criticalAnalysis.complianceRate.toFixed(1)}%
                 </div>
                 <div className="mt-2 text-xs text-green-700">
@@ -1296,7 +1296,7 @@ export default function CertificateReportGrid() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-lg p-6 border-2 border-orange-200">
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-orange-200 sm:col-span-2 lg:col-span-1">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-orange-900">Ação Urgente</span>
                   <ClockIcon className="w-6 h-6 text-orange-600" />
