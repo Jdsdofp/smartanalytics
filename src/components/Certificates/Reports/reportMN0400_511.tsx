@@ -88,7 +88,10 @@ const SearchableSelect = ({
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const normalizedOptions = options.map(opt =>
+  // ✅ ADICIONAR PROTEÇÃO
+  const safeOptions = options || [];
+
+  const normalizedOptions = safeOptions.map(opt =>
     typeof opt === 'string' ? { code: opt, label: opt } : opt
   );
 
@@ -460,25 +463,54 @@ export default function CertificateReportGrid() {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
+  // 2. SUBSTITUIR A FUNÇÃO fetchFilters
   const fetchFilters = async () => {
     setLoadingFilters(true);
     try {
-      const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/filters`
-      );
+      let url = `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/filters`;
+
+      if (filters.site && filters.site !== 'ALL') {
+        url += `?site=${filters.site}`;
+
+        if (filters.area && filters.area !== 'ALL') {
+          url += `&area=${filters.area}`;
+        }
+      }
+
+      console.log('🔍 Buscando filtros de:', url);
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error('Failed to fetch filters');
       }
 
       const result = await response.json();
-      setAvailableFilters(result.data);
+      console.log('✅ Resposta da API:', result);
+
+      // ✅ GARANTIR que sempre tenha arrays vazios
+      setAvailableFilters({
+        statuses: result.data?.statuses || [],
+        sites: result.data?.sites || [],
+        descriptions: result.data?.descriptions || [],
+        zones: result.data?.zones || [],
+        areas: result.data?.areas || []
+      });
     } catch (error) {
-      console.error('Error fetching filters:', error);
+      console.error('❌ Error fetching filters:', error);
+      // Em caso de erro, manter arrays vazios
+      setAvailableFilters({
+        statuses: [],
+        sites: [],
+        descriptions: [],
+        zones: [],
+        areas: []
+      });
     } finally {
       setLoadingFilters(false);
     }
   };
+
 
   const getDaysUntilExpiration = (expirationDate: string) => {
     const now = new Date();
@@ -626,6 +658,31 @@ export default function CertificateReportGrid() {
     fetchAllDataForAnalysis();
     fetchFilters();
   }, [itemsPerPage, sortBy, sortOrder, filters.status, filters.site, filters.certificateType, filters.zone, filters.area]);
+
+  // 4. CRIAR HANDLERS PARA OS FILTROS HIERÁRQUICOS
+  const handleSiteChange = (newSite: string) => {
+    setFilters({
+      ...filters,
+      site: newSite,
+      area: 'ALL',  // Limpa área quando muda site
+      zone: 'ALL'   // Limpa zona quando muda site
+    });
+  };
+
+  const handleAreaChange = (newArea: string) => {
+    setFilters({
+      ...filters,
+      area: newArea,
+      zone: 'ALL'  // Limpa zona quando muda área
+    });
+  };
+
+  const handleZoneChange = (newZone: string) => {
+    setFilters({
+      ...filters,
+      zone: newZone
+    });
+  };
 
   const handleDateFilterApply = () => {
     fetchData(1);
@@ -1721,96 +1778,96 @@ export default function CertificateReportGrid() {
                   </div>
                 </div>
               </div>
-                                        {/* Menu Dropdown Programação - MELHORADO */}
-                      {showExportProgramacaoMenu && (
-                        <div className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-2xl border-2 border-purple-200 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                          {/* Header do Menu */}
-                          <div className="bg-gradient-to-r from-purple-500 to-violet-600 p-5">
-                            <h3 className="font-bold text-white text-lg flex items-center gap-2">
-                              <DocumentTextIcon className="w-6 h-6" />
-                              Programação de Calibração
-                            </h3>
-                            <p className="text-purple-100 text-sm mt-1">Exportar no formato padrão</p>
-                          </div>
+              {/* Menu Dropdown Programação - MELHORADO */}
+              {showExportProgramacaoMenu && (
+                <div className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-2xl border-2 border-purple-200 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  {/* Header do Menu */}
+                  <div className="bg-gradient-to-r from-purple-500 to-violet-600 p-5">
+                    <h3 className="font-bold text-white text-lg flex items-center gap-2">
+                      <DocumentTextIcon className="w-6 h-6" />
+                      Programação de Calibração
+                    </h3>
+                    <p className="text-purple-100 text-sm mt-1">Exportar no formato padrão</p>
+                  </div>
 
-                          {/* Opções de Exportação */}
-                          <div className="p-4 space-y-3">
-                            {/* Excel - Filtrados */}
-                            <button
-                              onClick={() => handleExportProgramacao('excel', false)}
-                              className="w-full flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all group"
-                            >
-                              <div className="bg-green-100 p-3 rounded-xl group-hover:bg-green-500 transition-all">
-                                <DocumentTextIcon className="w-6 h-6 text-green-600 group-hover:text-white transition-all" />
-                              </div>
-                              <div className="text-left flex-1">
-                                <div className="font-bold text-gray-900 mb-1">Excel - Dados Filtrados</div>
-                                <div className="text-sm text-gray-600">
-                                  <span className="font-semibold text-green-600">{filteredData.length}</span> registros visíveis
-                                </div>
-                              </div>
-                            </button>
-
-                            {/* Excel - Todos */}
-                            <button
-                              onClick={() => handleExportProgramacao('excel', true)}
-                              className="w-full flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all group"
-                            >
-                              <div className="bg-green-100 p-3 rounded-xl group-hover:bg-green-500 transition-all">
-                                <DocumentTextIcon className="w-6 h-6 text-green-600 group-hover:text-white transition-all" />
-                              </div>
-                              <div className="text-left flex-1">
-                                <div className="font-bold text-gray-900 mb-1">Excel - Todos os Dados</div>
-                                <div className="text-sm text-gray-600">
-                                  <span className="font-semibold text-green-600">{pagination.totalItems}</span> registros totais
-                                </div>
-                              </div>
-                            </button>
-
-                            {/* PDF - Filtrados */}
-                            <button
-                              onClick={() => handleExportProgramacao('pdf', false)}
-                              className="w-full flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:border-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-rose-50 transition-all group"
-                            >
-                              <div className="bg-red-100 p-3 rounded-xl group-hover:bg-red-500 transition-all">
-                                <DocumentTextIcon className="w-6 h-6 text-red-600 group-hover:text-white transition-all" />
-                              </div>
-                              <div className="text-left flex-1">
-                                <div className="font-bold text-gray-900 mb-1">PDF - Dados Filtrados</div>
-                                <div className="text-sm text-gray-600">
-                                  <span className="font-semibold text-red-600">{filteredData.length}</span> registros visíveis
-                                </div>
-                              </div>
-                            </button>
-
-                            {/* PDF - Todos */}
-                            <button
-                              onClick={() => handleExportProgramacao('pdf', true)}
-                              className="w-full flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:border-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-rose-50 transition-all group"
-                            >
-                              <div className="bg-red-100 p-3 rounded-xl group-hover:bg-red-500 transition-all">
-                                <DocumentTextIcon className="w-6 h-6 text-red-600 group-hover:text-white transition-all" />
-                              </div>
-                              <div className="text-left flex-1">
-                                <div className="font-bold text-gray-900 mb-1">PDF - Todos os Dados</div>
-                                <div className="text-sm text-gray-600">
-                                  <span className="font-semibold text-red-600">{pagination.totalItems}</span> registros totais
-                                </div>
-                              </div>
-                            </button>
-                          </div>
-
-                          {/* Footer */}
-                          <div className="p-4 border-t-2 border-gray-200 bg-gray-50">
-                            <button
-                              onClick={() => setShowExportProgramacaoMenu(false)}
-                              className="w-full px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 font-bold rounded-lg hover:bg-gray-200 transition-all"
-                            >
-                              Fechar Menu
-                            </button>
-                          </div>
+                  {/* Opções de Exportação */}
+                  <div className="p-4 space-y-3">
+                    {/* Excel - Filtrados */}
+                    <button
+                      onClick={() => handleExportProgramacao('excel', false)}
+                      className="w-full flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all group"
+                    >
+                      <div className="bg-green-100 p-3 rounded-xl group-hover:bg-green-500 transition-all">
+                        <DocumentTextIcon className="w-6 h-6 text-green-600 group-hover:text-white transition-all" />
+                      </div>
+                      <div className="text-left flex-1">
+                        <div className="font-bold text-gray-900 mb-1">Excel - Dados Filtrados</div>
+                        <div className="text-sm text-gray-600">
+                          <span className="font-semibold text-green-600">{filteredData.length}</span> registros visíveis
                         </div>
-                      )}
+                      </div>
+                    </button>
+
+                    {/* Excel - Todos */}
+                    <button
+                      onClick={() => handleExportProgramacao('excel', true)}
+                      className="w-full flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:border-green-500 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all group"
+                    >
+                      <div className="bg-green-100 p-3 rounded-xl group-hover:bg-green-500 transition-all">
+                        <DocumentTextIcon className="w-6 h-6 text-green-600 group-hover:text-white transition-all" />
+                      </div>
+                      <div className="text-left flex-1">
+                        <div className="font-bold text-gray-900 mb-1">Excel - Todos os Dados</div>
+                        <div className="text-sm text-gray-600">
+                          <span className="font-semibold text-green-600">{pagination.totalItems}</span> registros totais
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* PDF - Filtrados */}
+                    <button
+                      onClick={() => handleExportProgramacao('pdf', false)}
+                      className="w-full flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:border-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-rose-50 transition-all group"
+                    >
+                      <div className="bg-red-100 p-3 rounded-xl group-hover:bg-red-500 transition-all">
+                        <DocumentTextIcon className="w-6 h-6 text-red-600 group-hover:text-white transition-all" />
+                      </div>
+                      <div className="text-left flex-1">
+                        <div className="font-bold text-gray-900 mb-1">PDF - Dados Filtrados</div>
+                        <div className="text-sm text-gray-600">
+                          <span className="font-semibold text-red-600">{filteredData.length}</span> registros visíveis
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* PDF - Todos */}
+                    <button
+                      onClick={() => handleExportProgramacao('pdf', true)}
+                      className="w-full flex items-start gap-4 p-4 border-2 border-gray-200 rounded-xl hover:border-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-rose-50 transition-all group"
+                    >
+                      <div className="bg-red-100 p-3 rounded-xl group-hover:bg-red-500 transition-all">
+                        <DocumentTextIcon className="w-6 h-6 text-red-600 group-hover:text-white transition-all" />
+                      </div>
+                      <div className="text-left flex-1">
+                        <div className="font-bold text-gray-900 mb-1">PDF - Todos os Dados</div>
+                        <div className="text-sm text-gray-600">
+                          <span className="font-semibold text-red-600">{pagination.totalItems}</span> registros totais
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="p-4 border-t-2 border-gray-200 bg-gray-50">
+                    <button
+                      onClick={() => setShowExportProgramacaoMenu(false)}
+                      className="w-full px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 font-bold rounded-lg hover:bg-gray-200 transition-all"
+                    >
+                      Fechar Menu
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Modal de Exportação - MELHORADO */}
               {showExportModal && (
@@ -1927,13 +1984,14 @@ export default function CertificateReportGrid() {
                       </div>
 
                       {/* Filtro de Site */}
+                      {/* Filtro de Site */}
                       <div className="space-y-2">
                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
                           Site / Localização
                         </label>
                         <select
                           value={filters.site}
-                          onChange={(e) => setFilters({ ...filters, site: e.target.value })}
+                          onChange={(e) => handleSiteChange(e.target.value)}
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium hover:border-blue-300 transition-all"
                         >
                           <option value="ALL">✓ Todos os Sites</option>
@@ -1947,20 +2005,6 @@ export default function CertificateReportGrid() {
                         </select>
                       </div>
 
-                      {/* Filtro de Zona */}
-                      <div className="space-y-2">
-                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
-                          Zona
-                        </label>
-                        <SearchableSelect
-                          label="Zona"
-                          value={filters.zone}
-                          onChange={(value) => setFilters({ ...filters, zone: value })}
-                          options={availableFilters.zones}
-                          loading={loadingFilters}
-                        />
-                      </div>
-
                       {/* Filtro de Área */}
                       <div className="space-y-2">
                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
@@ -1969,11 +2013,39 @@ export default function CertificateReportGrid() {
                         <SearchableSelect
                           label="Área"
                           value={filters.area}
-                          onChange={(value) => setFilters({ ...filters, area: value })}
+                          onChange={handleAreaChange}
                           options={availableFilters.areas}
                           loading={loadingFilters}
                         />
+                        {filters.site === 'ALL' && (
+                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <InformationCircleIcon className="w-4 h-4" />
+                            Selecione um site para filtrar áreas
+                          </p>
+                        )}
                       </div>
+
+                      {/* Filtro de Zona */}
+                      <div className="space-y-2">
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
+                          Zona
+                        </label>
+                        <SearchableSelect
+                          label="Zona"
+                          value={filters.zone}
+                          onChange={handleZoneChange}
+                          options={availableFilters.zones}
+                          loading={loadingFilters}
+                        />
+                        {filters.site === 'ALL' && (
+                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <InformationCircleIcon className="w-4 h-4" />
+                            Selecione um site para filtrar zonas
+                          </p>
+                        )}
+                      </div>
+
+
 
                       {/* Filtro de Tipo de Certificado */}
                       <div className="space-y-2">
