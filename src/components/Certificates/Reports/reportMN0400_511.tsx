@@ -69,20 +69,48 @@ interface CertificateFilters {
   descriptions: string[];
   zones: Array<{ code: string; label: string }>;
   areas: Array<{ code: string; label: string }>;
+  categories: Array<{ code: string; label: string }>;
+  brands: Array<{ code: string; label: string }>;
 }
+
+
+// ✅ TRADUÇÕES DE STATUS
+const STATUS_TRANSLATIONS: Record<string, string> = {
+  'APPROVED': 'Aprovado',
+  'REJECTED': 'Rejeitado',
+  'PENDING': 'Pendente',
+  'EXPIRED': 'Expirado',
+  'IN PROGRESS': 'Em Andamento',
+  'CANCELLED': 'Cancelado',
+  'DRAFT': 'Rascunho',
+  'COMPLETED': 'Concluído',
+  'ACTIVE': 'Ativo',
+  'INACTIVE': 'Inativo',
+  'NOT APPROVED': 'Não Aprovado',
+  'OPEN': 'Aberto',
+};
+
+// ✅ FUNÇÃO PARA TRADUZIR STATUS (mantém a original mas adiciona fallback)
+const translateStatus = (status: string): string => {
+  if (!status) return '';
+  const translated = STATUS_TRANSLATIONS[status];
+  return translated || status;
+};
 
 const SearchableSelect = ({
   label,
   value,
   onChange,
   options,
-  loading
+  loading,
+  translate = false
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: Array<{ code: string; label: string }> | string[];
   loading: boolean;
+  translate: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -91,9 +119,17 @@ const SearchableSelect = ({
   // ✅ ADICIONAR PROTEÇÃO
   const safeOptions = options || [];
 
-  const normalizedOptions = safeOptions.map(opt =>
-    typeof opt === 'string' ? { code: opt, label: opt } : opt
-  );
+  const normalizedOptions = safeOptions.map(opt => {
+    if (typeof opt === 'string') {
+      const translatedLabel = translate ? translateStatus(opt) : opt;
+      return { code: opt, label: translatedLabel };
+    } else {
+      const translatedLabel = translate ? translateStatus(opt.label) : opt.label;
+      return { code: opt.code, label: translatedLabel };
+    }
+  });
+
+
 
   const filteredOptions = normalizedOptions.filter(option =>
     option.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -113,7 +149,7 @@ const SearchableSelect = ({
   const getDisplayValue = () => {
     if (value === 'ALL') return `${label} - Todos`;
     const selected = normalizedOptions.find(opt => opt.code === value);
-    return selected ? selected.label : value;
+    return selected ? selected.label : (translate ? translateStatus(value) : value);
   };
 
   return (
@@ -455,7 +491,9 @@ export default function CertificateReportGrid() {
     sites: [],
     descriptions: [],
     zones: [],
-    areas: []
+    areas: [],
+    categories: [],
+    brands: []
   });
   const [loadingFilters, setLoadingFilters] = useState(true);
 
@@ -463,7 +501,8 @@ export default function CertificateReportGrid() {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
-  // 2. SUBSTITUIR A FUNÇÃO fetchFilters
+
+
   const fetchFilters = async () => {
     setLoadingFilters(true);
     try {
@@ -488,24 +527,67 @@ export default function CertificateReportGrid() {
       const result = await response.json();
       console.log('✅ Resposta da API:', result);
 
+      // ✅ TRADUZIR OS STATUS AO CARREGAR
+      // const translatedStatuses = (result.data?.statuses || []).map((status: string) => ({
+      //   code: status,
+      //   label: translateStatus(status)
+      // }));
+
       // ✅ GARANTIR que sempre tenha arrays vazios
       setAvailableFilters({
         statuses: result.data?.statuses || [],
         sites: result.data?.sites || [],
         descriptions: result.data?.descriptions || [],
         zones: result.data?.zones || [],
-        areas: result.data?.areas || []
+        areas: result.data?.areas || [],
+        categories: [],
+        brands: []
       });
     } catch (error) {
-      console.error('❌ Error fetching filters:', error);
-      // Em caso de erro, manter arrays vazios
+      console.error('Error fetching filters:', error);
       setAvailableFilters({
         statuses: [],
         sites: [],
         descriptions: [],
         zones: [],
-        areas: []
+        areas: [],
+        categories: [],
+        brands: []
       });
+    } finally {
+      setLoadingFilters(false);
+    }
+  };
+
+
+  const fetchTypeFilters = async () => {
+    setLoadingFilters(true);
+    try {
+      // Nova rota para status, tipos, categorias e marcas
+      const url = `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/filters/types`;
+
+      console.log('🔍 Buscando filtros de tipos:', url);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch type filters');
+      }
+
+      const result = await response.json();
+      console.log('✅ Filtros de tipos recebidos:', result);
+
+      // ✅ ATUALIZAR APENAS OS CAMPOS DA NOVA ROTA
+      setAvailableFilters(prev => ({
+        ...prev, // Mantém todos os filtros existentes (sites, áreas, zonas)
+        statuses: result.data?.statuses || [],
+        descriptions: result.data?.descriptions || [],
+        categories: result.data?.categories || [],
+        brands: result.data?.brands || []
+      }));
+    } catch (error) {
+      console.error('❌ Error fetching type filters:', error);
+      // Em caso de erro, não limpa os filtros existentes
     } finally {
       setLoadingFilters(false);
     }
@@ -657,6 +739,7 @@ export default function CertificateReportGrid() {
     fetchData(1);
     fetchAllDataForAnalysis();
     fetchFilters();
+    fetchTypeFilters();
   }, [itemsPerPage, sortBy, sortOrder, filters.status, filters.site, filters.certificateType, filters.zone, filters.area]);
 
   // 4. CRIAR HANDLERS PARA OS FILTROS HIERÁRQUICOS
@@ -718,6 +801,8 @@ export default function CertificateReportGrid() {
         item.serial.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.model.toLowerCase().includes(searchTerm.toLowerCase());
+
+
 
       const matchStatus = filters.status === 'ALL' || item.certificate_status_name === filters.status;
       const matchSite = filters.site === 'ALL' || item.Home_site_name === filters.site;
@@ -1950,7 +2035,7 @@ export default function CertificateReportGrid() {
                             certificateType: 'ALL',
                             expirationRange: 'ALL',
                             zone: 'ALL',
-                            area: 'ALL'
+                            area: 'ALL',
                           });
                           handleDateFilterClear();
                         }}
@@ -1963,25 +2048,22 @@ export default function CertificateReportGrid() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {/* Filtro de Status */}
+                      {/* Filtro de Status - AGORA COM TRADUÇÃO */}
                       <div className="space-y-2">
                         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">
                           Status do Certificado
                         </label>
-                        <select
+                        <SearchableSelect
+                          label="Status"
                           value={filters.status}
-                          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium hover:border-blue-300 transition-all"
-                        >
-                          <option value="ALL">✓ Todos os Status</option>
-                          {loadingFilters ? (
-                            <option disabled>Carregando...</option>
-                          ) : (
-                            availableFilters.statuses.map(status => (
-                              <option key={status} value={status}>{status}</option>
-                            ))
-                          )}
-                        </select>
+                          onChange={(value) => setFilters({ ...filters, status: value })}
+                          options={availableFilters.statuses}
+                          loading={loadingFilters}
+                          translate={true}
+                        />
                       </div>
+
+
 
                       {/* Filtro de Site */}
                       {/* Filtro de Site */}
@@ -2016,6 +2098,7 @@ export default function CertificateReportGrid() {
                           onChange={handleAreaChange}
                           options={availableFilters.areas}
                           loading={loadingFilters}
+                          translate
                         />
                         {filters.site === 'ALL' && (
                           <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
@@ -2036,6 +2119,7 @@ export default function CertificateReportGrid() {
                           onChange={handleZoneChange}
                           options={availableFilters.zones}
                           loading={loadingFilters}
+                          translate
                         />
                         {filters.site === 'ALL' && (
                           <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
@@ -2044,7 +2128,6 @@ export default function CertificateReportGrid() {
                           </p>
                         )}
                       </div>
-
 
 
                       {/* Filtro de Tipo de Certificado */}
@@ -2089,6 +2172,7 @@ export default function CertificateReportGrid() {
                       </div>
                     </div>
 
+
                     {/* Contador de Filtros Disponíveis */}
                     {!loadingFilters && (
                       <div className="mt-4 p-4 bg-white rounded-xl border-2 border-blue-200 shadow-sm">
@@ -2104,6 +2188,10 @@ export default function CertificateReportGrid() {
                           <span className="px-2 py-1 bg-blue-100 rounded-lg font-bold">{availableFilters.areas.length} áreas</span>
                           <span className="text-gray-400">•</span>
                           <span className="px-2 py-1 bg-blue-100 rounded-lg font-bold">{availableFilters.descriptions.length} tipos</span>
+                          <span className="text-gray-400">•</span>
+                          <span className="px-2 py-1 bg-blue-100 rounded-lg font-bold">{availableFilters.categories.length} categorias</span>
+                          <span className="text-gray-400">•</span>
+                          <span className="px-2 py-1 bg-blue-100 rounded-lg font-bold">{availableFilters.brands.length} marcas</span>
                         </div>
                       </div>
                     )}
@@ -2225,38 +2313,38 @@ export default function CertificateReportGrid() {
             </div>
 
             <style>{`
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes slide-in-from-top-2 {
-    from { transform: translateY(-0.5rem); }
-    to { transform: translateY(0); }
-  }
-  
-  @keyframes zoom-in-95 {
-    from { transform: scale(0.95); }
-    to { transform: scale(1); }
-  }
-  
-  .animate-in {
-    animation-duration: 200ms;
-    animation-fill-mode: both;
-  }
-  
-  .fade-in {
-    animation-name: fade-in;
-  }
-  
-  .slide-in-from-top-2 {
-    animation-name: slide-in-from-top-2;
-  }
-  
-  .zoom-in-95 {
-    animation-name: zoom-in-95;
-  }
-`}</style>
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slide-in-from-top-2 {
+      from { transform: translateY(-0.5rem); }
+      to { transform: translateY(0); }
+    }
+    
+    @keyframes zoom-in-95 {
+      from { transform: scale(0.95); }
+      to { transform: scale(1); }
+    }
+    
+    .animate-in {
+      animation-duration: 200ms;
+      animation-fill-mode: both;
+    }
+    
+    .fade-in {
+      animation-name: fade-in;
+    }
+    
+    .slide-in-from-top-2 {
+      animation-name: slide-in-from-top-2;
+    }
+    
+    .zoom-in-95 {
+      animation-name: zoom-in-95;
+    }
+  `}</style>
 
 
 
@@ -2438,7 +2526,7 @@ export default function CertificateReportGrid() {
                               <td className="px-3 py-2">
                                 <div className="flex items-center gap-1.5">
                                   {getStatusIcon(item.certificate_status_name)}
-                                  <span className="text-xs font-medium leading-none">{item.certificate_status_name}</span>
+                                  <span className="text-xs font-medium leading-none">{translateStatus(item.certificate_status_name)}</span>
                                 </div>
                               </td>
                               <td className="px-3 py-2 text-center">
@@ -2576,6 +2664,4 @@ export default function CertificateReportGrid() {
     </div>
   );
 }
-
-
 
