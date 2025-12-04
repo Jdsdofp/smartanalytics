@@ -1311,5 +1311,50 @@
 
     "loading": "Carregando dados dos certificados...",
     "error": "Erro ao carregar dados"
+  },
+  "devicePayloadStats": {
+    "title": "Estatísticas de Payload (Última Hora)",
+    "devicesWithActivity": "{{count}} dispositivos com atividade",
+    "filters": {
+      "title": "Filtros",
+      "payloadFilters": "Filtros de Payload",
+      "clearAll": "Limpar Tudo",
+      "apply": "Aplicar",
+      "activeFilters": "{{count}} filtro(s) ativo(s)",
+      "noActiveFilters": "Nenhum filtro ativo",
+      "deviceEui": "Device EUI",
+      "deviceEuiPlaceholder": "Ex: 20635F0241000FA3",
+      "objectName": "Nome do Objeto",
+      "objectNamePlaceholder": "Buscar por nome...",
+      "payloadType": "Tipo de Payload",
+      "all": "Todos",
+      "batteryLevel": "Nível de Bateria (%)",
+      "min": "Min",
+      "max": "Max",
+      "payloadQuantity": "Quantidade de Payloads (última hora)"
+    },
+    "update": "Atualizar",
+    "cards": {
+      "totalDevices": "Total de Dispositivos",
+      "totalPayloads": "Total de Payloads",
+      "avgPerHour": "Média por Hora",
+      "avgBattery": "Bateria Média"
+    },
+    "table": {
+      "deviceEui": "Device EUI",
+      "objectName": "Nome do Objeto",
+      "payloads": "Payloads",
+      "avgHour": "Média/h",
+      "lastPayload": "Último Payload",
+      "type": "Tipo",
+      "battery": "Bateria",
+      "noData": "Nenhum dispositivo com atividade na última hora"
+    },
+    "pagination": {
+      "showing": "Mostrando",
+      "to": "até",
+      "of": "de",
+      "results": "resultados"
+    }
   }
 }

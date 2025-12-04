@@ -40,6 +40,7 @@ import AssetManagementGrid from './DataGrid/AssetManagementGrid';
 import HealthScoreDashboard from './DataGrid/HealthScoreDashboard';
 import { exportToExcel, exportToPDF } from '../../utils/exportMN0400211';
 import ExportModal from './Modal/exportModal';
+import DevicePayloadStatsGrid from './DataGrid/DevicePayloadStatsGrid';
 
 // =====================================
 // 📊 INTERFACES ATUALIZADAS
@@ -3715,6 +3716,7 @@ export default function DeviceLogsView() {
             </div>
           )}
 
+          <DevicePayloadStatsGrid />
 
         </div>
 

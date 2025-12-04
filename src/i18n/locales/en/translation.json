@@ -1277,5 +1277,50 @@
 
     "loading": "Loading certificate data...",
     "error": "Error loading data"
+  },
+  "devicePayloadStats": {
+    "title": "Payload Statistics (Last Hour)",
+    "devicesWithActivity": "{{count}} devices with activity",
+    "filters": {
+      "title": "Filters",
+      "payloadFilters": "Payload Filters",
+      "clearAll": "Clear All",
+      "apply": "Apply",
+      "activeFilters": "{{count}} active filter(s)",
+      "noActiveFilters": "No active filters",
+      "deviceEui": "Device EUI",
+      "deviceEuiPlaceholder": "Ex: 20635F0241000FA3",
+      "objectName": "Object Name",
+      "objectNamePlaceholder": "Search by name...",
+      "payloadType": "Payload Type",
+      "all": "All",
+      "batteryLevel": "Battery Level (%)",
+      "min": "Min",
+      "max": "Max",
+      "payloadQuantity": "Payload Quantity (last hour)"
+    },
+    "update": "Update",
+    "cards": {
+      "totalDevices": "Total Devices",
+      "totalPayloads": "Total Payloads",
+      "avgPerHour": "Average per Hour",
+      "avgBattery": "Average Battery"
+    },
+    "table": {
+      "deviceEui": "Device EUI",
+      "objectName": "Object Name",
+      "payloads": "Payloads",
+      "avgHour": "Avg/h",
+      "lastPayload": "Last Payload",
+      "type": "Type",
+      "battery": "Battery",
+      "noData": "No devices with activity in the last hour"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "results": "results"
+    }
   }
 }
