@@ -285,7 +285,7 @@ export default function DevicePayloadStatsGrid() {
             if (filters.max_payloads > 0) params.append('max_payloads', filters.max_payloads.toString());
 
             const response = await fetch(
-                `http://localhost:4000/api/dashboard/devices/${companyId}/device-payloads?${params}`
+                `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/device-payloads?${params}`
             );
             const result = await response.json();
 
