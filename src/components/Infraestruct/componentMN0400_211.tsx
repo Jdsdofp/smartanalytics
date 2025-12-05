@@ -3233,6 +3233,8 @@ export default function DeviceLogsView() {
 
           {/* ✅ ALERTAS DE BATERIA BAIXA ATUALIZADOS */}
 
+          <DevicePayloadStatsGrid />
+
           <div className="bg-white rounded-lg shadow-sm border border-yellow-200 p-4">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
               <h3 className="text-lg font-semibold text-yellow-900 flex items-center gap-2">
