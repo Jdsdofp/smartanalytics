@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as echarts from 'echarts';
-import { 
-  ChevronDownIcon, 
-  ChevronUpIcon, 
-  ExclamationTriangleIcon, 
-  CalendarIcon, 
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ExclamationTriangleIcon,
+  CalendarIcon,
   ChartBarIcon,
   ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
@@ -230,7 +230,7 @@ const CertificateDashboard: React.FC<CertificateDashboardProps> = ({ data }) => 
       item.combined_risk_score,
       item.item_name
     ]);
-    
+
     chart4.setOption({
       title: {
         text: 'Risco vs Dias até Expiração',
@@ -316,7 +316,7 @@ const CertificateDashboard: React.FC<CertificateDashboardProps> = ({ data }) => 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 mb-6">
       {/* Cabeçalho */}
-      <div 
+      <div
         className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
@@ -329,8 +329,8 @@ const CertificateDashboard: React.FC<CertificateDashboardProps> = ({ data }) => 
             <CalendarIcon className="w-4 h-4" />
             <span>Atualizado: {new Date().toLocaleDateString('pt-BR')}</span>
           </div>
-          {expanded ? 
-            <ChevronUpIcon className="w-5 h-5 text-gray-600" /> : 
+          {expanded ?
+            <ChevronUpIcon className="w-5 h-5 text-gray-600" /> :
             <ChevronDownIcon className="w-5 h-5 text-gray-600" />
           }
         </div>
