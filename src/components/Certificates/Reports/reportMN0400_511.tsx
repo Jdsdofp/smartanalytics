@@ -2470,12 +2470,12 @@ export default function CertificateReportGrid() {
                               </td>
                               <td className="px-3 py-2">
                                 <div className="text-xs font-semibold text-gray-800 leading-none">
-                                  {item.code_area}
+                                  {item.code_zone}
                                 </div>
                               </td>
                               <td className="px-3 py-2">
                                 <div className="text-xs text-gray-600 leading-none">
-                                  {item.code_zone}
+                                  {item.code_area}
                                 </div>
                               </td>
                               <td className="px-3 py-2">

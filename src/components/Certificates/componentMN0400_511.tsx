@@ -987,8 +987,8 @@ export default function PredictiveCertificateAnalysis() {
 
   const tabs = [
     { key: 'overview', translation: t('predictiveCertificateAnalysis.tabs.overview') },
-    { key: 'predictability', translation: 'Predictability' },
-    { key: 'observability', translation: 'Observability' },
+    { key: 'predictability', translation: t('predictiveCertificateAnalysis.tabs.predictability') },
+    { key: 'observability', translation: t('predictiveCertificateAnalysis.tabs.observability') },
     { key: 'calendar', translation: t('predictiveCertificateAnalysis.tabs.calendar') },
     { key: 'report', translation: t('predictiveCertificateAnalysis.tabs.report') }
   ];
@@ -1081,9 +1081,9 @@ export default function PredictiveCertificateAnalysis() {
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500 hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-600 text-sm font-medium">URGENT</p>
+              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.urgentRiskItems').toUpperCase()}</p>
               <p className="text-3xl font-bold text-purple-600 mt-2">{data.analytics.urgentActions.toLocaleString()}</p>
-              <p className="text-xs text-slate-500 mt-1">Actions required</p>
+              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.kpi.actionsRequired')}</p>
             </div>
             <div className="bg-purple-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1099,7 +1099,7 @@ export default function PredictiveCertificateAnalysis() {
             <div>
               <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.financialRisk').toUpperCase()}</p>
               <p className="text-2xl font-bold text-slate-800 mt-2">R$ {(data.analytics.totalFinancialRisk / 1000).toFixed(1)}k</p>
-              <p className="text-xs text-slate-500 mt-1">Total at risk</p>
+              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.kpi.TotalAtRisk')}</p>
             </div>
             <div className="bg-green-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1113,9 +1113,9 @@ export default function PredictiveCertificateAnalysis() {
         <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-indigo-500 hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-600 text-sm font-medium">COMPLIANCE</p>
+              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.compliance').toUpperCase()}</p>
               <p className="text-3xl font-bold text-indigo-600 mt-2">{data.analytics.averageComplianceScore.toFixed(0)}%</p>
-              <p className="text-xs text-slate-500 mt-1">Average score</p>
+              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.kpi.averageScore')}</p>
             </div>
             <div className="bg-indigo-100 p-3 rounded-full">
               <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1133,19 +1133,19 @@ export default function PredictiveCertificateAnalysis() {
             <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <h3 className="font-semibold text-slate-800">Data Quality</h3>
+            <h3 className="font-semibold text-slate-800">{t('predictiveCertificateAnalysis.kpi.dataQuality')}</h3>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">Completeness:</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.completeness')}:</span>
               <span className="font-bold text-blue-600">{data.observabilityKPIs.dataQuality.completenessScore.toFixed(1)}%</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">Complete:</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.complete')}:</span>
               <span className="font-medium text-green-600">{data.observabilityKPIs.dataQuality.recordsWithCompleteData}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">Incomplete:</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.incomplete')}:</span>
               <span className="font-medium text-orange-600">{data.observabilityKPIs.dataQuality.recordsWithIncompleteData}</span>
             </div>
           </div>
@@ -1156,20 +1156,20 @@ export default function PredictiveCertificateAnalysis() {
             <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h3 className="font-semibold text-slate-800">Process Health</h3>
+            <h3 className="font-semibold text-slate-800">{t('predictiveCertificateAnalysis.kpi.processHealth')}</h3>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">On Time:</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.onTime')}:</span>
               <span className="font-medium text-green-600">{data.observabilityKPIs.processHealth.onTimeRenewals}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">Delayed:</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.delayed')}:</span>
               <span className="font-medium text-red-600">{data.observabilityKPIs.processHealth.delayedRenewals}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">Avg Time:</span>
-              <span className="font-medium text-slate-800">{data.observabilityKPIs.processHealth.avgProcessingTime.toFixed(0)} days</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.avgTime')}:</span>
+              <span className="font-medium text-slate-800">{t('predictiveCertificateAnalysis.kpi.days', {days: data.observabilityKPIs.processHealth.avgProcessingTime.toFixed(0)})}</span>
             </div>
           </div>
         </div>
@@ -1179,19 +1179,19 @@ export default function PredictiveCertificateAnalysis() {
             <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
-            <h3 className="font-semibold text-slate-800">Predictability</h3>
+            <h3 className="font-semibold text-slate-800">{t('predictiveCertificateAnalysis.kpi.predictability')}</h3>
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">High:</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.high')}:</span>
               <span className="font-medium text-green-600">{data.observabilityKPIs.predictability.highPredictability}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">Medium:</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.medium')}:</span>
               <span className="font-medium text-yellow-600">{data.observabilityKPIs.predictability.mediumPredictability}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">Avg Score:</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.avgScore')}:</span>
               <span className="font-bold text-purple-600">{data.observabilityKPIs.predictability.avgPredictabilityScore.toFixed(1)}%</span>
             </div>
           </div>
@@ -1206,9 +1206,9 @@ export default function PredictiveCertificateAnalysis() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div>
-              <h3 className="text-lg font-bold text-red-800">⚠️ Anomalies Detected</h3>
+              <h3 className="text-lg font-bold text-red-800">{t('predictiveCertificateAnalysis.kpi.anomaliesDetected')}</h3>
               <p className="text-sm text-red-700 mt-1">
-                {data.analytics.anomaliesDetected} unusual patterns identified (Avg Score: {data.analytics.averageAnomalyScore.toFixed(1)})
+                {t('predictiveCertificateAnalysis.kpi.unusualPatternsIdentified',  {total: data.analytics.anomaliesDetected, score: data.analytics.averageAnomalyScore})}
               </p>
             </div>
           </div>
@@ -1298,18 +1298,18 @@ export default function PredictiveCertificateAnalysis() {
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h4 className="text-md font-semibold text-slate-800 mb-4">Automation Readiness</h4>
+              <h4 className="text-md font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.kpi.automationReadiness')}</h4>
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-green-50 rounded">
-                  <span className="text-sm text-slate-700">High Readiness</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.kpi.highReadiness')}</span>
                   <span className="text-sm font-bold text-green-600">{data.automationReadiness.high}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-yellow-50 rounded">
-                  <span className="text-sm text-slate-700">Medium Readiness</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.kpi.mediumReadiness')}</span>
                   <span className="text-sm font-bold text-yellow-600">{data.automationReadiness.medium}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-red-50 rounded">
-                  <span className="text-sm text-slate-700">Low Readiness</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.kpi.lowReadiness')}</span>
                   <span className="text-sm font-bold text-red-600">{data.automationReadiness.low}</span>
                 </div>
               </div>
