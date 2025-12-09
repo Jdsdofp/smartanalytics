@@ -12,8 +12,13 @@ import {
     ArrowUpIcon,
     ArrowDownIcon,
     ArrowsUpDownIcon,
+    ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { useCompany } from '../../../hooks/useCompany';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+//@ts-ignore
+import autoTable from 'jspdf-autotable';
 
 // =====================================
 // 📊 INTERFACES
@@ -44,6 +49,165 @@ interface Pagination {
     total_records: number;
     total_pages: number;
 }
+
+// =====================================
+// 📥 COMPONENTE DE MENU DE EXPORTAÇÃO
+// =====================================
+
+const ExportMenu = ({ 
+    data,
+    //@ts-ignore
+    hasFilters,
+    loading,
+    onExport 
+}: { 
+    data: DevicePayloadStats[];
+    hasFilters: boolean;
+    loading: boolean;
+    onExport: (format: 'excel' | 'csv' | 'txt' | 'pdf', exportAll: boolean) => void;
+}) => {
+    const { t } = useTranslation();
+    const [isOpen, setIsOpen] = useState(false);
+    const [showScopeMenu, setShowScopeMenu] = useState(false);
+    const [selectedFormat, setSelectedFormat] = useState<'excel' | 'csv' | 'txt' | 'pdf' | null>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+                setShowScopeMenu(false);
+                setSelectedFormat(null);
+            }
+        };
+
+        if (isOpen || showScopeMenu) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen, showScopeMenu]);
+
+    const handleFormatSelect = (format: 'excel' | 'csv' | 'txt' | 'pdf') => {
+        // SEMPRE mostrar o menu de escopo para o usuário escolher
+        setSelectedFormat(format);
+        setShowScopeMenu(true);
+        setIsOpen(false);
+    };
+
+    const handleScopeSelect = (exportAll: boolean) => {
+        if (selectedFormat) {
+            onExport(selectedFormat, exportAll);
+            setShowScopeMenu(false);
+            setSelectedFormat(null);
+        }
+    };
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                disabled={data.length === 0 || loading}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+                {loading ? (
+                    <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span className="font-medium">{t('devicePayloadStats.export.exporting')}</span>
+                    </>
+                ) : (
+                    <>
+                        <ArrowDownTrayIcon className="h-4 w-4" />
+                        <span className="font-medium">{t('devicePayloadStats.export.button')}</span>
+                    </>
+                )}
+            </button>
+
+            {/* Menu de Formatos */}
+            {isOpen && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden">
+                    <div className="py-1">
+                        <button
+                            onClick={() => handleFormatSelect('excel')}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors flex items-center gap-2"
+                        >
+                            <span>📊</span>
+                            <span>{t('devicePayloadStats.export.excel')}</span>
+                        </button>
+                        <button
+                            onClick={() => handleFormatSelect('csv')}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors flex items-center gap-2"
+                        >
+                            <span>📄</span>
+                            <span>{t('devicePayloadStats.export.csv')}</span>
+                        </button>
+                        <button
+                            onClick={() => handleFormatSelect('txt')}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors flex items-center gap-2"
+                        >
+                            <span>📝</span>
+                            <span>{t('devicePayloadStats.export.txt')}</span>
+                        </button>
+                        <button
+                            onClick={() => handleFormatSelect('pdf')}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors flex items-center gap-2"
+                        >
+                            <span>📕</span>
+                            <span>{t('devicePayloadStats.export.pdf')}</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Menu de Escopo (Filtrado ou Tudo) */}
+            {showScopeMenu && (
+                <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden">
+                    <div className="p-3 bg-gray-50 border-b border-gray-200">
+                        <p className="text-xs font-medium text-gray-700">
+                            {t('devicePayloadStats.export.selectScope')}
+                        </p>
+                    </div>
+                    <div className="py-1">
+                        <button
+                            onClick={() => handleScopeSelect(false)}
+                            className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors border-b border-gray-100"
+                        >
+                            <div className="flex items-center gap-3">
+                                <FunnelIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">
+                                        {t('devicePayloadStats.export.exportFiltered')}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                        {t('devicePayloadStats.export.exportFilteredDesc', { count: data.length })}
+                                    </p>
+                                </div>
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => handleScopeSelect(true)}
+                            className="w-full px-4 py-3 text-left hover:bg-green-50 transition-colors"
+                        >
+                            <div className="flex items-center gap-3">
+                                <SignalIcon className="h-5 w-5 text-green-600 flex-shrink-0" />
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">
+                                        {t('devicePayloadStats.export.exportAll')}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                        {t('devicePayloadStats.export.exportAllDesc')}
+                                    </p>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
 
 // =====================================
 // 🎨 COMPONENTE DE FILTROS
@@ -259,6 +423,7 @@ export default function DevicePayloadStatsGrid() {
 
     const [data, setData] = useState<DevicePayloadStats[]>([]);
     const [loading, setLoading] = useState(false);
+    const [exportLoading, setExportLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(25);
     const [pagination, setPagination] = useState<Pagination>({
@@ -281,12 +446,12 @@ export default function DevicePayloadStatsGrid() {
         max_payloads: 0,
     });
 
-    const fetchData = async () => {
+    const fetchData = async (customLimit?: number) => {
         setLoading(true);
         try {
             const params = new URLSearchParams({
                 page: page.toString(),
-                limit: limit.toString(),
+                limit: (customLimit || limit).toString(),
                 sortBy,
                 sortOrder,
             });
@@ -307,10 +472,36 @@ export default function DevicePayloadStatsGrid() {
 
             setData(result.data || []);
             setPagination(result.pagination);
+            return result.data || [];
         } catch (error) {
             console.error('Error fetching device payload stats:', error);
+            return [];
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Buscar todos os dados sem paginação
+    const fetchAllData = async () => {
+        setExportLoading(true);
+        try {
+            const params = new URLSearchParams({
+                page: '1',
+                limit: '999999', // Buscar todos
+                sortBy,
+                sortOrder,
+            });
+
+            const response = await fetch(
+                `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/device-payloads?${params}`
+            );
+            const result = await response.json();
+            return result.data || [];
+        } catch (error) {
+            console.error('Error fetching all device payload stats:', error);
+            return [];
+        } finally {
+            setExportLoading(false);
         }
     };
 
@@ -339,6 +530,210 @@ export default function DevicePayloadStatsGrid() {
         if (filters.min_payloads > 0 || filters.max_payloads > 0) count++;
         return count;
     };
+
+    // =====================================
+    // 📥 FUNÇÕES DE EXPORTAÇÃO
+    // =====================================
+    
+    const handleExport = async (format: 'excel' | 'csv' | 'txt' | 'pdf', exportAll: boolean) => {
+        const timestamp = new Date().toISOString().split('T')[0];
+        const scope = exportAll ? 'all' : 'filtered';
+        const filename = `device_payload_stats_${scope}_${timestamp}`;
+
+        // Buscar dados apropriados
+        const exportData = exportAll ? await fetchAllData() : data;
+
+        if (exportData.length === 0) {
+            alert(t('devicePayloadStats.export.noData'));
+            return;
+        }
+
+        switch (format) {
+            case 'excel':
+                exportToExcel(filename, exportData);
+                break;
+            case 'csv':
+                exportToCSV(filename, exportData);
+                break;
+            case 'txt':
+                exportToTXT(filename, exportData);
+                break;
+            case 'pdf':
+                exportToPDF(filename, exportData);
+                break;
+        }
+    };
+
+    const exportToExcel = (filename: string, exportData: DevicePayloadStats[]) => {
+        const worksheet = XLSX.utils.json_to_sheet(
+            exportData.map(device => ({
+                'Device EUI': device.dev_eui,
+                'Nome do Objeto': device.object_name,
+                'Total de Payloads': device.total_payloads,
+                'Média por Hora': device.avg_per_hour,
+                'Último Payload': new Date(device.Thinkpark_last_payload_time).toLocaleString('pt-BR'),
+                'Tipo': device.last_payload_type,
+                'Bateria (%)': device.last_reported_battery_level,
+            }))
+        );
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Device Payloads');
+
+        // Ajustar largura das colunas
+        const maxWidth = exportData.reduce((w, r) => Math.max(w, r.dev_eui.length), 10);
+        worksheet['!cols'] = [
+            { wch: maxWidth },
+            { wch: 20 },
+            { wch: 15 },
+            { wch: 15 },
+            { wch: 20 },
+            { wch: 10 },
+            { wch: 12 }
+        ];
+
+        XLSX.writeFile(workbook, `${filename}.xlsx`);
+    };
+
+    const exportToCSV = (filename: string, exportData: DevicePayloadStats[]) => {
+        const headers = [
+            'Device EUI',
+            'Nome do Objeto',
+            'Total de Payloads',
+            'Média por Hora',
+            'Último Payload',
+            'Tipo',
+            'Bateria (%)'
+        ];
+
+        const csvContent = [
+            headers.join(','),
+            ...exportData.map(device =>
+                [
+                    device.dev_eui,
+                    `"${device.object_name}"`,
+                    device.total_payloads,
+                    device.avg_per_hour,
+                    `"${new Date(device.Thinkpark_last_payload_time).toLocaleString('pt-BR')}"`,
+                    device.last_payload_type,
+                    device.last_reported_battery_level
+                ].join(',')
+            )
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${filename}.csv`;
+        link.click();
+    };
+
+    const exportToTXT = (filename: string, exportData: DevicePayloadStats[]) => {
+        const colWidths = {
+            devEui: 20,
+            objectName: 25,
+            payloads: 12,
+            avgHour: 12,
+            lastPayload: 20,
+            type: 12,
+            battery: 10
+        };
+
+        const padRight = (str: string, width: number) => str.padEnd(width, ' ');
+        const padLeft = (str: string, width: number) => str.padStart(width, ' ');
+
+        const header = [
+            padRight('Device EUI', colWidths.devEui),
+            padRight('Nome do Objeto', colWidths.objectName),
+            padLeft('Payloads', colWidths.payloads),
+            padLeft('Média/Hora', colWidths.avgHour),
+            padRight('Último Payload', colWidths.lastPayload),
+            padRight('Tipo', colWidths.type),
+            padLeft('Bateria', colWidths.battery)
+        ].join(' | ');
+
+        const separator = '='.repeat(header.length);
+
+        const rows = exportData.map(device => {
+            const lastPayload = new Date(device.Thinkpark_last_payload_time).toLocaleString('pt-BR');
+            return [
+                padRight(device.dev_eui.substring(0, colWidths.devEui), colWidths.devEui),
+                padRight(device.object_name.substring(0, colWidths.objectName), colWidths.objectName),
+                padLeft(device.total_payloads.toString(), colWidths.payloads),
+                padLeft(device.avg_per_hour.toString(), colWidths.avgHour),
+                padRight(lastPayload.substring(0, colWidths.lastPayload), colWidths.lastPayload),
+                padRight(device.last_payload_type.substring(0, colWidths.type), colWidths.type),
+                padLeft(`${device.last_reported_battery_level}%`, colWidths.battery)
+            ].join(' | ');
+        });
+
+        const txtContent = [
+            'ESTATÍSTICAS DE PAYLOADS DOS DISPOSITIVOS',
+            `Gerado em: ${new Date().toLocaleString('pt-BR')}`,
+            `Total de dispositivos: ${exportData.length}`,
+            '',
+            separator,
+            header,
+            separator,
+            ...rows,
+            separator
+        ].join('\n');
+
+        const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${filename}.txt`;
+        link.click();
+    };
+
+    const exportToPDF = (filename: string, exportData: DevicePayloadStats[]) => {
+        const doc = new jsPDF();
+        
+        // Título
+        doc.setFontSize(16);
+        doc.text('Estatísticas de Payloads dos Dispositivos', 14, 15);
+        
+        // Info
+        doc.setFontSize(10);
+        doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 22);
+        doc.text(`Total de dispositivos: ${exportData.length}`, 14, 27);
+
+        // Tabela
+        autoTable(doc, {
+            startY: 32,
+            head: [['Device EUI', 'Objeto', 'Payloads', 'Média/h', 'Último Payload', 'Tipo', 'Bat.']],
+            body: exportData.map(device => [
+                device.dev_eui,
+                device.object_name,
+                device.total_payloads,
+                device.avg_per_hour,
+                new Date(device.Thinkpark_last_payload_time).toLocaleDateString('pt-BR'),
+                device.last_payload_type,
+                `${device.last_reported_battery_level}%`
+            ]),
+            styles: { 
+                fontSize: 8,
+                cellPadding: 2,
+            },
+            headStyles: {
+                fillColor: [59, 130, 246],
+                textColor: 255,
+                fontStyle: 'bold'
+            },
+            columnStyles: {
+                0: { cellWidth: 35 },
+                1: { cellWidth: 35 },
+                2: { cellWidth: 20, halign: 'right' },
+                3: { cellWidth: 20, halign: 'right' },
+                4: { cellWidth: 30 },
+                5: { cellWidth: 25 },
+                6: { cellWidth: 15, halign: 'right' }
+            }
+        });
+
+        doc.save(`${filename}.pdf`);
+    };
+
     //@ts-ignore
     const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => {
         const isActive = sortBy === field;
@@ -379,6 +774,13 @@ export default function DevicePayloadStatsGrid() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <ExportMenu 
+                        data={data}
+                        hasFilters={getActiveFiltersCount() > 0}
+                        loading={exportLoading}
+                        onExport={handleExport}
+                    />
+
                     <PayloadFilters
                         filters={filters}
                         onFiltersChange={setFilters}
@@ -397,7 +799,7 @@ export default function DevicePayloadStatsGrid() {
                     />
 
                     <button
-                        onClick={fetchData}
+                        onClick={() => fetchData()}
                         disabled={loading}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
                     >
@@ -452,27 +854,6 @@ export default function DevicePayloadStatsGrid() {
                         <ClockIcon className="h-8 w-8 text-purple-600 opacity-50" />
                     </div>
                 </div>
-
-                {/* <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-3 border border-yellow-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-yellow-600 font-medium">
-                {t('devicePayloadStats.cards.avgBattery')}
-              </p>
-              <p className="text-xl font-bold text-yellow-900">
-                {data.length > 0
-                  ? Math.round(
-                      data
-                        .map((d) => Number(d.last_reported_battery_level) || 0)
-                        .reduce((sum, level) => sum + level, 0) / data.length
-                    )
-                  : '0'}
-                %
-              </p>
-            </div>
-            <BoltIcon className="h-8 w-8 text-yellow-600 opacity-50" />
-          </div>
-        </div> */}
 
                 <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-3 border border-yellow-200">
                     <div className="flex items-center justify-between">

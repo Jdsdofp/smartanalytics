@@ -1375,6 +1375,21 @@
       "to": "to",
       "of": "of",
       "results": "results"
+    },
+     "export": {
+      "button": "Export",
+      "exporting": "Exporting...",
+      "excel": "Excel (.xlsx)",
+      "csv": "CSV",
+      "txt": "Tabbed TXT",
+      "pdf": "PDF",
+      "selectScope": "Choose what to export:",
+      "exportFiltered": "Filtered Data",
+      "exportFilteredDesc": "{{count}} records with filters applied",
+      "exportAll": "All Data",
+      "exportAllDesc": "All available records",
+      "noData": "No data to export"
     }
+    
   }
 }

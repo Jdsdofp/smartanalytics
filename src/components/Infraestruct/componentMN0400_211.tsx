@@ -1643,44 +1643,44 @@ const ActivityCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
   );
 };
 
-const GPSCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
-  const { t } = useTranslation();
+// const GPSCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
+//   const { t } = useTranslation();
 
-  const colorClasses = {
-    green: 'bg-gradient-to-br from-green-50 to-green-100 border-green-300',
-    blue: 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300',
-    teal: 'bg-gradient-to-br from-teal-50 to-teal-100 border-teal-300',
-    red: 'bg-gradient-to-br from-red-50 to-red-100 border-red-300',
-  };
+//   const colorClasses = {
+//     green: 'bg-gradient-to-br from-green-50 to-green-100 border-green-300',
+//     blue: 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300',
+//     teal: 'bg-gradient-to-br from-teal-50 to-teal-100 border-teal-300',
+//     red: 'bg-gradient-to-br from-red-50 to-red-100 border-red-300',
+//   };
 
-  // Busca a tradução baseada no cardKey
-  const translatedTitle = t(`dashboardCard.gpsCards.${cardKey}`);
-  const translatedDescription = t(`dashboardCard.gpsCards.descriptions.${cardKey}`);
+//   // Busca a tradução baseada no cardKey
+//   const translatedTitle = t(`dashboardCard.gpsCards.${cardKey}`);
+//   const translatedDescription = t(`dashboardCard.gpsCards.descriptions.${cardKey}`);
 
 
-  return (
-    <div className={`rounded-lg border-2 p-5 transition-all hover:shadow-lg ${colorClasses[card.color as keyof typeof colorClasses]}`}>
-      <div className="flex items-start gap-3">
-        <div className="text-3xl mt-1">
-          {card.icon}
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-gray-700">
-            {/* {card.title} */}
-            {translatedTitle}
-          </p>
-          <p className="mt-1 text-3xl font-bold text-gray-900">
-            {card.value}
-          </p>
-          <p className="mt-1 text-xs text-gray-600">
-            {/* {card.description} */}
-            {translatedDescription}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div className={`rounded-lg border-2 p-5 transition-all hover:shadow-lg ${colorClasses[card.color as keyof typeof colorClasses]}`}>
+//       <div className="flex items-start gap-3">
+//         <div className="text-3xl mt-1">
+//           {card.icon}
+//         </div>
+//         <div className="flex-1">
+//           <p className="text-sm font-semibold text-gray-700">
+//             {/* {card.title} */}
+//             {translatedTitle}
+//           </p>
+//           <p className="mt-1 text-3xl font-bold text-gray-900">
+//             {card.value}
+//           </p>
+//           <p className="mt-1 text-xs text-gray-600">
+//             {/* {card.description} */}
+//             {translatedDescription}
+//           </p>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 // Função para converter string para número seguro
 const safeParseNumber = (value: string | number): number => {
@@ -3118,7 +3118,7 @@ export default function DeviceLogsView() {
           )}
 
           {/* ✨ CARDS DE GPS */}
-          {dashboardCards?.gps_cards && (
+          {/* {dashboardCards?.gps_cards && (
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <MapPinIcon className="h-6 w-6" />
@@ -3131,10 +3131,10 @@ export default function DeviceLogsView() {
                 <GPSCard card={dashboardCards.gps_cards.gps_outdated} cardKey="gpsOutdated" />
               </div>
             </div>
-          )}
+          )} */}
 
           {/* ✨ MÉTRICAS RÁPIDAS */}
-          {dashboardCards?.quick_metrics && (
+          {/* {dashboardCards?.quick_metrics && (
             <div className="bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-lg border-2 border-purple-200 p-6 shadow-lg">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <ChartBarIcon className="h-6 w-6" />
@@ -3181,7 +3181,7 @@ export default function DeviceLogsView() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
 
           {/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO COM COMPONENTES */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

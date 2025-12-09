@@ -521,7 +521,7 @@ export default function PredictiveCertificateAnalysis() {
       echarts.dispose(renewalForecastRef.current);
       const chart = echarts.init(renewalForecastRef.current);
       const monthNames = [
-        t('predictiveCertificateAnalysis.kpi.month1'), 
+        t('predictiveCertificateAnalysis.kpi.month1'),
         t('predictiveCertificateAnalysis.kpi.month2'),
         t('predictiveCertificateAnalysis.kpi.month3'),
         t('predictiveCertificateAnalysis.kpi.month4'),
@@ -1056,8 +1056,8 @@ export default function PredictiveCertificateAnalysis() {
               <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.expiredCertificates').toUpperCase()}</p>
               <p className="text-3xl font-bold text-red-600 mt-2">{data.analytics.expiredCertificates.toLocaleString()}</p>
               <p className="text-red-500 text-xs mt-1">
-                {t('predictiveCertificateAnalysis.kpi.ofTotal', { 
-                  percentage: ((data.analytics.expiredCertificates / data.analytics.totalCertificates) * 100).toFixed(1) 
+                {t('predictiveCertificateAnalysis.kpi.ofTotal', {
+                  percentage: ((data.analytics.expiredCertificates / data.analytics.totalCertificates) * 100).toFixed(1)
                 })}
               </p>
             </div>
@@ -1076,8 +1076,8 @@ export default function PredictiveCertificateAnalysis() {
               <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.highRiskItems').toUpperCase()}</p>
               <p className="text-3xl font-bold text-orange-600 mt-2">{data.analytics.highRisk.toLocaleString()}</p>
               <p className="text-orange-500 text-xs mt-1">
-                {t('predictiveCertificateAnalysis.kpi.ofTotal', { 
-                  percentage: ((data.analytics.highRisk / data.analytics.totalCertificates) * 100).toFixed(1) 
+                {t('predictiveCertificateAnalysis.kpi.ofTotal', {
+                  percentage: ((data.analytics.highRisk / data.analytics.totalCertificates) * 100).toFixed(1)
                 })}
               </p>
             </div>
@@ -1181,7 +1181,7 @@ export default function PredictiveCertificateAnalysis() {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.avgTime')}:</span>
-              <span className="font-medium text-slate-800">{t('predictiveCertificateAnalysis.kpi.days', {days: data.observabilityKPIs.processHealth.avgProcessingTime.toFixed(0)})}</span>
+              <span className="font-medium text-slate-800">{t('predictiveCertificateAnalysis.kpi.days', { days: data.observabilityKPIs.processHealth.avgProcessingTime.toFixed(0) })}</span>
             </div>
           </div>
         </div>
@@ -1220,7 +1220,7 @@ export default function PredictiveCertificateAnalysis() {
             <div>
               <h3 className="text-lg font-bold text-red-800">{t('predictiveCertificateAnalysis.kpi.anomaliesDetected')}</h3>
               <p className="text-sm text-red-700 mt-1">
-                {t('predictiveCertificateAnalysis.kpi.unusualPatternsIdentified',  {total: data.analytics.anomaliesDetected, score: data.analytics.averageAnomalyScore})}
+                {t('predictiveCertificateAnalysis.kpi.unusualPatternsIdentified', { total: data.analytics.anomaliesDetected, score: data.analytics.averageAnomalyScore })}
               </p>
             </div>
           </div>
