@@ -1185,6 +1185,8 @@
       "predictability": "Predictability",
       "high": "High",
       "medium": "Medium",
+      "critical": "Critical",
+      "standard": "Standard",
       "avgScore": "Avg. Risk Score",
       "anomaliesDetected": "⚠ Anomalies Detected",
       "unusualPatternsIdentified":  "{{total}} unusual patterns identified (Average score: {{score}})",
@@ -1192,7 +1194,30 @@
       "automationReadiness": "Automation Readiness",
       "highReadiness": "High Readiness",
       "mediumReadiness": "Medium Readiness",
-      "lowReadiness": "Low Readiness"
+      "lowReadiness": "Low Readiness",
+      "riskComplexityMatrix": "Risk vs Complexity Matrix",
+      "lowRisk": "Low Risk",
+      "highRisk": "High Risk",
+      "lowComplexity": "Low Complexity",
+      "highComplexity": "High Complexity",
+      "quantity": "Quantity",
+      "month1": "Month 1",
+      "month2": "Month 2",
+      "month3": "Month 3",
+      "month4": "Month 4",
+      "month5": "Month 5",
+      "month6": "Month 6",
+      "month7": "Month 7",
+      "month8": "Month 8",
+      "month9": "Month 9",
+      "month10": "Month 10",
+      "month11": "Month 11",
+      "month12": "Month 12",
+      "custodyAnalysis": "Custody Analysis",
+      "responsible": "Responsible",
+      "email": "Email",
+      "urgentActions": "Urgent Actions"
+
     },
 
     "tabs": {
@@ -1213,7 +1238,10 @@
       "financialRiskByCategory": "Financial Risk by Category",
       "daysUntilExpiration": "Days Until Expiration Distribution",
       "brandReliability": "Brand Reliability Scores",
-      "renewalUrgencyTrend": "Renewal Urgency Trend (6-Week Forecast)"
+      "renewalUrgencyTrend": "Renewal Urgency Trend (6-Week Forecast)",
+      "concurrentRenewalsAnalysis": "Concurrent Renewals Analysis",
+      "strategicImportance": "Strategic Importance",
+      "strategicDistribution": "Strategic Distribution"
     },
 
     "calendar": {

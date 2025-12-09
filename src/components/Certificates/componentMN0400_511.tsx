@@ -453,23 +453,23 @@ export default function PredictiveCertificateAnalysis() {
 
       chart.setOption({
         title: {
-          text: 'Risk vs Complexity Matrix',
+          text: t('predictiveCertificateAnalysis.kpi.riskComplexityMatrix'),
           left: 'center',
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
           formatter: (params: any) => {
-            return `${params.name}<br/>Quantity: ${params.value}`;
+            return `${params.name}<br/>${t('predictiveCertificateAnalysis.kpi.quantity')}: ${params.value}`;
           }
         },
         xAxis: {
           type: 'category',
-          data: ['Low Complexity', 'High Complexity'],
+          data: [t('predictiveCertificateAnalysis.kpi.lowComplexity'), t('predictiveCertificateAnalysis.kpi.lowComplexity')],
           axisLabel: { fontSize: 12 }
         },
         yAxis: {
           type: 'category',
-          data: ['Low Risk', 'High Risk'],
+          data: [t('predictiveCertificateAnalysis.kpi.lowRisk'), t('predictiveCertificateAnalysis.kpi.highComplexity')],
           axisLabel: { fontSize: 12 }
         },
         visualMap: {
@@ -520,8 +520,20 @@ export default function PredictiveCertificateAnalysis() {
     if (renewalForecastRef.current) {
       echarts.dispose(renewalForecastRef.current);
       const chart = echarts.init(renewalForecastRef.current);
-      const monthNames = ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6',
-        'Month 7', 'Month 8', 'Month 9', 'Month 10', 'Month 11', 'Month 12'];
+      const monthNames = [
+        t('predictiveCertificateAnalysis.kpi.month1'), 
+        t('predictiveCertificateAnalysis.kpi.month2'),
+        t('predictiveCertificateAnalysis.kpi.month3'),
+        t('predictiveCertificateAnalysis.kpi.month4'),
+        t('predictiveCertificateAnalysis.kpi.month5'),
+        t('predictiveCertificateAnalysis.kpi.month6'),
+        t('predictiveCertificateAnalysis.kpi.month7'),
+        t('predictiveCertificateAnalysis.kpi.month8'),
+        t('predictiveCertificateAnalysis.kpi.month9'),
+        t('predictiveCertificateAnalysis.kpi.month10'),
+        t('predictiveCertificateAnalysis.kpi.month11'),
+        t('predictiveCertificateAnalysis.kpi.month12')
+      ];
 
       chart.setOption({
         title: {
@@ -617,7 +629,7 @@ export default function PredictiveCertificateAnalysis() {
 
       chart.setOption({
         title: {
-          text: 'Automation Readiness',
+          text: t('predictiveCertificateAnalysis.kpi.automationReadiness'),
           left: 'center',
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
@@ -680,7 +692,7 @@ export default function PredictiveCertificateAnalysis() {
 
       chart.setOption({
         title: {
-          text: 'Concurrent Renewals Analysis',
+          text: t('predictiveCertificateAnalysis.charts.concurrentRenewalsAnalysis'),
           left: 'center',
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
@@ -727,7 +739,7 @@ export default function PredictiveCertificateAnalysis() {
 
       chart.setOption({
         title: {
-          text: 'Strategic Importance',
+          text: t('predictiveCertificateAnalysis.charts.strategicImportance'),
           left: 'center',
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
@@ -1316,18 +1328,18 @@ export default function PredictiveCertificateAnalysis() {
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h4 className="text-md font-semibold text-slate-800 mb-4">Strategic Distribution</h4>
+              <h4 className="text-md font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.charts.strategicDistribution')}</h4>
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-red-50 rounded">
-                  <span className="text-sm text-slate-700">Critical</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.kpi.critical')}</span>
                   <span className="text-sm font-bold text-red-600">{data.strategicDistribution.critical}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-orange-50 rounded">
-                  <span className="text-sm text-slate-700">High</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.kpi.high')}</span>
                   <span className="text-sm font-bold text-orange-600">{data.strategicDistribution.high}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
-                  <span className="text-sm text-slate-700">Standard</span>
+                  <span className="text-sm text-slate-700">{t('predictiveCertificateAnalysis.kpi.standard')}</span>
                   <span className="text-sm font-bold text-blue-600">{data.strategicDistribution.standard}</span>
                 </div>
               </div>
@@ -1355,17 +1367,17 @@ export default function PredictiveCertificateAnalysis() {
 
           {/* Tabela de Custódia */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Custody Analysis</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.kpi.custodyAnalysis')}</h3>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Responsible</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('predictiveCertificateAnalysis.kpi.responsible')}</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('predictiveCertificateAnalysis.kpi.email')}</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Total</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">{t('predictiveCertificateAnalysis.status.expired')}</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">{t('predictiveCertificateAnalysis.calendar.expiring')}</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">Urgent Actions</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase">{t('predictiveCertificateAnalysis.kpi.urgentActions')}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-200">

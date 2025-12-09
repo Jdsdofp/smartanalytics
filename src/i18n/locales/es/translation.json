@@ -1184,6 +1184,8 @@
       "predictability": "Previsibilidad",
       "high": "Alto",
       "medium": "Medio",
+      "critical": "Crítico",
+      "standard": "Estándar",
       "avgScore": "Puntuación Promedio",
       "anomaliesDetected": "⚠ Anomalías Detectadas",
       "unusualPatternsIdentified": "{{total}} patrones inusuales identificados (puntuación media: {{score}})",
@@ -1191,7 +1193,29 @@
       "automationReadiness": "Preparación para Automatización",
       "highReadiness": "Alta Preparación",
       "mediumReadiness": "Preparación Media",
-      "lowReadiness": "Baja Preparación"
+      "lowReadiness": "Baja Preparación",
+      "riskComplexityMatrix": "Matriz de riesgo vs. complejidad",
+      "lowRisk": "Bajo Riesgo",
+      "highRisk": "Alto Riesgo",
+      "lowComplexity": "Baja Complejidad",
+      "highComplexity": "Alta Complejidad",
+      "quantity": "Cantidad",
+      "month1": "Mes 1",
+      "month2": "Mes 2",
+      "month3": "Mes 3",
+      "month4": "Mes 4",
+      "month5": "Mes 5",
+      "month6": "Mes 6",
+      "month7": "Mes 7",
+      "month8": "Mes 8",
+      "month9": "Mes 9",
+      "month10": "Mes 10",
+      "month11": "Mes 11",
+      "month12": "Mes 12",
+      "custodyAnalysis": "Análisis de Custodia",
+      "responsible": "Responsable",
+      "email": "Correo Electrónico",
+      "urgentActions": "Acciones Urgentes"
     },
 
     "tabs": {
@@ -1212,7 +1236,10 @@
       "financialRiskByCategory": "Riesgo Financiero por Categoría",
       "daysUntilExpiration": "Distribución de Días hasta la Expiración",
       "brandReliability": "Puntuaciones de Confiabilidad de Marca",
-      "renewalUrgencyTrend": "Tendencia de Urgencia de Renovación (Pronóstico 6 Semanas)"
+      "renewalUrgencyTrend": "Tendencia de Urgencia de Renovación (Pronóstico 6 Semanas)",
+      "concurrentRenewalsAnalysis": "Análisis de Renovaciones Concurrentes",
+      "strategicImportance": "Importancia Estratégica",
+      "strategicDistribution": "Distribución Estratégica de Certificados"
     },
 
     "calendar": {

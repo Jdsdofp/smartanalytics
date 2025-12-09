@@ -1219,6 +1219,8 @@
       "predictability": "Previsibilidade",
       "high": "Alta",
       "medium": "Média",
+       "critical": "Crítico",
+       "standard": "Padrão",
       "avgScore": "Pontuação Média",
       "anomaliesDetected": "⚠ Anomalias Detectadas",
       "unusualPatternsIdentified":  "{{total}} padrões incomuns identificados (Pontuação média: {{score}})",
@@ -1226,7 +1228,29 @@
       "automationReadiness": "Prontidão para Automação",
       "highReadiness": "Alta Prontidão",
       "mediumReadiness": "Média Prontidão",
-      "lowReadiness": "Baixa Prontidão"
+      "lowReadiness": "Baixa Prontidão",
+      "riskComplexityMatrix": "Matriz de Risco vs. Complexidade",
+      "lowRisk": "Baixo Risco",
+      "highRisk": "Alto Risco",
+      "lowComplexity": "Baixa Complexidade",
+      "highComplexity": "Alta Complexidade",
+      "quantity": "Quantidade",
+      "month1": "Mês 1",
+      "month2": "Mês 2",
+      "month3": "Mês 3",
+      "month4": "Mês 4",
+      "month5": "Mês 5",
+      "month6": "Mês 6",
+      "month7": "Mês 7",
+      "month8": "Mês 8",
+      "month9": "Mês 9",
+      "month10": "Mês 10",
+      "month11": "Mês 11",
+      "month12": "Mês 12",
+      "custodyAnalysis": "Análise de Custódia",
+      "responsible": "Responsável",
+      "email": "Email",
+      "urgentActions": "Ações Urgentes"
     },
 
     "tabs": {
@@ -1247,7 +1271,10 @@
       "financialRiskByCategory": "Risco Financeiro por Categoria",
       "daysUntilExpiration": "Distribuição de Dias até a Expiração",
       "brandReliability": "Pontuações de Confiabilidade da Marca",
-      "renewalUrgencyTrend": "Tendência de Urgência de Renovação (Previsão 6 Semanas)"
+      "renewalUrgencyTrend": "Tendência de Urgência de Renovação (Previsão 6 Semanas)",
+      "concurrentRenewalsAnalysis": "Análise de Renovações Concorrentes",
+      "strategicImportance": "Importância Estratégica",
+      "strategicDistribution": "Distribuição Estratégica dos Certificados"
     },
 
     "calendar": {
