@@ -152,7 +152,7 @@
       "regular": "REGULAR 🟠"
     }
   },
-"rawDataExplorer": {
+  "rawDataExplorer": {
     "title": "Explorador de Datos en Bruto",
     "refresh": "Actualizar",
     "activeFilters": "Filtros activos",
@@ -207,7 +207,7 @@
         "is_beacon_chosen": "Baliza Elegida",
         "area_code": "Código de Área",
         "zone_code": "Código de Zona",
-         "sensor_id": "ID del Sensor",
+        "sensor_id": "ID del Sensor",
         "person_code": "Código de Persona",
         "sensor_model": "Modelo del Sensor",
         "sensor_state": "Estado del Sensor",
@@ -294,7 +294,6 @@
       "network": "Red",
       "customers": "Clientes",
       "rawData": "Base de datos procesada"
-
     },
     "kpis": {
       "deviceUptime": {
@@ -318,7 +317,21 @@
       "batteryDistribution": "Distribución del Estado de la Batería",
       "gpsAccuracy": "Distribución de Precisión GPS",
       "eventDistribution": "Distribución de Tipos de Evento",
-      "healthScoreByCategory": "Puntuación de Estado por Categoría"
+      "healthScoreByCategory": "Puntuación de Estado por Categoría",
+
+      "batteryDistributionByStatus": "Estado de la batería del dispositivo en servicio",
+      "noData": "Sin datos disponibles"
+    },
+    "batteryDistributionChart": {
+      "devices": "Dispositivos",
+      "percentage": "Porcentaje",
+      "seriesName": "Estado de la Batería",
+      "tooltip": "{a}: {c} dispositivos ({d}%)",
+      "statuses": {
+        "healthy": "Saludable",
+        "alert": "Alerta",
+        "critical": "Crítico"
+      }
     },
     "healthScoreChart": {
       "score": "Puntuación",
@@ -823,7 +836,7 @@
         "stopped": "Detenido"
       }
     },
-     "modal": {
+    "modal": {
       "title": "Detalles del Trabajador",
       "subtitle": "Información completa de la ubicación",
       "defaultUserName": "Usuario",
@@ -1179,7 +1192,7 @@
       "incomplete": "Incompleto",
       "processHealth": "Salud del Proceso",
       "onTime": "A Tiempo",
-      "delayed":"🟠 Retrasado",
+      "delayed": "🟠 Retrasado",
       "avgTime": "Tiempo Promedio",
       "predictability": "Previsibilidad",
       "high": "Alto",
@@ -1220,8 +1233,8 @@
 
     "tabs": {
       "overview": "Resumen",
-       "predictability": "Previsibilidad",
-       "observability": "Observabilidad",
+      "predictability": "Previsibilidad",
+      "observability": "Observabilidad",
       "riskAnalysis": "Análisis de Riesgo",
       "trends": "Tendencias",
       "calendar": "Calendario",
@@ -1374,7 +1387,7 @@
       "of": "de",
       "results": "resultados"
     },
-     "export": {
+    "export": {
       "button": "Exportar",
       "exporting": "Exportando...",
       "excel": "Excel (.xlsx)",

@@ -152,7 +152,7 @@
       "regular": "REGULAR 🟠"
     }
   },
-"rawDataExplorer": {
+  "rawDataExplorer": {
     "title": "Telemetria do Dispositivo",
     "refresh": "Atualizar",
     "activeFilters": "Filtros ativos",
@@ -166,8 +166,7 @@
       "errors": "Erros GPS",
       "gpsDecisionLog": "Decisões GPS",
       "streamingApi": "API de Streaming",
-            "sensorHealth": "Saúde do Sensor"
-
+      "sensorHealth": "Saúde do Sensor"
     },
     "filters": {
       "globalSearchPlaceholder": "🔍 Busca global rápida...",
@@ -318,7 +317,21 @@
       "batteryDistribution": "Distribuição do Status da Bateria",
       "gpsAccuracy": "Distribuição da Precisão GPS",
       "eventDistribution": "Distribuição de Tipos de Evento",
-      "healthScoreByCategory": "Pontuação de Saúde por Categoria"
+      "healthScoreByCategory": "Pontuação de Saúde por Categoria",
+
+      "batteryDistributionByStatus": "Status da bateria do dispositivo em serviço",
+      "noData": "Sem dados disponíveis"
+    },
+    "batteryDistributionChart": {
+      "devices": "Dispositivos",
+      "percentage": "Percentual",
+      "seriesName": "Status da Bateria",
+      "tooltip": "{a}: {c} dispositivos ({d}%)",
+      "statuses": {
+        "healthy": "Saudável",
+        "alert": "Alerta",
+        "critical": "Crítico"
+      }
     },
     "healthScoreChart": {
       "score": "Pontuação",
@@ -897,7 +910,6 @@
       "close": "Fechar",
       "exportPDF": "Exportar PDF"
     }
-  
   },
   "assetManagement": {
     "title": "Monitoramento de Saúde",
@@ -1205,7 +1217,7 @@
       "actionsRequired": "Ações Necessarias",
       "TotalAtRisk": "Total em Risco",
       "financialRisk": "Risco Financeiro",
-      "averageScore": "Pontuação Média", 
+      "averageScore": "Pontuação Média",
       "ofTotal": "{{percentage}}% do Total",
       "assetsAtRisk": "Ativos em Risco",
       "dataQuality": "Qualidade dos Dados",
@@ -1214,16 +1226,16 @@
       "incomplete": "Incompleto",
       "processHealth": "Saúde do Processo",
       "onTime": "No Prazo",
-      "delayed":"🟠 Atrasado",
+      "delayed": "🟠 Atrasado",
       "avgTime": "Tempo Médio de Renovação",
       "predictability": "Previsibilidade",
       "high": "Alta",
       "medium": "Média",
-       "critical": "Crítico",
-       "standard": "Padrão",
+      "critical": "Crítico",
+      "standard": "Padrão",
       "avgScore": "Pontuação Média",
       "anomaliesDetected": "⚠ Anomalias Detectadas",
-      "unusualPatternsIdentified":  "{{total}} padrões incomuns identificados (Pontuação média: {{score}})",
+      "unusualPatternsIdentified": "{{total}} padrões incomuns identificados (Pontuação média: {{score}})",
       "days": "{{days}} Dias",
       "automationReadiness": "Prontidão para Automação",
       "highReadiness": "Alta Prontidão",

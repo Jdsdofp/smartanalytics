@@ -221,7 +221,6 @@
         "motion_status": "Motion Status",
         "current_zone_code": "Current Zone",
         "current_area_code": "Current Area"
-
       },
       "options": {
         "SOS_MODE_START": "SOS Start",
@@ -318,7 +317,21 @@
       "batteryDistribution": "Battery Status Distribution",
       "gpsAccuracy": "GPS Accuracy Distribution",
       "eventDistribution": "Event Type Distribution",
-      "healthScoreByCategory": "Health Score by Category"
+      "healthScoreByCategory": "Health Score by Category",
+
+      "batteryDistributionByStatus": "In Service Device Battery Status",
+      "noData": "No data available"
+    },
+    "batteryDistributionChart": {
+      "devices": "Devices",
+      "percentage": "Percentage",
+      "seriesName": "Battery Status",
+      "tooltip": "{a}: {c} devices ({d}%)",
+      "statuses": {
+        "healthy": "Healthy",
+        "alert": "Alert",
+        "critical": "Critical"
+      }
     },
     "healthScoreChart": {
       "score": "Score",
@@ -1180,7 +1193,7 @@
       "incomplete": "Incomplete",
       "processHealth": "Process Health",
       "onTime": "On Time",
-      "delayed":"🟠 Delayed",
+      "delayed": "🟠 Delayed",
       "avgTime": "Avg. Time to Renew",
       "predictability": "Predictability",
       "high": "High",
@@ -1189,8 +1202,8 @@
       "standard": "Standard",
       "avgScore": "Avg. Risk Score",
       "anomaliesDetected": "⚠ Anomalies Detected",
-      "unusualPatternsIdentified":  "{{total}} unusual patterns identified (Average score: {{score}})",
-      "days":"{{days}} Days",
+      "unusualPatternsIdentified": "{{total}} unusual patterns identified (Average score: {{score}})",
+      "days": "{{days}} Days",
       "automationReadiness": "Automation Readiness",
       "highReadiness": "High Readiness",
       "mediumReadiness": "Medium Readiness",
@@ -1217,13 +1230,12 @@
       "responsible": "Responsible",
       "email": "Email",
       "urgentActions": "Urgent Actions"
-
     },
 
     "tabs": {
       "overview": "Overview",
-       "predictability": "Predictability",
-       "observability": "Observability",
+      "predictability": "Predictability",
+      "observability": "Observability",
       "riskAnalysis": "Risk Analysis",
       "trends": "Trends",
       "calendar": "Calendar",
@@ -1376,7 +1388,7 @@
       "of": "of",
       "results": "results"
     },
-     "export": {
+    "export": {
       "button": "Export",
       "exporting": "Exporting...",
       "excel": "Excel (.xlsx)",
@@ -1390,6 +1402,5 @@
       "exportAllDesc": "All available records",
       "noData": "No data to export"
     }
-    
   }
 }

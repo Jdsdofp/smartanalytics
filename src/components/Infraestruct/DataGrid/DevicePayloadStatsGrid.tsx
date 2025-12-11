@@ -1004,7 +1004,7 @@ export default function DevicePayloadStatsGrid() {
                                                     ))}
                                             </div>
                                         </th>
-                                        <th
+                                        {/* <th
                                             className="px-3 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
                                             onClick={() => handleSort('avg_per_hour')}
                                         >
@@ -1017,7 +1017,7 @@ export default function DevicePayloadStatsGrid() {
                                                         <ArrowDownIcon className="h-3 w-3" />
                                                     ))}
                                             </div>
-                                        </th>
+                                        </th> */}
                                         <th
                                             className="px-3 py-2 text-left text-[10px] font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
                                             onClick={() => handleSort('Thinkpark_last_payload_time')}
@@ -1087,9 +1087,9 @@ export default function DevicePayloadStatsGrid() {
                                                         {device.total_payloads}
                                                     </span>
                                                 </td>
-                                                <td className="px-3 py-2 whitespace-nowrap">
+                                                {/* <td className="px-3 py-2 whitespace-nowrap">
                                                     <span className="text-[11px] text-gray-900">{device.avg_per_hour}</span>
-                                                </td>
+                                                </td> */}
                                                 <td className="px-3 py-2 whitespace-nowrap">
                                                     <div className="text-[10px]">
                                                         <div className="text-gray-900">

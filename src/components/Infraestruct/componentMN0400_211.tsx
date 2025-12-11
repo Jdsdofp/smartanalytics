@@ -71,6 +71,7 @@ interface DashboardOverview {
       report_count: number;
       percentage: string;
     }>;
+    battery_distribution: BatteryDistributionData[];
   };
 
 
@@ -310,6 +311,16 @@ interface BatteryPieChartProps {
     warning: number;
     critical: number;
   };
+}
+
+interface BatteryDistributionData {
+  status: string;
+  device_count: number;
+  percentage: number;
+}
+
+interface BatteryDistributionPieChartProps {
+  data: BatteryDistributionData[];
 }
 
 
@@ -600,6 +611,179 @@ interface BatteryPieChartProps {
 //     </div>
 //   );
 // };
+
+const BatteryDistributionPieChart = ({ data }: BatteryDistributionPieChartProps) => {
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstanceRef = useRef<echarts.ECharts | null>(null);
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!chartRef.current || !data || data.length === 0) return;
+
+    // Criar ou obter instância
+    if (!chartInstanceRef.current) {
+      chartInstanceRef.current = echarts.init(chartRef.current);
+    }
+
+    // 🎨 Mapear cores vibrantes baseado no status
+    const getColor = (status: string) => {
+      const statusLower = status.toLowerCase();
+      
+      // Saudável - Verde vibrante
+      if (statusLower.includes('Healthy') || statusLower.includes('healthy')) {
+        return '#10b981'; // green-500
+      }
+      
+      // Alerta/Warning - Amarelo/Laranja
+      if (statusLower.includes('Alert') || statusLower.includes('warning')) {
+        return '#f59e0b'; // amber-500
+      }
+      
+      // Crítico - Vermelho vibrante
+      if (statusLower.includes('Critical') || statusLower.includes('critical')) {
+        return '#ef4444'; // red-500
+      }
+      
+      // Fallback - Cinza
+      return '#d1ba37ff'; // gray-500
+    };
+
+    const option: EChartsOption = {
+      tooltip: {
+        trigger: 'item',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        borderColor: '#e5e7eb',
+        borderWidth: 1,
+        textStyle: {
+          color: '#374151',
+        },
+        formatter: (params: any) => {
+          const color = params.color;
+          return `
+            <div style="padding: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${color};"></div>
+                <strong style="font-size: 14px;">${params.name}</strong>
+              </div>
+              <div style="font-size: 13px; color: #6b7280;">
+                ${t('deviceLogs.batteryDistributionChart.devices')}: <strong style="color: #111827;">${params.value}</strong>
+              </div>
+              <div style="font-size: 13px; color: #6b7280;">
+                ${t('deviceLogs.batteryDistributionChart.percentage')}: <strong style="color: #111827;">${params.data.percentage}%</strong>
+              </div>
+            </div>
+          `;
+        },
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        top: 'center',
+        itemGap: 16,
+        itemWidth: 14,
+        itemHeight: 14,
+        textStyle: {
+          fontSize: 13,
+          color: '#374151',
+          fontWeight: 500,
+        },
+        formatter: (name: string) => {
+          const item = data.find(d => d.status === name);
+          return `${name} (${item?.device_count || 0})`;
+        },
+      },
+      series: [
+        {
+          name: t('deviceLogs.batteryDistributionChart.seriesName'),
+          type: 'pie',
+          radius: ['45%', '75%'], // Donut chart
+          center: ['60%', '50%'],
+          avoidLabelOverlap: true,
+          itemStyle: {
+            borderRadius: 8,
+            borderColor: '#fff',
+            borderWidth: 3,
+          },
+          label: {
+            show: true,
+            formatter: (params: any) => {
+              return `{b|${params.name}}\n{per|${params.percent}%}`;
+            },
+            rich: {
+              b: {
+                fontSize: 12,
+                fontWeight: 'bold',
+                color: '#111827',
+                lineHeight: 20,
+              },
+              per: {
+                fontSize: 14,
+                fontWeight: 'bold',
+                color: '#374151',
+                lineHeight: 20,
+              },
+            },
+            fontSize: 12,
+            color: '#374151',
+          },
+          labelLine: {
+            show: true,
+            length: 15,
+            length2: 10,
+            smooth: true,
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 16,
+              fontWeight: 'bold',
+            },
+            itemStyle: {
+              shadowBlur: 20,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.3)',
+              borderWidth: 4,
+            },
+            scale: true,
+            scaleSize: 10,
+          },
+          data: data.map(item => ({
+            value: item.device_count,
+            name: item.status,
+            percentage: item.percentage,
+            itemStyle: { 
+              color: getColor(item.status),
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.1)',
+            },
+          })),
+        },
+      ],
+    };
+
+    chartInstanceRef.current.setOption(option);
+
+    // Resize handler
+    const handleResize = () => {
+      chartInstanceRef.current?.resize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [data, t]);
+
+  // Cleanup ao desmontar
+  useEffect(() => {
+    return () => {
+      chartInstanceRef.current?.dispose();
+      chartInstanceRef.current = null;
+    };
+  }, []);
+
+  return <div ref={chartRef} className="w-full h-full min-w-0" />;
+};
 
 const LowBatteryTableFilters = ({
   filters,
@@ -2412,266 +2596,266 @@ export default function DeviceLogsView() {
   }, [overview, activeTab, companyId]);
 
   // 4
-  useEffect(() => {
-    if (!overview) return;
+  // useEffect(() => {
+  //   if (!overview) return;
 
-    // const timer = setTimeout(() => {
-    // }, 100);
-    try {
-      const batteryElement = document.getElementById('battery-chart');
-      if (batteryElement) {
-        const batteryChart = echarts.init(batteryElement);
-        const batteryOption: EChartsOption = {
-          tooltip: {
-            trigger: 'item',
-            formatter: t('batteryChart.tooltip'),
-          },
-          legend: {
-            orient: 'vertical',
-            left: 'left',
-          },
-          series: [
-            {
-              name: t('batteryChart.seriesName'),
-              type: 'pie',
-              radius: '70%',
-              data: [
-                {
-                  value: safeParseNumber(overview?.kpis.battery_health?.healthy_devices),
-                  name: t('batteryChart.healthy'),
-                  itemStyle: { color: '#10b981' }
-                },
-                {
-                  value: safeParseNumber(overview.kpis.battery_health.warning_devices),
-                  name: t('batteryChart.warning'),
-                  itemStyle: { color: '#f59e0b' }
-                },
-                {
-                  value: safeParseNumber(overview.kpis.battery_health.critical_devices),
-                  name: t('batteryChart.critical'),
-                  itemStyle: { color: '#ef4444' }
-                },
-              ],
-              emphasis: {
-                itemStyle: {
-                  shadowBlur: 10,
-                  shadowOffsetX: 0,
-                  shadowColor: 'rgba(0, 0, 0, 0.5)',
-                },
-              },
-            },
-          ],
-        };
-        batteryChart.setOption(batteryOption);
-      }
+  //   // const timer = setTimeout(() => {
+  //   // }, 100);
+  //   try {
+  //     const batteryElement = document.getElementById('battery-chart');
+  //     if (batteryElement) {
+  //       const batteryChart = echarts.init(batteryElement);
+  //       const batteryOption: EChartsOption = {
+  //         tooltip: {
+  //           trigger: 'item',
+  //           formatter: t('batteryChart.tooltip'),
+  //         },
+  //         legend: {
+  //           orient: 'vertical',
+  //           left: 'left',
+  //         },
+  //         series: [
+  //           {
+  //             name: t('batteryChart.seriesName'),
+  //             type: 'pie',
+  //             radius: '70%',
+  //             data: [
+  //               {
+  //                 value: safeParseNumber(overview?.kpis.battery_health?.healthy_devices),
+  //                 name: t('batteryChart.healthy'),
+  //                 itemStyle: { color: '#10b981' }
+  //               },
+  //               {
+  //                 value: safeParseNumber(overview.kpis.battery_health.warning_devices),
+  //                 name: t('batteryChart.warning'),
+  //                 itemStyle: { color: '#f59e0b' }
+  //               },
+  //               {
+  //                 value: safeParseNumber(overview.kpis.battery_health.critical_devices),
+  //                 name: t('batteryChart.critical'),
+  //                 itemStyle: { color: '#ef4444' }
+  //               },
+  //             ],
+  //             emphasis: {
+  //               itemStyle: {
+  //                 shadowBlur: 10,
+  //                 shadowOffsetX: 0,
+  //                 shadowColor: 'rgba(0, 0, 0, 0.5)',
+  //               },
+  //             },
+  //           },
+  //         ],
+  //       };
+  //       batteryChart.setOption(batteryOption);
+  //     }
 
-      const accuracyElement = document.getElementById('accuracy-chart');
-      if (accuracyElement) {
-        const accuracyChart = echarts.init(accuracyElement);
-        const accuracyOption: EChartsOption = {
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow' },
-          },
-          grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true,
-          },
-          xAxis: {
-            type: 'category',
-            data: overview.kpis.accuracy_distribution.map(d => {
-              const range = d.accuracy_range;
-              if (range.includes('Excellent')) return t('accuracyChart.accuracyRanges.excellent');
-              if (range.includes('Good')) return t('accuracyChart.accuracyRanges.good');
-              if (range.includes('Fair')) return t('accuracyChart.accuracyRanges.fair');
-              if (range.includes('Poor')) return t('accuracyChart.accuracyRanges.poor');
-              return range;
-            }),
-            axisLabel: {
-              rotate: 45,
-              fontSize: 11,
-            },
-          },
-          yAxis: {
-            type: 'value',
-            name: t('accuracyChart.yAxis.name'),
-          },
-          series: [
-            {
-              name: t('accuracyChart.series.name'),
-              type: 'bar',
-              data: overview.kpis.accuracy_distribution.map(d => ({
-                value: d.report_count,
-                itemStyle: {
-                  color: d.accuracy_range.includes('Excellent') ? '#10b981' :
-                    d.accuracy_range.includes('Good') ? '#3b82f6' :
-                      d.accuracy_range.includes('Fair') ? '#f59e0b' : '#ef4444',
-                },
-              })),
-              label: {
-                show: true,
-                position: 'top',
-                formatter: '{c}',
-              },
-            },
-          ],
-        };
-        accuracyChart.setOption(accuracyOption);
-      }
+  //     const accuracyElement = document.getElementById('accuracy-chart');
+  //     if (accuracyElement) {
+  //       const accuracyChart = echarts.init(accuracyElement);
+  //       const accuracyOption: EChartsOption = {
+  //         tooltip: {
+  //           trigger: 'axis',
+  //           axisPointer: { type: 'shadow' },
+  //         },
+  //         grid: {
+  //           left: '3%',
+  //           right: '4%',
+  //           bottom: '3%',
+  //           containLabel: true,
+  //         },
+  //         xAxis: {
+  //           type: 'category',
+  //           data: overview.kpis.accuracy_distribution.map(d => {
+  //             const range = d.accuracy_range;
+  //             if (range.includes('Excellent')) return t('accuracyChart.accuracyRanges.excellent');
+  //             if (range.includes('Good')) return t('accuracyChart.accuracyRanges.good');
+  //             if (range.includes('Fair')) return t('accuracyChart.accuracyRanges.fair');
+  //             if (range.includes('Poor')) return t('accuracyChart.accuracyRanges.poor');
+  //             return range;
+  //           }),
+  //           axisLabel: {
+  //             rotate: 45,
+  //             fontSize: 11,
+  //           },
+  //         },
+  //         yAxis: {
+  //           type: 'value',
+  //           name: t('accuracyChart.yAxis.name'),
+  //         },
+  //         series: [
+  //           {
+  //             name: t('accuracyChart.series.name'),
+  //             type: 'bar',
+  //             data: overview.kpis.accuracy_distribution.map(d => ({
+  //               value: d.report_count,
+  //               itemStyle: {
+  //                 color: d.accuracy_range.includes('Excellent') ? '#10b981' :
+  //                   d.accuracy_range.includes('Good') ? '#3b82f6' :
+  //                     d.accuracy_range.includes('Fair') ? '#f59e0b' : '#ef4444',
+  //               },
+  //             })),
+  //             label: {
+  //               show: true,
+  //               position: 'top',
+  //               formatter: '{c}',
+  //             },
+  //           },
+  //         ],
+  //       };
+  //       accuracyChart.setOption(accuracyOption);
+  //     }
 
-      if (gatewayQuality.length > 0) {
-        const gatewayElement = document.getElementById('gateway-chart');
-        if (gatewayElement) {
-          const gatewayChart = echarts.init(gatewayElement);
-          const gatewayOption: EChartsOption = {
-            tooltip: {
-              trigger: 'axis',
-              axisPointer: { type: 'cross' },
-            },
-            legend: {
-              data: [
-                t('gatewayChart.legend.avgRssi'),
-                t('gatewayChart.legend.avgSnr'),
-                t('gatewayChart.legend.reportCount')
-              ],
-            },
-            grid: {
-              left: '3%',
-              right: '4%',
-              bottom: '10%',
-              containLabel: true,
-            },
-            xAxis: {
-              type: 'category',
-              data: gatewayQuality.map(g => g.gateway_name),
-              axisLabel: {
-                rotate: 45,
-                fontSize: 10,
-              },
-            },
-            yAxis: [
-              {
-                type: 'value',
-                name: t('gatewayChart.yAxis.rssiSnr'),
-                position: 'left',
-              },
-              {
-                type: 'value',
-                name: t('gatewayChart.yAxis.count'),
-                position: 'right',
-              },
-            ],
-            series: [
-              {
-                name: t('gatewayChart.legend.avgRssi'),
-                type: 'line',
-                data: gatewayQuality.map(g => g.avg_rssi),
-                itemStyle: { color: '#3b82f6' },
-              },
-              {
-                name: t('gatewayChart.legend.avgSnr'),
-                type: 'line',
-                data: gatewayQuality.map(g => g.avg_snr),
-                itemStyle: { color: '#10b981' },
-              },
-              {
-                name: t('gatewayChart.legend.reportCount'),
-                type: 'bar',
-                yAxisIndex: 1,
-                data: gatewayQuality.map(g => g.report_count),
-                itemStyle: { color: '#8b5cf6' },
-              },
-            ],
-          };
-          gatewayChart.setOption(gatewayOption);
-        }
-      }
+  //     if (gatewayQuality.length > 0) {
+  //       const gatewayElement = document.getElementById('gateway-chart');
+  //       if (gatewayElement) {
+  //         const gatewayChart = echarts.init(gatewayElement);
+  //         const gatewayOption: EChartsOption = {
+  //           tooltip: {
+  //             trigger: 'axis',
+  //             axisPointer: { type: 'cross' },
+  //           },
+  //           legend: {
+  //             data: [
+  //               t('gatewayChart.legend.avgRssi'),
+  //               t('gatewayChart.legend.avgSnr'),
+  //               t('gatewayChart.legend.reportCount')
+  //             ],
+  //           },
+  //           grid: {
+  //             left: '3%',
+  //             right: '4%',
+  //             bottom: '10%',
+  //             containLabel: true,
+  //           },
+  //           xAxis: {
+  //             type: 'category',
+  //             data: gatewayQuality.map(g => g.gateway_name),
+  //             axisLabel: {
+  //               rotate: 45,
+  //               fontSize: 10,
+  //             },
+  //           },
+  //           yAxis: [
+  //             {
+  //               type: 'value',
+  //               name: t('gatewayChart.yAxis.rssiSnr'),
+  //               position: 'left',
+  //             },
+  //             {
+  //               type: 'value',
+  //               name: t('gatewayChart.yAxis.count'),
+  //               position: 'right',
+  //             },
+  //           ],
+  //           series: [
+  //             {
+  //               name: t('gatewayChart.legend.avgRssi'),
+  //               type: 'line',
+  //               data: gatewayQuality.map(g => g.avg_rssi),
+  //               itemStyle: { color: '#3b82f6' },
+  //             },
+  //             {
+  //               name: t('gatewayChart.legend.avgSnr'),
+  //               type: 'line',
+  //               data: gatewayQuality.map(g => g.avg_snr),
+  //               itemStyle: { color: '#10b981' },
+  //             },
+  //             {
+  //               name: t('gatewayChart.legend.reportCount'),
+  //               type: 'bar',
+  //               yAxisIndex: 1,
+  //               data: gatewayQuality.map(g => g.report_count),
+  //               itemStyle: { color: '#8b5cf6' },
+  //             },
+  //           ],
+  //         };
+  //         gatewayChart.setOption(gatewayOption);
+  //       }
+  //     }
 
-      if (eventTypes.length > 0) {
-        const eventsElement = document.getElementById('events-chart');
-        if (eventsElement) {
-          const eventsChart = echarts.init(eventsElement);
-          const eventsOption: EChartsOption = {
-            tooltip: {
-              trigger: 'axis',
-              axisPointer: { type: 'shadow' },
-            },
-            legend: {
-              data: [
-                t('eventsChart.legend.validEvents'),
-                t('eventsChart.legend.duplicates')
-              ],
-            },
-            grid: {
-              left: '3%',
-              right: '4%',
-              bottom: '15%',
-              containLabel: true,
-            },
-            xAxis: {
-              type: 'category',
-              data: eventTypes.map(e => e.event_type),
-              axisLabel: {
-                rotate: 45,
-                fontSize: 10,
-              },
-            },
-            yAxis: {
-              type: 'value',
-              name: t('eventsChart.yAxis.name'),
-            },
-            series: [
-              {
-                name: t('eventsChart.legend.validEvents'),
-                type: 'bar',
-                stack: 'total',
-                data: eventTypes.map(e => e.valid_events),
-                itemStyle: { color: '#10b981' },
-              },
-              {
-                name: t('eventsChart.legend.duplicates'),
-                type: 'bar',
-                stack: 'total',
-                data: eventTypes.map(e => e.duplicate_events),
-                itemStyle: { color: '#ef4444' },
-              },
-            ],
-          };
-          eventsChart.setOption(eventsOption);
-        }
-      }
-    } catch (error) {
-      console.error('Error initializing charts:', error);
-    }
+  //     if (eventTypes.length > 0) {
+  //       const eventsElement = document.getElementById('events-chart');
+  //       if (eventsElement) {
+  //         const eventsChart = echarts.init(eventsElement);
+  //         const eventsOption: EChartsOption = {
+  //           tooltip: {
+  //             trigger: 'axis',
+  //             axisPointer: { type: 'shadow' },
+  //           },
+  //           legend: {
+  //             data: [
+  //               t('eventsChart.legend.validEvents'),
+  //               t('eventsChart.legend.duplicates')
+  //             ],
+  //           },
+  //           grid: {
+  //             left: '3%',
+  //             right: '4%',
+  //             bottom: '15%',
+  //             containLabel: true,
+  //           },
+  //           xAxis: {
+  //             type: 'category',
+  //             data: eventTypes.map(e => e.event_type),
+  //             axisLabel: {
+  //               rotate: 45,
+  //               fontSize: 10,
+  //             },
+  //           },
+  //           yAxis: {
+  //             type: 'value',
+  //             name: t('eventsChart.yAxis.name'),
+  //           },
+  //           series: [
+  //             {
+  //               name: t('eventsChart.legend.validEvents'),
+  //               type: 'bar',
+  //               stack: 'total',
+  //               data: eventTypes.map(e => e.valid_events),
+  //               itemStyle: { color: '#10b981' },
+  //             },
+  //             {
+  //               name: t('eventsChart.legend.duplicates'),
+  //               type: 'bar',
+  //               stack: 'total',
+  //               data: eventTypes.map(e => e.duplicate_events),
+  //               itemStyle: { color: '#ef4444' },
+  //             },
+  //           ],
+  //         };
+  //         eventsChart.setOption(eventsOption);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error initializing charts:', error);
+  //   }
 
-    return () => {
-      // clearTimeout(timer);
+  //   return () => {
+  //     // clearTimeout(timer);
 
-      const batteryElement = document.getElementById('battery-chart');
-      const accuracyElement = document.getElementById('accuracy-chart');
-      const gatewayElement = document.getElementById('gateway-chart');
-      const eventsElement = document.getElementById('events-chart');
+  //     const batteryElement = document.getElementById('battery-chart');
+  //     const accuracyElement = document.getElementById('accuracy-chart');
+  //     const gatewayElement = document.getElementById('gateway-chart');
+  //     const eventsElement = document.getElementById('events-chart');
 
-      if (batteryElement) {
-        const batteryInstance = echarts.getInstanceByDom(batteryElement);
-        batteryInstance?.dispose();
-      }
-      if (accuracyElement) {
-        const accuracyInstance = echarts.getInstanceByDom(accuracyElement);
-        accuracyInstance?.dispose();
-      }
-      if (gatewayElement) {
-        const gatewayInstance = echarts.getInstanceByDom(gatewayElement);
-        gatewayInstance?.dispose();
-      }
-      if (eventsElement) {
-        const eventsInstance = echarts.getInstanceByDom(eventsElement);
-        eventsInstance?.dispose();
-      }
-    };
-  }, [overview, gatewayQuality, eventTypes, activeTab]);
+  //     if (batteryElement) {
+  //       const batteryInstance = echarts.getInstanceByDom(batteryElement);
+  //       batteryInstance?.dispose();
+  //     }
+  //     if (accuracyElement) {
+  //       const accuracyInstance = echarts.getInstanceByDom(accuracyElement);
+  //       accuracyInstance?.dispose();
+  //     }
+  //     if (gatewayElement) {
+  //       const gatewayInstance = echarts.getInstanceByDom(gatewayElement);
+  //       gatewayInstance?.dispose();
+  //     }
+  //     if (eventsElement) {
+  //       const eventsInstance = echarts.getInstanceByDom(eventsElement);
+  //       eventsInstance?.dispose();
+  //     }
+  //   };
+  // }, [overview, gatewayQuality, eventTypes, activeTab]);
 
   // 5 useEffect para debounce do nome
   useEffect(() => {
@@ -3040,7 +3224,7 @@ export default function DeviceLogsView() {
 
       {/* Tabs de Navegação */}
       <div className="border-b border-gray-200 mb-6">
-  <nav className="-mb-px flex space-x-8 max-[856px]:overflow-x-auto">
+        <nav className="-mb-px flex space-x-8 max-[856px]:overflow-x-auto">
           {[
             { id: 'overview', label: t('deviceLogs.tabs.overview'), icon: ChartBarIcon },
             { id: 'mapview', label: t('deviceLogs.tabs.mapview'), icon: MapIcon },
@@ -3184,7 +3368,9 @@ export default function DeviceLogsView() {
           )} */}
 
           {/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO COM COMPONENTES */}
+          {/* ✅ GRÁFICOS COM RESPONSIVIDADE - VERSÃO ATUALIZADA */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Gráfico de Pizza - Saúde da Bateria (BEM SIMPLES) */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {t('deviceLogs.charts.batteryDistribution')}
@@ -3200,35 +3386,22 @@ export default function DeviceLogsView() {
               </div>
             </div>
 
+            {/* 🆕 Gráfico de Pizza - Distribuição de Bateria (NOVO DA API) */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {t('deviceLogs.charts.healthScoreByCategory')}
+                {t('deviceLogs.charts.batteryDistributionByStatus')}
               </h3>
               <div className="w-full h-64 sm:h-80 min-h-64 overflow-hidden">
-                <div id="health-score-chart" className="w-full h-full min-w-0" />
-              </div>
-              {/* Legenda do health score */}
-              <div className="mt-4 flex flex-wrap gap-4 text-xs">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-green-500 rounded"></div>
-                  <span>80-100% {t('deviceLogs.healthScoreChart.legend.excellent')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                  <span>60-79% {t('deviceLogs.healthScoreChart.legend.good')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                  <span>40-59% {t('deviceLogs.healthScoreChart.legend.fair')}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-red-500 rounded"></div>
-                  <span>0-39% {t('deviceLogs.healthScoreChart.legend.poor')}</span>
-                </div>
+                {overview?.kpis.battery_distribution && overview.kpis.battery_distribution.length > 0 ? (
+                  <BatteryDistributionPieChart data={overview.kpis.battery_distribution} />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-gray-500">{t('deviceLogs.charts.noData')}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-
 
 
           {/* ✅ ALERTAS DE BATERIA BAIXA ATUALIZADOS */}
@@ -3411,7 +3584,7 @@ export default function DeviceLogsView() {
                                     <span className="text-[9px]">{device.battery_freshness}</span>
                                   </td>
 
-                                  {/* GPS Info */}  
+                                  {/* GPS Info */}
                                   <td className="px-2 py-2 whitespace-nowrap bg-red-50">
                                     {device.gps_age !== null ? (
                                       <span className={`text-[10px] font-medium ${device.gps_age < 30 ? 'text-green-600' :
