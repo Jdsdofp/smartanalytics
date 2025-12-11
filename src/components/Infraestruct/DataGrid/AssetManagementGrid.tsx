@@ -14,8 +14,6 @@ import {
   ArrowPathIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   XMarkIcon,
   BarsArrowDownIcon,
   BarsArrowUpIcon,
@@ -860,94 +858,93 @@ export default function AssetManagementGrid() {
             )}
           </div>
           
-          {/* ✅ PAGINAÇÃO INFERIOR FIXA */}
-          {pagination.total_pages > 1 && !loading && (
-            <div className="border-t border-gray-200 bg-white px-6 py-4 sticky bottom-0">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-sm text-gray-700">
-                  {/* Página <span className="font-medium">{pagination.current_page}</span> de{' '}
-                  <span className="font-medium">{pagination.total_pages}</span> •{' '}
-                  <span className="font-medium">{filteredData.length}</span> de{' '}
-                  <span className="font-medium">{pagination.total_count}</span> resultados
-                  {Object.values(columnFilters).some(filter => filter) && (
-                    <span className="ml-2 text-blue-600 text-xs">(filtrado)</span>
-                  )} */}
-
-                  {t('assetManagement.pagination.pageInfo', {
-                    current: pagination.current_page,
-                    total: pagination.total_pages,
-                    shown: filteredData.length,
-                    totalCount: pagination.total_count
-                  })}
-                  {Object.values(columnFilters).some(filter => filter) && (
-                    <span className="ml-2 text-blue-600 text-xs">
-                      {t('assetManagement.filtered')}
-                    </span>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handlePageChange(1)}
-                    disabled={pagination.current_page === 1}
-                    className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title={t('assetManagement.pagination.firstPage')}
-                  >
-                    <ChevronLeftIcon className="h-4 w-4" />
-                    <ChevronLeftIcon className="h-4 w-4 -ml-3" />
-                  </button>
-                  
-                  <button
-                    onClick={() => handlePageChange(pagination.current_page - 1)}
-                    disabled={!pagination.has_prev}
-                    className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Página anterior"
-                  >
-                    <ChevronLeftIcon className="h-4 w-4" />
-                  </button>
-                  
-                  <div className="flex items-center gap-1 mx-2">
-                    {getPageNumbers().map((page, index) => (
-                      page === '...' ? (
-                        <span key={index} className="px-2 text-gray-400">...</span>
-                      ) : (
-                        <button
-                          key={index}
-                          onClick={() => handlePageChange(page as number)}
-                          className={`min-w-[2rem] px-2 py-1 text-sm rounded ${
-                            pagination.current_page === page
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      )
-                    ))}
-                  </div>
-                  
-                  <button
-                    onClick={() => handlePageChange(pagination.current_page + 1)}
-                    disabled={!pagination.has_next}
-                    className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Próxima página"
-                  >
-                    <ChevronRightIcon className="h-4 w-4" />
-                  </button>
-                  
-                  <button
-                    onClick={() => handlePageChange(pagination.total_pages)}
-                    disabled={pagination.current_page === pagination.total_pages}
-                    className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Última página"
-                  >
-                    <ChevronRightIcon className="h-4 w-4" />
-                    <ChevronRightIcon className="h-4 w-4 -ml-3" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+         {/* ✅ PAGINAÇÃO INFERIOR FIXA */}
+{pagination.total_pages > 1 && !loading && (
+  <div className="border-t border-gray-200 bg-white px-6 py-4 sticky bottom-0">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Info da paginação */}
+      <div className="text-sm text-gray-700">
+        {t('assetManagement.pagination.pageInfo', {
+          current: pagination.current_page,
+          total: pagination.total_pages,
+          shown: filteredData.length,
+          totalCount: pagination.total_count
+        })}
+        {Object.values(columnFilters).some(filter => filter) && (
+          <span className="ml-2 text-blue-600 text-xs">
+            {t('assetManagement.filtered')}
+          </span>
+        )}
+      </div>
+      
+      {/* Controles de paginação */}
+      <div className="flex items-center gap-2">
+        {/* Primeira página */}
+        <button
+          onClick={() => handlePageChange(1)}
+          disabled={pagination.current_page === 1}
+          className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
+          title={t('assetManagement.pagination.firstPage')}
+        >
+          «
+        </button>
+        
+        {/* Página anterior */}
+        <button
+          onClick={() => handlePageChange(pagination.current_page - 1)}
+          disabled={!pagination.has_prev}
+          className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
+          title="Página anterior"
+        >
+          ‹
+        </button>
+        
+        {/* Números das páginas */}
+        <div className="flex items-center gap-1">
+          {getPageNumbers().map((page, index) => (
+            page === '...' ? (
+              <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+                ...
+              </span>
+            ) : (
+              <button
+                key={`page-${page}`}
+                onClick={() => handlePageChange(page as number)}
+                className={`min-w-[2.5rem] px-3 py-1.5 text-sm border rounded transition-colors ${
+                  pagination.current_page === page
+                    ? 'bg-blue-600 text-white border-blue-600 font-medium'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            )
+          ))}
+        </div>
+        
+        {/* Próxima página */}
+        <button
+          onClick={() => handlePageChange(pagination.current_page + 1)}
+          disabled={!pagination.has_next}
+          className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
+          title="Próxima página"
+        >
+          ›
+        </button>
+        
+        {/* Última página */}
+        <button
+          onClick={() => handlePageChange(pagination.total_pages)}
+          disabled={pagination.current_page === pagination.total_pages}
+          className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors"
+          title="Última página"
+        >
+          »
+        </button>
+      </div>
+    </div>
+  </div>
+)}
         </div>
       </div>
     </div>
