@@ -553,9 +553,9 @@
   "batteryChart": {
     "tooltip": "{b}: {c} ({d}%)",
     "seriesName": "Status da Bateria",
-    "healthy": "Saudável (≥30%)",
-    "warning": "Atenção (20-29%)",
-    "critical": "Crítico (<20%)"
+    "healthy": "Saudável",
+    "warning": "Atenção",
+    "critical": "Crítico"
   },
   "accuracyChart": {
     "tooltip": {
@@ -1378,7 +1378,7 @@
     "error": "Erro ao carregar dados"
   },
   "devicePayloadStats": {
-    "title": "Estatísticas de Payload (Última Hora)",
+    "title": "Estatísticas de carga útil em serviço (última hora)",
     "devicesWithActivity": "{{count}} dispositivos com atividade",
     "filters": {
       "title": "Filtros",

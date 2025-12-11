@@ -481,7 +481,7 @@ export default function AssetManagementGrid() {
             <div className="flex items-center gap-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">{t('assetManagement.title')}</h3>
-                <p className="text-sm text-gray-600">
+                {/* <p className="text-sm text-gray-600">
                   {loading ? t('assetManagement.loading') : t('assetManagement.devicesCount', {
               count: filteredData.length,
               total: pagination.total_count
@@ -491,7 +491,7 @@ export default function AssetManagementGrid() {
                 {t('assetManagement.filtered')}
               </span>
             )}
-                </p>
+                </p> */}
               </div>
               
               {/* Indicador de Ordenação */}

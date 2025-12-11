@@ -2274,15 +2274,36 @@ const BatteryPieChart = ({ data }: BatteryPieChartProps) => {
       chartInstanceRef.current = echarts.init(chartRef.current);
     }
 
+
     const option: EChartsOption = {
       tooltip: {
         trigger: 'item',
         formatter: t('batteryChart.tooltip'),
       },
       legend: {
-        orient: 'vertical',
-        left: 'left',
+  orient: 'vertical',
+  left: 'left',
+  formatter: (name: string) => {
+    const item = [
+      {
+        value: data.healthy,
+        name: t('batteryChart.healthy'),
       },
+      {
+        value: data.warning,
+        name: t('batteryChart.warning'),
+      },
+      {
+        value: data.critical,
+        name: t('batteryChart.critical'),
+      },
+    ].find(i => i.name === name);
+
+    return `${name} (${item?.value ?? 0})`;
+  }
+},
+
+
       series: [
         {
           name: t('batteryChart.seriesName'),
