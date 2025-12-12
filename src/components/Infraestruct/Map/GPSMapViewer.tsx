@@ -387,6 +387,42 @@ const GPSMapViewer = () => {
 
   const playIntervalRef = useRef<any | null>(null);
 
+  // Adicione este useEffect logo após as declarações de estado, antes dos outros useEffects
+
+useEffect(() => {
+  // Configurar datas iniciais apenas uma vez quando o componente monta
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  // Formatar para datetime-local (formato: YYYY-MM-DDTHH:mm)
+  const formatDateTimeLocal = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  setFilters(prev => ({
+    ...prev,
+    start_date: formatDateTimeLocal(yesterday),
+    end_date: formatDateTimeLocal(now)
+  }));
+}, []); // Array vazio garante que execute apenas uma vez
+
+
+// Logo após o useEffect que configura as datas iniciais, adicione este:
+
+useEffect(() => {
+  // Chamar a API automaticamente quando o componente montar e as datas estiverem configuradas
+  if (filters.start_date && filters.end_date) {
+    fetchGPSData(1);
+  }
+}, [filters.start_date, filters.end_date]); // Executa quando as datas mudarem
+
   // =====================================
   // 📡 FETCH DE DADOS
   // =====================================
@@ -838,7 +874,7 @@ const GPSMapViewer = () => {
                   <div className="mt-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">
-                        Selecionados ({filters.dev_eui.length})
+                         {t('gpsMap.filters.selected', {count: filters.dev_eui.length})}
                       </span>
                       <button
                         onClick={deselectAllDevices}
@@ -1212,16 +1248,16 @@ const GPSMapViewer = () => {
 
                 if (isStart) {
                   icon = createWorkerIcon('#22c55e', photoUrl, userName);
-                  status = '🟢 Início';
+                  status = t('gpsRouteMap.markers.start');
                 } else if (isEnd) {
                   icon = createWorkerIcon('#ef4444', photoUrl, userName);
-                  status = '🔴 Fim';
+                  status = t('gpsRouteMap.markers.end');
                 } else if (isCurrent) {
                   icon = createCurrentWorkerIcon('#eab308');
-                  status = '⭐ Atual';
+                  status = t('gpsRouteMap.markers.currentPosition');
                 } else {
                   icon = createWorkerIcon(deviceColor, photoUrl, userName);
-                  status = `📍 Ponto ${index + 1}`;
+                  status = `${t('gpsRouteMap.markers.point')} ${index + 1}`;
                 }
 
                 return (
@@ -1274,6 +1310,7 @@ const GPSMapViewer = () => {
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             {new Date(point.timestamp).toLocaleDateString(t('gpsMap.gpsMap.popup.locale'))}
+                            
                           </div>
                         </div>
 
@@ -1289,15 +1326,15 @@ const GPSMapViewer = () => {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-600 font-medium">{t('gpsMap.gpsMap.popup.accuracy')}:</span>
+                          {/* <div className="flex items-center justify-between">
+                             <span className="text-gray-600 font-medium">{t('gpsMap.gpsMap.popup.accuracy')}:</span>
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${point.gps_accuracy < 10 ? 'bg-green-100 text-green-800' :
                               point.gps_accuracy < 25 ? 'bg-yellow-100 text-yellow-800' :
                                 'bg-red-100 text-red-800'
                               }`}>
                               {point.gps_accuracy}m
                             </span>
-                          </div>
+                          </div> */}
 
                           <div className="pt-2 border-t border-gray-100 space-y-1">
                             {point.battery_level && (
