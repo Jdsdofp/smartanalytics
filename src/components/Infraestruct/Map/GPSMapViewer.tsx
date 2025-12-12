@@ -654,8 +654,8 @@ const GPSMapViewer = () => {
       const params = new URLSearchParams({
         page: pageNum.toString(),
         limit: '1000',
-        sortBy: 'timestamp',
-        sortOrder: 'ASC',
+        sortBy: 'max_log_id',
+        sortOrder: 'DESC',
       });
 
       // Adicionar filtros
@@ -665,13 +665,13 @@ const GPSMapViewer = () => {
       if (filters.start_date) params.append('start_date', filters.start_date);
       if (filters.end_date) params.append('end_date', filters.end_date);
       if (filters.valid_gps_only) params.append('valid_gps_only', 'true');
-      if (filters.max_accuracy) params.append('max_accuracy', filters.max_accuracy);
+      //if (filters.max_accuracy) params.append('max_accuracy', filters.max_accuracy);
       if (filters.min_accuracy) params.append('min_accuracy', filters.min_accuracy);
       if (filters.latest_only) params.append('latest_only', 'true');
 
-      const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/gps-data?${params}`
-      );
+     const response = await fetch(
+      `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/gps-route?${params}`
+    );
 
       if (!response.ok) {
         throw new Error('Falha ao carregar dados GPS');
