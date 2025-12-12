@@ -281,6 +281,11 @@ interface GPSPoint {
   id?: number;
 }
 
+interface DeviceInfo {
+  person_code: string;
+  person_name: string;
+}
+
 interface GPSFilters {
   dev_eui: string[];
   start_date: string;
@@ -356,7 +361,7 @@ const GPSMapViewer = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [availableDevices, setAvailableDevices] = useState<string[]>([]);
+  const [availableDevices, setAvailableDevices] = useState<DeviceInfo[]>([]);
   const [loadingDevices, setLoadingDevices] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -387,46 +392,60 @@ const GPSMapViewer = () => {
 
   const playIntervalRef = useRef<any | null>(null);
 
-  // Adicione este useEffect logo após as declarações de estado, antes dos outros useEffects
-
-useEffect(() => {
-  // Configurar datas iniciais apenas uma vez quando o componente monta
-  const now = new Date();
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  // Formatar para datetime-local (formato: YYYY-MM-DDTHH:mm)
-  const formatDateTimeLocal = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  // =====================================
+  // 🔍 FUNÇÃO AUXILIAR PARA BUSCA
+  // =====================================
+  const getDeviceDisplayName = (device: DeviceInfo): string => {
+    return `${device.person_code} - ${device.person_name}`;
   };
 
-  setFilters(prev => ({
-    ...prev,
-    start_date: formatDateTimeLocal(yesterday),
-    end_date: formatDateTimeLocal(now)
-  }));
-}, []); // Array vazio garante que execute apenas uma vez
-
-
-// Logo após o useEffect que configura as datas iniciais, adicione este:
-
-useEffect(() => {
-  // Chamar a API automaticamente quando o componente montar e as datas estiverem configuradas
-  if (filters.start_date && filters.end_date) {
-    fetchGPSData(1);
-  }
-}, [filters.start_date, filters.end_date]); // Executa quando as datas mudarem
+  const filterDevicesBySearch = (devices: DeviceInfo[], search: string): DeviceInfo[] => {
+    if (!search) return devices;
+    
+    const searchLower = search.toLowerCase();
+    return devices.filter(device => 
+      device.person_code.toLowerCase().includes(searchLower) ||
+      device.person_name.toLowerCase().includes(searchLower)
+    );
+  };
 
   // =====================================
-  // 📡 FETCH DE DADOS
+  // 📅 CONFIGURAR DATAS INICIAIS
   // =====================================
+  useEffect(() => {
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
 
+    const formatDateTimeLocal = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+    setFilters(prev => ({
+      ...prev,
+      start_date: formatDateTimeLocal(yesterday),
+      end_date: formatDateTimeLocal(now)
+    }));
+  }, []);
+
+  // =====================================
+  // 🚀 BUSCAR DADOS AUTOMATICAMENTE
+  // =====================================
+  useEffect(() => {
+    if (filters.start_date && filters.end_date) {
+      fetchGPSData(1);
+    }
+  }, [filters.start_date, filters.end_date]);
+
+  // =====================================
+  // 📡 FETCH DE DISPOSITIVOS
+  // =====================================
   const fetchAvailableDevices = useCallback(async () => {
     setLoadingDevices(true);
     try {
@@ -454,6 +473,9 @@ useEffect(() => {
     fetchAvailableDevices();
   }, [fetchAvailableDevices]);
 
+  // =====================================
+  // 📡 FETCH DE DADOS GPS
+  // =====================================
   const fetchGPSData = useCallback(async (pageNum: number = 1) => {
     setLoading(true);
     setError(null);
@@ -469,20 +491,17 @@ useEffect(() => {
       if (filters.dev_eui.length > 0) {
         params.append('dev_eui', filters.dev_eui.join(','));
       }
-      // if (filters.start_date) params.append('start_date', filters.start_date);
 
-          // Ajustar formato das datas para ISO 8601 com timezone
-    if (filters.start_date) {
-      const startDate = new Date(filters.start_date);
-      params.append('start_date', startDate.toISOString());
-    }
+      if (filters.start_date) {
+        const startDate = new Date(filters.start_date);
+        params.append('start_date', startDate.toISOString());
+      }
 
-        if (filters.end_date) {
-      const endDate = new Date(filters.end_date);
-      params.append('end_date', endDate.toISOString());
-    }
+      if (filters.end_date) {
+        const endDate = new Date(filters.end_date);
+        params.append('end_date', endDate.toISOString());
+      }
 
-      // if (filters.end_date) params.append('end_date', filters.end_date);
       if (filters.min_accuracy) params.append('min_accuracy', filters.min_accuracy);
 
       const response = await fetch(
@@ -604,14 +623,14 @@ useEffect(() => {
   // =====================================
   // 🎨 HANDLERS DE FILTROS
   // =====================================
-  const toggleDevice = (devEui: string) => {
+  const toggleDevice = (personCode: string) => {
     setFilters((prev) => {
-      const isSelected = prev.dev_eui.includes(devEui);
+      const isSelected = prev.dev_eui.includes(personCode);
       return {
         ...prev,
         dev_eui: isSelected
-          ? prev.dev_eui.filter((d) => d !== devEui)
-          : [...prev.dev_eui, devEui],
+          ? prev.dev_eui.filter((d) => d !== personCode)
+          : [...prev.dev_eui, personCode],
       };
     });
   };
@@ -619,7 +638,7 @@ useEffect(() => {
   const selectAllDevices = () => {
     setFilters((prev) => ({
       ...prev,
-      dev_eui: [...availableDevices],
+      dev_eui: availableDevices.map(d => d.person_code),
     }));
   };
 
@@ -630,10 +649,10 @@ useEffect(() => {
     }));
   };
 
-  const handleRemoveDevEui = (devEui: string) => {
+  const handleRemoveDevEui = (personCode: string) => {
     setFilters((prev) => ({
       ...prev,
-      dev_eui: prev.dev_eui.filter((d) => d !== devEui),
+      dev_eui: prev.dev_eui.filter((d) => d !== personCode),
     }));
   };
 
@@ -666,9 +685,7 @@ useEffect(() => {
     fetchGPSData(1);
   };
 
-  const filteredDevices = availableDevices.filter(devEui =>
-    devEui.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDevices = filterDevicesBySearch(availableDevices, searchTerm);
 
   // =====================================
   // 🎨 RENDERIZAÇÃO
@@ -756,7 +773,7 @@ useEffect(() => {
                           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <input
                             type="text"
-                            placeholder={t('assetManagement.searchPlaceholder')}
+                            placeholder="Buscar por código ou nome..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -808,13 +825,13 @@ useEffect(() => {
                             {searchTerm ? 'Nenhum dispositivo encontrado' : t('gpsMap.filters.noDevices')}
                           </div>
                         ) : (
-                          filteredDevices.map((devEui) => {
-                            const isSelected = filters.dev_eui.includes(devEui);
-                            const color = getDeviceColor(devEui, filters.dev_eui);
+                          filteredDevices.map((device) => {
+                            const isSelected = filters.dev_eui.includes(device.person_code);
+                            const color = getDeviceColor(device.person_code, filters.dev_eui);
 
                             return (
                               <label
-                                key={devEui}
+                                key={device.person_code}
                                 className={`flex items-center px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 ${isSelected ? 'bg-blue-50' : 'border-l-transparent'
                                   }`}
                                 style={{
@@ -824,7 +841,7 @@ useEffect(() => {
                                 <input
                                   type="checkbox"
                                   checked={isSelected}
-                                  onChange={() => toggleDevice(devEui)}
+                                  onChange={() => toggleDevice(device.person_code)}
                                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                                 />
                                 <span className="ml-3 flex items-center gap-2 flex-1">
@@ -835,10 +852,10 @@ useEffect(() => {
                                     />
                                   )}
                                   <span
-                                    className={`text-sm font-mono ${isSelected ? 'font-semibold text-gray-900' : 'text-gray-700'
+                                    className={`text-sm ${isSelected ? 'font-semibold text-gray-900' : 'text-gray-700'
                                       }`}
                                   >
-                                    {devEui}
+                                    {getDeviceDisplayName(device)}
                                   </span>
                                 </span>
                               </label>
@@ -850,11 +867,8 @@ useEffect(() => {
                       <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-gray-600">
-                            {t('assetManagement.devicesCount', {
-                              filtered: filteredDevices.length,
-                              total: availableDevices.length
-                            })}
-                            {searchTerm && t('assetManagement.filtered')}
+                            {filteredDevices.length} de {availableDevices.length} dispositivos
+                            {searchTerm && ' (filtrado)'}
                           </p>
                           {searchTerm && (
                             <button
@@ -874,7 +888,7 @@ useEffect(() => {
                   <div className="mt-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">
-                         {t('gpsMap.filters.selected', {count: filters.dev_eui.length})}
+                        {t('gpsMap.filters.selected', {count: filters.dev_eui.length})}
                       </span>
                       <button
                         onClick={deselectAllDevices}
@@ -884,11 +898,12 @@ useEffect(() => {
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 max-h-32 overflow-y-auto">
-                      {filters.dev_eui.map((devEui) => {
-                        const color = getDeviceColor(devEui, filters.dev_eui);
+                      {filters.dev_eui.map((personCode) => {
+                        const device = availableDevices.find(d => d.person_code === personCode);
+                        const color = getDeviceColor(personCode, filters.dev_eui);
                         return (
                           <span
-                            key={devEui}
+                            key={personCode}
                             className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 shadow-sm hover:shadow-md transition-shadow"
                             style={{ borderColor: color }}
                           >
@@ -896,11 +911,11 @@ useEffect(() => {
                               className="w-3 h-3 rounded-full ring-2 ring-white"
                               style={{ backgroundColor: color }}
                             ></span>
-                            <span className="font-mono font-semibold text-gray-700">
-                              {devEui}
+                            <span className="font-semibold text-gray-700">
+                              {device ? getDeviceDisplayName(device) : personCode}
                             </span>
                             <button
-                              onClick={() => handleRemoveDevEui(devEui)}
+                              onClick={() => handleRemoveDevEui(personCode)}
                               className="hover:bg-red-50 rounded-full p-1 transition-colors group"
                               title="Remover"
                             >
