@@ -773,7 +773,7 @@ const RawDataExplorer: React.FC = () => {
         setLoadingDeviceUids(true);
         try {
             const response = await fetch(
-                `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/device/list`
+                `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/device/list-simple`
             );
 
             if (!response.ok) {

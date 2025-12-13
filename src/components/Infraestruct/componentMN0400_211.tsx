@@ -36,7 +36,7 @@ import { t } from 'i18next';
 import GPSRouteMapLeaflet from './Map/GPSRouteMap';
 import GPSMapViewer from './Map/GPSMapViewer';
 import { useCompany } from '../../hooks/useCompany';
-import AssetManagementGrid from './DataGrid/AssetManagementGrid';
+// import AssetManagementGrid from './DataGrid/AssetManagementGrid';
 import HealthScoreDashboard from './DataGrid/HealthScoreDashboard';
 import { exportToExcel, exportToPDF } from '../../utils/exportMN0400211';
 import ExportModal from './Modal/exportModal';
@@ -839,11 +839,11 @@ const LowBatteryTableFilters = ({
     { value: 'STATIC', label: t('lowBatteryTable.filters.motion.static'), icon: '⏸️' }
   ];
 
-  const reportFreshnessOptions = [
-    { value: 'REAL_TIME', label: t('lowBatteryTable.filters.freshness.realTime'), color: 'green' },
-    { value: 'RECENT', label: t('lowBatteryTable.filters.freshness.recent'), color: 'blue' },
-    { value: 'STALE', label: t('lowBatteryTable.filters.freshness.stale'), color: 'gray' }
-  ];
+  // const reportFreshnessOptions = [
+  //   { value: 'REAL_TIME', label: t('lowBatteryTable.filters.freshness.realTime'), color: 'green' },
+  //   { value: 'RECENT', label: t('lowBatteryTable.filters.freshness.recent'), color: 'blue' },
+  //   { value: 'STALE', label: t('lowBatteryTable.filters.freshness.stale'), color: 'gray' }
+  // ];
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -1046,7 +1046,7 @@ const LowBatteryTableFilters = ({
             </div>
 
             {/* Filtro de Freshness */}
-            <div>
+            {/* <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 {t('lowBatteryTable.filters.reportFreshness')}
               </label>
@@ -1064,7 +1064,7 @@ const LowBatteryTableFilters = ({
                   </button>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Footer */}
@@ -3482,11 +3482,11 @@ export default function DeviceLogsView() {
                             {/* Battery Info */}
                             <SortableHeader field="battery_level" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.battery')}</SortableHeader>
                             <SortableHeader field="battery_status" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.status')}</SortableHeader>
-                            <SortableHeader field="battery_score" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.score')}</SortableHeader>
+                            {/* <SortableHeader field="battery_score" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.score')}</SortableHeader> */}
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.charging')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.updated')}</th>
                             <SortableHeader field="battery_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.fresh')}</th>
+                            {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.fresh')}</th> */}
 
                             {/* GPS Info */}
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-red-50">{t('lowBatteryTable.headers.gpsAge')}</th>
@@ -3501,10 +3501,10 @@ export default function DeviceLogsView() {
                             {/* Motion Info */}
                             <SortableHeader field="motion_status" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.motion')}</SortableHeader>
                             {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.value')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.updated')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.changed')}</th>
                             <SortableHeader field="motion_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader> */}
-                            <SortableHeader field="motion_freshness" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.fresh')}</SortableHeader>
+                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.updated')}</th>
+                            {/* <SortableHeader field="motion_freshness" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.fresh')}</SortableHeader> */}
                             {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.motion')}</th> */}
 
                             {/* Report Info */}
@@ -3513,8 +3513,8 @@ export default function DeviceLogsView() {
                             <SortableHeader field="hours_since_report" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.hours')}</SortableHeader>
                             <SortableHeader field="days_since_report" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.days')}</SortableHeader> */}
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.fresh')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.status')}</th>
-                            <SortableHeader field="freshness_score" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.score')}</SortableHeader>
+                            {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50">{t('lowBatteryTable.headers.status')}</th>
+                            <SortableHeader field="freshness_score" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-purple-50'>{t('lowBatteryTable.headers.score')}</SortableHeader> */}
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -3566,7 +3566,7 @@ export default function DeviceLogsView() {
                                       {device.battery_status}
                                     </span>
                                   </td>
-                                  <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
+                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
                                     <div className="relative w-8 h-8">
                                       <svg className="w-8 h-8 transform -rotate-90">
                                         <circle cx="16" cy="16" r="14" stroke="#e5e7eb" strokeWidth="3" fill="none" />
@@ -3585,7 +3585,7 @@ export default function DeviceLogsView() {
                                         <span className="text-[9px] font-bold">{device.battery_score}</span>
                                       </div>
                                     </div>
-                                  </td>
+                                  </td> */}
                                   <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
                                     <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] ${device.battery_charging === 'YES' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
                                       }`}>
@@ -3601,9 +3601,9 @@ export default function DeviceLogsView() {
                                   <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
                                     <span className="text-[10px] text-gray-600">{device.battery_minutes_ago}m</span>
                                   </td>
-                                  <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
+                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-yellow-50">
                                     <span className="text-[9px]">{device.battery_freshness}</span>
-                                  </td>
+                                  </td> */}
 
                                   {/* GPS Info */}
                                   <td className="px-2 py-2 whitespace-nowrap bg-red-50">
@@ -3653,14 +3653,14 @@ export default function DeviceLogsView() {
                                       {device.motion_status === 'MOVING' ? '🏃' : '⏸️'}
                                     </span>
                                   </td>
-                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-green-50">
-                                    <span className="text-[10px] text-gray-600">{device.motion_status_numeric}</span>
-                                  </td>
                                   <td className="px-2 py-2 whitespace-nowrap bg-green-50">
                                     <div className="text-[9px]">
                                       <div className="text-gray-900">{new Date(device.motion_last_updated).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</div>
                                       <div className="text-gray-500">{new Date(device.motion_last_updated).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
                                     </div>
+                                  </td>
+                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                    <span className="text-[10px] text-gray-600">{device.motion_status_numeric}</span>
                                   </td>
                                   <td className="px-2 py-2 whitespace-nowrap bg-green-50">
                                     <div className="text-[9px]">
@@ -3671,9 +3671,9 @@ export default function DeviceLogsView() {
                                   <td className="px-2 py-2 whitespace-nowrap bg-green-50">
                                     <span className="text-[10px] text-gray-600">{device.motion_minutes_ago}m</span>
                                   </td> */}
-                                  <td className="px-2 py-2 whitespace-nowrap bg-green-50">
+                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-green-50">
                                     <span className="text-[9px]">{device.motion_freshness}</span>
-                                  </td>
+                                  </td> */}
 
                                   {/* Report Info */}
                                   {/* <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
@@ -3699,10 +3699,10 @@ export default function DeviceLogsView() {
                                       {device.report_freshness}
                                     </span>
                                   </td>
-                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
                                     <span className="text-[10px]">{device.report_status}</span>
-                                  </td>
-                                  <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
+                                  </td> */}
+                                  {/* <td className="px-2 py-2 whitespace-nowrap bg-purple-50">
                                     <div className="relative w-8 h-8">
                                       <svg className="w-8 h-8 transform -rotate-90">
                                         <circle cx="16" cy="16" r="14" stroke="#e5e7eb" strokeWidth="3" fill="none" />
@@ -3724,7 +3724,7 @@ export default function DeviceLogsView() {
                                         <span className="text-[9px] font-bold">{device.freshness_score}</span>
                                       </div>
                                     </div>
-                                  </td>
+                                  </td> */}
                                 </tr>
                               ))}
                             </>)}
@@ -3774,7 +3774,7 @@ export default function DeviceLogsView() {
             )}
           </div>
 
-          <AssetManagementGrid />
+          {/* <AssetManagementGrid /> */}
           <HealthScoreDashboard companyId={companyId} />
 
         </div>

@@ -86,7 +86,7 @@ interface DeviceInfo {
 }
 
 interface GPSFilters {
-  dev_eui: string[]; // 🔄 Array para seleção múltipla
+  dev_eui: string;
   start_date: string;
   end_date: string;
   valid_gps_only: boolean;
@@ -536,7 +536,7 @@ const GPSRouteMapLeaflet = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const [filters, setFilters] = useState<GPSFilters>({
-    dev_eui: [], // 🔄 Array vazio
+    dev_eui: '',
     start_date: '',
     end_date: '',
     valid_gps_only: true,
@@ -553,7 +553,7 @@ const GPSRouteMapLeaflet = () => {
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
   // @ts-ignore
   const [shouldApplyPlayerZoom, setShouldApplyPlayerZoom] = useState(false);
-  const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('streets');
+  const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('satellite');
   const playbackIntervalRef = useRef<any | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -562,7 +562,7 @@ const GPSRouteMapLeaflet = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const fetchGPSRoute = async () => {
-    if (!filters.dev_eui || filters.dev_eui.length === 0) {
+    if (!filters.dev_eui) {
       alert(t('gpsRouteMap.alerts.noDeviceEUI'));
       return;
     }
@@ -570,7 +570,7 @@ const GPSRouteMapLeaflet = () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        dev_eui: filters.dev_eui.join(','), // 🔄 Join array com vírgula
+        dev_eui: filters.dev_eui,
         limit: limit.toString(),
         sortBy: 'timestamp',
         sortOrder: 'ASC',
@@ -746,37 +746,18 @@ const GPSRouteMapLeaflet = () => {
   const defaultCenter: [number, number] = [-2.4833, -44.2167];
   const center = positions.length > 0 ? positions[0] : defaultCenter;
 
-  // 🔄 Handlers para seleção múltipla
-  const toggleDevice = (personCode: string) => {
-    setFilters((prev) => {
-      const isSelected = prev.dev_eui.includes(personCode);
-      return {
-        ...prev,
-        dev_eui: isSelected
-          ? prev.dev_eui.filter((d) => d !== personCode)
-          : [...prev.dev_eui, personCode],
-      };
-    });
-  };
-
-  const selectAllDevices = () => {
+  // Handlers para single select
+  const handleSelectDevice = (personCode: string) => {
     setFilters((prev) => ({
       ...prev,
-      dev_eui: availableDevices.map(d => d.person_code),
+      dev_eui: personCode,
     }));
   };
 
-  const deselectAllDevices = () => {
+  const handleClearDevice = () => {
     setFilters((prev) => ({
       ...prev,
-      dev_eui: [],
-    }));
-  };
-
-  const handleRemoveDevEui = (personCode: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      dev_eui: prev.dev_eui.filter((d) => d !== personCode),
+      dev_eui: '',
     }));
   };
 
@@ -833,7 +814,7 @@ const GPSRouteMapLeaflet = () => {
         </div>
       </div>
 
-      {/* SELEÇÃO MÚLTIPLA DE DISPOSITIVOS */}
+      {/* SINGLE SELECT DE DISPOSITIVO */}
       <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
         <div className="relative dropdown-container">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -852,9 +833,13 @@ const GPSRouteMapLeaflet = () => {
             className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
           >
             <span className="text-sm text-gray-700 truncate">
-              {filters.dev_eui.length === 0
-                ? t('gpsMap.filters.selectDevices')
-                : t('gpsMap.filters.devicesSelected', { count: filters.dev_eui.length })}
+              {filters.dev_eui 
+                ? (() => {
+                    const device = availableDevices.find(d => d.person_code === filters.dev_eui);
+                    return device ? getDeviceDisplayName(device) : filters.dev_eui;
+                  })()
+                : t('gpsMap.filters.selectDevices')
+              }
             </span>
             <svg
               className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ml-2 ${isDropdownOpen ? 'transform rotate-180' : ''}`}
@@ -892,23 +877,13 @@ const GPSRouteMapLeaflet = () => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={selectAllDevices}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      {t('gpsMap.filters.selectAll')}
-                    </button>
-                    <span className="text-gray-300">|</span>
-                    <button
-                      type="button"
-                      onClick={deselectAllDevices}
-                      className="text-xs text-red-600 hover:text-red-800 font-medium"
-                    >
-                      {t('gpsMap.filters.clear')}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearDevice}
+                    className="text-xs text-red-600 hover:text-red-800 font-medium"
+                  >
+                    {t('gpsMap.filters.clear')}
+                  </button>
                   <button
                     type="button"
                     onClick={fetchAvailableDevices}
@@ -921,7 +896,7 @@ const GPSRouteMapLeaflet = () => {
                 </div>
               </div>
 
-              {/* Lista de dispositivos com checkboxes */}
+              {/* Lista de dispositivos */}
               <div className="overflow-y-auto max-h-64">
                 {filteredDevices.length === 0 ? (
                   <div className="px-4 py-8 text-center text-sm text-gray-500">
@@ -929,29 +904,23 @@ const GPSRouteMapLeaflet = () => {
                   </div>
                 ) : (
                   filteredDevices.map((device) => {
-                    const isSelected = filters.dev_eui.includes(device.person_code);
-                    const color = '#3b82f6'; // Cor padrão azul
+                    const isSelected = filters.dev_eui === device.person_code;
 
                     return (
-                      <label
+                      <button
                         key={device.person_code}
-                        className={`flex items-center px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 ${isSelected
+                        onClick={() => {
+                          handleSelectDevice(device.person_code);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`flex items-center w-full px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 text-left ${isSelected
                             ? 'bg-blue-50 border-l-blue-600'
                             : 'border-l-transparent'
                           }`}
                       >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleDevice(device.person_code)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                        />
-                        <span className="ml-3 flex items-center gap-2 flex-1">
+                        <span className="flex items-center gap-2 flex-1">
                           {isSelected && (
-                            <span
-                              className="w-3 h-3 rounded-full ring-2 ring-white"
-                              style={{ backgroundColor: color }}
-                            />
+                            <span className="w-3 h-3 rounded-full ring-2 ring-white bg-blue-500" />
                           )}
                           <span
                             className={`text-sm ${isSelected
@@ -962,7 +931,7 @@ const GPSRouteMapLeaflet = () => {
                             {getDeviceDisplayName(device)}
                           </span>
                         </span>
-                      </label>
+                      </button>
                     );
                   })
                 )}
@@ -989,47 +958,37 @@ const GPSRouteMapLeaflet = () => {
           )}
         </div>
 
-        {/* Dispositivos selecionados */}
-        {filters.dev_eui.length > 0 && (
+        {/* Dispositivo selecionado */}
+        {filters.dev_eui && (
           <div className="mt-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">
-                {t('gpsMap.filters.selected', {count: filters.dev_eui.length})}
+                {t('gpsMap.filters.selected', {count: 1})}
               </span>
               <button
-                onClick={deselectAllDevices}
+                onClick={handleClearDevice}
                 className="text-xs text-red-600 hover:text-red-800 font-medium"
               >
-                {t('gpsMap.filters.removeAll')}
+                {t('gpsMap.filters.remove')}
               </button>
             </div>
-            <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 max-h-32 overflow-y-auto">
-              {filters.dev_eui.map((personCode) => {
-                const device = availableDevices.find(d => d.person_code === personCode);
-                const color = '#3b82f6';
-                return (
-                  <span
-                    key={personCode}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 shadow-sm hover:shadow-md transition-shadow"
-                    style={{ borderColor: color }}
-                  >
-                    <span
-                      className="w-3 h-3 rounded-full ring-2 ring-white"
-                      style={{ backgroundColor: color }}
-                    ></span>
-                    <span className="font-semibold text-gray-700">
-                      {device ? getDeviceDisplayName(device) : personCode}
-                    </span>
-                    <button
-                      onClick={() => handleRemoveDevEui(personCode)}
-                      className="hover:bg-red-50 rounded-full p-1 transition-colors group"
-                      title="Remover"
-                    >
-                      <XMarkIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-600" />
-                    </button>
-                  </span>
-                );
-              })}
+            <div className="p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 border-blue-500 shadow-sm">
+                <span className="w-3 h-3 rounded-full ring-2 ring-white bg-blue-500"></span>
+                <span className="font-semibold text-gray-700">
+                  {(() => {
+                    const device = availableDevices.find(d => d.person_code === filters.dev_eui);
+                    return device ? getDeviceDisplayName(device) : filters.dev_eui;
+                  })()}
+                </span>
+                <button
+                  onClick={handleClearDevice}
+                  className="hover:bg-red-50 rounded-full p-1 transition-colors group"
+                  title="Remover"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-600" />
+                </button>
+              </span>
             </div>
           </div>
         )}

@@ -385,7 +385,7 @@ const GPSMapViewer = () => {
   const [playbackSpeed, setPlaybackSpeed] = useState(1000);
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
 
-  const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('streets');
+  const [mapType, setMapType] = useState<keyof typeof MAP_TYPES>('satellite');
   const [showHeatmap, setShowHeatmap] = useState(false);
 
   const [center] = useState<[number, number]>([-2.5307, -44.3068]);
