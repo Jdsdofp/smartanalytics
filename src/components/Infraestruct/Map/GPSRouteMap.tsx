@@ -80,8 +80,13 @@ interface GPSPoint {
   gps_accuracy: number;
 }
 
+interface DeviceInfo {
+  person_code: string;
+  person_name: string;
+}
+
 interface GPSFilters {
-  dev_eui: string; // 🆕 Mudou de string[] para string
+  dev_eui: string[]; // 🔄 Array para seleção múltipla
   start_date: string;
   end_date: string;
   valid_gps_only: boolean;
@@ -89,6 +94,23 @@ interface GPSFilters {
   min_accuracy: string;
   latest_only?: boolean;
 }
+
+// =====================================
+// 🔍 FUNÇÃO AUXILIAR PARA BUSCA
+// =====================================
+const getDeviceDisplayName = (device: DeviceInfo): string => {
+  return `${device.person_code} - ${device.person_name}`;
+};
+
+const filterDevicesBySearch = (devices: DeviceInfo[], search: string): DeviceInfo[] => {
+  if (!search) return devices;
+  
+  const searchLower = search.toLowerCase();
+  return devices.filter(device => 
+    device.person_code.toLowerCase().includes(searchLower) ||
+    device.person_name.toLowerCase().includes(searchLower)
+  );
+};
 
 // Componente para ajustar o mapa aos bounds
 function MapBounds({ positions }: { positions: [number, number][] }) {
@@ -513,9 +535,8 @@ const GPSRouteMapLeaflet = () => {
   const [limit, setLimit] = useState(200);
   const [showFilters, setShowFilters] = useState(false);
 
-  // 🆕 Filtros com dev_eui como string
   const [filters, setFilters] = useState<GPSFilters>({
-    dev_eui: '', // 🆕 String vazia ao invés de array
+    dev_eui: [], // 🔄 Array vazio
     start_date: '',
     end_date: '',
     valid_gps_only: true,
@@ -536,12 +557,12 @@ const GPSRouteMapLeaflet = () => {
   const playbackIntervalRef = useRef<any | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [availableDevices, setAvailableDevices] = useState<string[]>([]);
+  const [availableDevices, setAvailableDevices] = useState<DeviceInfo[]>([]);
   const [loadingDevices, setLoadingDevices] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const fetchGPSRoute = async () => {
-    if (!filters.dev_eui) {
+    if (!filters.dev_eui || filters.dev_eui.length === 0) {
       alert(t('gpsRouteMap.alerts.noDeviceEUI'));
       return;
     }
@@ -549,7 +570,7 @@ const GPSRouteMapLeaflet = () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        dev_eui: filters.dev_eui,
+        dev_eui: filters.dev_eui.join(','), // 🔄 Join array com vírgula
         limit: limit.toString(),
         sortBy: 'timestamp',
         sortOrder: 'ASC',
@@ -725,18 +746,37 @@ const GPSRouteMapLeaflet = () => {
   const defaultCenter: [number, number] = [-2.4833, -44.2167];
   const center = positions.length > 0 ? positions[0] : defaultCenter;
 
-  // 🆕 Handlers para single select
-  const handleSelectDevice = (devEui: string) => {
+  // 🔄 Handlers para seleção múltipla
+  const toggleDevice = (personCode: string) => {
+    setFilters((prev) => {
+      const isSelected = prev.dev_eui.includes(personCode);
+      return {
+        ...prev,
+        dev_eui: isSelected
+          ? prev.dev_eui.filter((d) => d !== personCode)
+          : [...prev.dev_eui, personCode],
+      };
+    });
+  };
+
+  const selectAllDevices = () => {
     setFilters((prev) => ({
       ...prev,
-      dev_eui: devEui,
+      dev_eui: availableDevices.map(d => d.person_code),
     }));
   };
 
-  const handleClearDevice = () => {
+  const deselectAllDevices = () => {
     setFilters((prev) => ({
       ...prev,
-      dev_eui: '',
+      dev_eui: [],
+    }));
+  };
+
+  const handleRemoveDevEui = (personCode: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      dev_eui: prev.dev_eui.filter((d) => d !== personCode),
     }));
   };
 
@@ -755,9 +795,7 @@ const GPSRouteMapLeaflet = () => {
     };
   }, [isDropdownOpen]);
 
-  const filteredDevices = availableDevices.filter(devEui =>
-    devEui.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDevices = filterDevicesBySearch(availableDevices, searchTerm);
 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
@@ -795,14 +833,14 @@ const GPSRouteMapLeaflet = () => {
         </div>
       </div>
 
-      {/* 🆕 SINGLE SELECT DE DISPOSITIVO */}
+      {/* SELEÇÃO MÚLTIPLA DE DISPOSITIVOS */}
       <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
         <div className="relative dropdown-container">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Device UID
+            {t('gpsMap.filters.devices')}
             {loadingDevices && (
               <span className="ml-2 text-xs text-gray-500 animate-pulse">
-                (carregando...)
+                {t('gpsMap.filters.loadingDevices')}
               </span>
             )}
           </label>
@@ -814,7 +852,9 @@ const GPSRouteMapLeaflet = () => {
             className="w-full flex items-center justify-between px-4 py-2.5 bg-white border border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
           >
             <span className="text-sm text-gray-700 truncate">
-              {filters.dev_eui || t('assetManagement.searchPlaceholder')}
+              {filters.dev_eui.length === 0
+                ? t('gpsMap.filters.selectDevices')
+                : t('gpsMap.filters.devicesSelected', { count: filters.dev_eui.length })}
             </span>
             <svg
               className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ml-2 ${isDropdownOpen ? 'transform rotate-180' : ''}`}
@@ -835,7 +875,7 @@ const GPSRouteMapLeaflet = () => {
                   <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="text"
-                    placeholder={t('assetManagement.searchPlaceholder')}
+                    placeholder="Buscar por código ou nome..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -852,13 +892,23 @@ const GPSRouteMapLeaflet = () => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={handleClearDevice}
-                    className="text-xs text-red-600 hover:text-red-800 font-medium"
-                  >
-                    {t('gpsMap.filters.clear')}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={selectAllDevices}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      {t('gpsMap.filters.selectAll')}
+                    </button>
+                    <span className="text-gray-300">|</span>
+                    <button
+                      type="button"
+                      onClick={deselectAllDevices}
+                      className="text-xs text-red-600 hover:text-red-800 font-medium"
+                    >
+                      {t('gpsMap.filters.clear')}
+                    </button>
+                  </div>
                   <button
                     type="button"
                     onClick={fetchAvailableDevices}
@@ -871,44 +921,48 @@ const GPSRouteMapLeaflet = () => {
                 </div>
               </div>
 
-              {/* Lista de dispositivos */}
+              {/* Lista de dispositivos com checkboxes */}
               <div className="overflow-y-auto max-h-64">
                 {filteredDevices.length === 0 ? (
                   <div className="px-4 py-8 text-center text-sm text-gray-500">
-                    {searchTerm ? 'Nenhum dispositivo encontrado' : 'Nenhum dispositivo disponível'}
+                    {searchTerm ? 'Nenhum dispositivo encontrado' : t('gpsMap.filters.noDevices')}
                   </div>
                 ) : (
-                  filteredDevices.map((devEui) => {
-                    const isSelected = filters.dev_eui === devEui;
+                  filteredDevices.map((device) => {
+                    const isSelected = filters.dev_eui.includes(device.person_code);
+                    const color = '#3b82f6'; // Cor padrão azul
 
                     return (
-                      <button
-                        key={devEui}
-                        onClick={() => {
-                          handleSelectDevice(devEui);
-                          setIsDropdownOpen(false);
-                        }}
-                        className={`flex items-center w-full px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 text-left ${isSelected
+                      <label
+                        key={device.person_code}
+                        className={`flex items-center px-4 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors border-l-4 ${isSelected
                             ? 'bg-blue-50 border-l-blue-600'
                             : 'border-l-transparent'
                           }`}
                       >
-                        <span className="flex items-center gap-2 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleDevice(device.person_code)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        />
+                        <span className="ml-3 flex items-center gap-2 flex-1">
                           {isSelected && (
                             <span
-                              className="w-3 h-3 rounded-full ring-2 ring-white bg-blue-500"
+                              className="w-3 h-3 rounded-full ring-2 ring-white"
+                              style={{ backgroundColor: color }}
                             />
                           )}
                           <span
-                            className={`text-sm font-mono ${isSelected
+                            className={`text-sm ${isSelected
                                 ? 'font-semibold text-gray-900'
                                 : 'text-gray-700'
                               }`}
                           >
-                            {devEui}
+                            {getDeviceDisplayName(device)}
                           </span>
                         </span>
-                      </button>
+                      </label>
                     );
                   })
                 )}
@@ -918,11 +972,8 @@ const GPSRouteMapLeaflet = () => {
               <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-3 py-2">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-gray-600">
-                      {t('gpsMap.filters.devicesCountPagination', {
-                      count: filteredDevices.length,
-                      total: availableDevices.length
-                    })}
-                      {searchTerm && t('assetManagement.filtered')}
+                    {filteredDevices.length} de {availableDevices.length} dispositivos
+                    {searchTerm && ' (filtrado)'}
                   </p>
                   {searchTerm && (
                     <button
@@ -938,40 +989,53 @@ const GPSRouteMapLeaflet = () => {
           )}
         </div>
 
-        {/* Dispositivo selecionado */}
-        {filters.dev_eui && (
+        {/* Dispositivos selecionados */}
+        {filters.dev_eui.length > 0 && (
           <div className="mt-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">
-                 {t('gpsMap.filters.select')}
+                {t('gpsMap.filters.selected', {count: filters.dev_eui.length})}
               </span>
               <button
-                onClick={handleClearDevice}
+                onClick={deselectAllDevices}
                 className="text-xs text-red-600 hover:text-red-800 font-medium"
               >
-                {t('gpsMap.filters.remove')}
+                {t('gpsMap.filters.removeAll')}
               </button>
             </div>
-            <div className="p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 border-blue-500 shadow-sm">
-                <span className="w-3 h-3 rounded-full ring-2 ring-white bg-blue-500"></span>
-                <span className="font-mono font-semibold text-gray-700">
-                  {filters.dev_eui}
-                </span>
-                <button
-                  onClick={handleClearDevice}
-                  className="hover:bg-red-50 rounded-full p-1 transition-colors group"
-                  title="Remover"
-                >
-                  <XMarkIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-600" />
-                </button>
-              </span>
+            <div className="flex flex-wrap gap-2 p-3 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 max-h-32 overflow-y-auto">
+              {filters.dev_eui.map((personCode) => {
+                const device = availableDevices.find(d => d.person_code === personCode);
+                const color = '#3b82f6';
+                return (
+                  <span
+                    key={personCode}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full text-sm border-2 shadow-sm hover:shadow-md transition-shadow"
+                    style={{ borderColor: color }}
+                  >
+                    <span
+                      className="w-3 h-3 rounded-full ring-2 ring-white"
+                      style={{ backgroundColor: color }}
+                    ></span>
+                    <span className="font-semibold text-gray-700">
+                      {device ? getDeviceDisplayName(device) : personCode}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveDevEui(personCode)}
+                      className="hover:bg-red-50 rounded-full p-1 transition-colors group"
+                      title="Remover"
+                    >
+                      <XMarkIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-600" />
+                    </button>
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}
       </div>
 
-      {/* Filters */}
+      {/* Filters - mantém exatamente igual ao original */}
       {showFilters && (
         <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1043,7 +1107,7 @@ const GPSRouteMapLeaflet = () => {
         </div>
       )}
 
-      {/* Player Controls */}
+      {/* Player Controls - mantém igual */}
       {validData.length > 0 && (
         <div className="bg-yellow-50 border-b border-yellow-200 px-6 py-4">
           <div className="flex flex-col space-y-4">
@@ -1173,7 +1237,7 @@ const GPSRouteMapLeaflet = () => {
         </div>
       )}
 
-      {/* Stats */}
+      {/* Stats - mantém igual */}
       {validData.length > 0 && (
         <div className="bg-blue-50 border-b border-blue-200 px-6 py-3">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -1203,7 +1267,7 @@ const GPSRouteMapLeaflet = () => {
         </div>
       )}
 
-      {/* Map */}
+      {/* Map - mantém igual ao original */}
       <div className="p-6">
         {loading ? (
           <div className="flex items-center justify-center h-[700px]">
@@ -1324,7 +1388,7 @@ const GPSRouteMapLeaflet = () => {
         )}
       </div>
 
-      {/* Legend */}
+      {/* Legend - mantém igual */}
       {validData.length > 0 && (
         <div className="bg-gray-50 border-t border-gray-200 px-6 py-4">
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
