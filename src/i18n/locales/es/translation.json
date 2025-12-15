@@ -293,7 +293,7 @@
       "events": "Eventos",
       "network": "Red",
       "customers": "Clientes",
-      "rawData": "Base de datos procesada"
+      "rawData": "Telemetría de Dispositivos"
     },
     "kpis": {
       "deviceUptime": {
@@ -1155,7 +1155,8 @@
     "activityCards": {
       "activeLastHour": "Activos en la Última Hora",
       "silent24h": "Silenciosos (+24h)",
-      "inactiveToday": "Inactivos Hoy"
+      "inactiveToday": "Inactivos Hoy",
+      "devices": "Dispositivos"
     },
     "gpsCards": {
       "gpsToday": "GPS Hoy",

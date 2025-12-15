@@ -41,6 +41,8 @@ import HealthScoreDashboard from './DataGrid/HealthScoreDashboard';
 import { exportToExcel, exportToPDF } from '../../utils/exportMN0400211';
 import ExportModal from './Modal/exportModal';
 import DevicePayloadStatsGrid from './DataGrid/DevicePayloadStatsGrid';
+import { EquipmentCard } from './Components/EquipmentCard';
+import { ActivityCard } from './Components/ActivityCard';
 
 // =====================================
 // 📊 INTERFACES ATUALIZADAS
@@ -844,6 +846,7 @@ const LowBatteryTableFilters = ({
   //   { value: 'RECENT', label: t('lowBatteryTable.filters.freshness.recent'), color: 'blue' },
   //   { value: 'STALE', label: t('lowBatteryTable.filters.freshness.stale'), color: 'gray' }
   // ];
+
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -1740,92 +1743,92 @@ const ChartContainer = ({
 };
 
 
-const EquipmentCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
+// const EquipmentCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
 
-  const { t } = useTranslation();
+//   const { t } = useTranslation();
 
-  const colorClasses = {
-    blue: 'bg-blue-50 border-blue-200',
-    green: 'bg-green-50 border-green-200',
-    red: 'bg-red-50 border-red-200',
-    gray: 'bg-gray-50 border-gray-200',
-  };
+//   const colorClasses = {
+//     blue: 'bg-blue-50 border-blue-200',
+//     green: 'bg-green-50 border-green-200',
+//     red: 'bg-red-50 border-red-200',
+//     gray: 'bg-gray-50 border-gray-200',
+//   };
 
-  const textColorClasses = {
-    blue: 'text-blue-600',
-    green: 'text-green-600',
-    red: 'text-red-600',
-    gray: 'text-gray-600',
-  };
+//   const textColorClasses = {
+//     blue: 'text-blue-600',
+//     green: 'text-green-600',
+//     red: 'text-red-600',
+//     gray: 'text-gray-600',
+//   };
 
-  const isPrimary = card.type === 'primary';
+//   const isPrimary = card.type === 'primary';
 
-  // Busca a tradução baseada no cardKey
-  const translatedTitle = t(`dashboardCard.equipmentCards.${cardKey}`);
+//   // Busca a tradução baseada no cardKey
+//   const translatedTitle = t(`dashboardCard.equipmentCards.${cardKey}`);
 
-  return (
-    <div className={`rounded-lg border-2 p-6 transition-all hover:shadow-lg ${colorClasses[card.color as keyof typeof colorClasses]}`}>
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className={`text-sm font-medium opacity-80 uppercase tracking-wide ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
-            {/* {card.title} */}
-            {translatedTitle}
-          </p>
-          <div className="mt-2 flex items-baseline gap-2">
-            <p className={`font-bold ${isPrimary ? 'text-4xl' : 'text-3xl'} ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
-              {card.value}
-            </p>
-            {card.percentage && (
-              <span className={`text-sm font-medium opacity-75 ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
-                ({card.percentage}%)
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="text-4xl">
-          {card.icon}
-        </div>
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div className={`rounded-lg border-2 p-6 transition-all hover:shadow-lg ${colorClasses[card.color as keyof typeof colorClasses]}`}>
+//       <div className="flex items-start justify-between">
+//         <div className="flex-1">
+//           <p className={`text-sm font-medium opacity-80 uppercase tracking-wide ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+//             {/* {card.title} */}
+//             {translatedTitle}
+//           </p>
+//           <div className="mt-2 flex items-baseline gap-2">
+//             <p className={`font-bold ${isPrimary ? 'text-4xl' : 'text-3xl'} ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+//               {card.value}
+//             </p>
+//             {card.percentage && (
+//               <span className={`text-sm font-medium opacity-75 ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+//                 ({card.percentage}%)
+//               </span>
+//             )}
+//           </div>
+//         </div>
+//         <div className="text-4xl">
+//           {card.icon}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
-const ActivityCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
-  const { t } = useTranslation();
-  const colorClasses = {
-    green: 'bg-green-50 border-green-200',
-    orange: 'bg-orange-50 border-orange-200',
-    yellow: 'bg-yellow-50 border-yellow-200',
-  };
+// const ActivityCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
+//   const { t } = useTranslation();
+//   const colorClasses = {
+//     green: 'bg-green-50 border-green-200',
+//     orange: 'bg-orange-50 border-orange-200',
+//     yellow: 'bg-yellow-50 border-yellow-200',
+//   };
 
-  const textColorClasses = {
-    green: 'text-green-700',
-    orange: 'text-orange-700',
-    yellow: 'text-yellow-700',
-  };
+//   const textColorClasses = {
+//     green: 'text-green-700',
+//     orange: 'text-orange-700',
+//     yellow: 'text-yellow-700',
+//   };
 
-  // Busca a tradução baseada no cardKey
-  const translatedTitle = t(`dashboardCard.activityCards.${cardKey}`);
+//   // Busca a tradução baseada no cardKey
+//   const translatedTitle = t(`dashboardCard.activityCards.${cardKey}`);
 
-  return (
-    <div className={`rounded-lg border-2 p-5 transition-all hover:shadow-md ${colorClasses[card.color as keyof typeof colorClasses]}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className={`text-xs font-medium opacity-80 uppercase tracking-wide ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
-            {/* {card.title} */}
-            {translatedTitle}
-          </p>
-          <p className={`mt-1 text-3xl font-bold ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
-            {card.value}
-          </p>
-        </div>
-        <div className="text-3xl">
-          {card.icon}
-        </div>
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div className={`rounded-lg border-2 p-5 transition-all hover:shadow-md ${colorClasses[card.color as keyof typeof colorClasses]}`}>
+//       <div className="flex items-center justify-between">
+//         <div>
+//           <p className={`text-xs font-medium opacity-80 uppercase tracking-wide ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+//             {/* {card.title} */}
+//             {translatedTitle}
+//           </p>
+//           <p className={`mt-1 text-3xl font-bold ${textColorClasses[card.color as keyof typeof textColorClasses]}`}>
+//             {card.value}
+//           </p>
+//         </div>
+//         <div className="text-3xl">
+//           {card.icon}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
 // const GPSCard = ({ card, cardKey }: { card: any; cardKey: string }) => {
 //   const { t } = useTranslation();
@@ -3300,31 +3303,39 @@ export default function DeviceLogsView() {
         <div className="space-y-6">
           {/* ✨ CARDS DE EQUIPAMENTOS */}
           {dashboardCards?.equipment_cards && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <DevicePhoneMobileIcon className="h-6 w-6" />
-                {t('dashboard.equipmentStatus')}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <EquipmentCard card={dashboardCards.equipment_cards.total} cardKey="total" />
-                <EquipmentCard card={dashboardCards.equipment_cards.online} cardKey="online" />
-                <EquipmentCard card={dashboardCards.equipment_cards.offline} cardKey="offline" />
-                <EquipmentCard card={dashboardCards.equipment_cards.no_data} cardKey="noData" />
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg">
+                  <DevicePhoneMobileIcon className="h-6 w-6 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  {t('dashboard.equipmentStatus')}
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <EquipmentCard card={dashboardCards.equipment_cards.total} cardKey="total" isLoading={refreshing} />
+                <EquipmentCard card={dashboardCards.equipment_cards.online} cardKey="online" isLoading={refreshing} />
+                <EquipmentCard card={dashboardCards.equipment_cards.offline} cardKey="offline" isLoading={refreshing} />
+                <EquipmentCard card={dashboardCards.equipment_cards.no_data} cardKey="noData" isLoading={refreshing} />
               </div>
             </div>
           )}
 
           {/* ✨ CARDS DE ATIVIDADE */}
           {dashboardCards?.activity_cards && (
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <ClockIcon className="h-6 w-6" />
-                {t('dashboard.recentActivity')}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <ActivityCard card={dashboardCards.activity_cards.active_last_hour} cardKey="activeLastHour" />
-                <ActivityCard card={dashboardCards.activity_cards.silent_24h} cardKey="silent24h" />
-                <ActivityCard card={dashboardCards.activity_cards.inactive_today} cardKey="inactiveToday" />
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg">
+                  <ClockIcon className="h-6 w-6 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  {t('dashboard.recentActivity')}
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <ActivityCard card={dashboardCards.activity_cards.active_last_hour} cardKey="activeLastHour" isLoading={refreshing} />
+                <ActivityCard card={dashboardCards.activity_cards.silent_24h} cardKey="silent24h" isLoading={refreshing} />
+                <ActivityCard card={dashboardCards.activity_cards.inactive_today} cardKey="inactiveToday" isLoading={refreshing} />
               </div>
             </div>
           )}
@@ -3491,7 +3502,7 @@ export default function DeviceLogsView() {
                             <SortableHeader field="battery_status" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.status')}</SortableHeader>
                             {/* <SortableHeader field="battery_score" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.score')}</SortableHeader> */}
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.charging')}</th>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.updated')}</th>
+                            <SortableHeader field='battery_last_updated' bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.updated')}</SortableHeader>
                             <SortableHeader field="battery_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader>
                             {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-yellow-50">{t('lowBatteryTable.headers.fresh')}</th> */}
 
@@ -3501,7 +3512,7 @@ export default function DeviceLogsView() {
 
                             {/* Temperature Info */}
                             <SortableHeader field="temperature" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50'>{t('lowBatteryTable.headers.temp')}</SortableHeader>
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.updated')}</th>
+                            <SortableHeader field='temperature_last_updated' bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50'>{t('lowBatteryTable.headers.updated')}</SortableHeader>
                             {/* <SortableHeader field="temperature_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-blue-50">{t('lowBatteryTable.headers.fresh')}</th> */}
 
@@ -3510,7 +3521,7 @@ export default function DeviceLogsView() {
                             {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.value')}</th>
                             <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.changed')}</th>
                             <SortableHeader field="motion_minutes_ago" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.minAgo')}</SortableHeader> */}
-                            <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.updated')}</th>
+                            <SortableHeader field='motion_last_updated' bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.updated')}</SortableHeader>
                             {/* <SortableHeader field="motion_freshness" bgClass='px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50'>{t('lowBatteryTable.headers.fresh')}</SortableHeader> */}
                             {/* <th className="px-2 py-2 text-left text-[10px] font-medium text-gray-500 uppercase whitespace-nowrap bg-green-50">{t('lowBatteryTable.headers.motion')}</th> */}
 
@@ -4130,7 +4141,12 @@ export default function DeviceLogsView() {
                   <p className="text-sm font-medium text-gray-600">{t('gateway.metrics.overallAvgRssi')}</p>
                   <p className="mt-2 text-3xl font-semibold text-gray-900">
                     {gatewayQuality.length > 0
-                      ? (gatewayQuality.reduce((sum, g) => sum + (g.avg_rssi || 0), 0) / gatewayQuality.length).toFixed(1)
+                      ? (
+                        gatewayQuality.reduce((sum: any, g: any) => {
+                          const rssiValue = parseFloat(g.avg_rssi) || 0;
+                          return sum + rssiValue;
+                        }, 0) / gatewayQuality.length
+                      ).toFixed(1)
                       : '0'
                     } dBm
                   </p>
