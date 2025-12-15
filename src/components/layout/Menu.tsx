@@ -397,10 +397,10 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
       ]
     },
     {
-      icon: UserGroupIcon, label: 'People Analytics', path: '/MN0400_003', hidden: true,
+      icon: UserGroupIcon, label: 'People Analytics', path: '/MN0400_003', hidden: false,
       children: [
         {
-          icon: UserGroupIcon, label: 'Workforce Planning', path: '/MN0400_110', children: [
+          icon: UserGroupIcon, label: 'Workforce Planning', path: '/MN0400_110', hidden: true, children: [
             { icon: ChartPieIcon, label: 'Workforce Composition', path: '/MN0400_111', permissionCode: 'MN0400_111' },
             { icon: MapPinIcon, label: 'Headcount by Location & Role', path: '/MN0400_112', permissionCode: 'MN0400_112' },
             { icon: ChartBarIcon, label: 'Turnover & Retention Analysis', path: '/MN0400_113', permissionCode: 'MN0400_113' },
@@ -417,11 +417,11 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           ]
         },
         {
-          icon: ShieldCheckIcon, label: 'Safety & Wellbeing', path: '/MN0400_130', disabled: true, children: [
-            { icon: ChartBarIcon, label: 'Safety Leading Indicators', path: '/MN0400_131', permissionCode: 'MN0400_131' },
-            { icon: ChartBarIcon, label: 'Incident Rate Trends', path: '/MN0400_132', permissionCode: 'MN0400_132' },
-            { icon: DocumentChartBarIcon, label: 'Near-Miss Analysis', path: '/MN0400_133', permissionCode: 'MN0400_133' },
-            { icon: DocumentTextIcon, label: 'Safety Compliance Score', path: '/MN0400_134', permissionCode: 'MN0400_134' },
+          icon: ShieldCheckIcon, label: 'Safety & Wellbeing', path: '/MN0400_130', children: [
+            { icon: ChartBarIcon, label: ' Real-time People Visibility', path: '/MN0400_131', permissionCode: 'MN0400_131' },
+            { icon: ChartBarIcon, label: 'Incident Rate Trends', path: '/MN0400_132', permissionCode: 'MN0400_132', hidden: true },
+            { icon: DocumentChartBarIcon, label: 'Near-Miss Analysis', path: '/MN0400_133', permissionCode: 'MN0400_133', hidden: true },
+            { icon: DocumentTextIcon, label: 'Safety Compliance Score', path: '/MN0400_134', permissionCode: 'MN0400_134', hidden: true },
           ]
         },
         {

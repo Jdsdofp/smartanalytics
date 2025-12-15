@@ -223,8 +223,8 @@ export default function Login() {
             {/* Footer */}
             <div className="text-center pt-6 border-t border-slate-700/50">
               <p className="text-xs text-slate-500">
-                © 2024 SmartxHub. Todos os direitos reservados.
-              </p>
+  © {new Date().getFullYear()} SmartxHub. Todos os direitos reservados.
+</p>
             </div>
           </div>
         </div>

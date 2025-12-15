@@ -116,6 +116,12 @@ function App() {
         </>
       }/>
 
+      <Route path='/MN0400_131' element={
+        <PrivateRoute>
+          <MN0400_211 />
+        </PrivateRoute>
+      } />
+
     </Routes>
 
   );

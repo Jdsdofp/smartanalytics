@@ -43,6 +43,7 @@ import ExportModal from './Modal/exportModal';
 import DevicePayloadStatsGrid from './DataGrid/DevicePayloadStatsGrid';
 import { EquipmentCard } from './Components/EquipmentCard';
 import { ActivityCard } from './Components/ActivityCard';
+import { useLocation } from 'react-router-dom';
 
 // =====================================
 // 📊 INTERFACES ATUALIZADAS
@@ -2367,7 +2368,8 @@ const BatteryPieChart = ({ data }: BatteryPieChartProps) => {
 export default function DeviceLogsView() {
 
   const { t } = useTranslation();
-  const { companyId } = useCompany()
+  const { companyId } = useCompany();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [motionDevices, setMotionDevices] = useState<DevicePosition[]>([]);
@@ -3187,6 +3189,9 @@ export default function DeviceLogsView() {
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-900">
               {t('deviceLogs.title')}
+              <span className="text-sm text-gray-400 font-mono bg-gray-100 px-1 py-2 rounded">
+                {location.pathname}
+              </span>
             </h1>
             <p className="mt-2 text-sm text-gray-600">
               {t('deviceLogs.lastUpdate')}: {new Date(overview.generated_at).toLocaleString('pt-BR')}
@@ -3261,7 +3266,9 @@ export default function DeviceLogsView() {
             { id: 'events', label: t('deviceLogs.tabs.events'), icon: ShieldExclamationIcon },
             { id: 'network', label: t('deviceLogs.tabs.network'), icon: SignalIcon },
             // { id: 'customers', label: t('deviceLogs.tabs.customers'), icon: MapPinIcon },
-            { id: 'rawdata', label: t('deviceLogs.tabs.rawData'), icon: DocumentChartBarIcon },
+              ...(location.pathname === '/MN0400_211' ? [
+      { id: 'rawdata', label: t('deviceLogs.tabs.rawData'), icon: DocumentChartBarIcon }
+    ] : [])
           ].map((tab) => (
             <button
               key={tab.id}
@@ -4309,7 +4316,7 @@ export default function DeviceLogsView() {
           </div>
         </div>
       )}
-
+        
       {activeTab === 'rawdata' && (
         <RawDataExplorer />
       )}
