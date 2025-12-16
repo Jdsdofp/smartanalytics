@@ -276,260 +276,3048 @@ export default function CertificateReportGrid() {
 
   const [showExportProgramacaoMenu, setShowExportProgramacaoMenu] = useState(false);
 
-  const getExecutionDate = (expirationDate: string) => {
-    const date = new Date(expirationDate);
-    date.setFullYear(date.getFullYear() - 1);
-    return date.toLocaleDateString('pt-BR');
-  };
+// ============= FUNÇÕES DE EXPORTAÇÃO DE PROGRAMAÇÃO ATUALIZADAS =============
+//@ts-ignore
+const getExecutionDate = (expirationDate: string) => {
+  const date = new Date(expirationDate);
+  date.setFullYear(date.getFullYear() - 1);
+  return date.toLocaleDateString('pt-BR');
+};
 
-  const exportProgramacaoExcel = async (dataToExport: CertificateReport[]) => {
-    import('xlsx').then(async (XLSX) => {
-      const headers = [
-        'Nº. Patrimônio', 'Código', 'Descrição', 'Departamento', 'Fabricante',
-        'Modelo', 'Nº. Série', 'Comodato', 'Dt. Execução', 'Dt. Validade', 'Não Conf.', 'Fornecedor'
-      ];
+const exportProgramacaoExcel = async (dataToExport: CertificateReport[]) => {
+  import('xlsx').then(async (XLSX) => {
+    // ✅ CABEÇALHOS EXATAMENTE COMO NA TABELA
+    const headers = [
+      'Site',
+      'Área', 
+      'Zona',
+      'Certificado',
+      'Código',
+      'Item',
+      'Marca',
+      'Modelo',
+      'Serial',
+      'Expiração',
+      'Dias p/ Expirar',
+      'Status',
+      'Criticidade'
+    ];
 
-      const dataRows = dataToExport.map(item => [
-        '---',
+    // ✅ DADOS EXATAMENTE COMO NA TABELA
+    const dataRows = dataToExport.map(item => {
+      const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+      const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
+      
+      return [
+        item.Home_site_name,
+        item.code_zone,
+        item.code_area,
+        item.certificate_description,
         item.item_code,
         item.item_name,
-        item.code_area,
-        item.brand || '---',
-        item.model || '---',
-        item.serial || '---',
-        'Não',
-        getExecutionDate(item.expiration_date),
-        formatDate(item.expiration_date),
-        '---',
-        '---'
-      ]);
-
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
-
-      const colWidths = headers.map(() => ({ wch: 20 }));
-      ws['!cols'] = colWidths;
-
-      XLSX.utils.book_append_sheet(wb, ws, 'Programação Calibração');
-
-      const fileName = `programacao-calibracao-${new Date().toISOString().split('T')[0]}.xlsx`;
-      XLSX.writeFile(wb, fileName);
-    }).catch(error => {
-      console.error('Erro ao carregar biblioteca XLSX:', error);
-      alert('Erro ao exportar para Excel.');
-    });
-  };
-
-  const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
-    try {
-      const { jsPDF } = await import('jspdf');
-      const doc = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      }) as import('jspdf').jsPDF;
-
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 10;
-      let yPosition = margin;
-
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.text('PROGRAMAÇÃO DE CALIBRAÇÃO', margin, yPosition);
-      yPosition += 8;
-
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text(new Date().toLocaleDateString('pt-BR'), margin, yPosition);
-      yPosition += 5;
-
-      const currentDate = new Date();
-      const nextYear = new Date(currentDate);
-      nextYear.setFullYear(currentDate.getFullYear() + 1);
-
-      doc.text(
-        `Período: ${currentDate.getMonth() + 1}/${currentDate.getFullYear()} a ${nextYear.getMonth() + 1}/${nextYear.getFullYear()}, Ordenação: Código, Quant. Registros: ${dataToExport.length}`,
-        margin,
-        yPosition
-      );
-      yPosition += 5;
-
-      doc.text('Filtros: Controlado: Sim', margin, yPosition);
-      yPosition += 8;
-
-      const headers = [
-        'Nº. Patrim.',
-        'Código',
-        'Descrição',
-        'Departamento',
-        'Fabricante',
-        'Modelo',
-        'Nº. Série',
-        'Comod.',
-        'Dt. Exec.',
-        'Dt. Valid.',
-        'N. Conf.',
-        'Fornec.'
+        item.brand || '-',
+        item.model || '-',
+        item.serial,
+        `${formatDate(item.expiration_date)} ${new Date(item.expiration_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
+        `${daysUntilExpiration} dias`,
+        translateStatus(item.certificate_status_name),
+        criticalityBadge.label
       ];
+    });
 
-      const colWidths = [15, 18, 35, 40, 22, 22, 25, 12, 18, 18, 12, 20];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
 
-      doc.setFillColor(220, 220, 220);
+    // ✅ LARGURAS DAS COLUNAS
+    const colWidths = [
+      { wch: 25 }, // Site
+      { wch: 20 }, // Área
+      { wch: 20 }, // Zona
+      { wch: 30 }, // Certificado
+      { wch: 15 }, // Código
+      { wch: 40 }, // Item
+      { wch: 15 }, // Marca
+      { wch: 15 }, // Modelo
+      { wch: 20 }, // Serial
+      { wch: 20 }, // Expiração
+      { wch: 15 }, // Dias
+      { wch: 15 }, // Status
+      { wch: 15 }  // Criticidade
+    ];
+    ws['!cols'] = colWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Certificados');
+
+    const fileName = `certificados-${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  }).catch(error => {
+    console.error('Erro ao carregar biblioteca XLSX:', error);
+    alert('Erro ao exportar para Excel.');
+  });
+};
+
+// const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
+//   try {
+//     const { jsPDF } = await import('jspdf');
+//     const doc = new jsPDF({
+//       orientation: 'landscape',
+//       unit: 'mm',
+//       format: 'a4'
+//     }) as import('jspdf').jsPDF;
+
+//     const pageWidth = doc.internal.pageSize.getWidth();
+//     const pageHeight = doc.internal.pageSize.getHeight();
+//     const margin = 10;
+//     let yPosition = margin;
+
+//     // ✅ CABEÇALHO DO DOCUMENTO
+//     doc.setFontSize(16);
+//     doc.setFont('helvetica', 'bold');
+//     doc.text('RELATÓRIO DE CERTIFICADOS', margin, yPosition);
+//     yPosition += 8;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     doc.text(new Date().toLocaleDateString('pt-BR'), margin, yPosition);
+//     doc.text(`Total de Registros: ${dataToExport.length}`, pageWidth - margin, yPosition, { align: 'right' });
+//     yPosition += 10;
+
+//     // ✅ CABEÇALHOS EXATAMENTE COMO NA TABELA
+//     const headers = [
+//       'Site',
+//       'Área',
+//       'Zona',
+//       'Certificado',
+//       'Código',
+//       'Item',
+//       'Marca',
+//       'Modelo',
+//       'Serial',
+//       'Expiração',
+//       'Dias',
+//       'Status',
+//       'Criticidade'
+//     ];
+
+//     // ✅ LARGURAS DAS COLUNAS (ajustadas para caber na página)
+//     const colWidths = [18, 15, 15, 22, 12, 30, 12, 12, 18, 18, 10, 15, 15];
+
+//     // ✅ DESENHAR CABEÇALHO DA TABELA
+//     doc.setFillColor(220, 220, 220);
+//     doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+//     doc.setFontSize(7);
+//     doc.setFont('helvetica', 'bold');
+
+//     let xPosition = margin + 1;
+//     headers.forEach((header, index) => {
+//       doc.text(header, xPosition, yPosition);
+//       xPosition += colWidths[index];
+//     });
+
+//     yPosition += 6;
+
+//     // ✅ DESENHAR LINHAS DE DADOS
+//     doc.setFont('helvetica', 'normal');
+//     doc.setFontSize(6);
+
+//     dataToExport.forEach((item, index) => {
+//       // ✅ VERIFICAR SE PRECISA DE NOVA PÁGINA
+//       if (yPosition > pageHeight - 20) {
+//         doc.addPage();
+//         yPosition = margin;
+
+//         // Redesenhar cabeçalho
+//         doc.setFillColor(220, 220, 220);
+//         doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+//         doc.setFont('helvetica', 'bold');
+//         doc.setFontSize(7);
+//         xPosition = margin + 1;
+//         headers.forEach((header, index) => {
+//           doc.text(header, xPosition, yPosition);
+//           xPosition += colWidths[index];
+//         });
+//         yPosition += 6;
+//         doc.setFont('helvetica', 'normal');
+//         doc.setFontSize(6);
+//       }
+
+//       // ✅ CALCULAR DADOS EXATAMENTE COMO NA TABELA
+//       const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+//       const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
+
+//       xPosition = margin + 1;
+//       const rowData = [
+//         item.Home_site_name,
+//         item.code_zone,
+//         item.code_area,
+//         item.certificate_description.substring(0, 20),
+//         item.item_code,
+//         item.item_name.substring(0, 28),
+//         item.brand || '-',
+//         item.model || '-',
+//         item.serial.substring(0, 16),
+//         formatDate(item.expiration_date),
+//         `${daysUntilExpiration}`,
+//         translateStatus(item.certificate_status_name),
+//         criticalityBadge.label
+//       ];
+
+//       // ✅ APLICAR COR BASEADA NA CRITICIDADE
+//       if (criticalityBadge.label === 'EXPIRADO' || criticalityBadge.label === 'CRÍTICO') {
+//         doc.setFillColor(254, 226, 226); // Vermelho claro
+//       } else if (criticalityBadge.label === 'ATENÇÃO') {
+//         doc.setFillColor(254, 243, 199); // Laranja claro
+//       } else if (criticalityBadge.label === 'ALERTA') {
+//         doc.setFillColor(254, 249, 195); // Amarelo claro
+//       } else {
+//         doc.setFillColor(220, 252, 231); // Verde claro
+//       }
+//       doc.rect(margin, yPosition - 3, pageWidth - 2 * margin, 5, 'F');
+
+//       // ✅ ESCREVER DADOS
+//       rowData.forEach((text, colIndex) => {
+//         const maxWidth = colWidths[colIndex] - 2;
+//         const lines = doc.splitTextToSize(text, maxWidth);
+        
+//         // ✅ COR ESPECIAL PARA COLUNA DE DIAS
+//         if (colIndex === 10) { // Coluna "Dias"
+//           if (daysUntilExpiration < 0) {
+//             doc.setTextColor(220, 38, 38); // Vermelho
+//           } else if (daysUntilExpiration <= 30) {
+//             doc.setTextColor(249, 115, 22); // Laranja
+//           } else if (daysUntilExpiration <= 90) {
+//             doc.setTextColor(234, 179, 8); // Amarelo
+//           } else {
+//             doc.setTextColor(34, 197, 94); // Verde
+//           }
+//           doc.setFont('helvetica', 'bold');
+//         } else {
+//           doc.setTextColor(0, 0, 0);
+//           doc.setFont('helvetica', 'normal');
+//         }
+
+//         doc.text(lines[0], xPosition, yPosition);
+//         xPosition += colWidths[colIndex];
+//       });
+
+//       yPosition += 5;
+//     });
+
+//     // ✅ RODAPÉ
+//     doc.setFontSize(7);
+//     doc.setTextColor(128, 128, 128);
+//     doc.text(
+//       `Gerado em ${new Date().toLocaleString('pt-BR')}`,
+//       pageWidth / 2,
+//       pageHeight - 5,
+//       { align: 'center' }
+//     );
+
+//     doc.save(`certificados-${new Date().toISOString().split('T')[0]}.pdf`);
+//   } catch (error) {
+//     console.error('Erro ao gerar PDF:', error);
+//     alert('Erro ao exportar para PDF.');
+//   }
+// };
+
+  // const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
+  //   try {
+  //     const { jsPDF } = await import('jspdf');
+  //     const doc = new jsPDF({
+  //       orientation: 'landscape',
+  //       unit: 'mm',
+  //       format: 'a4'
+  //     }) as import('jspdf').jsPDF;
+
+  //     const pageWidth = doc.internal.pageSize.getWidth();
+  //     const pageHeight = doc.internal.pageSize.getHeight();
+  //     const margin = 10;
+  //     let yPosition = margin;
+
+  //     doc.setFontSize(16);
+  //     doc.setFont('helvetica', 'bold');
+  //     doc.text('PROGRAMAÇÃO DE CALIBRAÇÃO', margin, yPosition);
+  //     yPosition += 8;
+
+  //     doc.setFontSize(9);
+  //     doc.setFont('helvetica', 'normal');
+  //     doc.text(new Date().toLocaleDateString('pt-BR'), margin, yPosition);
+  //     yPosition += 5;
+
+  //     const currentDate = new Date();
+  //     const nextYear = new Date(currentDate);
+  //     nextYear.setFullYear(currentDate.getFullYear() + 1);
+
+  //     doc.text(
+  //       `Período: ${currentDate.getMonth() + 1}/${currentDate.getFullYear()} a ${nextYear.getMonth() + 1}/${nextYear.getFullYear()}, Ordenação: Código, Quant. Registros: ${dataToExport.length}`,
+  //       margin,
+  //       yPosition
+  //     );
+  //     yPosition += 5;
+
+  //     doc.text('Filtros: Controlado: Sim', margin, yPosition);
+  //     yPosition += 8;
+
+  //     const headers = [
+  //       'Nº. Patrim.',
+  //       'Código',
+  //       'Descrição',
+  //       'Departamento',
+  //       'Fabricante',
+  //       'Modelo',
+  //       'Nº. Série',
+  //       'Comod.',
+  //       'Dt. Exec.',
+  //       'Dt. Valid.',
+  //       'N. Conf.',
+  //       'Fornec.'
+  //     ];
+
+  //     const colWidths = [15, 18, 35, 40, 22, 22, 25, 12, 18, 18, 12, 20];
+
+  //     doc.setFillColor(220, 220, 220);
+  //     doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+  //     doc.setFontSize(7);
+  //     doc.setFont('helvetica', 'bold');
+
+  //     let xPosition = margin + 1;
+  //     headers.forEach((header, index) => {
+  //       doc.text(header, xPosition, yPosition);
+  //       xPosition += colWidths[index];
+  //     });
+
+  //     yPosition += 6;
+
+  //     doc.setFont('helvetica', 'normal');
+  //     doc.setFontSize(6);
+
+  //     // @ts-ignore
+  //     dataToExport.forEach((item, index) => {
+  //       if (yPosition > pageHeight - 20) {
+  //         doc.addPage();
+  //         yPosition = margin;
+
+  //         doc.setFillColor(220, 220, 220);
+  //         doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+  //         doc.setFont('helvetica', 'bold');
+  //         doc.setFontSize(7);
+  //         xPosition = margin + 1;
+  //         headers.forEach((header, index) => {
+  //           doc.text(header, xPosition, yPosition);
+  //           xPosition += colWidths[index];
+  //         });
+  //         yPosition += 6;
+  //         doc.setFont('helvetica', 'normal');
+  //         doc.setFontSize(6);
+  //       }
+
+  //       xPosition = margin + 1;
+  //       const rowData = [
+  //         '---',
+  //         item.item_code,
+  //         item.item_name.substring(0, 30),
+  //         item.code_area.substring(0, 35),
+  //         item.brand || '---',
+  //         item.model || '---',
+  //         item.serial || '---',
+  //         'Não',
+  //         getExecutionDate(item.expiration_date),
+  //         formatDate(item.expiration_date),
+  //         '---',
+  //         '---'
+  //       ];
+
+  //       rowData.forEach((text, colIndex) => {
+  //         const maxWidth = colWidths[colIndex] - 2;
+  //         const lines = doc.splitTextToSize(text, maxWidth);
+  //         doc.text(lines[0], xPosition, yPosition);
+  //         xPosition += colWidths[colIndex];
+  //       });
+
+  //       yPosition += 5;
+  //     });
+
+  //     doc.setFontSize(7);
+  //     doc.text(`Pág. 1 / 1`, pageWidth - margin - 15, pageHeight - 5);
+
+  //     doc.save(`programacao-calibracao-${new Date().toISOString().split('T')[0]}.pdf`);
+  //   } catch (error) {
+  //     console.error('Erro ao gerar PDF:', error);
+  //     alert('Erro ao exportar para PDF.');
+  //   }
+  // };
+
+
+// const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
+//   try {
+//     const { jsPDF } = await import('jspdf');
+//     const doc = new jsPDF({
+//       orientation: 'landscape',
+//       unit: 'mm',
+//       format: 'a4'
+//     }) as import('jspdf').jsPDF;
+
+//     const pageWidth = doc.internal.pageSize.getWidth();
+//     const pageHeight = doc.internal.pageSize.getHeight();
+//     const margin = 10;
+//     let yPosition = margin;
+
+//     // ✅ CABEÇALHO DO DOCUMENTO
+//     doc.setFontSize(16);
+//     doc.setFont('helvetica', 'bold');
+//     doc.text('RELATÓRIO DE CERTIFICADOS', margin, yPosition);
+//     yPosition += 8;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     doc.text(new Date().toLocaleDateString('pt-BR'), margin, yPosition);
+//     doc.text(`Total de Registros: ${dataToExport.length}`, pageWidth - margin, yPosition, { align: 'right' });
+//     yPosition += 10;
+
+//     // ✅ CABEÇALHOS EXATAMENTE COMO NA TABELA
+//     const headers = [
+//       'Site',
+//       'Área',
+//       'Zona',
+//       'Certificado',
+//       'Código',
+//       'Item',
+//       'Marca',
+//       'Modelo',
+//       'Serial',
+//       'Expiração',
+//       'Dias',
+//       'Status',
+//       'Criticidade'
+//     ];
+
+//     // ✅ LARGURAS DAS COLUNAS (ajustadas para caber na página)
+//     const colWidths = [18, 40, 40, 22, 12, 30, 12, 12, 18, 18, 10, 15, 15];
+
+//     // ✅ FUNÇÃO AUXILIAR PARA DESENHAR CABEÇALHO
+//     const drawTableHeader = () => {
+//       doc.setFillColor(220, 220, 220);
+//       doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+//       doc.setFontSize(7);
+//       doc.setFont('helvetica', 'bold');
+
+//       let xPos = margin + 1;
+//       headers.forEach((header, index) => {
+//         doc.text(header, xPos, yPosition);
+//         xPos += colWidths[index];
+//       });
+
+//       yPosition += 6;
+//       doc.setFont('helvetica', 'normal');
+//       doc.setFontSize(6);
+//     };
+
+//     // ✅ DESENHAR CABEÇALHO INICIAL
+//     drawTableHeader();
+
+//     // ✅ DESENHAR LINHAS DE DADOS
+//     dataToExport.forEach((item, index) => {
+//       // ✅ CALCULAR DADOS EXATAMENTE COMO NA TABELA
+//       const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+//       const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
+
+//       // ✅ PREPARAR DADOS DA LINHA COM QUEBRA DE TEXTO
+//       const rowData = [
+//         { text: item.Home_site_name, maxWidth: colWidths[0] - 2 },
+//         { text: item.code_zone, maxWidth: colWidths[1] - 2 }, // Área - com quebra
+//         { text: item.code_area, maxWidth: colWidths[2] - 2 }, // Zona - com quebra
+//         { text: item.certificate_description, maxWidth: colWidths[3] - 2 },
+//         { text: item.item_code, maxWidth: colWidths[4] - 2 },
+//         { text: item.item_name, maxWidth: colWidths[5] - 2 },
+//         { text: item.brand || '-', maxWidth: colWidths[6] - 2 },
+//         { text: item.model || '-', maxWidth: colWidths[7] - 2 },
+//         { text: item.serial, maxWidth: colWidths[8] - 2 },
+//         { text: formatDate(item.expiration_date), maxWidth: colWidths[9] - 2 },
+//         { text: `${daysUntilExpiration}`, maxWidth: colWidths[10] - 2 },
+//         { text: translateStatus(item.certificate_status_name), maxWidth: colWidths[11] - 2 },
+//         { text: criticalityBadge.label, maxWidth: colWidths[12] - 2 }
+//       ];
+
+//       // ✅ CALCULAR ALTURA DA LINHA (baseado na maior quantidade de linhas de texto)
+//       let maxLines = 1;
+//       const splitTexts = rowData.map((data) => {
+//         const lines = doc.splitTextToSize(data.text, data.maxWidth);
+//         maxLines = Math.max(maxLines, lines.length);
+//         return lines;
+//       });
+
+//       const rowHeight = maxLines * 4; // 4mm por linha de texto
+
+//       // ✅ VERIFICAR SE PRECISA DE NOVA PÁGINA
+//       if (yPosition + rowHeight > pageHeight - 15) {
+//         doc.addPage();
+//         yPosition = margin;
+//         drawTableHeader();
+//       }
+
+//       // ✅ APLICAR COR BASEADA NA CRITICIDADE
+//       if (criticalityBadge.label === 'EXPIRADO' || criticalityBadge.label === 'CRÍTICO') {
+//         doc.setFillColor(254, 226, 226); // Vermelho claro
+//       } else if (criticalityBadge.label === 'ATENÇÃO') {
+//         doc.setFillColor(254, 243, 199); // Laranja claro
+//       } else if (criticalityBadge.label === 'ALERTA') {
+//         doc.setFillColor(254, 249, 195); // Amarelo claro
+//       } else {
+//         doc.setFillColor(220, 252, 231); // Verde claro
+//       }
+//       doc.rect(margin, yPosition - 3, pageWidth - 2 * margin, rowHeight, 'F');
+
+//       // ✅ ESCREVER DADOS COM QUEBRA DE LINHA
+//       let xPosition = margin + 1;
+      
+//       splitTexts.forEach((lines, colIndex) => {
+//         let textYPosition = yPosition;
+
+//         // ✅ COR ESPECIAL PARA COLUNA DE DIAS
+//         if (colIndex === 10) { // Coluna "Dias"
+//           if (daysUntilExpiration < 0) {
+//             doc.setTextColor(220, 38, 38); // Vermelho
+//           } else if (daysUntilExpiration <= 30) {
+//             doc.setTextColor(249, 115, 22); // Laranja
+//           } else if (daysUntilExpiration <= 90) {
+//             doc.setTextColor(234, 179, 8); // Amarelo
+//           } else {
+//             doc.setTextColor(34, 197, 94); // Verde
+//           }
+//           doc.setFont('helvetica', 'bold');
+//         } else {
+//           doc.setTextColor(0, 0, 0);
+//           doc.setFont('helvetica', 'normal');
+//         }
+
+//         // ✅ ESCREVER CADA LINHA DE TEXTO
+//         lines.forEach((line: string) => {
+//           doc.text(line, xPosition, textYPosition);
+//           textYPosition += 4; // Espaçamento entre linhas
+//         });
+
+//         xPosition += colWidths[colIndex];
+//       });
+
+//       yPosition += rowHeight;
+//     });
+
+//     // ✅ RODAPÉ
+//     doc.setFontSize(7);
+//     doc.setTextColor(128, 128, 128);
+//     doc.text(
+//       `Gerado em ${new Date().toLocaleString('pt-BR')}`,
+//       pageWidth / 2,
+//       pageHeight - 5,
+//       { align: 'center' }
+//     );
+
+//     doc.save(`certificados-${new Date().toISOString().split('T')[0]}.pdf`);
+//   } catch (error) {
+//     console.error('Erro ao gerar PDF:', error);
+//     alert('Erro ao exportar para PDF.');
+//   }
+// };
+
+
+// const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
+//   try {
+//     const { jsPDF } = await import('jspdf');
+//     const doc = new jsPDF({
+//       orientation: 'landscape',
+//       unit: 'mm',
+//       format: 'a4'
+//     }) as import('jspdf').jsPDF;
+
+//     const pageWidth = doc.internal.pageSize.getWidth();
+//     const pageHeight = doc.internal.pageSize.getHeight();
+//     const margin = 10;
+//     let yPosition = margin;
+
+//     // ✅ CABEÇALHO DO DOCUMENTO
+//     doc.setFontSize(16);
+//     doc.setFont('helvetica', 'bold');
+//     doc.text('RELATÓRIO DE CERTIFICADOS', margin, yPosition);
+//     yPosition += 8;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     doc.text(new Date().toLocaleDateString('pt-BR'), margin, yPosition);
+//     doc.text(`Total de Registros: ${dataToExport.length}`, pageWidth - margin, yPosition, { align: 'right' });
+//     yPosition += 10;
+
+//     // ✅ CABEÇALHOS EXATAMENTE COMO NA TABELA
+//     const headers = [
+//       'Site',
+//       'Área',
+//       'Zona',
+//       'Certificado',
+//       'Código',
+//       'Item',
+//       'Marca',
+//       'Modelo',
+//       'Serial',
+//       'Expiração',
+//       'Dias',
+//       'Status',
+//       'Criticidade'
+//     ];
+
+//     // ✅ LARGURAS DAS COLUNAS (ajustadas para caber na página)
+//     const colWidths = [18, 40, 40, 22, 12, 30, 12, 12, 18, 18, 10, 15, 15];
+
+//     // ✅ FUNÇÃO AUXILIAR PARA DESENHAR CABEÇALHO
+//     const drawTableHeader = () => {
+//       doc.setFillColor(220, 220, 220);
+//       doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+//       doc.setFontSize(7);
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(0, 0, 0);
+
+//       let xPos = margin + 1;
+//       headers.forEach((header, index) => {
+//         doc.text(header, xPos, yPosition);
+//         xPos += colWidths[index];
+//       });
+
+//       yPosition += 6;
+      
+//       // ✅ LINHA HORIZONTAL ABAIXO DO CABEÇALHO - MAIS VISÍVEL
+//       doc.setDrawColor(180, 180, 180); // Cinza mais escuro
+//       doc.setLineWidth(0.5); // Linha mais grossa
+//       doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+//       yPosition += 1; // Espaço após a linha
+      
+//       doc.setFont('helvetica', 'normal');
+//       doc.setFontSize(6);
+//     };
+
+//     // ✅ DESENHAR CABEÇALHO INICIAL
+//     drawTableHeader();
+
+//     // ✅ DESENHAR LINHAS DE DADOS
+//     dataToExport.forEach((item, index) => {
+//       // ✅ CALCULAR DADOS EXATAMENTE COMO NA TABELA
+//       const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+//       const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
+
+//       // ✅ PREPARAR DADOS DA LINHA COM QUEBRA DE TEXTO
+//       const rowData = [
+//         { text: item.Home_site_name, maxWidth: colWidths[0] - 2 },
+//         { text: item.code_zone, maxWidth: colWidths[1] - 2 }, // Área - com quebra
+//         { text: item.code_area, maxWidth: colWidths[2] - 2 }, // Zona - com quebra
+//         { text: item.certificate_description, maxWidth: colWidths[3] - 2 },
+//         { text: item.item_code, maxWidth: colWidths[4] - 2 },
+//         { text: item.item_name, maxWidth: colWidths[5] - 2 },
+//         { text: item.brand || '-', maxWidth: colWidths[6] - 2 },
+//         { text: item.model || '-', maxWidth: colWidths[7] - 2 },
+//         { text: item.serial, maxWidth: colWidths[8] - 2 },
+//         { text: formatDate(item.expiration_date), maxWidth: colWidths[9] - 2 },
+//         { text: `${daysUntilExpiration}`, maxWidth: colWidths[10] - 2 },
+//         { text: translateStatus(item.certificate_status_name), maxWidth: colWidths[11] - 2 },
+//         { text: criticalityBadge.label, maxWidth: colWidths[12] - 2 }
+//       ];
+
+//       // ✅ CALCULAR ALTURA DA LINHA (baseado na maior quantidade de linhas de texto)
+//       let maxLines = 1;
+//       const splitTexts = rowData.map((data) => {
+//         const lines = doc.splitTextToSize(data.text, data.maxWidth);
+//         maxLines = Math.max(maxLines, lines.length);
+//         return lines;
+//       });
+
+//       const rowHeight = maxLines * 4 + 1; // 4mm por linha de texto + 1mm padding
+
+//       // ✅ VERIFICAR SE PRECISA DE NOVA PÁGINA
+//       if (yPosition + rowHeight > pageHeight - 15) {
+//         doc.addPage();
+//         yPosition = margin;
+//         drawTableHeader();
+//       }
+
+//       // ✅ APLICAR COR BASEADA NA CRITICIDADE
+//       if (criticalityBadge.label === 'EXPIRADO' || criticalityBadge.label === 'CRÍTICO') {
+//         doc.setFillColor(254, 226, 226); // Vermelho claro
+//       } else if (criticalityBadge.label === 'ATENÇÃO') {
+//         doc.setFillColor(254, 243, 199); // Laranja claro
+//       } else if (criticalityBadge.label === 'ALERTA') {
+//         doc.setFillColor(254, 249, 195); // Amarelo claro
+//       } else {
+//         doc.setFillColor(220, 252, 231); // Verde claro
+//       }
+//       doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight, 'F');
+
+//       // ✅ ESCREVER DADOS COM QUEBRA DE LINHA
+//       let xPosition = margin + 1;
+      
+//       splitTexts.forEach((lines, colIndex) => {
+//         let textYPosition = yPosition + 3; // Padding top
+
+//         // ✅ COR ESPECIAL PARA COLUNA DE DIAS
+//         if (colIndex === 10) { // Coluna "Dias"
+//           if (daysUntilExpiration < 0) {
+//             doc.setTextColor(220, 38, 38); // Vermelho
+//           } else if (daysUntilExpiration <= 30) {
+//             doc.setTextColor(249, 115, 22); // Laranja
+//           } else if (daysUntilExpiration <= 90) {
+//             doc.setTextColor(234, 179, 8); // Amarelo
+//           } else {
+//             doc.setTextColor(34, 197, 94); // Verde
+//           }
+//           doc.setFont('helvetica', 'bold');
+//         } else {
+//           doc.setTextColor(0, 0, 0);
+//           doc.setFont('helvetica', 'normal');
+//         }
+
+//         // ✅ ESCREVER CADA LINHA DE TEXTO
+//         lines.forEach((line: string) => {
+//           doc.text(line, xPosition, textYPosition);
+//           textYPosition += 4; // Espaçamento entre linhas
+//         });
+
+//         xPosition += colWidths[colIndex];
+//       });
+
+//       yPosition += rowHeight;
+
+//       // ✅ LINHA HORIZONTAL ENTRE AS LINHAS - MAIS VISÍVEL
+//       doc.setDrawColor(200, 200, 200); // Cinza médio
+//       doc.setLineWidth(0.2); // Linha um pouco mais grossa
+//       doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+//       yPosition += 0.5; // Pequeno espaço após a linha
+//     });
+
+//     // ✅ RODAPÉ
+//     doc.setFontSize(7);
+//     doc.setTextColor(128, 128, 128);
+//     doc.text(
+//       `Gerado em ${new Date().toLocaleString('pt-BR')}`,
+//       pageWidth / 2,
+//       pageHeight - 5,
+//       { align: 'center' }
+//     );
+
+//     doc.save(`certificados-${new Date().toISOString().split('T')[0]}.pdf`);
+//   } catch (error) {
+//     console.error('Erro ao gerar PDF:', error);
+//     alert('Erro ao exportar para PDF.');
+//   }
+// };
+
+
+// const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
+//   try {
+//     const { jsPDF } = await import('jspdf');
+//     const doc = new jsPDF({
+//       orientation: 'landscape',
+//       unit: 'mm',
+//       format: 'a4'
+//     }) as import('jspdf').jsPDF;
+
+//     const pageWidth = doc.internal.pageSize.getWidth();
+//     const pageHeight = doc.internal.pageSize.getHeight();
+//     const margin = 10;
+//     let yPosition = margin;
+
+//     // ✅ CALCULAR ESTATÍSTICAS ANALÍTICAS
+//     const analytics = {
+//       total: dataToExport.length,
+//       expired: 0,
+//       expiringIn30Days: 0,
+//       expiringIn60Days: 0,
+//       expiringIn90Days: 0,
+//       safe: 0,
+//       bySite: {} as Record<string, number>,
+//       byCertificateType: {} as Record<string, number>,
+//       byStatus: {} as Record<string, number>,
+//       byBrand: {} as Record<string, number>,
+//       criticalItems: [] as any[]
+//     };
+
+//     dataToExport.forEach(item => {
+//       const days = getDaysUntilExpiration(item.expiration_date);
+      
+//       // Contagem por período
+//       if (days < 0) analytics.expired++;
+//       else if (days <= 30) analytics.expiringIn30Days++;
+//       else if (days <= 60) analytics.expiringIn60Days++;
+//       else if (days <= 90) analytics.expiringIn90Days++;
+//       else analytics.safe++;
+
+//       // Agregar por site
+//       analytics.bySite[item.Home_site_name] = (analytics.bySite[item.Home_site_name] || 0) + 1;
+      
+//       // Agregar por tipo de certificado
+//       analytics.byCertificateType[item.certificate_description] = 
+//         (analytics.byCertificateType[item.certificate_description] || 0) + 1;
+      
+//       // Agregar por status
+//       analytics.byStatus[item.certificate_status_name] = 
+//         (analytics.byStatus[item.certificate_status_name] || 0) + 1;
+      
+//       // Agregar por marca
+//       if (item.brand) {
+//         analytics.byBrand[item.brand] = (analytics.byBrand[item.brand] || 0) + 1;
+//       }
+
+//       // Itens críticos (expirados ou expirando em 30 dias)
+//       if (days <= 30) {
+//         analytics.criticalItems.push({
+//           item: item.item_name,
+//           code: item.item_code,
+//           days,
+//           site: item.Home_site_name
+//         });
+//       }
+//     });
+
+//     // Ordenar itens críticos por dias
+//     analytics.criticalItems.sort((a, b) => a.days - b.days);
+
+//     // Top 5 sites
+//     const topSites = Object.entries(analytics.bySite)
+//       .sort((a, b) => b[1] - a[1])
+//       .slice(0, 5);
+
+//     // Top 5 tipos de certificado
+//     const topCertTypes = Object.entries(analytics.byCertificateType)
+//       .sort((a, b) => b[1] - a[1])
+//       .slice(0, 5);
+
+//     // ✅ CABEÇALHO DO DOCUMENTO COM RESUMO
+//     doc.setFontSize(18);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(37, 99, 235); // Azul
+//     doc.text('RELATÓRIO DE CERTIFICADOS', margin, yPosition);
+//     yPosition += 8;
+
+//     doc.setFontSize(10);
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(new Date().toLocaleDateString('pt-BR'), margin, yPosition);
+//     doc.text(`Total de Registros: ${dataToExport.length}`, pageWidth - margin, yPosition, { align: 'right' });
+//     yPosition += 8;
+
+//     // ✅ RESUMO EXECUTIVO NO CABEÇALHO
+//     doc.setFillColor(245, 247, 250); // Cinza claro
+//     doc.rect(margin, yPosition, pageWidth - 2 * margin, 35, 'F');
+    
+//     yPosition += 5;
+//     doc.setFontSize(11);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('RESUMO EXECUTIVO', margin + 3, yPosition);
+//     yPosition += 6;
+
+//     // Primeira linha de métricas
+//     doc.setFontSize(8);
+//     doc.setFont('helvetica', 'normal');
+//     let xPos = margin + 3;
+//     const metrics = [
+//       { label: 'Total', value: analytics.total, color: [59, 130, 246] },
+//       { label: 'Expirados', value: analytics.expired, color: [239, 68, 68] },
+//       { label: '≤ 30 dias', value: analytics.expiringIn30Days, color: [249, 115, 22] },
+//       { label: '31-60 dias', value: analytics.expiringIn60Days, color: [234, 179, 8] },
+//       { label: '61-90 dias', value: analytics.expiringIn90Days, color: [34, 197, 94] },
+//       { label: '> 90 dias', value: analytics.safe, color: [16, 185, 129] }
+//     ];
+
+//     metrics.forEach((metric, index) => {
+//       doc.setTextColor(100, 100, 100);
+//       doc.text(metric.label + ':', xPos, yPosition);
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(metric.color[0], metric.color[1], metric.color[2]);
+//       doc.text(metric.value.toString(), xPos + 18, yPosition);
+//       doc.setFont('helvetica', 'normal');
+//       xPos += 45;
+//     });
+
+//     yPosition += 6;
+
+//     // Top Sites
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Top Sites:', margin + 3, yPosition);
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     xPos = margin + 20;
+//     topSites.forEach(([site, count], index) => {
+//       if (index < 3) {
+//         doc.text(`${site.substring(0, 20)} (${count})`, xPos, yPosition);
+//         xPos += 85;
+//       }
+//     });
+
+//     yPosition += 6;
+
+//     // Top Tipos de Certificado
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Top Tipos:', margin + 3, yPosition);
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     xPos = margin + 20;
+//     topCertTypes.forEach(([type, count], index) => {
+//       if (index < 3) {
+//         doc.text(`${type.substring(0, 20)} (${count})`, xPos, yPosition);
+//         xPos += 85;
+//       }
+//     });
+
+//     yPosition += 6;
+
+//     // Status Distribution
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Status:', margin + 3, yPosition);
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     xPos = margin + 20;
+//     Object.entries(analytics.byStatus).forEach(([status, count]) => {
+//       doc.text(`${translateStatus(status)}: ${count}`, xPos, yPosition);
+//       xPos += 70;
+//     });
+
+//     yPosition += 10;
+
+//     // ✅ CABEÇALHOS EXATAMENTE COMO NA TABELA
+//     const headers = [
+//       'Site',
+//       'Área',
+//       'Zona',
+//       'Certificado',
+//       'Código',
+//       'Item',
+//       'Marca',
+//       'Modelo',
+//       'Serial',
+//       'Expiração',
+//       'Dias',
+//       'Status',
+//       'Criticidade'
+//     ];
+
+//     // ✅ LARGURAS DAS COLUNAS (ajustadas para caber na página)
+//     const colWidths = [18, 40, 40, 22, 12, 30, 12, 12, 18, 18, 10, 15, 15];
+
+//     // ✅ FUNÇÃO AUXILIAR PARA DESENHAR CABEÇALHO
+//     const drawTableHeader = () => {
+//       doc.setFillColor(220, 220, 220);
+//       doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+//       doc.setFontSize(7);
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(0, 0, 0);
+
+//       let xPos = margin + 1;
+//       headers.forEach((header, index) => {
+//         doc.text(header, xPos, yPosition);
+//         xPos += colWidths[index];
+//       });
+
+//       yPosition += 6;
+      
+//       // ✅ LINHA HORIZONTAL ABAIXO DO CABEÇALHO
+//       doc.setDrawColor(180, 180, 180);
+//       doc.setLineWidth(0.5);
+//       doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+//       yPosition += 1;
+      
+//       doc.setFont('helvetica', 'normal');
+//       doc.setFontSize(6);
+//     };
+
+//     // ✅ DESENHAR CABEÇALHO INICIAL
+//     drawTableHeader();
+
+//     // ✅ DESENHAR LINHAS DE DADOS
+//     dataToExport.forEach((item, index) => {
+//       const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+//       const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
+
+//       const rowData = [
+//         { text: item.Home_site_name, maxWidth: colWidths[0] - 2 },
+//         { text: item.code_zone, maxWidth: colWidths[1] - 2 },
+//         { text: item.code_area, maxWidth: colWidths[2] - 2 },
+//         { text: item.certificate_description, maxWidth: colWidths[3] - 2 },
+//         { text: item.item_code, maxWidth: colWidths[4] - 2 },
+//         { text: item.item_name, maxWidth: colWidths[5] - 2 },
+//         { text: item.brand || '-', maxWidth: colWidths[6] - 2 },
+//         { text: item.model || '-', maxWidth: colWidths[7] - 2 },
+//         { text: item.serial, maxWidth: colWidths[8] - 2 },
+//         { text: formatDate(item.expiration_date), maxWidth: colWidths[9] - 2 },
+//         { text: `${daysUntilExpiration}`, maxWidth: colWidths[10] - 2 },
+//         { text: translateStatus(item.certificate_status_name), maxWidth: colWidths[11] - 2 },
+//         { text: criticalityBadge.label, maxWidth: colWidths[12] - 2 }
+//       ];
+
+//       let maxLines = 1;
+//       const splitTexts = rowData.map((data) => {
+//         const lines = doc.splitTextToSize(data.text, data.maxWidth);
+//         maxLines = Math.max(maxLines, lines.length);
+//         return lines;
+//       });
+
+//       const rowHeight = maxLines * 4 + 1;
+
+//       if (yPosition + rowHeight > pageHeight - 15) {
+//         doc.addPage();
+//         yPosition = margin;
+//         drawTableHeader();
+//       }
+
+//       if (criticalityBadge.label === 'EXPIRADO' || criticalityBadge.label === 'CRÍTICO') {
+//         doc.setFillColor(254, 226, 226);
+//       } else if (criticalityBadge.label === 'ATENÇÃO') {
+//         doc.setFillColor(254, 243, 199);
+//       } else if (criticalityBadge.label === 'ALERTA') {
+//         doc.setFillColor(254, 249, 195);
+//       } else {
+//         doc.setFillColor(220, 252, 231);
+//       }
+//       doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight, 'F');
+
+//       let xPosition = margin + 1;
+      
+//       splitTexts.forEach((lines, colIndex) => {
+//         let textYPosition = yPosition + 3;
+
+//         if (colIndex === 10) {
+//           if (daysUntilExpiration < 0) {
+//             doc.setTextColor(220, 38, 38);
+//           } else if (daysUntilExpiration <= 30) {
+//             doc.setTextColor(249, 115, 22);
+//           } else if (daysUntilExpiration <= 90) {
+//             doc.setTextColor(234, 179, 8);
+//           } else {
+//             doc.setTextColor(34, 197, 94);
+//           }
+//           doc.setFont('helvetica', 'bold');
+//         } else {
+//           doc.setTextColor(0, 0, 0);
+//           doc.setFont('helvetica', 'normal');
+//         }
+
+//         lines.forEach((line: string) => {
+//           doc.text(line, xPosition, textYPosition);
+//           textYPosition += 4;
+//         });
+
+//         xPosition += colWidths[colIndex];
+//       });
+
+//       yPosition += rowHeight;
+
+//       doc.setDrawColor(200, 200, 200);
+//       doc.setLineWidth(0.2);
+//       doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+//       yPosition += 0.5;
+//     });
+
+//     // ✅ PÁGINA FINAL COM ANÁLISE DETALHADA
+//     doc.addPage();
+//     yPosition = margin;
+
+//     // Título da página de análise
+//     doc.setFontSize(16);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(37, 99, 235);
+//     doc.text('ANÁLISE DETALHADA', margin, yPosition);
+//     yPosition += 10;
+
+//     // Seção 1: Distribuição por Período
+//     doc.setFontSize(12);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Distribuição por Período de Expiração', margin, yPosition);
+//     yPosition += 6;
+
+//     doc.setFillColor(239, 68, 68, 20);
+//     doc.rect(margin, yPosition, 60, 8, 'F');
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     doc.text(`Certificados Expirados: ${analytics.expired}`, margin + 2, yPosition + 5);
+    
+//     doc.setFillColor(249, 115, 22, 20);
+//     doc.rect(margin + 65, yPosition, 60, 8, 'F');
+//     doc.text(`Expirando em 30 dias: ${analytics.expiringIn30Days}`, margin + 67, yPosition + 5);
+    
+//     doc.setFillColor(234, 179, 8, 20);
+//     doc.rect(margin + 130, yPosition, 60, 8, 'F');
+//     doc.text(`Expirando 31-60 dias: ${analytics.expiringIn60Days}`, margin + 132, yPosition + 5);
+    
+//     yPosition += 10;
+    
+//     doc.setFillColor(16, 185, 129, 20);
+//     doc.rect(margin, yPosition, 60, 8, 'F');
+//     doc.text(`Expirando 61-90 dias: ${analytics.expiringIn90Days}`, margin + 2, yPosition + 5);
+    
+//     doc.setFillColor(34, 197, 94, 20);
+//     doc.rect(margin + 65, yPosition, 60, 8, 'F');
+//     doc.text(`Válidos (> 90 dias): ${analytics.safe}`, margin + 67, yPosition + 5);
+    
+//     yPosition += 15;
+
+//     // Seção 2: Top 5 Sites
+//     doc.setFontSize(12);
+//     doc.setFont('helvetica', 'bold');
+//     doc.text('Top 5 Sites com Mais Certificados', margin, yPosition);
+//     yPosition += 6;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     topSites.forEach(([site, count], index) => {
+//       const percentage = ((count / analytics.total) * 100).toFixed(1);
+//       doc.text(`${index + 1}. ${site}`, margin + 2, yPosition);
+//       doc.setFont('helvetica', 'bold');
+//       doc.text(`${count} (${percentage}%)`, margin + 150, yPosition);
+//       doc.setFont('helvetica', 'normal');
+//       yPosition += 5;
+//     });
+
+//     yPosition += 5;
+
+//     // Seção 3: Distribuição por Tipo de Certificado
+//     doc.setFontSize(12);
+//     doc.setFont('helvetica', 'bold');
+//     doc.text('Distribuição por Tipo de Certificado', margin, yPosition);
+//     yPosition += 6;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     topCertTypes.forEach(([type, count], index) => {
+//       const percentage = ((count / analytics.total) * 100).toFixed(1);
+//       doc.text(`${index + 1}. ${type}`, margin + 2, yPosition);
+//       doc.setFont('helvetica', 'bold');
+//       doc.text(`${count} (${percentage}%)`, margin + 150, yPosition);
+//       doc.setFont('helvetica', 'normal');
+//       yPosition += 5;
+//     });
+
+//     yPosition += 5;
+
+//     // Seção 4: Top 5 Marcas
+//     const topBrands = Object.entries(analytics.byBrand)
+//       .sort((a, b) => b[1] - a[1])
+//       .slice(0, 5);
+
+//     doc.setFontSize(12);
+//     doc.setFont('helvetica', 'bold');
+//     doc.text('Top 5 Marcas', margin, yPosition);
+//     yPosition += 6;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     topBrands.forEach(([brand, count], index) => {
+//       const percentage = ((count / analytics.total) * 100).toFixed(1);
+//       doc.text(`${index + 1}. ${brand}`, margin + 2, yPosition);
+//       doc.setFont('helvetica', 'bold');
+//       doc.text(`${count} (${percentage}%)`, margin + 150, yPosition);
+//       doc.setFont('helvetica', 'normal');
+//       yPosition += 5;
+//     });
+
+//     yPosition += 5;
+
+//     // Seção 5: Itens Críticos (Ação Urgente)
+//     if (analytics.criticalItems.length > 0) {
+//       doc.setFontSize(12);
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(239, 68, 68);
+//       doc.text('⚠ ITENS CRÍTICOS - AÇÃO URGENTE NECESSÁRIA', margin, yPosition);
+//       yPosition += 6;
+
+//       doc.setFontSize(8);
+//       doc.setTextColor(0, 0, 0);
+//       doc.setFont('helvetica', 'normal');
+      
+//       const criticalToShow = analytics.criticalItems.slice(0, 10);
+//       criticalToShow.forEach((critical, index) => {
+//         const statusColor = critical.days < 0 ? [239, 68, 68] : [249, 115, 22];
+//         const statusText = critical.days < 0 ? 'EXPIRADO' : `${critical.days} dias`;
+        
+//         doc.text(`${index + 1}. ${critical.item.substring(0, 40)}`, margin + 2, yPosition);
+//         doc.text(`[${critical.code}]`, margin + 110, yPosition);
+//         doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+//         doc.setFont('helvetica', 'bold');
+//         doc.text(statusText, margin + 150, yPosition);
+//         doc.setTextColor(0, 0, 0);
+//         doc.setFont('helvetica', 'normal');
+//         doc.text(critical.site.substring(0, 20), margin + 175, yPosition);
+//         yPosition += 5;
+//       });
+
+//       if (analytics.criticalItems.length > 10) {
+//         doc.setFontSize(8);
+//         doc.setTextColor(100, 100, 100);
+//         doc.text(`... e mais ${analytics.criticalItems.length - 10} itens críticos`, margin + 2, yPosition);
+//         yPosition += 5;
+//       }
+//     }
+
+//     // ✅ RODAPÉ EM TODAS AS PÁGINAS
+//     const totalPages = doc.getNumberOfPages();
+//     for (let i = 1; i <= totalPages; i++) {
+//       doc.setPage(i);
+//       doc.setFontSize(7);
+//       doc.setTextColor(128, 128, 128);
+//       doc.text(
+//         `Gerado em ${new Date().toLocaleString('pt-BR')} - Página ${i} de ${totalPages}`,
+//         pageWidth / 2,
+//         pageHeight - 5,
+//         { align: 'center' }
+//       );
+//     }
+
+//     doc.save(`certificados-relatorio-completo-${new Date().toISOString().split('T')[0]}.pdf`);
+//   } catch (error) {
+//     console.error('Erro ao gerar PDF:', error);
+//     alert('Erro ao exportar para PDF.');
+//   }
+// };
+
+
+// const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
+//   try {
+//     const { jsPDF } = await import('jspdf');
+//     const doc = new jsPDF({
+//       orientation: 'landscape',
+//       unit: 'mm',
+//       format: 'a4'
+//     }) as import('jspdf').jsPDF;
+
+//     const pageWidth = doc.internal.pageSize.getWidth();
+//     const pageHeight = doc.internal.pageSize.getHeight();
+//     const margin = 10;
+//     let yPosition = margin;
+
+//     // ✅ CALCULAR ESTATÍSTICAS ANALÍTICAS
+//     const analytics = {
+//       total: dataToExport.length,
+//       expired: 0,
+//       expiringIn30Days: 0,
+//       expiringIn60Days: 0,
+//       expiringIn90Days: 0,
+//       safe: 0,
+//       bySite: {} as Record<string, number>,
+//       byCertificateType: {} as Record<string, number>,
+//       byStatus: {} as Record<string, number>,
+//       byBrand: {} as Record<string, number>,
+//       criticalItems: [] as any[]
+//     };
+
+//     dataToExport.forEach(item => {
+//       const days = getDaysUntilExpiration(item.expiration_date);
+      
+//       if (days < 0) analytics.expired++;
+//       else if (days <= 30) analytics.expiringIn30Days++;
+//       else if (days <= 60) analytics.expiringIn60Days++;
+//       else if (days <= 90) analytics.expiringIn90Days++;
+//       else analytics.safe++;
+
+//       analytics.bySite[item.Home_site_name] = (analytics.bySite[item.Home_site_name] || 0) + 1;
+//       analytics.byCertificateType[item.certificate_description] = 
+//         (analytics.byCertificateType[item.certificate_description] || 0) + 1;
+//       analytics.byStatus[item.certificate_status_name] = 
+//         (analytics.byStatus[item.certificate_status_name] || 0) + 1;
+      
+//       if (item.brand) {
+//         analytics.byBrand[item.brand] = (analytics.byBrand[item.brand] || 0) + 1;
+//       }
+
+//       if (days <= 30) {
+//         analytics.criticalItems.push({
+//           item: item.item_name,
+//           code: item.item_code,
+//           days,
+//           site: item.Home_site_name
+//         });
+//       }
+//     });
+
+//     analytics.criticalItems.sort((a, b) => a.days - b.days);
+
+//     const topSites = Object.entries(analytics.bySite)
+//       .sort((a, b) => b[1] - a[1])
+//       .slice(0, 5);
+
+//     const topCertTypes = Object.entries(analytics.byCertificateType)
+//       .sort((a, b) => b[1] - a[1])
+//       .slice(0, 5);
+
+//     // ✅ CABEÇALHO DO DOCUMENTO
+//     doc.setFontSize(18);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(37, 99, 235);
+//     doc.text('RELATÓRIO DE CERTIFICADOS', margin, yPosition);
+    
+//     doc.setFontSize(10);
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(`Total de Registros: ${dataToExport.length}`, pageWidth - margin, yPosition, { align: 'right' });
+//     yPosition += 8;
+
+//     doc.setFontSize(9);
+//     doc.text(new Date().toLocaleDateString('pt-BR'), margin, yPosition);
+//     yPosition += 8;
+
+//     // ✅ RESUMO EXECUTIVO - LAYOUT MELHORADO
+//     doc.setFillColor(245, 247, 250);
+//     doc.rect(margin, yPosition, pageWidth - 2 * margin, 40, 'F');
+    
+//     yPosition += 6;
+//     doc.setFontSize(11);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('RESUMO EXECUTIVO', margin + 3, yPosition);
+//     yPosition += 7;
+
+//     // ✅ MÉTRICAS EM LINHA - ORGANIZADO
+//     doc.setFontSize(8);
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+    
+//     let xPos = margin + 3;
+    
+//     // Total
+//     doc.text('Total:', xPos, yPosition);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(59, 130, 246);
+//     doc.text(analytics.total.toString(), xPos + 15, yPosition);
+    
+//     // Expirados
+//     xPos += 40;
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.text('Expirados:', xPos, yPosition);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(239, 68, 68);
+//     doc.text(analytics.expired.toString(), xPos + 22, yPosition);
+    
+//     // ≤ 30 dias
+//     xPos += 50;
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.text('< 30 dias: ', xPos, yPosition);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(249, 115, 22);
+//     doc.text(analytics.expiringIn30Days.toString(), xPos + 20, yPosition);
+    
+//     // 31-60 dias
+//     xPos += 45;
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.text('31-60 dias:', xPos, yPosition);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(234, 179, 8);
+//     doc.text(analytics.expiringIn60Days.toString(), xPos + 22, yPosition);
+    
+//     // 61-90 dias
+//     xPos += 50;
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.text('61-90 dias:', xPos, yPosition);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(34, 197, 94);
+//     doc.text(analytics.expiringIn90Days.toString(), xPos + 22, yPosition);
+    
+//     // > 90 dias
+//     xPos += 50;
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.text('> 90 dias:', xPos, yPosition);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(16, 185, 129);
+//     doc.text(analytics.safe.toString(), xPos + 20, yPosition);
+
+//     yPosition += 7;
+
+//     // ✅ TOP SITES - ORGANIZADO
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Top Sites:', margin + 3, yPosition);
+    
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.setFontSize(7);
+    
+//     xPos = margin + 3;
+//     yPosition += 5;
+//     topSites.slice(0, 3).forEach(([site, count], index) => {
+//       doc.text(`${index + 1}. ${site.substring(0, 25)} (${count})`, xPos, yPosition);
+//       xPos += 90;
+//     });
+
+//     yPosition += 6;
+
+//     // ✅ TOP TIPOS - ORGANIZADO
+//     doc.setFontSize(8);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Top Tipos:', margin + 3, yPosition);
+    
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.setFontSize(7);
+    
+//     xPos = margin + 3;
+//     yPosition += 5;
+//     topCertTypes.slice(0, 3).forEach(([type, count], index) => {
+//       doc.text(`${index + 1}. ${type.substring(0, 25)} (${count})`, xPos, yPosition);
+//       xPos += 90;
+//     });
+
+//     yPosition += 6;
+
+//     // ✅ STATUS - ORGANIZADO
+//     doc.setFontSize(8);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Status:', margin + 3, yPosition);
+    
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.setFontSize(7);
+    
+//     xPos = margin + 20;
+//     Object.entries(analytics.byStatus).forEach(([status, count]) => {
+//       doc.text(`${translateStatus(status)}: ${count}`, xPos, yPosition);
+//       xPos += 60;
+//     });
+
+//     yPosition += 10;
+
+//     // ✅ CABEÇALHOS DA TABELA
+//     const headers = [
+//       'Site',
+//       'Área',
+//       'Zona',
+//       'Certificado',
+//       'Código',
+//       'Item',
+//       'Marca',
+//       'Modelo',
+//       'Serial',
+//       'Expiração',
+//       'Dias',
+//       'Status',
+//       'Criticidade'
+//     ];
+
+//     const colWidths = [18, 40, 40, 22, 12, 30, 12, 12, 18, 18, 10, 15, 15];
+
+//     const drawTableHeader = () => {
+//       doc.setFillColor(220, 220, 220);
+//       doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+//       doc.setFontSize(7);
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(0, 0, 0);
+
+//       let xPos = margin + 1;
+//       headers.forEach((header, index) => {
+//         doc.text(header, xPos, yPosition);
+//         xPos += colWidths[index];
+//       });
+
+//       yPosition += 6;
+      
+//       doc.setDrawColor(180, 180, 180);
+//       doc.setLineWidth(0.5);
+//       doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+//       yPosition += 1;
+      
+//       doc.setFont('helvetica', 'normal');
+//       doc.setFontSize(6);
+//     };
+
+//     drawTableHeader();
+
+//     // ✅ DESENHAR LINHAS DE DADOS
+//     dataToExport.forEach((item, index) => {
+//       const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+//       const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
+
+//       const rowData = [
+//         { text: item.Home_site_name, maxWidth: colWidths[0] - 2 },
+//         { text: item.code_zone, maxWidth: colWidths[1] - 2 },
+//         { text: item.code_area, maxWidth: colWidths[2] - 2 },
+//         { text: item.certificate_description, maxWidth: colWidths[3] - 2 },
+//         { text: item.item_code, maxWidth: colWidths[4] - 2 },
+//         { text: item.item_name, maxWidth: colWidths[5] - 2 },
+//         { text: item.brand || '-', maxWidth: colWidths[6] - 2 },
+//         { text: item.model || '-', maxWidth: colWidths[7] - 2 },
+//         { text: item.serial, maxWidth: colWidths[8] - 2 },
+//         { text: formatDate(item.expiration_date), maxWidth: colWidths[9] - 2 },
+//         { text: `${daysUntilExpiration}`, maxWidth: colWidths[10] - 2 },
+//         { text: translateStatus(item.certificate_status_name), maxWidth: colWidths[11] - 2 },
+//         { text: criticalityBadge.label, maxWidth: colWidths[12] - 2 }
+//       ];
+
+//       let maxLines = 1;
+//       const splitTexts = rowData.map((data) => {
+//         const lines = doc.splitTextToSize(data.text, data.maxWidth);
+//         maxLines = Math.max(maxLines, lines.length);
+//         return lines;
+//       });
+
+//       const rowHeight = maxLines * 4 + 1;
+
+//       if (yPosition + rowHeight > pageHeight - 15) {
+//         doc.addPage();
+//         yPosition = margin;
+//         drawTableHeader();
+//       }
+
+//       if (criticalityBadge.label === 'EXPIRADO' || criticalityBadge.label === 'CRÍTICO') {
+//         doc.setFillColor(254, 226, 226);
+//       } else if (criticalityBadge.label === 'ATENÇÃO') {
+//         doc.setFillColor(254, 243, 199);
+//       } else if (criticalityBadge.label === 'ALERTA') {
+//         doc.setFillColor(254, 249, 195);
+//       } else {
+//         doc.setFillColor(220, 252, 231);
+//       }
+//       doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight, 'F');
+
+//       let xPosition = margin + 1;
+      
+//       splitTexts.forEach((lines, colIndex) => {
+//         let textYPosition = yPosition + 3;
+
+//         if (colIndex === 10) {
+//           if (daysUntilExpiration < 0) {
+//             doc.setTextColor(220, 38, 38);
+//           } else if (daysUntilExpiration <= 30) {
+//             doc.setTextColor(249, 115, 22);
+//           } else if (daysUntilExpiration <= 90) {
+//             doc.setTextColor(234, 179, 8);
+//           } else {
+//             doc.setTextColor(34, 197, 94);
+//           }
+//           doc.setFont('helvetica', 'bold');
+//         } else {
+//           doc.setTextColor(0, 0, 0);
+//           doc.setFont('helvetica', 'normal');
+//         }
+
+//         lines.forEach((line: string) => {
+//           doc.text(line, xPosition, textYPosition);
+//           textYPosition += 4;
+//         });
+
+//         xPosition += colWidths[colIndex];
+//       });
+
+//       yPosition += rowHeight;
+
+//       doc.setDrawColor(200, 200, 200);
+//       doc.setLineWidth(0.2);
+//       doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+//       yPosition += 0.5;
+//     });
+
+//     // ✅ PÁGINA FINAL - ANÁLISE DETALHADA - LAYOUT MELHORADO
+//     doc.addPage();
+//     yPosition = margin;
+
+//     doc.setFontSize(18);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(37, 99, 235);
+//     doc.text('ANÁLISE DETALHADA', margin, yPosition);
+//     yPosition += 12;
+
+//     // ✅ SEÇÃO 1: DISTRIBUIÇÃO POR PERÍODO
+//     doc.setFontSize(11);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Distribuição por Período de Expiração', margin, yPosition);
+//     yPosition += 7;
+
+//     const distributionData = [
+//       { label: 'Certificados Expirados:', value: analytics.expired, color: [254, 226, 226] },
+//       { label: 'Expirando em 30 dias:', value: analytics.expiringIn30Days, color: [254, 243, 199] },
+//       { label: 'Expirando 31-60 dias:', value: analytics.expiringIn60Days, color: [254, 249, 195] },
+//       { label: 'Expirando 61-90 dias:', value: analytics.expiringIn90Days, color: [220, 252, 231] },
+//       { label: 'Válidos (> 90 dias):', value: analytics.safe, color: [209, 250, 229] }
+//     ];
+
+//     distributionData.forEach((item) => {
+//       doc.setFillColor(item.color[0], item.color[1], item.color[2]);
+//       doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 7, 'F');
+      
+//       doc.setFontSize(9);
+//       doc.setFont('helvetica', 'normal');
+//       doc.setTextColor(51, 51, 51);
+//       doc.text(item.label, margin + 3, yPosition + 2);
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.text(item.value.toString(), pageWidth - margin - 20, yPosition + 2);
+      
+//       yPosition += 8;
+//     });
+
+//     yPosition += 5;
+
+//     // ✅ SEÇÃO 2: TOP 5 SITES
+//     doc.setFontSize(11);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Top 5 Sites com Mais Certificados', margin, yPosition);
+//     yPosition += 7;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     topSites.forEach(([site, count], index) => {
+//       const percentage = ((count / analytics.total) * 100).toFixed(1);
+      
+//       doc.setTextColor(80, 80, 80);
+//       doc.text(`${index + 1}. ${site}`, margin + 5, yPosition);
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(37, 99, 235);
+//       doc.text(`${count} (${percentage}%)`, pageWidth - margin - 35, yPosition);
+      
+//       doc.setFont('helvetica', 'normal');
+//       yPosition += 6;
+//     });
+
+//     yPosition += 5;
+
+//     // ✅ SEÇÃO 3: DISTRIBUIÇÃO POR TIPO
+//     doc.setFontSize(11);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Distribuição por Tipo de Certificado', margin, yPosition);
+//     yPosition += 7;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     topCertTypes.forEach(([type, count], index) => {
+//       const percentage = ((count / analytics.total) * 100).toFixed(1);
+      
+//       doc.setTextColor(80, 80, 80);
+//       doc.text(`${index + 1}. ${type}`, margin + 5, yPosition);
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(37, 99, 235);
+//       doc.text(`${count} (${percentage}%)`, pageWidth - margin - 35, yPosition);
+      
+//       doc.setFont('helvetica', 'normal');
+//       yPosition += 6;
+//     });
+
+//     yPosition += 5;
+
+//     // ✅ SEÇÃO 4: TOP 5 MARCAS
+//     const topBrands = Object.entries(analytics.byBrand)
+//       .sort((a, b) => b[1] - a[1])
+//       .slice(0, 5);
+
+//     doc.setFontSize(11);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('Top 5 Marcas', margin, yPosition);
+//     yPosition += 7;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     topBrands.forEach(([brand, count], index) => {
+//       const percentage = ((count / analytics.total) * 100).toFixed(1);
+      
+//       doc.setTextColor(80, 80, 80);
+//       doc.text(`${index + 1}. ${brand}`, margin + 5, yPosition);
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(37, 99, 235);
+//       doc.text(`${count} (${percentage}%)`, pageWidth - margin - 35, yPosition);
+      
+//       doc.setFont('helvetica', 'normal');
+//       yPosition += 6;
+//     });
+
+//     yPosition += 8;
+
+//     // ✅ SEÇÃO 5: ITENS CRÍTICOS
+//     if (analytics.criticalItems.length > 0) {
+//       doc.setFontSize(11);
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(239, 68, 68);
+//       doc.text('⚠ ITENS CRÍTICOS - AÇÃO URGENTE NECESSÁRIA', margin, yPosition);
+//       yPosition += 7;
+
+//       doc.setFontSize(8);
+//       doc.setFont('helvetica', 'normal');
+      
+//       // Cabeçalho da tabela de críticos
+//       doc.setFillColor(254, 226, 226);
+//       doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 6, 'F');
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(51, 51, 51);
+//       doc.text('Item', margin + 3, yPosition + 2);
+//       doc.text('Código', margin + 90, yPosition + 2);
+//       doc.text('Status', margin + 130, yPosition + 2);
+//       doc.text('Site', margin + 160, yPosition + 2);
+//       yPosition += 7;
+      
+//       doc.setFont('helvetica', 'normal');
+//       const criticalToShow = analytics.criticalItems.slice(0, 15);
+//       criticalToShow.forEach((critical, index) => {
+//         if (yPosition > pageHeight - 20) return;
+        
+//         const bgColor = index % 2 === 0 ? [255, 255, 255] : [250, 250, 250];
+//         doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+//         doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 5, 'F');
+        
+//         doc.setTextColor(51, 51, 51);
+//         doc.text(`${index + 1}. ${critical.item.substring(0, 35)}`, margin + 3, yPosition + 1);
+//         doc.text(critical.code, margin + 90, yPosition + 1);
+        
+//         const statusColor = critical.days < 0 ? [239, 68, 68] : [249, 115, 22];
+//         const statusText = critical.days < 0 ? 'EXPIRADO' : `${critical.days} dias`;
+//         doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+//         doc.setFont('helvetica', 'bold');
+//         doc.text(statusText, margin + 130, yPosition + 1);
+        
+//         doc.setTextColor(51, 51, 51);
+//         doc.setFont('helvetica', 'normal');
+//         doc.text(critical.site.substring(0, 25), margin + 160, yPosition + 1);
+        
+//         yPosition += 6;
+//       });
+
+//       if (analytics.criticalItems.length > 15) {
+//         doc.setFontSize(8);
+//         doc.setTextColor(100, 100, 100);
+//         doc.text(`... e mais ${analytics.criticalItems.length - 15} itens críticos`, margin + 3, yPosition + 2);
+//       }
+//     }
+
+//     // ✅ RODAPÉ EM TODAS AS PÁGINAS
+//     const totalPages = doc.getNumberOfPages();
+//     for (let i = 1; i <= totalPages; i++) {
+//       doc.setPage(i);
+//       doc.setFontSize(7);
+//       doc.setTextColor(128, 128, 128);
+//       doc.text(
+//         `Gerado em ${new Date().toLocaleString('pt-BR')} - Página ${i} de ${totalPages}`,
+//         pageWidth / 2,
+//         pageHeight - 5,
+//         { align: 'center' }
+//       );
+//     }
+
+//     doc.save(`certificados-relatorio-completo-${new Date().toISOString().split('T')[0]}.pdf`);
+//   } catch (error) {
+//     console.error('Erro ao gerar PDF:', error);
+//     alert('Erro ao exportar para PDF.');
+//   }
+// };
+
+
+// const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
+//   try {
+//     const { jsPDF } = await import('jspdf');
+//     const doc = new jsPDF({
+//       orientation: 'landscape',
+//       unit: 'mm',
+//       format: 'a4'
+//     }) as import('jspdf').jsPDF;
+
+//     const pageWidth = doc.internal.pageSize.getWidth();
+//     const pageHeight = doc.internal.pageSize.getHeight();
+//     const margin = 10;
+//     let yPosition = margin;
+
+//     // ✅ CALCULAR ESTATÍSTICAS ANALÍTICAS
+//     const analytics = {
+//       total: dataToExport.length,
+//       expired: 0,
+//       expiringIn30Days: 0,
+//       expiringIn60Days: 0,
+//       expiringIn90Days: 0,
+//       safe: 0,
+//       bySite: {} as Record<string, number>,
+//       byCertificateType: {} as Record<string, number>,
+//       byStatus: {} as Record<string, number>,
+//       byBrand: {} as Record<string, number>,
+//       criticalItems: [] as any[]
+//     };
+
+//     dataToExport.forEach(item => {
+//       const days = getDaysUntilExpiration(item.expiration_date);
+      
+//       if (days < 0) analytics.expired++;
+//       else if (days <= 30) analytics.expiringIn30Days++;
+//       else if (days <= 60) analytics.expiringIn60Days++;
+//       else if (days <= 90) analytics.expiringIn90Days++;
+//       else analytics.safe++;
+
+//       analytics.bySite[item.Home_site_name] = (analytics.bySite[item.Home_site_name] || 0) + 1;
+//       analytics.byCertificateType[item.certificate_description] = 
+//         (analytics.byCertificateType[item.certificate_description] || 0) + 1;
+//       analytics.byStatus[item.certificate_status_name] = 
+//         (analytics.byStatus[item.certificate_status_name] || 0) + 1;
+      
+//       if (item.brand) {
+//         analytics.byBrand[item.brand] = (analytics.byBrand[item.brand] || 0) + 1;
+//       }
+
+//       if (days <= 30) {
+//         analytics.criticalItems.push({
+//           item: item.item_name,
+//           code: item.item_code,
+//           days,
+//           site: item.Home_site_name
+//         });
+//       }
+//     });
+
+//     analytics.criticalItems.sort((a, b) => a.days - b.days);
+
+//     const topSites = Object.entries(analytics.bySite)
+//       .sort((a, b) => b[1] - a[1])
+//       .slice(0, 5);
+
+//     const topCertTypes = Object.entries(analytics.byCertificateType)
+//       .sort((a, b) => b[1] - a[1])
+//       .slice(0, 5);
+
+//     // ✅ CABEÇALHO MELHORADO COM DESIGN MODERNO
+//     // Faixa superior azul com gradiente simulado
+//     doc.setFillColor(37, 99, 235);
+//     doc.rect(0, 0, pageWidth, 12, 'F');
+    
+//     // Título em branco
+//     doc.setFontSize(20);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(255, 255, 255);
+//     doc.text('RELATÓRIO DE CERTIFICADOS', margin + 2, 8);
+    
+//     // Badge com total de registros
+//     const badgeX = pageWidth - margin - 50;
+//     doc.setFillColor(255, 255, 255, 0.2);
+//     doc.roundedRect(badgeX, 3, 45, 6, 2, 2, 'F');
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'bold');
+//     doc.text(`${dataToExport.length} REGISTROS`, badgeX + 22.5, 7, { align: 'center' });
+    
+//     yPosition = 15;
+    
+//     // Linha de informações secundárias
+//     doc.setFontSize(8);
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(100, 100, 100);
+//     doc.text(`${new Date().toLocaleDateString('pt-BR', { 
+//       weekday: 'long', 
+//       year: 'numeric', 
+//       month: 'long', 
+//       day: 'numeric' 
+//     })}`, margin, yPosition);
+    
+//     doc.text(`${new Date().toLocaleTimeString('pt-BR')}`, pageWidth - margin, yPosition, { align: 'right' });
+//     yPosition += 6;
+
+//     // Linha decorativa
+//     doc.setDrawColor(37, 99, 235);
+//     doc.setLineWidth(0.5);
+//     doc.line(margin, yPosition, pageWidth - margin, yPosition);
+//     yPosition += 6;
+
+//     // ✅ RESUMO EXECUTIVO - DESIGN APRIMORADO
+//     // Card com sombra simulada
+//     doc.setFillColor(250, 250, 250);
+//     doc.roundedRect(margin, yPosition, pageWidth - 2 * margin, 38, 2, 2, 'F');
+    
+//     // Borda do card
+//     doc.setDrawColor(220, 220, 220);
+//     doc.setLineWidth(0.3);
+//     doc.roundedRect(margin, yPosition, pageWidth - 2 * margin, 38, 2, 2, 'S');
+    
+//     yPosition += 6;
+    
+//     // Título do resumo com ícone
+//     doc.setFontSize(11);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(37, 99, 235);
+//     doc.text('📊 RESUMO EXECUTIVO', margin + 3, yPosition);
+//     yPosition += 7;
+
+//     // ✅ MÉTRICAS COM BADGES COLORIDOS
+//     doc.setFontSize(8);
+//     let xPos = margin + 3;
+//     const badgeSpacing = 43;
+    
+//     const metricsData = [
+//       { label: 'Total', value: analytics.total, bgColor: [59, 130, 246], textColor: [255, 255, 255] },
+//       { label: 'Expirados', value: analytics.expired, bgColor: [239, 68, 68], textColor: [255, 255, 255] },
+//       { label: '≤ 30 dias', value: analytics.expiringIn30Days, bgColor: [249, 115, 22], textColor: [255, 255, 255] },
+//       { label: '31-60 dias', value: analytics.expiringIn60Days, bgColor: [234, 179, 8], textColor: [255, 255, 255] },
+//       { label: '61-90 dias', value: analytics.expiringIn90Days, bgColor: [34, 197, 94], textColor: [255, 255, 255] },
+//       { label: '> 90 dias', value: analytics.safe, bgColor: [16, 185, 129], textColor: [255, 255, 255] }
+//     ];
+
+//     metricsData.forEach((metric) => {
+//       // Badge colorido
+//       doc.setFillColor(metric.bgColor[0], metric.bgColor[1], metric.bgColor[2]);
+//       doc.roundedRect(xPos, yPosition - 4, 40, 6, 1.5, 1.5, 'F');
+      
+//       // Label
+//       doc.setFontSize(7);
+//       doc.setFont('helvetica', 'normal');
+//       doc.setTextColor(metric.textColor[0], metric.textColor[1], metric.textColor[2]);
+//       doc.text(metric.label, xPos + 2, yPosition - 0.5);
+      
+//       // Valor
+//       doc.setFont('helvetica', 'bold');
+//       doc.setFontSize(8);
+//       doc.text(metric.value.toString(), xPos + 38, yPosition - 0.5, { align: 'right' });
+      
+//       xPos += badgeSpacing;
+//     });
+
+//     yPosition += 7;
+
+//     // ✅ TOP SITES COM ÍCONE
+//     doc.setFont('helvetica', 'bold');
+//     doc.setFontSize(8);
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('🏢 Top Sites:', margin + 3, yPosition);
+    
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.setFontSize(7);
+    
+//     xPos = margin + 3;
+//     yPosition += 5;
+//     topSites.slice(0, 3).forEach(([site, count], index) => {
+//       doc.text(`${index + 1}. ${site.substring(0, 24)} (${count})`, xPos, yPosition);
+//       xPos += 90;
+//     });
+
+//     yPosition += 6;
+
+//     // ✅ TOP TIPOS COM ÍCONE
+//     doc.setFontSize(8);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('📋 Top Tipos:', margin + 3, yPosition);
+    
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.setFontSize(7);
+    
+//     xPos = margin + 3;
+//     yPosition += 5;
+//     topCertTypes.slice(0, 3).forEach(([type, count], index) => {
+//       doc.text(`${index + 1}. ${type.substring(0, 24)} (${count})`, xPos, yPosition);
+//       xPos += 90;
+//     });
+
+//     yPosition += 6;
+
+//     // ✅ STATUS COM ÍCONE
+//     doc.setFontSize(8);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(51, 51, 51);
+//     doc.text('✓ Status:', margin + 3, yPosition);
+    
+//     doc.setFont('helvetica', 'normal');
+//     doc.setTextColor(80, 80, 80);
+//     doc.setFontSize(7);
+    
+//     xPos = margin + 20;
+//     Object.entries(analytics.byStatus).forEach(([status, count]) => {
+//       doc.text(`${translateStatus(status)}: ${count}`, xPos, yPosition);
+//       xPos += 60;
+//     });
+
+//     yPosition += 10;
+
+//     // ✅ CABEÇALHOS DA TABELA
+//     const headers = [
+//       'Site',
+//       'Área',
+//       'Zona',
+//       'Certificado',
+//       'Código',
+//       'Item',
+//       'Marca',
+//       'Modelo',
+//       'Serial',
+//       'Expiração',
+//       'Dias',
+//       'Status',
+//       'Criticidade'
+//     ];
+
+//     const colWidths = [18, 40, 40, 22, 12, 30, 12, 12, 18, 18, 10, 15, 15];
+
+//     const drawTableHeader = () => {
+//       doc.setFillColor(37, 99, 235);
+//       doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+
+//       doc.setFontSize(7);
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(255, 255, 255);
+
+//       let xPos = margin + 1;
+//       headers.forEach((header, index) => {
+//         doc.text(header, xPos, yPosition);
+//         xPos += colWidths[index];
+//       });
+
+//       yPosition += 6;
+      
+//       doc.setDrawColor(37, 99, 235);
+//       doc.setLineWidth(0.5);
+//       doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+//       yPosition += 1;
+      
+//       doc.setFont('helvetica', 'normal');
+//       doc.setFontSize(6);
+//     };
+
+//     drawTableHeader();
+
+//     // ✅ DESENHAR LINHAS DE DADOS
+//     dataToExport.forEach((item, index) => {
+//       const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+//       const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
+
+//       const rowData = [
+//         { text: item.Home_site_name, maxWidth: colWidths[0] - 2 },
+//         { text: item.code_zone, maxWidth: colWidths[1] - 2 },
+//         { text: item.code_area, maxWidth: colWidths[2] - 2 },
+//         { text: item.certificate_description, maxWidth: colWidths[3] - 2 },
+//         { text: item.item_code, maxWidth: colWidths[4] - 2 },
+//         { text: item.item_name, maxWidth: colWidths[5] - 2 },
+//         { text: item.brand || '-', maxWidth: colWidths[6] - 2 },
+//         { text: item.model || '-', maxWidth: colWidths[7] - 2 },
+//         { text: item.serial, maxWidth: colWidths[8] - 2 },
+//         { text: formatDate(item.expiration_date), maxWidth: colWidths[9] - 2 },
+//         { text: `${daysUntilExpiration}`, maxWidth: colWidths[10] - 2 },
+//         { text: translateStatus(item.certificate_status_name), maxWidth: colWidths[11] - 2 },
+//         { text: criticalityBadge.label, maxWidth: colWidths[12] - 2 }
+//       ];
+
+//       let maxLines = 1;
+//       const splitTexts = rowData.map((data) => {
+//         const lines = doc.splitTextToSize(data.text, data.maxWidth);
+//         maxLines = Math.max(maxLines, lines.length);
+//         return lines;
+//       });
+
+//       const rowHeight = maxLines * 4 + 1;
+
+//       if (yPosition + rowHeight > pageHeight - 20) {
+//         doc.addPage();
+//         yPosition = margin;
+//         drawTableHeader();
+//       }
+
+//       if (criticalityBadge.label === 'EXPIRADO' || criticalityBadge.label === 'CRÍTICO') {
+//         doc.setFillColor(254, 226, 226);
+//       } else if (criticalityBadge.label === 'ATENÇÃO') {
+//         doc.setFillColor(254, 243, 199);
+//       } else if (criticalityBadge.label === 'ALERTA') {
+//         doc.setFillColor(254, 249, 195);
+//       } else {
+//         doc.setFillColor(220, 252, 231);
+//       }
+//       doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight, 'F');
+
+//       let xPosition = margin + 1;
+      
+//       splitTexts.forEach((lines, colIndex) => {
+//         let textYPosition = yPosition + 3;
+
+//         if (colIndex === 10) {
+//           if (daysUntilExpiration < 0) {
+//             doc.setTextColor(220, 38, 38);
+//           } else if (daysUntilExpiration <= 30) {
+//             doc.setTextColor(249, 115, 22);
+//           } else if (daysUntilExpiration <= 90) {
+//             doc.setTextColor(234, 179, 8);
+//           } else {
+//             doc.setTextColor(34, 197, 94);
+//           }
+//           doc.setFont('helvetica', 'bold');
+//         } else {
+//           doc.setTextColor(0, 0, 0);
+//           doc.setFont('helvetica', 'normal');
+//         }
+
+//         lines.forEach((line: string) => {
+//           doc.text(line, xPosition, textYPosition);
+//           textYPosition += 4;
+//         });
+
+//         xPosition += colWidths[colIndex];
+//       });
+
+//       yPosition += rowHeight;
+
+//       doc.setDrawColor(230, 230, 230);
+//       doc.setLineWidth(0.1);
+//       doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+//       yPosition += 0.5;
+//     });
+
+//     // ✅ PÁGINA FINAL - ANÁLISE DETALHADA
+//     doc.addPage();
+//     yPosition = margin;
+
+//     // Cabeçalho da página de análise
+//     doc.setFillColor(37, 99, 235);
+//     doc.rect(0, 0, pageWidth, 12, 'F');
+    
+//     doc.setFontSize(20);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(255, 255, 255);
+//     doc.text('ANÁLISE DETALHADA', margin + 2, 8);
+    
+//     yPosition = 18;
+
+//     // ✅ SEÇÃO 1: DISTRIBUIÇÃO POR PERÍODO
+//     doc.setFontSize(12);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(37, 99, 235);
+//     doc.text('📊 Distribuição por Período de Expiração', margin, yPosition);
+//     yPosition += 8;
+
+//     const distributionData = [
+//       { label: 'Certificados Expirados', value: analytics.expired, color: [239, 68, 68], icon: '❌' },
+//       { label: 'Expirando em 30 dias', value: analytics.expiringIn30Days, color: [249, 115, 22], icon: '⚠️' },
+//       { label: 'Expirando 31-60 dias', value: analytics.expiringIn60Days, color: [234, 179, 8], icon: '⏰' },
+//       { label: 'Expirando 61-90 dias', value: analytics.expiringIn90Days, color: [34, 197, 94], icon: '✓' },
+//       { label: 'Válidos (> 90 dias)', value: analytics.safe, color: [16, 185, 129], icon: '✓✓' }
+//     ];
+
+//     distributionData.forEach((item) => {
+//       doc.setFillColor(item.color[0], item.color[1], item.color[2], 0.1);
+//       doc.roundedRect(margin, yPosition - 2, pageWidth - 2 * margin, 7, 1.5, 1.5, 'F');
+      
+//       doc.setDrawColor(item.color[0], item.color[1], item.color[2]);
+//       doc.setLineWidth(0.5);
+//       doc.roundedRect(margin, yPosition - 2, pageWidth - 2 * margin, 7, 1.5, 1.5, 'S');
+      
+//       doc.setFontSize(9);
+//       doc.setFont('helvetica', 'normal');
+//       doc.setTextColor(51, 51, 51);
+//       doc.text(`${item.icon} ${item.label}`, margin + 3, yPosition + 2);
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(item.color[0], item.color[1], item.color[2]);
+//       doc.text(item.value.toString(), pageWidth - margin - 20, yPosition + 2);
+      
+//       yPosition += 8;
+//     });
+
+//     yPosition += 5;
+
+//     // ✅ SEÇÃO 2: TOP 5 SITES
+//     doc.setFontSize(12);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(37, 99, 235);
+//     doc.text('🏢 Top 5 Sites com Mais Certificados', margin, yPosition);
+//     yPosition += 8;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     topSites.forEach(([site, count], index) => {
+//       const percentage = ((count / analytics.total) * 100).toFixed(1);
+      
+//       // Barra de progresso
+//       const barWidth = (count / analytics.total) * (pageWidth - 2 * margin - 100);
+//       doc.setFillColor(59, 130, 246, 0.3);
+//       doc.roundedRect(margin + 5, yPosition - 3, barWidth, 5, 1, 1, 'F');
+      
+//       doc.setTextColor(80, 80, 80);
+//       doc.text(`${index + 1}. ${site.substring(0, 60)}`, margin + 5, yPosition);
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(37, 99, 235);
+//       doc.text(`${count} (${percentage}%)`, pageWidth - margin - 35, yPosition);
+      
+//       doc.setFont('helvetica', 'normal');
+//       yPosition += 7;
+//     });
+
+//     yPosition += 5;
+
+//     // ✅ SEÇÃO 3: DISTRIBUIÇÃO POR TIPO
+//     doc.setFontSize(12);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(37, 99, 235);
+//     doc.text('📋 Distribuição por Tipo de Certificado', margin, yPosition);
+//     yPosition += 8;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     topCertTypes.forEach(([type, count], index) => {
+//       const percentage = ((count / analytics.total) * 100).toFixed(1);
+      
+//       const barWidth = (count / analytics.total) * (pageWidth - 2 * margin - 100);
+//       doc.setFillColor(139, 92, 246, 0.3);
+//       doc.roundedRect(margin + 5, yPosition - 3, barWidth, 5, 1, 1, 'F');
+      
+//       doc.setTextColor(80, 80, 80);
+//       doc.text(`${index + 1}. ${type.substring(0, 60)}`, margin + 5, yPosition);
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(139, 92, 246);
+//       doc.text(`${count} (${percentage}%)`, pageWidth - margin - 35, yPosition);
+      
+//       doc.setFont('helvetica', 'normal');
+//       yPosition += 7;
+//     });
+
+//     yPosition += 5;
+
+//     // ✅ SEÇÃO 4: TOP 5 MARCAS
+//     const topBrands = Object.entries(analytics.byBrand)
+//       .sort((a, b) => b[1] - a[1])
+//       .slice(0, 5);
+
+//     doc.setFontSize(12);
+//     doc.setFont('helvetica', 'bold');
+//     doc.setTextColor(37, 99, 235);
+//     doc.text('🏭 Top 5 Marcas', margin, yPosition);
+//     yPosition += 8;
+
+//     doc.setFontSize(9);
+//     doc.setFont('helvetica', 'normal');
+//     topBrands.forEach(([brand, count], index) => {
+//       const percentage = ((count / analytics.total) * 100).toFixed(1);
+      
+//       const barWidth = (count / analytics.total) * (pageWidth - 2 * margin - 100);
+//       doc.setFillColor(16, 185, 129, 0.3);
+//       doc.roundedRect(margin + 5, yPosition - 3, barWidth, 5, 1, 1, 'F');
+      
+//       doc.setTextColor(80, 80, 80);
+//       doc.text(`${index + 1}. ${brand}`, margin + 5, yPosition);
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(16, 185, 129);
+//       doc.text(`${count} (${percentage}%)`, pageWidth - margin - 35, yPosition);
+      
+//       doc.setFont('helvetica', 'normal');
+//       yPosition += 7;
+//     });
+
+//     yPosition += 8;
+
+//     // ✅ SEÇÃO 5: ITENS CRÍTICOS
+//     if (analytics.criticalItems.length > 0) {
+//       doc.setFontSize(12);
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(239, 68, 68);
+//       doc.text('⚠️ ITENS CRÍTICOS - AÇÃO URGENTE NECESSÁRIA', margin, yPosition);
+//       yPosition += 8;
+
+//       doc.setFontSize(8);
+//       doc.setFont('helvetica', 'normal');
+      
+//       // Cabeçalho da tabela
+//       doc.setFillColor(239, 68, 68);
+//       doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 6, 'F');
+      
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(255, 255, 255);
+//       doc.text('Item', margin + 3, yPosition + 2);
+//       doc.text('Código', margin + 90, yPosition + 2);
+//       doc.text('Status', margin + 130, yPosition + 2);
+//       doc.text('Site', margin + 160, yPosition + 2);
+//       yPosition += 7;
+      
+//       doc.setFont('helvetica', 'normal');
+//       const criticalToShow = analytics.criticalItems.slice(0, 15);
+//       criticalToShow.forEach((critical, index) => {
+//         if (yPosition > pageHeight - 25) return;
+        
+//         const bgColor = index % 2 === 0 ? [255, 255, 255] : [254, 242, 242];
+//         doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+//         doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 5, 'F');
+        
+//         doc.setTextColor(51, 51, 51);
+//         doc.text(`${index + 1}. ${critical.item.substring(0, 35)}`, margin + 3, yPosition + 1);
+//         doc.text(critical.code, margin + 90, yPosition + 1);
+        
+//         const statusColor = critical.days < 0 ? [239, 68, 68] : [249, 115, 22];
+//         const statusText = critical.days < 0 ? 'EXPIRADO' : `${critical.days} dias`;
+//         doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+//         doc.setFont('helvetica', 'bold');
+//         doc.text(statusText, margin + 130, yPosition + 1);
+        
+//         doc.setTextColor(51, 51, 51);
+//         doc.setFont('helvetica', 'normal');
+//         doc.text(critical.site.substring(0, 25), margin + 160, yPosition + 1);
+        
+//         yPosition += 6;
+//       });
+
+//       if (analytics.criticalItems.length > 15) {
+//         doc.setFontSize(8);
+//         doc.setTextColor(100, 100, 100);
+//         doc.text(`... e mais ${analytics.criticalItems.length - 15} itens críticos`, margin + 3, yPosition + 2);
+//       }
+//     }
+
+//     // ✅ RODAPÉ MELHORADO EM TODAS AS PÁGINAS
+//     const totalPages = doc.getNumberOfPages();
+//     for (let i = 1; i <= totalPages; i++) {
+//       doc.setPage(i);
+      
+//       // Linha decorativa superior do rodapé
+//       doc.setDrawColor(37, 99, 235);
+//       doc.setLineWidth(0.5);
+//       doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+      
+//       // Fundo do rodapé
+//       doc.setFillColor(248, 250, 252);
+//       doc.rect(0, pageHeight - 11, pageWidth, 11, 'F');
+      
+//       // Informações do rodapé
+//       doc.setFontSize(7);
+//       doc.setFont('helvetica', 'normal');
+//       doc.setTextColor(100, 100, 100);
+      
+//       // Esquerda - Data e hora
+//       doc.text(
+//         `📅 Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+//         margin,
+//         pageHeight - 5
+//       );
+      
+//       // Centro - Nome do relatório
+//       doc.setFont('helvetica', 'bold');
+//       doc.setTextColor(37, 99, 235);
+//       doc.text(
+//         'SmartX Hub - Relatório de Certificados',
+//         pageWidth / 2,
+//         pageHeight - 5,
+//         { align: 'center' }
+//       );
+      
+//       // Direita - Paginação com badge
+//       doc.setFont('helvetica', 'normal');
+//       doc.setTextColor(100, 100, 100);
+//       const pageText = `Página ${i} de ${totalPages}`;
+//       const pageTextWidth = doc.getTextWidth(pageText);
+      
+//       doc.setFillColor(37, 99, 235, 0.1);
+//       doc.roundedRect(pageWidth - margin - pageTextWidth - 4, pageHeight - 7.5, pageTextWidth + 4, 4, 1, 1, 'F');
+      
+//       doc.setTextColor(37, 99, 235);
+//       doc.setFont('helvetica', 'bold');
+//       doc.text(pageText, pageWidth - margin, pageHeight - 5, { align: 'right' });
+//     }
+
+//     doc.save(`certificados-relatorio-completo-${new Date().toISOString().split('T')[0]}.pdf`);
+//   } catch (error) {
+//     console.error('Erro ao gerar PDF:', error);
+//     alert('Erro ao exportar para PDF.');
+//   }
+// };
+
+
+const exportProgramacaoPDF = async (dataToExport: CertificateReport[]) => {
+  try {
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    }) as import('jspdf').jsPDF;
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 10;
+    let yPosition = margin;
+
+    // ✅ CALCULAR ESTATÍSTICAS ANALÍTICAS
+    const analytics = {
+      total: dataToExport.length,
+      expired: 0,
+      expiringIn30Days: 0,
+      expiringIn60Days: 0,
+      expiringIn90Days: 0,
+      safe: 0,
+      bySite: {} as Record<string, number>,
+      byCertificateType: {} as Record<string, number>,
+      byStatus: {} as Record<string, number>,
+      byBrand: {} as Record<string, number>,
+      criticalItems: [] as any[]
+    };
+
+    dataToExport.forEach(item => {
+      const days = getDaysUntilExpiration(item.expiration_date);
+      
+      if (days < 0) analytics.expired++;
+      else if (days <= 30) analytics.expiringIn30Days++;
+      else if (days <= 60) analytics.expiringIn60Days++;
+      else if (days <= 90) analytics.expiringIn90Days++;
+      else analytics.safe++;
+
+      analytics.bySite[item.Home_site_name] = (analytics.bySite[item.Home_site_name] || 0) + 1;
+      analytics.byCertificateType[item.certificate_description] = 
+        (analytics.byCertificateType[item.certificate_description] || 0) + 1;
+      analytics.byStatus[item.certificate_status_name] = 
+        (analytics.byStatus[item.certificate_status_name] || 0) + 1;
+      
+      if (item.brand) {
+        analytics.byBrand[item.brand] = (analytics.byBrand[item.brand] || 0) + 1;
+      }
+
+      if (days <= 30) {
+        analytics.criticalItems.push({
+          item: item.item_name,
+          code: item.item_code,
+          days,
+          site: item.Home_site_name
+        });
+      }
+    });
+
+    analytics.criticalItems.sort((a, b) => a.days - b.days);
+
+    const topSites = Object.entries(analytics.bySite)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    const topCertTypes = Object.entries(analytics.byCertificateType)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    // ✅ CABEÇALHO MELHORADO COM DESIGN MODERNO
+    // Faixa superior azul
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, pageWidth, 12, 'F');
+    
+    // Título em branco
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('RELATORIO DE CERTIFICADOS', margin + 2, 8);
+    
+    // Badge com total de registros
+    const badgeX = pageWidth - margin - 50;
+    doc.setFillColor(255, 255, 255, 0.2);
+    doc.roundedRect(badgeX, 3, 45, 6, 2, 2, 'F');
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${dataToExport.length} REGISTROS`, badgeX + 22.5, 7, { align: 'center' });
+    
+    yPosition = 15;
+    
+    // Linha de informações secundárias
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Data: ${new Date().toLocaleDateString('pt-BR', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })}`, margin, yPosition);
+    
+    doc.text(`Horario: ${new Date().toLocaleTimeString('pt-BR')}`, pageWidth - margin, yPosition, { align: 'right' });
+    yPosition += 6;
+
+    // Linha decorativa
+    doc.setDrawColor(37, 99, 235);
+    doc.setLineWidth(0.5);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 6;
+
+    // ✅ RESUMO EXECUTIVO - DESIGN APRIMORADO
+    // Card com sombra simulada
+    doc.setFillColor(250, 250, 250);
+    doc.roundedRect(margin, yPosition, pageWidth - 2 * margin, 38, 2, 2, 'F');
+    
+    // Borda do card
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(margin, yPosition, pageWidth - 2 * margin, 38, 2, 2, 'S');
+    
+    yPosition += 6;
+    
+    // Título do resumo
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(37, 99, 235);
+    doc.text('RESUMO EXECUTIVO', margin + 3, yPosition);
+    yPosition += 7;
+
+    // ✅ MÉTRICAS COM BADGES COLORIDOS
+    doc.setFontSize(8);
+    let xPos = margin + 3;
+    const badgeSpacing = 43;
+    
+    const metricsData = [
+      { label: 'Total', value: analytics.total, bgColor: [59, 130, 246], textColor: [255, 255, 255] },
+      { label: 'Expirados', value: analytics.expired, bgColor: [239, 68, 68], textColor: [255, 255, 255] },
+      { label: '< 30 dias', value: analytics.expiringIn30Days, bgColor: [249, 115, 22], textColor: [255, 255, 255] },
+      { label: '31-60 dias', value: analytics.expiringIn60Days, bgColor: [234, 179, 8], textColor: [255, 255, 255] },
+      { label: '61-90 dias', value: analytics.expiringIn90Days, bgColor: [34, 197, 94], textColor: [255, 255, 255] },
+      { label: '> 90 dias', value: analytics.safe, bgColor: [16, 185, 129], textColor: [255, 255, 255] }
+    ];
+
+    metricsData.forEach((metric) => {
+      // Badge colorido
+      doc.setFillColor(metric.bgColor[0], metric.bgColor[1], metric.bgColor[2]);
+      doc.roundedRect(xPos, yPosition - 4, 40, 6, 1.5, 1.5, 'F');
+      
+      // Label
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(metric.textColor[0], metric.textColor[1], metric.textColor[2]);
+      doc.text(metric.label, xPos + 2, yPosition - 0.5);
+      
+      // Valor
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text(metric.value.toString(), xPos + 38, yPosition - 0.5, { align: 'right' });
+      
+      xPos += badgeSpacing;
+    });
+
+    yPosition += 7;
+
+    // ✅ TOP SITES
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(51, 51, 51);
+    doc.text('Top Sites:', margin + 3, yPosition);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.setFontSize(7);
+    
+    xPos = margin + 3;
+    yPosition += 5;
+    topSites.slice(0, 3).forEach(([site, count], index) => {
+      doc.text(`${index + 1}. ${site.substring(0, 24)} (${count})`, xPos, yPosition);
+      xPos += 90;
+    });
+
+    yPosition += 6;
+
+    // ✅ TOP TIPOS
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(51, 51, 51);
+    doc.text('Top Tipos:', margin + 3, yPosition);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.setFontSize(7);
+    
+    xPos = margin + 3;
+    yPosition += 5;
+    topCertTypes.slice(0, 3).forEach(([type, count], index) => {
+      doc.text(`${index + 1}. ${type.substring(0, 24)} (${count})`, xPos, yPosition);
+      xPos += 90;
+    });
+
+    yPosition += 6;
+
+    // ✅ STATUS
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(51, 51, 51);
+    doc.text('Status:', margin + 3, yPosition);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(80, 80, 80);
+    doc.setFontSize(7);
+    
+    xPos = margin + 20;
+    Object.entries(analytics.byStatus).forEach(([status, count]) => {
+      doc.text(`${translateStatus(status)}: ${count}`, xPos, yPosition);
+      xPos += 60;
+    });
+
+    yPosition += 10;
+
+    // ✅ CABEÇALHOS DA TABELA
+    const headers = [
+      'Site',
+      'Area',
+      'Zona',
+      'Certificado',
+      'Codigo',
+      'Item',
+      'Marca',
+      'Modelo',
+      'Serial',
+      'Expiracao',
+      'Dias',
+      'Status',
+      'Criticidade'
+    ];
+
+    const colWidths = [18, 40, 40, 22, 12, 30, 12, 12, 18, 18, 10, 15, 15];
+
+    const drawTableHeader = () => {
+      doc.setFillColor(37, 99, 235);
       doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
 
       doc.setFontSize(7);
       doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
 
-      let xPosition = margin + 1;
+      let xPos = margin + 1;
       headers.forEach((header, index) => {
-        doc.text(header, xPosition, yPosition);
-        xPosition += colWidths[index];
+        doc.text(header, xPos, yPosition);
+        xPos += colWidths[index];
       });
 
       yPosition += 6;
-
+      
+      doc.setDrawColor(37, 99, 235);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+      yPosition += 1;
+      
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(6);
+    };
 
-      // @ts-ignore
-      dataToExport.forEach((item, index) => {
-        if (yPosition > pageHeight - 20) {
-          doc.addPage();
-          yPosition = margin;
+    drawTableHeader();
 
-          doc.setFillColor(220, 220, 220);
-          doc.rect(margin, yPosition - 4, pageWidth - 2 * margin, 6, 'F');
+    // ✅ DESENHAR LINHAS DE DADOS
+    //@ts-ignore
+    dataToExport.forEach((item, index) => {
+      const daysUntilExpiration = getDaysUntilExpiration(item.expiration_date);
+      const criticalityBadge = getCriticalityBadge(daysUntilExpiration);
 
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(7);
-          xPosition = margin + 1;
-          headers.forEach((header, index) => {
-            doc.text(header, xPosition, yPosition);
-            xPosition += colWidths[index];
-          });
-          yPosition += 6;
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(6);
-        }
+      const rowData = [
+        { text: item.Home_site_name, maxWidth: colWidths[0] - 2 },
+        { text: item.code_zone, maxWidth: colWidths[1] - 2 },
+        { text: item.code_area, maxWidth: colWidths[2] - 2 },
+        { text: item.certificate_description, maxWidth: colWidths[3] - 2 },
+        { text: item.item_code, maxWidth: colWidths[4] - 2 },
+        { text: item.item_name, maxWidth: colWidths[5] - 2 },
+        { text: item.brand || '-', maxWidth: colWidths[6] - 2 },
+        { text: item.model || '-', maxWidth: colWidths[7] - 2 },
+        { text: item.serial, maxWidth: colWidths[8] - 2 },
+        { text: formatDate(item.expiration_date), maxWidth: colWidths[9] - 2 },
+        { text: `${daysUntilExpiration}`, maxWidth: colWidths[10] - 2 },
+        { text: translateStatus(item.certificate_status_name), maxWidth: colWidths[11] - 2 },
+        { text: criticalityBadge.label, maxWidth: colWidths[12] - 2 }
+      ];
 
-        xPosition = margin + 1;
-        const rowData = [
-          '---',
-          item.item_code,
-          item.item_name.substring(0, 30),
-          item.code_area.substring(0, 35),
-          item.brand || '---',
-          item.model || '---',
-          item.serial || '---',
-          'Não',
-          getExecutionDate(item.expiration_date),
-          formatDate(item.expiration_date),
-          '---',
-          '---'
-        ];
-
-        rowData.forEach((text, colIndex) => {
-          const maxWidth = colWidths[colIndex] - 2;
-          const lines = doc.splitTextToSize(text, maxWidth);
-          doc.text(lines[0], xPosition, yPosition);
-          xPosition += colWidths[colIndex];
-        });
-
-        yPosition += 5;
+      let maxLines = 1;
+      const splitTexts = rowData.map((data) => {
+        const lines = doc.splitTextToSize(data.text, data.maxWidth);
+        maxLines = Math.max(maxLines, lines.length);
+        return lines;
       });
 
-      doc.setFontSize(7);
-      doc.text(`Pág. 1 / 1`, pageWidth - margin - 15, pageHeight - 5);
+      const rowHeight = maxLines * 4 + 1;
 
-      doc.save(`programacao-calibracao-${new Date().toISOString().split('T')[0]}.pdf`);
-    } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
-      alert('Erro ao exportar para PDF.');
-    }
-  };
-
-  const handleExportProgramacao = async (format: 'excel' | 'pdf', exportAll: boolean) => {
-    setShowExportProgramacaoMenu(false);
-
-    let dataToExport = filteredData;
-
-    // ✅ SÓ BUSCA TODOS OS DADOS SE exportAll FOR TRUE
-    if (exportAll) {
-      try {
-        const params = new URLSearchParams({
-          page: '1',
-          limit: '999999',
-          sortBy: 'item_code',
-          sortOrder: 'ASC'
-        });
-
-        // ✅ APLICAR OS MESMOS FILTROS DA TELA
-        if (filters.status !== 'ALL') {
-          params.append('certificateStatus', filters.status);
-        }
-        if (filters.site !== 'ALL') {
-          params.append('homeSiteName', filters.site);
-        }
-        if (filters.certificateType !== 'ALL') {
-          params.append('certificateDescription', filters.certificateType);
-        }
-        if (filters.zone !== 'ALL') {
-          params.append('homeZoneCode', filters.zone);
-        }
-        if (filters.area !== 'ALL') {
-          params.append('homeArea', filters.area);
-        }
-        if (dateFilter.startDate) {
-          params.append('startDate', dateFilter.startDate);
-        }
-        if (dateFilter.endDate) {
-          params.append('endDate', dateFilter.endDate);
-        }
-
-        const response = await fetch(
-          `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch all data');
-        }
-
-        const result: ApiResponse = await response.json();
-        dataToExport = result.data;
-
-        console.log('✅ Dados carregados para exportação:', {
-          total: dataToExport.length,
-          exportAll,
-          filtrosAplicados: {
-            status: filters.status,
-            site: filters.site,
-            certificateType: filters.certificateType,
-            zone: filters.zone,
-            area: filters.area
-          }
-        });
-      } catch (error) {
-        console.error('❌ Error fetching all data:', error);
-        alert('Erro ao buscar todos os dados. Exportando dados visíveis.');
-        // ✅ SE FALHAR, MANTÉM OS DADOS FILTRADOS DA TELA
-        dataToExport = filteredData;
+      if (yPosition + rowHeight > pageHeight - 20) {
+        doc.addPage();
+        yPosition = margin;
+        drawTableHeader();
       }
-    } else {
-      // ✅ QUANDO exportAll = false, USA OS DADOS JÁ FILTRADOS NA TELA
-      console.log('✅ Exportando dados filtrados da tela:', {
-        total: dataToExport.length,
-        exportAll: false
+
+      if (criticalityBadge.label === 'EXPIRADO' || criticalityBadge.label === 'CRÍTICO') {
+        doc.setFillColor(254, 226, 226);
+      } else if (criticalityBadge.label === 'ATENÇÃO') {
+        doc.setFillColor(254, 243, 199);
+      } else if (criticalityBadge.label === 'ALERTA') {
+        doc.setFillColor(254, 249, 195);
+      } else {
+        doc.setFillColor(220, 252, 231);
+      }
+      doc.rect(margin, yPosition, pageWidth - 2 * margin, rowHeight, 'F');
+
+      let xPosition = margin + 1;
+      
+      splitTexts.forEach((lines, colIndex) => {
+        let textYPosition = yPosition + 3;
+
+        if (colIndex === 10) {
+          if (daysUntilExpiration < 0) {
+            doc.setTextColor(220, 38, 38);
+          } else if (daysUntilExpiration <= 30) {
+            doc.setTextColor(249, 115, 22);
+          } else if (daysUntilExpiration <= 90) {
+            doc.setTextColor(234, 179, 8);
+          } else {
+            doc.setTextColor(34, 197, 94);
+          }
+          doc.setFont('helvetica', 'bold');
+        } else {
+          doc.setTextColor(0, 0, 0);
+          doc.setFont('helvetica', 'normal');
+        }
+
+        lines.forEach((line: string) => {
+          doc.text(line, xPosition, textYPosition);
+          textYPosition += 4;
+        });
+
+        xPosition += colWidths[colIndex];
       });
+
+      yPosition += rowHeight;
+
+      doc.setDrawColor(230, 230, 230);
+      doc.setLineWidth(0.1);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      
+      yPosition += 0.5;
+    });
+
+    // ✅ PÁGINA FINAL - ANÁLISE DETALHADA
+    doc.addPage();
+    yPosition = margin;
+
+    // Cabeçalho da página de análise
+    doc.setFillColor(37, 99, 235);
+    doc.rect(0, 0, pageWidth, 12, 'F');
+    
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('ANALISE DETALHADA', margin + 2, 8);
+    
+    yPosition = 18;
+
+    // ✅ SEÇÃO 1: DISTRIBUIÇÃO POR PERÍODO
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(37, 99, 235);
+    doc.text('>> Distribuicao por Periodo de Expiracao', margin, yPosition);
+    yPosition += 8;
+
+    const distributionData = [
+      { label: 'Certificados Expirados', value: analytics.expired, color: [239, 68, 68], icon: 'X' },
+      { label: 'Expirando em 30 dias', value: analytics.expiringIn30Days, color: [249, 115, 22], icon: '!' },
+      { label: 'Expirando 31-60 dias', value: analytics.expiringIn60Days, color: [234, 179, 8], icon: '~' },
+      { label: 'Expirando 61-90 dias', value: analytics.expiringIn90Days, color: [34, 197, 94], icon: '+' },
+      { label: 'Validos (> 90 dias)', value: analytics.safe, color: [16, 185, 129], icon: 'OK' }
+    ];
+
+    distributionData.forEach((item) => {
+      doc.setFillColor(item.color[0], item.color[1], item.color[2], 0.1);
+      doc.roundedRect(margin, yPosition - 2, pageWidth - 2 * margin, 7, 1.5, 1.5, 'F');
+      
+      doc.setDrawColor(item.color[0], item.color[1], item.color[2]);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(margin, yPosition - 2, pageWidth - 2 * margin, 7, 1.5, 1.5, 'S');
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(51, 51, 51);
+      doc.text(`[${item.icon}] ${item.label}`, margin + 3, yPosition + 2);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(item.color[0], item.color[1], item.color[2]);
+      doc.text(item.value.toString(), pageWidth - margin - 20, yPosition + 2);
+      
+      yPosition += 8;
+    });
+
+    yPosition += 5;
+
+    // ✅ SEÇÃO 2: TOP 5 SITES
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(37, 99, 235);
+    doc.text('>> Top 5 Sites com Mais Certificados', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    topSites.forEach(([site, count], index) => {
+      const percentage = ((count / analytics.total) * 100).toFixed(1);
+      
+      // Barra de progresso
+      const barWidth = (count / analytics.total) * (pageWidth - 2 * margin - 100);
+      doc.setFillColor(59, 130, 246, 0.3);
+      doc.roundedRect(margin + 5, yPosition - 3, barWidth, 5, 1, 1, 'F');
+      
+      doc.setTextColor(80, 80, 80);
+      doc.text(`${index + 1}. ${site.substring(0, 60)}`, margin + 5, yPosition);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(37, 99, 235);
+      doc.text(`${count} (${percentage}%)`, pageWidth - margin - 35, yPosition);
+      
+      doc.setFont('helvetica', 'normal');
+      yPosition += 7;
+    });
+
+    yPosition += 5;
+
+    // ✅ SEÇÃO 3: DISTRIBUIÇÃO POR TIPO
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(37, 99, 235);
+    doc.text('>> Distribuicao por Tipo de Certificado', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    topCertTypes.forEach(([type, count], index) => {
+      const percentage = ((count / analytics.total) * 100).toFixed(1);
+      
+      const barWidth = (count / analytics.total) * (pageWidth - 2 * margin - 100);
+      doc.setFillColor(139, 92, 246, 0.3);
+      doc.roundedRect(margin + 5, yPosition - 3, barWidth, 5, 1, 1, 'F');
+      
+      doc.setTextColor(80, 80, 80);
+      doc.text(`${index + 1}. ${type.substring(0, 60)}`, margin + 5, yPosition);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(139, 92, 246);
+      doc.text(`${count} (${percentage}%)`, pageWidth - margin - 35, yPosition);
+      
+      doc.setFont('helvetica', 'normal');
+      yPosition += 7;
+    });
+
+    yPosition += 5;
+
+    // ✅ SEÇÃO 4: TOP 5 MARCAS
+    const topBrands = Object.entries(analytics.byBrand)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(37, 99, 235);
+    doc.text('>> Top 5 Marcas', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    topBrands.forEach(([brand, count], index) => {
+      const percentage = ((count / analytics.total) * 100).toFixed(1);
+      
+      const barWidth = (count / analytics.total) * (pageWidth - 2 * margin - 100);
+      doc.setFillColor(16, 185, 129, 0.3);
+      doc.roundedRect(margin + 5, yPosition - 3, barWidth, 5, 1, 1, 'F');
+      
+      doc.setTextColor(80, 80, 80);
+      doc.text(`${index + 1}. ${brand}`, margin + 5, yPosition);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(16, 185, 129);
+      doc.text(`${count} (${percentage}%)`, pageWidth - margin - 35, yPosition);
+      
+      doc.setFont('helvetica', 'normal');
+      yPosition += 7;
+    });
+
+    yPosition += 8;
+
+    // ✅ SEÇÃO 5: ITENS CRÍTICOS
+    if (analytics.criticalItems.length > 0) {
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(239, 68, 68);
+      doc.text('>> ITENS CRITICOS - ACAO URGENTE NECESSARIA', margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      
+      // Cabeçalho da tabela
+      doc.setFillColor(239, 68, 68);
+      doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 6, 'F');
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('Item', margin + 3, yPosition + 2);
+      doc.text('Codigo', margin + 90, yPosition + 2);
+      doc.text('Status', margin + 130, yPosition + 2);
+      doc.text('Site', margin + 160, yPosition + 2);
+      yPosition += 7;
+      
+      doc.setFont('helvetica', 'normal');
+      const criticalToShow = analytics.criticalItems.slice(0, 15);
+      criticalToShow.forEach((critical, index) => {
+        if (yPosition > pageHeight - 25) return;
+        
+        const bgColor = index % 2 === 0 ? [255, 255, 255] : [254, 242, 242];
+        doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+        doc.rect(margin, yPosition - 2, pageWidth - 2 * margin, 5, 'F');
+        
+        doc.setTextColor(51, 51, 51);
+        doc.text(`${index + 1}. ${critical.item.substring(0, 35)}`, margin + 3, yPosition + 1);
+        doc.text(critical.code, margin + 90, yPosition + 1);
+        
+        const statusColor = critical.days < 0 ? [239, 68, 68] : [249, 115, 22];
+        const statusText = critical.days < 0 ? 'EXPIRADO' : `${critical.days} dias`;
+        doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+        doc.setFont('helvetica', 'bold');
+        doc.text(statusText, margin + 130, yPosition + 1);
+        
+        doc.setTextColor(51, 51, 51);
+        doc.setFont('helvetica', 'normal');
+        doc.text(critical.site.substring(0, 25), margin + 160, yPosition + 1);
+        
+        yPosition += 6;
+      });
+
+      if (analytics.criticalItems.length > 15) {
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`... e mais ${analytics.criticalItems.length - 15} itens criticos`, margin + 3, yPosition + 2);
+      }
     }
 
-    // ✅ CHAMA A FUNÇÃO DE EXPORTAÇÃO COM OS DADOS CORRETOS
-    if (format === 'excel') {
-      await exportProgramacaoExcel(dataToExport);
-    } else {
-      await exportProgramacaoPDF(dataToExport);
+    // ✅ RODAPÉ MELHORADO EM TODAS AS PÁGINAS
+    const totalPages = doc.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      
+      // Linha decorativa superior do rodapé
+      doc.setDrawColor(37, 99, 235);
+      doc.setLineWidth(0.5);
+      doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+      
+      // Fundo do rodapé
+      doc.setFillColor(248, 250, 252);
+      doc.rect(0, pageHeight - 11, pageWidth, 11, 'F');
+      
+      // Informações do rodapé
+      doc.setFontSize(7);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 100);
+      
+      // Esquerda - Data e hora
+      doc.text(
+        `Gerado em ${new Date().toLocaleDateString('pt-BR')} as ${new Date().toLocaleTimeString('pt-BR')}`,
+        margin,
+        pageHeight - 5
+      );
+      
+      // Centro - Nome do relatório
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(37, 99, 235);
+      doc.text(
+        'SmartX Hub - Relatorio de Certificados',
+        pageWidth / 2,
+        pageHeight - 5,
+        { align: 'center' }
+      );
+      
+      // Direita - Paginação com badge
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 100);
+      const pageText = `Pagina ${i} de ${totalPages}`;
+      const pageTextWidth = doc.getTextWidth(pageText);
+      
+      doc.setFillColor(37, 99, 235, 0.1);
+      doc.roundedRect(pageWidth - margin - pageTextWidth - 4, pageHeight - 7.5, pageTextWidth + 4, 4, 1, 1, 'F');
+      
+      doc.setTextColor(37, 99, 235);
+      doc.setFont('helvetica', 'bold');
+      doc.text(pageText, pageWidth - margin, pageHeight - 5, { align: 'right' });
     }
-  };
+
+    doc.save(`certificados-relatorio-completo-${new Date().toISOString().split('T')[0]}.pdf`);
+  } catch (error) {
+    console.error('Erro ao gerar PDF:', error);
+    alert('Erro ao exportar para PDF.');
+  }
+};
+
+
+
+// ✅ ATUALIZAR A FUNÇÃO handleExportProgramacao
+const handleExportProgramacao = async (format: 'excel' | 'pdf', exportAll: boolean) => {
+  setShowExportProgramacaoMenu(false);
+
+  let dataToExport = filteredData;
+
+  // ✅ BUSCAR TODOS OS DADOS SE exportAll FOR TRUE
+  if (exportAll) {
+    try {
+      const params = new URLSearchParams({
+        page: '1',
+        limit: '999999',
+        sortBy,
+        sortOrder
+      });
+
+      // ✅ APLICAR OS MESMOS FILTROS DA TELA
+      if (filters.status !== 'ALL') {
+        params.append('certificateStatus', filters.status);
+      }
+      if (filters.site !== 'ALL') {
+        params.append('homeSiteName', filters.site);
+      }
+      if (filters.certificateType !== 'ALL') {
+        params.append('certificateDescription', filters.certificateType);
+      }
+      if (filters.zone !== 'ALL') {
+        params.append('homeZoneCode', filters.zone);
+      }
+      if (filters.area !== 'ALL') {
+        params.append('homeArea', filters.area);
+      }
+      if (dateFilter.startDate) {
+        params.append('startDate', dateFilter.startDate);
+      }
+      if (dateFilter.endDate) {
+        params.append('endDate', dateFilter.endDate);
+      }
+
+      const response = await fetch(
+        `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch all data');
+      }
+
+      const result: ApiResponse = await response.json();
+      dataToExport = result.data;
+
+      console.log('✅ Dados carregados para exportação:', {
+        total: dataToExport.length,
+        exportAll,
+        filtrosAplicados: filters
+      });
+    } catch (error) {
+      console.error('❌ Error fetching all data:', error);
+      alert('Erro ao buscar todos os dados. Exportando dados visíveis.');
+      dataToExport = filteredData;
+    }
+  }
+
+  // ✅ CHAMAR A FUNÇÃO DE EXPORTAÇÃO CORRETA
+  if (format === 'excel') {
+    await exportProgramacaoExcel(dataToExport);
+  } else {
+    await exportProgramacaoPDF(dataToExport);
+  }
+};
 
   const [availableFilters, setAvailableFilters] = useState<CertificateFilters>({
     statuses: [],
