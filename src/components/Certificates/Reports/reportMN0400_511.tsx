@@ -454,6 +454,7 @@ export default function CertificateReportGrid() {
 
     let dataToExport = filteredData;
 
+    // ✅ SÓ BUSCA TODOS OS DADOS SE exportAll FOR TRUE
     if (exportAll) {
       try {
         const params = new URLSearchParams({
@@ -462,6 +463,29 @@ export default function CertificateReportGrid() {
           sortBy: 'item_code',
           sortOrder: 'ASC'
         });
+
+        // ✅ APLICAR OS MESMOS FILTROS DA TELA
+        if (filters.status !== 'ALL') {
+          params.append('certificateStatus', filters.status);
+        }
+        if (filters.site !== 'ALL') {
+          params.append('homeSiteName', filters.site);
+        }
+        if (filters.certificateType !== 'ALL') {
+          params.append('certificateDescription', filters.certificateType);
+        }
+        if (filters.zone !== 'ALL') {
+          params.append('homeZoneCode', filters.zone);
+        }
+        if (filters.area !== 'ALL') {
+          params.append('homeArea', filters.area);
+        }
+        if (dateFilter.startDate) {
+          params.append('startDate', dateFilter.startDate);
+        }
+        if (dateFilter.endDate) {
+          params.append('endDate', dateFilter.endDate);
+        }
 
         const response = await fetch(
           `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
@@ -473,12 +497,33 @@ export default function CertificateReportGrid() {
 
         const result: ApiResponse = await response.json();
         dataToExport = result.data;
+
+        console.log('✅ Dados carregados para exportação:', {
+          total: dataToExport.length,
+          exportAll,
+          filtrosAplicados: {
+            status: filters.status,
+            site: filters.site,
+            certificateType: filters.certificateType,
+            zone: filters.zone,
+            area: filters.area
+          }
+        });
       } catch (error) {
-        console.error('Error fetching all data:', error);
+        console.error('❌ Error fetching all data:', error);
         alert('Erro ao buscar todos os dados. Exportando dados visíveis.');
+        // ✅ SE FALHAR, MANTÉM OS DADOS FILTRADOS DA TELA
+        dataToExport = filteredData;
       }
+    } else {
+      // ✅ QUANDO exportAll = false, USA OS DADOS JÁ FILTRADOS NA TELA
+      console.log('✅ Exportando dados filtrados da tela:', {
+        total: dataToExport.length,
+        exportAll: false
+      });
     }
 
+    // ✅ CHAMA A FUNÇÃO DE EXPORTAÇÃO COM OS DADOS CORRETOS
     if (format === 'excel') {
       await exportProgramacaoExcel(dataToExport);
     } else {
@@ -1044,7 +1089,7 @@ export default function CertificateReportGrid() {
         });
 
         const response = await fetch(
-          `http://localhost:4000/api/dashboard/${companyId}/certificates/reports?${params}`
+          `https://apinode.smartxhub.cloud/api/dashboard/${companyId}/certificates/reports?${params}`
         );
 
         if (!response.ok) {

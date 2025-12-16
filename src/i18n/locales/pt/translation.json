@@ -1287,8 +1287,16 @@
       "renewalUrgencyTrend": "Tendência de Urgência de Renovação (Previsão 6 Semanas)",
       "concurrentRenewalsAnalysis": "Análise de Renovações Concorrentes",
       "strategicImportance": "Importância Estratégica",
-      "strategicDistribution": "Distribuição Estratégica dos Certificados"
+      "strategicDistribution": "Distribuição Estratégica dos Certificados",
+       "certificateStatus": {
+      "VALID": "Válido",
+      "EXPIRED": "Expirado",
+      "EXPIRING_SOON": "Expirando em Breve",
+      "EXPIRING_MEDIUM": "Expirando em Médio Prazo",
+      "NO_EXPIRATION": "Sem Expiração"
+    }
     },
+   
 
     "calendar": {
       "certificateExpirationCalendar": "Calendário de Expiração de Certificados",

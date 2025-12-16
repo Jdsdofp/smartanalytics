@@ -1254,8 +1254,17 @@
       "renewalUrgencyTrend": "Renewal Urgency Trend (6-Week Forecast)",
       "concurrentRenewalsAnalysis": "Concurrent Renewals Analysis",
       "strategicImportance": "Strategic Importance",
-      "strategicDistribution": "Strategic Distribution"
+      "strategicDistribution": "Strategic Distribution",
+        "certificateStatus": {
+      "VALID": "Valid",
+      "EXPIRED": "Expired",
+      "EXPIRING_SOON": "Expiring Soon",
+      "EXPIRING_MEDIUM": "Expiring Medium Term",
+      "NO_EXPIRATION": "No Expiration"
+    }
     },
+
+  
 
     "calendar": {
       "certificateExpirationCalendar": "Certificate Expiration Calendar",

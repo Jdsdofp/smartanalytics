@@ -26,3 +26,36 @@
   padding: 2px 4px;
   font-size: 0.75rem;
 }
+
+/*
+Adicione este CSS no seu arquivo global ou em um <style> tag:
+*/
+.calendar-container .fc {
+  font-size: 14px;
+}
+
+.calendar-container .fc-toolbar-title {
+  font-size: 1.5em !important;
+  font-weight: 600;
+}
+
+.calendar-container .fc-button {
+  padding: 0.4em 0.65em !important;
+  font-size: 0.9em !important;
+}
+
+.calendar-container .fc-event {
+  cursor: pointer;
+  border: none !important;
+  padding: 2px 4px;
+  font-size: 0.85em;
+}
+
+.calendar-container .fc-daygrid-event {
+  margin-bottom: 2px;
+}
+
+.calendar-container .fc-col-header-cell {
+  background-color: #f8fafc;
+  font-weight: 600;
+}

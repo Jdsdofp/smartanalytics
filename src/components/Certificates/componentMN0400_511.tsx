@@ -8,6 +8,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import CertificateReportGrid from './Reports/reportMN0400_511';
 import { useCompany } from '../../hooks/useCompany';
 import { t } from 'i18next';
+import CertificateMap from './Reports/CertificateMap';
 
 // ============= INTERFACES ATUALIZADAS =============
 interface ObservabilityKPIs {
@@ -287,7 +288,7 @@ export default function PredictiveCertificateAnalysis() {
   const createOverviewCharts = () => {
     if (!data) return;
 
-    // DISTRIBUIÇÃO DE RISCO
+    // DISTRIBUIÇÃO DE RISCO - AJUSTADO
     if (riskDistributionRef.current) {
       echarts.dispose(riskDistributionRef.current);
       const chart = echarts.init(riskDistributionRef.current);
@@ -295,6 +296,7 @@ export default function PredictiveCertificateAnalysis() {
         title: {
           text: t('predictiveCertificateAnalysis.charts.riskLevelDistribution'),
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
@@ -302,24 +304,41 @@ export default function PredictiveCertificateAnalysis() {
           formatter: '{b}: {c} ({d}%)'
         },
         legend: {
-          bottom: '5%',
-          left: 'center'
+          bottom: 10,
+          left: 'center',
+          orient: 'horizontal'
+        },
+        grid: {
+          containLabel: true
         },
         series: [{
           type: 'pie',
-          radius: ['50%', '75%'],
-          avoidLabelOverlap: false,
+          radius: ['40%', '65%'],
+          center: ['50%', '50%'],
+          avoidLabelOverlap: true,
           itemStyle: {
-            borderRadius: 10,
+            borderRadius: 8,
             borderColor: '#fff',
             borderWidth: 2
           },
           label: {
             show: true,
-            formatter: '{b}\n{c} ({d}%)'
+            position: 'outside',
+            formatter: '{b}\n{c} ({d}%)',
+            fontSize: 11
+          },
+          labelLine: {
+            show: true,
+            length: 15,
+            length2: 10
           },
           emphasis: {
-            label: { show: true, fontSize: 16, fontWeight: 'bold' }
+            label: { show: true, fontSize: 14, fontWeight: 'bold' },
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
           },
           data: data.riskDistribution.map(item => ({
             value: item.value,
@@ -330,7 +349,7 @@ export default function PredictiveCertificateAnalysis() {
       });
     }
 
-    // STATUS DE VALIDADE
+    // STATUS DE VALIDADE - COM I18N
     if (validityStatusRef.current) {
       echarts.dispose(validityStatusRef.current);
       const chart = echarts.init(validityStatusRef.current);
@@ -338,24 +357,57 @@ export default function PredictiveCertificateAnalysis() {
         title: {
           text: t('predictiveCertificateAnalysis.charts.certificateStatusDistribution'),
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{b}: {c} ({d}%)'
+          formatter: (params: any) => {
+            const translatedName = t(`predictiveCertificateAnalysis.charts.certificateStatus.${params.data.originalName}`);
+            return `${translatedName}: ${params.value} (${params.percent}%)`;
+          }
         },
         legend: {
-          bottom: '5%',
+          bottom: 10,
           left: 'center',
-          orient: 'horizontal'
+          orient: 'horizontal',
+          type: 'scroll',
+          formatter: (name: any) => {
+            // Extrai o nome original da string "Nome Traduzido (12.7%)"
+            const match = name.match(/^(.+?)\s*\(/);
+            return match ? match[1] : name;
+          }
         },
         series: [{
           type: 'pie',
-          radius: '70%',
+          radius: '60%',
+          center: ['50%', '50%'],
           data: data.validityStatusData.map(item => ({
             value: item.value,
-            name: `${item.name} (${item.percentage}%)`
+            originalName: item.name, // Mantém o nome original para referência
+            name: `${t(`predictiveCertificateAnalysis.charts.certificateStatus.${item.name}`)} (${item.percentage}%)`,
+            itemStyle: {
+              // Opcional: cores personalizadas por status
+              color: {
+                'VALID': '#10b981',
+                'EXPIRED': '#ef4444',
+                'EXPIRING_SOON': '#f59e0b',
+                'EXPIRING_MEDIUM': '#eab308',
+                'NO_EXPIRATION': '#6b7280'
+              }[item.name]
+            }
           })),
+          label: {
+            show: true,
+            position: 'outside',
+            formatter: '{b}',
+            fontSize: 11
+          },
+          labelLine: {
+            show: true,
+            length: 15,
+            length2: 10
+          },
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -367,16 +419,16 @@ export default function PredictiveCertificateAnalysis() {
       });
     }
 
-    // ANÁLISE POR DEPARTAMENTO
+    // ANÁLISE POR DEPARTAMENTO - COM RÓTULOS DE DADOS
     if (departmentRiskRef.current) {
       echarts.dispose(departmentRiskRef.current);
       const chart = echarts.init(departmentRiskRef.current);
       const top10Depts = data.departmentRiskAnalysis.slice(0, 10);
-
       chart.setOption({
         title: {
           text: t('predictiveCertificateAnalysis.charts.departmentPerformance'),
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
@@ -384,23 +436,27 @@ export default function PredictiveCertificateAnalysis() {
           axisPointer: { type: 'shadow' },
           formatter: (params: any) => {
             const dept = top10Depts[params[0].dataIndex];
-            return `<strong>${dept.name}</strong><br/>
-                    Total: ${dept.total}<br/>
-                    ${t('predictiveCertificateAnalysis.status.expired')}: ${dept.expired}<br/>
-                    ${t('predictiveCertificateAnalysis.calendar.expiring')}: ${dept.expiringSoon}<br/>
-                    ${t('predictiveCertificateAnalysis.risk.highRisk')}: ${dept.highRisk}<br/>
-                    ${t('predictiveCertificateAnalysis.kpi.financialRisk')}: R$ ${dept.totalFinancialRisk.toFixed(2)}<br/>
-                    Avg Renewal Score: ${dept.avgRenewalScore.toFixed(1)}`;
+            return `<div style="padding: 8px;">
+                <strong style="font-size: 13px;">${dept.name}</strong><br/>
+                <span style="font-size: 12px;">Total: <strong>${dept.total}</strong></span><br/>
+                <span style="font-size: 12px;">${t('predictiveCertificateAnalysis.status.expired')}: <strong style="color: #ef4444;">${dept.expired}</strong></span><br/>
+                <span style="font-size: 12px;">${t('predictiveCertificateAnalysis.calendar.expiring')}: <strong style="color: #f59e0b;">${dept.expiringSoon}</strong></span><br/>
+                <span style="font-size: 12px;">${t('predictiveCertificateAnalysis.risk.highRisk')}: <strong style="color: #dc2626;">${dept.highRisk}</strong></span><br/>
+                <span style="font-size: 12px;">${t('predictiveCertificateAnalysis.kpi.financialRisk')}: <strong>R$ ${dept.totalFinancialRisk.toFixed(2)}</strong></span><br/>
+                <span style="font-size: 12px;">Avg Renewal: <strong>${dept.avgRenewalScore.toFixed(1)}</strong></span>
+              </div>`;
           }
         },
         legend: {
           data: ['Total', t('predictiveCertificateAnalysis.status.expired'), t('predictiveCertificateAnalysis.calendar.expiring'), t('predictiveCertificateAnalysis.risk.highRisk')],
-          bottom: '5%'
+          bottom: 10,
+          type: 'scroll'
         },
         grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '15%',
+          left: '5%',
+          right: '5%',
+          top: '15%',
+          bottom: '20%',
           containLabel: true
         },
         xAxis: {
@@ -408,88 +464,175 @@ export default function PredictiveCertificateAnalysis() {
           data: top10Depts.map(d => d.name),
           axisLabel: {
             interval: 0,
-            rotate: 45,
-            fontSize: 10
+            rotate: 35,
+            fontSize: 10,
+            overflow: 'truncate',
+            width: 80
           }
         },
         yAxis: {
           type: 'value',
-          name: 'Quantity'
+          name: 'Quantidade',
+          nameTextStyle: {
+            fontSize: 12,
+            padding: [0, 0, 0, 10]
+          }
         },
         series: [
           {
             name: 'Total',
             type: 'bar',
             data: top10Depts.map(d => d.total),
-            itemStyle: { color: '#3b82f6' }
+            itemStyle: { color: '#3b82f6' },
+            barMaxWidth: 40,
+            label: {
+              show: true,
+              position: 'top',
+              fontSize: 11,
+              fontWeight: 'bold',
+              color: '#3b82f6',
+              formatter: '{c}'
+            }
           },
           {
             name: t('predictiveCertificateAnalysis.status.expired'),
             type: 'bar',
             data: top10Depts.map(d => d.expired),
-            itemStyle: { color: '#ef4444' }
+            itemStyle: { color: '#ef4444' },
+            barMaxWidth: 40,
+            label: {
+              show: true,
+              position: 'top',
+              fontSize: 11,
+              fontWeight: 'bold',
+              color: '#ef4444',
+              formatter: '{c}'
+            }
           },
           {
             name: t('predictiveCertificateAnalysis.calendar.expiring'),
             type: 'bar',
             data: top10Depts.map(d => d.expiringSoon),
-            itemStyle: { color: '#f59e0b' }
+            itemStyle: { color: '#f59e0b' },
+            barMaxWidth: 40,
+            label: {
+              show: true,
+              position: 'top',
+              fontSize: 11,
+              fontWeight: 'bold',
+              color: '#f59e0b',
+              formatter: '{c}'
+            }
           },
           {
             name: t('predictiveCertificateAnalysis.risk.highRisk'),
             type: 'bar',
             data: top10Depts.map(d => d.highRisk),
-            itemStyle: { color: '#dc2626' }
+            itemStyle: { color: '#dc2626' },
+            barMaxWidth: 40,
+            label: {
+              show: true,
+              position: 'top',
+              fontSize: 11,
+              fontWeight: 'bold',
+              color: '#dc2626',
+              formatter: '{c}'
+            }
           }
         ]
       });
     }
 
-    // MATRIZ RISCO vs COMPLEXIDADE
+    // MATRIZ RISCO vs COMPLEXIDADE - CORRIGIDO
     if (complexityMatrixRef.current) {
       echarts.dispose(complexityMatrixRef.current);
       const chart = echarts.init(complexityMatrixRef.current);
       const matrix = data.riskComplexityMatrix;
 
+      const maxValue = Math.max(
+        matrix.highRisk_highComplexity,
+        matrix.highRisk_lowComplexity,
+        matrix.lowRisk_highComplexity,
+        matrix.lowRisk_lowComplexity
+      );
+
       chart.setOption({
         title: {
           text: t('predictiveCertificateAnalysis.kpi.riskComplexityMatrix'),
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
+          position: 'top',
           formatter: (params: any) => {
-            return `${params.name}<br/>${t('predictiveCertificateAnalysis.kpi.quantity')}: ${params.value}`;
+            const complexityLabels = [
+              t('predictiveCertificateAnalysis.kpi.lowComplexity'),
+              t('predictiveCertificateAnalysis.kpi.highComplexity')
+            ];
+            const riskLabels = [
+              t('predictiveCertificateAnalysis.kpi.lowRisk'),
+              t('predictiveCertificateAnalysis.kpi.highComplexity')
+            ];
+
+            return `<div style="padding: 8px;">
+                    <strong>${riskLabels[params.data[1]]} / ${complexityLabels[params.data[0]]}</strong><br/>
+                    ${t('predictiveCertificateAnalysis.kpi.quantity')}: <strong>${params.data[2]}</strong>
+                  </div>`;
           }
+        },
+        grid: {
+          left: '15%',
+          right: '10%',
+          top: '20%',
+          bottom: '20%',
+          containLabel: true
         },
         xAxis: {
           type: 'category',
-          data: [t('predictiveCertificateAnalysis.kpi.lowComplexity'), t('predictiveCertificateAnalysis.kpi.lowComplexity')],
-          axisLabel: { fontSize: 12 }
+          data: [
+            t('predictiveCertificateAnalysis.kpi.lowComplexity'),
+            t('predictiveCertificateAnalysis.kpi.highComplexity')
+          ],
+          splitArea: {
+            show: true
+          },
+          axisLabel: {
+            fontSize: 11,
+            interval: 0
+          }
         },
         yAxis: {
           type: 'category',
-          data: [t('predictiveCertificateAnalysis.kpi.lowRisk'), t('predictiveCertificateAnalysis.kpi.highComplexity')],
-          axisLabel: { fontSize: 12 }
+          data: [
+            t('predictiveCertificateAnalysis.kpi.lowRisk'),
+            'Alto Risco'
+          ],
+          splitArea: {
+            show: true
+          },
+          axisLabel: {
+            fontSize: 11,
+            interval: 0
+          }
         },
         visualMap: {
           min: 0,
-          max: Math.max(
-            matrix.highRisk_highComplexity,
-            matrix.highRisk_lowComplexity,
-            matrix.lowRisk_highComplexity,
-            matrix.lowRisk_lowComplexity
-          ),
+          max: maxValue,
           calculable: true,
           orient: 'horizontal',
           left: 'center',
-          bottom: '5%',
+          bottom: 10,
           inRange: {
             color: ['#d1fae5', '#10b981', '#f59e0b', '#ef4444']
+          },
+          text: ['Alto', 'Baixo'],
+          textStyle: {
+            fontSize: 11
           }
         },
         series: [{
-          name: 'Certificates',
+          name: 'Certificados',
           type: 'heatmap',
           data: [
             [0, 0, matrix.lowRisk_lowComplexity],
@@ -499,8 +642,9 @@ export default function PredictiveCertificateAnalysis() {
           ],
           label: {
             show: true,
-            fontSize: 16,
-            fontWeight: 'bold'
+            fontSize: 18,
+            fontWeight: 'bold',
+            color: '#fff'
           },
           emphasis: {
             itemStyle: {
@@ -513,10 +657,11 @@ export default function PredictiveCertificateAnalysis() {
     }
   };
 
+  // ============= CORREÇÕES PARA PREDICTABILITY =============
   const createPredictabilityCharts = () => {
     if (!data) return;
 
-    // PREVISÃO DE RENOVAÇÕES (12 meses)
+    // PREVISÃO DE RENOVAÇÕES - MELHORADO
     if (renewalForecastRef.current) {
       echarts.dispose(renewalForecastRef.current);
       const chart = echarts.init(renewalForecastRef.current);
@@ -539,6 +684,7 @@ export default function PredictiveCertificateAnalysis() {
         title: {
           text: t('predictiveCertificateAnalysis.charts.renewalUrgencyTrend'),
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
@@ -546,32 +692,53 @@ export default function PredictiveCertificateAnalysis() {
           axisPointer: { type: 'cross' }
         },
         legend: {
-          data: [t('predictiveCertificateAnalysis.risk.highRisk'), t('predictiveCertificateAnalysis.risk.mediumRisk'), t('predictiveCertificateAnalysis.risk.lowRisk'), 'Estimated Cost'],
-          bottom: 0
+          data: [
+            t('predictiveCertificateAnalysis.risk.highRisk'),
+            t('predictiveCertificateAnalysis.risk.mediumRisk'),
+            t('predictiveCertificateAnalysis.risk.lowRisk'),
+            'Custo Estimado'
+          ],
+          bottom: 10,
+          type: 'scroll'
         },
         grid: {
-          left: '3%',
-          right: '4%',
+          left: '5%',
+          right: '8%',
+          top: '15%',
           bottom: '15%',
           containLabel: true
         },
         xAxis: {
           type: 'category',
           boundaryGap: false,
-          data: monthNames
+          data: monthNames,
+          axisLabel: {
+            fontSize: 11,
+            rotate: 0
+          }
         },
         yAxis: [
           {
             type: 'value',
-            name: 'Quantity',
-            position: 'left'
+            name: 'Quantidade',
+            position: 'left',
+            nameTextStyle: {
+              fontSize: 12
+            },
+            axisLabel: {
+              fontSize: 11
+            }
           },
           {
             type: 'value',
-            name: 'Cost (R$)',
+            name: 'Custo (R$)',
             position: 'right',
+            nameTextStyle: {
+              fontSize: 12
+            },
             axisLabel: {
-              formatter: (value: number) => `R$ ${(value / 1000).toFixed(0)}k`
+              formatter: (value: number) => `R$ ${(value / 1000).toFixed(0)}k`,
+              fontSize: 11
             }
           }
         ],
@@ -610,81 +777,105 @@ export default function PredictiveCertificateAnalysis() {
             data: data.renewalForecast.map(item => item.lowRisk)
           },
           {
-            name: 'Estimated Cost',
+            name: 'Custo Estimado',
             type: 'line',
             yAxisIndex: 1,
             smooth: true,
             lineStyle: { width: 3, color: '#3b82f6' },
             itemStyle: { color: '#3b82f6' },
+            symbol: 'circle',
+            symbolSize: 6,
             data: data.renewalForecast.map(item => item.estimatedCost)
           }
         ]
       });
     }
 
-    // AUTOMAÇÃO - GAUGE
+    // AUTOMAÇÃO - GAUGE MELHORADO
     if (automationReadinessRef.current) {
       echarts.dispose(automationReadinessRef.current);
       const chart = echarts.init(automationReadinessRef.current);
+      const percentage = parseFloat(data.automationReadiness.percentage);
 
       chart.setOption({
         title: {
           text: t('predictiveCertificateAnalysis.kpi.automationReadiness'),
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
           formatter: '{a} <br/>{b} : {c}%'
         },
         series: [{
-          name: 'Readiness',
+          name: 'Prontidão',
           type: 'gauge',
           startAngle: 180,
           endAngle: 0,
           min: 0,
           max: 100,
-          splitNumber: 10,
+          splitNumber: 5,
+          center: ['50%', '70%'],
+          radius: '80%',
           itemStyle: {
-            color: '#3b82f6'
+            color: percentage >= 70 ? '#10b981' : percentage >= 40 ? '#f59e0b' : '#ef4444'
           },
           progress: {
             show: true,
-            width: 18
+            width: 20
           },
           pointer: {
-            show: false
+            show: true,
+            length: '60%',
+            width: 6
           },
           axisLine: {
             lineStyle: {
-              width: 18
+              width: 20,
+              color: [[1, '#e5e7eb']]
             }
           },
           axisTick: {
-            show: false
+            show: true,
+            distance: -25,
+            length: 8,
+            lineStyle: {
+              color: '#999',
+              width: 1
+            }
           },
           splitLine: {
-            show: false
+            show: true,
+            distance: -30,
+            length: 15,
+            lineStyle: {
+              color: '#999',
+              width: 2
+            }
           },
           axisLabel: {
-            show: false
+            show: true,
+            distance: -45,
+            color: '#999',
+            fontSize: 11
           },
           detail: {
             valueAnimation: true,
             formatter: '{value}%',
-            fontSize: 24,
+            fontSize: 28,
             fontWeight: 'bold',
-            color: '#3b82f6',
-            offsetCenter: [0, '0%']
+            color: 'auto',
+            offsetCenter: [0, '-10%']
           },
           data: [{
-            value: parseFloat(data.automationReadiness.percentage),
-            name: 'Automation'
+            value: percentage,
+            name: 'Automação'
           }]
         }]
       });
     }
 
-    // RENOVAÇÕES CONCORRENTES
+    // RENOVAÇÕES CONCORRENTES - MELHORADO
     if (concurrentRenewalsRef.current) {
       echarts.dispose(concurrentRenewalsRef.current);
       const chart = echarts.init(concurrentRenewalsRef.current);
@@ -694,25 +885,44 @@ export default function PredictiveCertificateAnalysis() {
         title: {
           text: t('predictiveCertificateAnalysis.charts.concurrentRenewalsAnalysis'),
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
           trigger: 'axis',
-          axisPointer: { type: 'shadow' }
+          axisPointer: { type: 'shadow' },
+          formatter: (params: any) => {
+            return `<div style="padding: 8px;">
+                    <strong>${params[0].name}</strong><br/>
+                    Certificados: <strong>${params[0].value}</strong>
+                  </div>`;
+          }
         },
         grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
+          left: '5%',
+          right: '5%',
+          top: '20%',
+          bottom: '10%',
           containLabel: true
         },
         xAxis: {
           type: 'category',
-          data: ['No Concurrency', 'Low (1-5)', 'Medium (6-10)', 'High (>10)']
+          data: ['Sem Concorrência', 'Baixa (1-5)', 'Média (6-10)', 'Alta (>10)'],
+          axisLabel: {
+            fontSize: 11,
+            interval: 0,
+            rotate: 0
+          }
         },
         yAxis: {
           type: 'value',
-          name: 'Certificates'
+          name: 'Certificados',
+          nameTextStyle: {
+            fontSize: 12
+          },
+          axisLabel: {
+            fontSize: 11
+          }
         },
         series: [{
           type: 'bar',
@@ -722,55 +932,101 @@ export default function PredictiveCertificateAnalysis() {
             { value: concurrent.mediumConcurrency, itemStyle: { color: '#f59e0b' } },
             { value: concurrent.highConcurrency, itemStyle: { color: '#ef4444' } }
           ],
+          barMaxWidth: 60,
           label: {
             show: true,
             position: 'top',
-            formatter: '{c}'
+            formatter: '{c}',
+            fontSize: 12,
+            fontWeight: 'bold'
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.3)'
+            }
           }
         }]
       });
     }
 
-    // IMPORTÂNCIA ESTRATÉGICA - RADAR
+    // IMPORTÂNCIA ESTRATÉGICA - RADAR MELHORADO
     if (strategicImportanceRef.current) {
       echarts.dispose(strategicImportanceRef.current);
       const chart = echarts.init(strategicImportanceRef.current);
       const strategic = data.strategicDistribution;
+      const maxVal = Math.max(strategic.critical, strategic.high, strategic.standard, strategic.low);
 
       chart.setOption({
         title: {
           text: t('predictiveCertificateAnalysis.charts.strategicImportance'),
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
-          trigger: 'item'
+          trigger: 'item',
+          formatter: (params: any) => {
+            return `<div style="padding: 8px;">
+                    <strong>${params.name}</strong><br/>
+                    Valor: <strong>${params.value}</strong>
+                  </div>`;
+          }
         },
         radar: {
+          center: ['50%', '55%'],
+          radius: '65%',
           indicator: [
-            { name: 'Critical', max: Math.max(strategic.critical, strategic.high, strategic.standard, strategic.low) },
-            { name: 'High', max: Math.max(strategic.critical, strategic.high, strategic.standard, strategic.low) },
-            { name: 'Standard', max: Math.max(strategic.critical, strategic.high, strategic.standard, strategic.low) },
-            { name: 'Low', max: Math.max(strategic.critical, strategic.high, strategic.standard, strategic.low) }
-          ]
+            { name: 'Crítico', max: maxVal },
+            { name: 'Alto', max: maxVal },
+            { name: 'Padrão', max: maxVal },
+            { name: 'Baixo', max: maxVal }
+          ],
+          axisName: {
+            fontSize: 12,
+            color: '#666'
+          },
+          splitArea: {
+            areaStyle: {
+              color: ['rgba(59, 130, 246, 0.05)', 'rgba(59, 130, 246, 0.1)']
+            }
+          }
         },
         series: [{
           type: 'radar',
           data: [{
             value: [strategic.critical, strategic.high, strategic.standard, strategic.low],
-            name: 'Distribution',
-            areaStyle: { color: 'rgba(59, 130, 246, 0.3)' },
-            lineStyle: { color: '#3b82f6', width: 2 }
+            name: 'Distribuição',
+            areaStyle: {
+              color: 'rgba(59, 130, 246, 0.3)',
+              opacity: 0.7
+            },
+            lineStyle: {
+              color: '#3b82f6',
+              width: 2
+            },
+            symbol: 'circle',
+            symbolSize: 6,
+            itemStyle: {
+              color: '#3b82f6'
+            },
+            label: {
+              show: true,
+              formatter: '{c}',
+              fontSize: 11,
+              fontWeight: 'bold'
+            }
           }]
         }]
       });
     }
   };
 
+  // ============= CORREÇÕES PARA OBSERVABILITY =============
   const createObservabilityCharts = () => {
     if (!data) return;
 
-    // ANÁLISE POR TIPO DE CERTIFICADO
+    // ANÁLISE POR TIPO DE CERTIFICADO - MELHORADO
     if (certificateTypeRef.current) {
       echarts.dispose(certificateTypeRef.current);
       const chart = echarts.init(certificateTypeRef.current);
@@ -778,8 +1034,9 @@ export default function PredictiveCertificateAnalysis() {
 
       chart.setOption({
         title: {
-          text: 'Certificate Types Analysis',
+          text: 'Análise por Tipo de Certificado',
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
@@ -788,12 +1045,14 @@ export default function PredictiveCertificateAnalysis() {
         },
         legend: {
           data: ['Total', t('predictiveCertificateAnalysis.status.expired'), t('predictiveCertificateAnalysis.calendar.expiring')],
-          bottom: '5%'
+          bottom: 10,
+          type: 'scroll'
         },
         grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '15%',
+          left: '5%',
+          right: '5%',
+          top: '15%',
+          bottom: '20%',
           containLabel: true
         },
         xAxis: {
@@ -801,37 +1060,48 @@ export default function PredictiveCertificateAnalysis() {
           data: top10Types.map(t => t.name),
           axisLabel: {
             interval: 0,
-            rotate: 45,
-            fontSize: 10
+            rotate: 35,
+            fontSize: 10,
+            overflow: 'truncate',
+            width: 80
           }
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          nameTextStyle: {
+            fontSize: 12
+          },
+          axisLabel: {
+            fontSize: 11
+          }
         },
         series: [
           {
             name: 'Total',
             type: 'bar',
             data: top10Types.map(t => t.total),
-            itemStyle: { color: '#3b82f6' }
+            itemStyle: { color: '#3b82f6' },
+            barMaxWidth: 40
           },
           {
             name: t('predictiveCertificateAnalysis.status.expired'),
             type: 'bar',
             data: top10Types.map(t => t.expired),
-            itemStyle: { color: '#ef4444' }
+            itemStyle: { color: '#ef4444' },
+            barMaxWidth: 40
           },
           {
             name: t('predictiveCertificateAnalysis.calendar.expiring'),
             type: 'bar',
             data: top10Types.map(t => t.expiringSoon),
-            itemStyle: { color: '#f59e0b' }
+            itemStyle: { color: '#f59e0b' },
+            barMaxWidth: 40
           }
         ]
       });
     }
 
-    // TOP MARCAS
+    // TOP MARCAS - MELHORADO
     if (brandAnalysisRef.current) {
       echarts.dispose(brandAnalysisRef.current);
       const chart = echarts.init(brandAnalysisRef.current);
@@ -840,6 +1110,7 @@ export default function PredictiveCertificateAnalysis() {
         title: {
           text: t('predictiveCertificateAnalysis.charts.brandReliability'),
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
@@ -847,24 +1118,38 @@ export default function PredictiveCertificateAnalysis() {
           axisPointer: { type: 'shadow' },
           formatter: (params: any) => {
             const brand = data.brandAnalysis[params[0].dataIndex];
-            return `<strong>${brand.name}</strong><br/>
-                    Total: ${brand.total}<br/>
-                    ${t('predictiveCertificateAnalysis.status.expired')}: ${brand.expired}<br/>
-                    Avg Validity: ${brand.avgValidityDays.toFixed(0)} days`;
+            return `<div style="padding: 8px;">
+                    <strong style="font-size: 13px;">${brand.name}</strong><br/>
+                    <span style="font-size: 12px;">Total: <strong>${brand.total}</strong></span><br/>
+                    <span style="font-size: 12px;">${t('predictiveCertificateAnalysis.status.expired')}: <strong style="color: #ef4444;">${brand.expired}</strong></span><br/>
+                    <span style="font-size: 12px;">Validade Média: <strong>${brand.avgValidityDays.toFixed(0)} dias</strong></span>
+                  </div>`;
           }
         },
         grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
+          left: '5%',
+          right: '5%',
+          top: '15%',
+          bottom: '5%',
           containLabel: true
         },
         xAxis: {
-          type: 'value'
+          type: 'value',
+          nameTextStyle: {
+            fontSize: 12
+          },
+          axisLabel: {
+            fontSize: 11
+          }
         },
         yAxis: {
           type: 'category',
-          data: data.brandAnalysis.map(b => b.name)
+          data: data.brandAnalysis.map(b => b.name),
+          axisLabel: {
+            fontSize: 11,
+            overflow: 'truncate',
+            width: 120
+          }
         },
         series: [{
           type: 'bar',
@@ -873,26 +1158,37 @@ export default function PredictiveCertificateAnalysis() {
             color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
               { offset: 0, color: '#10b981' },
               { offset: 1, color: '#3b82f6' }
-            ])
+            ]),
+            borderRadius: [0, 4, 4, 0]
           },
+          barMaxWidth: 30,
           label: {
             show: true,
             position: 'right',
-            formatter: '{c}'
+            formatter: '{c}',
+            fontSize: 11,
+            fontWeight: 'bold'
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowColor: 'rgba(0, 0, 0, 0.3)'
+            }
           }
         }]
       });
     }
 
-    // LOCALIZAÇÕES
+    // LOCALIZAÇÕES - MELHORADO
     if (locationAnalysisRef.current) {
       echarts.dispose(locationAnalysisRef.current);
       const chart = echarts.init(locationAnalysisRef.current);
 
       chart.setOption({
         title: {
-          text: 'Top 10 Locations',
+          text: 'Top 10 Localizações',
           left: 'center',
+          top: 10,
           textStyle: { fontSize: 16, fontWeight: 'bold' }
         },
         tooltip: {
@@ -901,12 +1197,14 @@ export default function PredictiveCertificateAnalysis() {
         },
         legend: {
           data: ['Total', t('predictiveCertificateAnalysis.status.expired'), t('predictiveCertificateAnalysis.calendar.expiringSoon')],
-          bottom: '5%'
+          bottom: 10,
+          type: 'scroll'
         },
         grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '15%',
+          left: '5%',
+          right: '5%',
+          top: '15%',
+          bottom: '20%',
           containLabel: true
         },
         xAxis: {
@@ -914,31 +1212,42 @@ export default function PredictiveCertificateAnalysis() {
           data: data.locationAnalysis.map(l => l.name),
           axisLabel: {
             interval: 0,
-            rotate: 45,
-            fontSize: 10
+            rotate: 35,
+            fontSize: 10,
+            overflow: 'truncate',
+            width: 80
           }
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          nameTextStyle: {
+            fontSize: 12
+          },
+          axisLabel: {
+            fontSize: 11
+          }
         },
         series: [
           {
             name: 'Total',
             type: 'bar',
             data: data.locationAnalysis.map(l => l.total),
-            itemStyle: { color: '#3b82f6' }
+            itemStyle: { color: '#3b82f6' },
+            barMaxWidth: 40
           },
           {
             name: t('predictiveCertificateAnalysis.status.expired'),
             type: 'bar',
             data: data.locationAnalysis.map(l => l.expired),
-            itemStyle: { color: '#ef4444' }
+            itemStyle: { color: '#ef4444' },
+            barMaxWidth: 40
           },
           {
             name: t('predictiveCertificateAnalysis.calendar.expiringSoon'),
             type: 'bar',
             data: data.locationAnalysis.map(l => l.expiringSoon),
-            itemStyle: { color: '#f59e0b' }
+            itemStyle: { color: '#f59e0b' },
+            barMaxWidth: 40
           }
         ]
       });
@@ -1001,6 +1310,7 @@ export default function PredictiveCertificateAnalysis() {
     { key: 'overview', translation: t('predictiveCertificateAnalysis.tabs.overview') },
     { key: 'predictability', translation: t('predictiveCertificateAnalysis.tabs.predictability') },
     { key: 'observability', translation: t('predictiveCertificateAnalysis.tabs.observability') },
+    { key: 'map', translation: 'Mapa' },
     { key: 'calendar', translation: t('predictiveCertificateAnalysis.tabs.calendar') },
     { key: 'report', translation: t('predictiveCertificateAnalysis.tabs.report') }
   ];
@@ -1249,21 +1559,54 @@ export default function PredictiveCertificateAnalysis() {
 
       {/* TAB CONTENT - OVERVIEW */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div ref={riskDistributionRef} className="w-full h-80"></div>
+        <div className="space-y-6">
+          {/* Primeira linha - 2 gráficos maiores */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div ref={riskDistributionRef} className="w-full" style={{ height: '400px' }}></div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div ref={validityStatusRef} className="w-full" style={{ height: '400px' }}></div>
+            </div>
           </div>
 
+          {/* Segunda linha - Departamento (full width) */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <div ref={validityStatusRef} className="w-full h-80"></div>
+            <div ref={departmentRiskRef} className="w-full" style={{ height: '450px' }}></div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div ref={departmentRiskRef} className="w-full h-80"></div>
-          </div>
+          {/* Terceira linha - Matriz de Complexidade */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div ref={complexityMatrixRef} className="w-full" style={{ height: '400px' }}></div>
+            </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div ref={complexityMatrixRef} className="w-full h-80"></div>
+            {/* Espaço para adicionar outro gráfico ou métricas */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">Métricas Adicionais</h3>
+              <div className="space-y-4">
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
+                  <p className="text-sm text-slate-600">Score Médio de Renovação</p>
+                  <p className="text-3xl font-bold text-blue-600">{data.analytics.averageRenewalScore.toFixed(1)}%</p>
+                </div>
+
+                <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
+                  <p className="text-sm text-slate-600">Score Médio de Compliance</p>
+                  <p className="text-3xl font-bold text-purple-600">{data.analytics.averageComplianceScore.toFixed(1)}%</p>
+                </div>
+
+                <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg">
+                  <p className="text-sm text-slate-600">Risco Médio de Expiração</p>
+                  <p className="text-3xl font-bold text-orange-600">{data.analytics.averageExpirationRisk.toFixed(1)}%</p>
+                </div>
+
+                <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                  <p className="text-sm text-slate-600">Complexidade Média</p>
+                  <p className="text-3xl font-bold text-green-600">{data.analytics.averageComplexityScore.toFixed(1)}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1346,6 +1689,10 @@ export default function PredictiveCertificateAnalysis() {
             </div>
           </div>
         </div>
+      )}
+
+      {activeTab === 'map' && (
+        <CertificateMap companyId={companyId} />
       )}
 
       {/* TAB CONTENT - OBSERVABILITY */}
