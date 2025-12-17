@@ -1293,7 +1293,8 @@
       "EXPIRED": "Expirado",
       "EXPIRING_SOON": "Expirando em Breve",
       "EXPIRING_MEDIUM": "Expirando em Médio Prazo",
-      "NO_EXPIRATION": "Sem Expiração"
+      "NO_EXPIRATION": "Sem Expiração",
+      "ON_HOLD": "Em Espera"
     }
     },
    
@@ -1443,6 +1444,78 @@
       "exportAll": "Todos os Dados",
       "exportAllDesc": "Todos os registros disponíveis",
       "noData": "Não há dados para exportar"
+    }
+  },
+  "profile": {
+    "title": "Meu Perfil",
+    "subtitle": "Gerencie suas informações pessoais e preferências",
+    "tabs": {
+      "profile": "Perfil",
+      "security": "Segurança",
+      "preferences": "Preferências",
+      "notifications": "Notificações"
+    },
+    "personalInfo": "Informações Pessoais",
+    "personalInfoSubtitle": "Atualize suas informações básicas",
+    "security": "Segurança",
+    "securitySubtitle": "Gerencie sua senha e autenticação",
+    "preferences": "Preferências",
+    "preferencesSubtitle": "Personalize sua experiência",
+    "notifications": "Notificações",
+    "notificationsSubtitle": "Configure como você deseja ser notificado",
+    "fields": {
+      "name": "Nome Completo",
+      "email": "E-mail",
+      "phone": "Telefone",
+      "department": "Departamento",
+      "position": "Cargo",
+      "currentPassword": "Senha Atual",
+      "newPassword": "Nova Senha",
+      "confirmPassword": "Confirmar Nova Senha",
+      "language": "Idioma",
+      "theme": "Tema",
+      "dateFormat": "Formato de Data",
+      "timeFormat": "Formato de Hora"
+    },
+    "theme": {
+      "light": "Claro",
+      "dark": "Escuro",
+      "system": "Sistema"
+    },
+    "edit": "Editar",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "saving": "Salvando...",
+    "updating": "Atualizando...",
+    "changePassword": "Alterar Senha",
+    "savePreferences": "Salvar Preferências",
+    "saveNotifications": "Salvar Notificações",
+    "updateSuccess": "Perfil atualizado com sucesso!",
+    "updateError": "Erro ao atualizar perfil",
+    "passwordChanged": "Senha alterada com sucesso!",
+    "passwordChangeError": "Erro ao alterar senha",
+    "passwordMismatch": "As senhas não coincidem",
+    "passwordTooShort": "A senha deve ter pelo menos 8 caracteres",
+    "passwordRequirements": "A senha deve ter pelo menos 8 caracteres",
+    "preferencesUpdated": "Preferências atualizadas com sucesso!",
+    "preferencesError": "Erro ao atualizar preferências",
+    "notificationsUpdated": "Notificações atualizadas com sucesso!",
+    "notificationsError": "Erro ao atualizar notificações",
+    "twoFactor": "Autenticação de Dois Fatores",
+    "twoFactorAuth": "Autenticação em Duas Etapas",
+    "twoFactorDescription": "Adicione uma camada extra de segurança à sua conta",
+    "enable": "Ativar",
+    "notif": {
+      "email": "Notificações por E-mail",
+      "emailDesc": "Receba notificações importantes por e-mail",
+      "push": "Notificações Push",
+      "pushDesc": "Receba notificações em tempo real no navegador",
+      "certificates": "Alertas de Certificados",
+      "certificatesDesc": "Receba alertas quando certificados estiverem próximos do vencimento",
+      "updates": "Atualizações do Sistema",
+      "updatesDesc": "Seja notificado sobre novas funcionalidades e melhorias",
+      "reports": "Relatórios Semanais",
+      "reportsDesc": "Receba um resumo semanal das atividades"
     }
   }
 }

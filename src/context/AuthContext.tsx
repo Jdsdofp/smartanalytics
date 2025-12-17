@@ -35,6 +35,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://apinode.smartxhub.cloud/api'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  
+
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 

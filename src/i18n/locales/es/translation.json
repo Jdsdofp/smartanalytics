@@ -1259,7 +1259,8 @@
       "EXPIRED": "Expirado",
       "EXPIRING_SOON": "Expirando Pronto",
       "EXPIRING_MEDIUM": "Expirando a Medio Plazo",
-      "NO_EXPIRATION": "Sin Expiración"
+      "NO_EXPIRATION": "Sin Expiración",
+      "ON_HOLD": "EN ESPERA"
     }
     },
 

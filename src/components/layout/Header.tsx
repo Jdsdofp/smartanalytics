@@ -3,6 +3,7 @@ import ThemeToggle from '../ThemeToggle'
 import { useAuth } from '../../context/AuthContext'
 import { useCompany } from '../../hooks/useCompany'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -12,6 +13,7 @@ function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth()
   const { company, logo } = useCompany()
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800
@@ -150,7 +152,9 @@ function Header({ onMenuClick }: HeaderProps) {
               </div>
 
               {/* Menu Items */}
-              <button className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300
+              <button
+                 onClick={()=>navigate('/user/perfil')}
+                 className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300
                                hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

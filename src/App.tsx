@@ -16,6 +16,7 @@ import MN0400_312 from './pages/Analytics/Locations/MN0400_312';
 import MN0400_211 from './pages/Analytics/Infraestrict/MN0400_211';
 import PocSwift from './pages/PocSwift';
 import MN0400_133 from './pages/Analytics/Infraestrict/MN0400_133';
+import Perfil from './pages/Perfil';
 
 function App() {
 
@@ -36,6 +37,15 @@ function App() {
       />
 
       <Route
+        path="/user/perfil"
+        element={
+          <PrivateRoute>
+            <Perfil />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
         path="/MN0400_011"
         element={
           <PrivateRoute>
@@ -43,6 +53,7 @@ function App() {
           </PrivateRoute>
         }
       />
+
 
       <Route
         path="/MN0400_111"
@@ -107,15 +118,15 @@ function App() {
 
       <Route path="/MN0400_211" element={
         <PrivateRoute>
-          <MN0400_211/>
+          <MN0400_211 />
         </PrivateRoute>
-      }/>
+      } />
 
       <Route path="/poc-swift" element={
         <>
           <PocSwift />
         </>
-      }/>
+      } />
 
       <Route path='/MN0400_131' element={
         <PrivateRoute>
@@ -123,7 +134,7 @@ function App() {
         </PrivateRoute>
       } />
 
-        <Route path='/MN0400_133' element={
+      <Route path='/MN0400_133' element={
         <PrivateRoute>
           <MN0400_133 />
         </PrivateRoute>

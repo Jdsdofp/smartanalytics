@@ -40,6 +40,8 @@ const CertificateDashboard: React.FC<CertificateDashboardProps> = ({ data }) => 
   const chartRef4 = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState(true);
 
+  
+
   // Estatísticas calculadas
   const stats = {
     total: data.length,

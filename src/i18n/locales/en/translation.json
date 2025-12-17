@@ -1260,7 +1260,8 @@
       "EXPIRED": "Expired",
       "EXPIRING_SOON": "Expiring Soon",
       "EXPIRING_MEDIUM": "Expiring Medium Term",
-      "NO_EXPIRATION": "No Expiration"
+      "NO_EXPIRATION": "No Expiration",
+      "ON_HOLD": "ON HOLD"
     }
     },
 
@@ -1290,8 +1291,7 @@
       "approved": "Approved",
       "pending": "Pending",
       "expiring_0_30": "Expiring 0-30 Days",
-      "expiring_31_90": "Expiring 31-90 Days",
-      "valid": "Valid"
+      "expiring_31_90": "Expiring 31-90 Days"
     },
 
     "risk": {
@@ -1411,6 +1411,78 @@
       "exportAll": "All Data",
       "exportAllDesc": "All available records",
       "noData": "No data to export"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your personal information and preferences",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "preferences": "Preferences",
+      "notifications": "Notifications"
+    },
+    "personalInfo": "Personal Information",
+    "personalInfoSubtitle": "Update your basic information",
+    "security": "Security",
+    "securitySubtitle": "Manage your password and authentication",
+    "preferences": "Preferences",
+    "preferencesSubtitle": "Customize your experience",
+    "notifications": "Notifications",
+    "notificationsSubtitle": "Configure how you want to be notified",
+    "fields": {
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "department": "Department",
+      "position": "Position",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "language": "Language",
+      "theme": "Theme",
+      "dateFormat": "Date Format",
+      "timeFormat": "Time Format"
+    },
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "updating": "Updating...",
+    "changePassword": "Change Password",
+    "savePreferences": "Save Preferences",
+    "saveNotifications": "Save Notifications",
+    "updateSuccess": "Profile updated successfully!",
+    "updateError": "Error updating profile",
+    "passwordChanged": "Password changed successfully!",
+    "passwordChangeError": "Error changing password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordRequirements": "Password must be at least 8 characters",
+    "preferencesUpdated": "Preferences updated successfully!",
+    "preferencesError": "Error updating preferences",
+    "notificationsUpdated": "Notifications updated successfully!",
+    "notificationsError": "Error updating notifications",
+    "twoFactor": "Two-Factor Authentication",
+    "twoFactorAuth": "Two-Step Authentication",
+    "twoFactorDescription": "Add an extra layer of security to your account",
+    "enable": "Enable",
+    "notif": {
+      "email": "Email Notifications",
+      "emailDesc": "Receive important notifications via email",
+      "push": "Push Notifications",
+      "pushDesc": "Receive real-time notifications in your browser",
+      "certificates": "Certificate Alerts",
+      "certificatesDesc": "Receive alerts when certificates are about to expire",
+      "updates": "System Updates",
+      "updatesDesc": "Be notified about new features and improvements",
+      "reports": "Weekly Reports",
+      "reportsDesc": "Receive a weekly summary of activities"
     }
   }
 }

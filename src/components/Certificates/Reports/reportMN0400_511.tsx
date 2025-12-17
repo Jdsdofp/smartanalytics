@@ -87,7 +87,7 @@ const STATUS_TRANSLATIONS: Record<string, string> = {
   'ACTIVE': 'Ativo',
   'INACTIVE': 'Inativo',
   'NOT APPROVED': 'Não Aprovado',
-  'OPEN': 'Aberto',
+  'OPEN': 'Aberto'
 };
 
 // ✅ FUNÇÃO PARA TRADUZIR STATUS (mantém a original mas adiciona fallback)
