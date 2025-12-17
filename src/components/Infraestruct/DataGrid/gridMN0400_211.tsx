@@ -1514,7 +1514,7 @@ const RawDataExplorer: React.FC = () => {
                                     setPagination(prev => ({ ...prev, current_page: 1 }));
                                 }}
                                 className={`
-                        flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 
+                        cursor-pointer flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 
                         text-sm font-medium border-b-2 transition-colors whitespace-nowrap
                         ${activeTab === config.id
                                         ? 'border-blue-600 text-blue-600'

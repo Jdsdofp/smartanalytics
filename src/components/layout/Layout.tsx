@@ -44,8 +44,8 @@ export default function Layout({ children }: LayoutProps) {
       <div className="flex flex-col lg:flex-row">
         <Menu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
         <main className="flex-1 w-full min-w-0"> {/* Adicionado min-w-0 */}
-          {/* <Navbar /> */}
-          <div className="w-full px-2 sm:px-4 lg:px-6 py-4 sm:py-6"> {/* Removido container mx-auto max-w-full */}
+          {/* <Navbar /> */} {/* Navbar w-full px-2 sm:px-4 lg:px-6 py-4 sm:py-6 */}
+          <div className="w-full sm:px-2 lg:px-1 sm:py-1"> {/* Removido container mx-auto max-w-full */}
             {children}
           </div>
         </main>

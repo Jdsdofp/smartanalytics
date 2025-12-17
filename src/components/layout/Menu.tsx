@@ -420,7 +420,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           icon: ShieldCheckIcon, label: 'Safety & Wellbeing', path: '/MN0400_130', children: [
             { icon: ChartBarIcon, label: ' Real-time People Visibility', path: '/MN0400_131', permissionCode: 'MN0400_131' },
             { icon: ChartBarIcon, label: 'Incident Rate Trends', path: '/MN0400_132', permissionCode: 'MN0400_132', hidden: true },
-            { icon: DocumentChartBarIcon, label: 'Near-Miss Analysis', path: '/MN0400_133', permissionCode: 'MN0400_133', hidden: true },
+            { icon: DocumentChartBarIcon, label: 'Boundary Access Analytics', path: '/MN0400_133', permissionCode: 'MN0400_133' },
             { icon: DocumentTextIcon, label: 'Safety Compliance Score', path: '/MN0400_134', permissionCode: 'MN0400_134', hidden: true },
           ]
         },
