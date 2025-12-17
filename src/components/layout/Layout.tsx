@@ -1,35 +1,8 @@
-// import { useState } from 'react'
-// import Header from './Header'
-// import Menu from './Menu'
-// import Navbar from './Navbar'
-
-// interface LayoutProps {
-//   children: React.ReactNode
-// }
-
-// export default function Layout({ children }: LayoutProps) {
-//   const [menuOpen, setMenuOpen] = useState(false)
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-//       <Header onMenuClick={() => setMenuOpen(!menuOpen)} />
-//       <div className="flex flex-col lg:flex-row">
-//         <Menu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
-//         <main className="flex-1 w-full">
-//           <Navbar />
-//           <div className="container mx-auto max-w-full px-2 sm:px-4 lg:px-6 py-4 sm:py-6">
-//                 {children}
-//           </div>
-//         </main>
-//       </div>
-//     </div>
-//   )
-// }
-
+//src/components/layout/Layout.tsx
 import { useState } from 'react'
 import Header from './Header'
 import Menu from './Menu'
-// import Navbar from './Navbar'
+import { useSearchParams } from 'react-router-dom'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -38,18 +11,26 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false)
 
+  const [searchParams] = useSearchParams()
+  const isEmbedded = searchParams.get('embedded') === 'true'
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <Header onMenuClick={() => setMenuOpen(!menuOpen)} />
-      <div className="flex flex-col lg:flex-row">
-        <Menu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
-        <main className="flex-1 w-full min-w-0"> {/* Adicionado min-w-0 */}
-          {/* <Navbar /> */} {/* Navbar w-full px-2 sm:px-4 lg:px-6 py-4 sm:py-6 */}
-          <div className="w-full sm:px-2 lg:px-1 sm:py-1"> {/* Removido container mx-auto max-w-full */}
-            {children}
-          </div>
-        </main>
+    isEmbedded ? (
+      <div className="w-full sm:px-2 lg:px-1 sm:py-1">
+        {children}
       </div>
-    </div>
+    ) : (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <Header onMenuClick={() => setMenuOpen(!menuOpen)} />
+        <div className="flex flex-col lg:flex-row">
+          <Menu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+          <main className="flex-1 w-full min-w-0">
+            <div className="w-full sm:px-2 lg:px-1 sm:py-1">
+              {children}
+            </div>
+          </main>
+        </div>
+      </div>
+    )
   )
 }

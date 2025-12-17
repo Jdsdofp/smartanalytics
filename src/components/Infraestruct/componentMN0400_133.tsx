@@ -1,3 +1,4 @@
+//src/components/Infraestruct/componentMN0400_133.tsx
 import { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import {

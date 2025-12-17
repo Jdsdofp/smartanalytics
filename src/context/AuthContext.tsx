@@ -1,6 +1,7 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import axios from 'axios'
+import { useSearchParams } from 'react-router-dom'
 
 interface User {
   id: string
@@ -37,16 +38,210 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  const [searchParams] = useSearchParams()
+
+
   // Verifica se há usuário salvo ao iniciar
-  useEffect(() => {
+  // useEffect(() => {
+  //   const savedUser = sessionStorage.getItem('user')
+  //   const savedToken = sessionStorage.getItem('token')
+    
+  //   if (savedUser && savedToken) {
+  //     setUser(JSON.parse(savedUser))
+  //   }
+  //   setIsLoading(false)
+  // }, [])
+
+  const clearSession = () => {
+  sessionStorage.removeItem('token')
+  sessionStorage.removeItem('user')
+  sessionStorage.removeItem('webKey')
+  sessionStorage.removeItem('companyData')
+  sessionStorage.removeItem('theme')
+}
+
+
+//   useEffect(() => {
+//   const bootstrap = async () => {
+//     const savedUser = sessionStorage.getItem('user')
+//     const savedToken = sessionStorage.getItem('token')
+
+//     // ✅ Login normal
+//     if (savedUser && savedToken) {
+//       setUser(JSON.parse(savedUser))
+//       setIsLoading(false)
+//       return
+//     }
+
+//     // ❌ Não é embedded
+//     if (!isEmbedded) {
+//       setIsLoading(false)
+//       return
+//     }
+
+//     // ❌ Embed sem token
+//     if (!embeddedToken) {
+//       console.error('Embed sem token')
+//       setIsLoading(false)
+//       return
+//     }
+
+//     try {
+//       // 🔥 Valida token embed
+//       const { data } = await axios.post(
+//         `${API_BASE_URL}/auth/validate`,
+//         {},
+//         {
+//           headers: {
+//             Authorization: `Bearer ${embeddedToken}`
+//           }
+//         }
+//       )
+
+//       if (!data.success || !data.valid) {
+//         throw new Error('Token embed inválido')
+//       }
+
+//       const u = data.user
+
+//       // 👤 Monta usuário no formato do frontend
+//       const embeddedUser = {
+//         id: u.userId.toString(),
+//         name: u.firstName && u.lastName
+//           ? `${u.firstName} ${u.lastName}`
+//           : u.userName,
+//         email: u.email,
+//         login: u.login,
+//         role: u.role,
+//         type: u.type,
+//         active: u.active,
+//         timeZone: u.timeZone,
+//         companyId: u.companyId,
+//         companyName: u.companyName,
+//         webKey: u.webKey,
+//         language: u.language,
+//         permissions: u.permissions || [],
+//         company: {
+//           components: u.components || []
+//         }
+//       }
+
+//       // 💾 Salva tudo
+//       setUser(embeddedUser)
+
+//       sessionStorage.setItem('token', embeddedToken)
+//       sessionStorage.setItem('user', JSON.stringify(embeddedUser))
+
+//       sessionStorage.setItem('companyData', JSON.stringify({
+//         id: u.companyId,
+//         name: u.companyName,
+//         components: u.components || [],
+//         devices: u.devices || [],
+//         details: {
+//           full_name: u.companyName,
+//           logo: null
+//         }
+//       }))
+
+//       // (opcional) se existir theme em outro endpoint
+//       // sessionStorage.setItem('theme', JSON.stringify(theme))
+
+//     } catch (err) {
+//       console.error('Erro ao validar token embed:', err)
+//     } finally {
+//       setIsLoading(false)
+//     }
+//   }
+
+//   bootstrap()
+// }, [])
+
+useEffect(() => {
+  const bootstrap = async () => {
     const savedUser = sessionStorage.getItem('user')
     const savedToken = sessionStorage.getItem('token')
-    
-    if (savedUser && savedToken) {
-      setUser(JSON.parse(savedUser))
+
+    const isEmbedded = searchParams.get('embedded') === 'true'
+    const embeddedToken = searchParams.get('token')
+
+    // 🧹 EMBED sem token → limpa tudo
+    if (isEmbedded && !embeddedToken) {
+      console.warn('Embed sem token. Limpando sessão.')
+      clearSession()
+      setUser(null)
+      setIsLoading(false)
+      return
     }
+
+    // ✅ Login normal
+    if (savedUser && savedToken && !isEmbedded) {
+      setUser(JSON.parse(savedUser))
+      setIsLoading(false)
+      return
+    }
+
+    // 🔥 Embed com token
+    if (isEmbedded && embeddedToken) {
+      try {
+        const { data } = await axios.post(
+          `${API_BASE_URL}/auth/validate`,
+          {},
+          { headers: { Authorization: `Bearer ${embeddedToken}` } }
+        )
+
+        if (!data.success || !data.valid) {
+          throw new Error('Token embed inválido')
+        }
+
+        const u = data.user
+
+        const embeddedUser = {
+          id: u.userId.toString(),
+          name: `${u.firstName} ${u.lastName}`.trim(),
+          email: u.email,
+          login: u.login,
+          role: u.role,
+          type: u.type,
+          active: u.active,
+          timeZone: u.timeZone,
+          companyId: u.companyId,
+          companyName: u.companyName,
+          webKey: u.webKey,
+          language: u.language,
+          permissions: u.permissions || [],
+          company: { components: u.components || [] }
+        }
+
+        setUser(embeddedUser)
+
+        sessionStorage.setItem('token', embeddedToken)
+        sessionStorage.setItem('user', JSON.stringify(embeddedUser))
+        sessionStorage.setItem('companyData', JSON.stringify({
+          id: u.companyId,
+          name: u.companyName,
+          components: u.components || [],
+          devices: u.devices || [],
+          details: { full_name: u.companyName, logo: null }
+        }))
+
+      } catch (err) {
+        console.error('Erro no embed, limpando sessão:', err)
+        clearSession()
+        setUser(null)
+      } finally {
+        setIsLoading(false)
+      }
+      return
+    }
+
+    // ❌ Sem sessão válida
     setIsLoading(false)
-  }, [])
+  }
+
+  bootstrap()
+}, [])
+
+
 
   const login = async (username: string, password: string) => {
     try {

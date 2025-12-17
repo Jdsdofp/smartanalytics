@@ -125,6 +125,7 @@ const loadFromSessionStorage = () => {
 }
 
 export function useCompany() {
+  
   // Inicializa os estados com os dados do sessionStorage de forma síncrona
   const [companyData, setCompanyData] = useState<CompanyDetails | null>(() => {
     const { companyData } = loadFromSessionStorage()
