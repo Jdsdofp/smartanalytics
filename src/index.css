@@ -343,3 +343,32 @@
 .leaflet-pane {
   transform-origin: center center;
 }
+
+/* Animação para o modal */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Garantir que o botão embed fique por cima de tudo */
+.z-40 {
+  z-index: 40;
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 640px) {
+  .fixed.top-20.right-6 {
+    top: 4.5rem;
+    right: 1rem;
+  }
+}

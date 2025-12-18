@@ -3200,53 +3200,11 @@ export default function DeviceLogsView() {
 
           {/* ✨ CONTROLES DE REFRESH */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-            {/* Status do Auto-Refresh */}
-            {/* <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
-              <div className={`w-3 h-3 rounded-full ${autoRefreshEnabled ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-              <span className="text-sm text-gray-700">
-                {autoRefreshEnabled ? 'Auto-refresh ativo' : 'Auto-refresh pausado'}
-              </span>
-            </div> */}
-
-            {/* Seletor de Intervalo */}
-            {/* <select
-              value={refreshInterval}
-              onChange={(e) => handleIntervalChange(Number(e.target.value))}
-              disabled={!autoRefreshEnabled}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-            > */}
-            {/* <option value={10000}>10 segundos</option>
-              <option value={30000}>30 segundos</option> */}
-            {/* <option value={60000}>1 min</option>
-              <option value={300000}>5 min</option>
-            </select> */}
-
-            {/* Botão Toggle Auto-Refresh */}
-            {/* <button
-              onClick={toggleAutoRefresh}
-              className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors ${autoRefreshEnabled
-                ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-                : 'bg-green-100 text-green-700 hover:bg-green-200'
-                }`}
-            >
-              {autoRefreshEnabled ? (
-                <>
-                  <PauseIcon className="h-4 w-4" />
-                  {t('gpsMap.player.pause')}
-                </>
-              ) : (
-                <>
-                  <PlayIcon className="h-4 w-4" />
-                  Active
-                </>
-              )}
-            </button> */}
-
             {/* Botão Refresh Manual */}
             <button
               onClick={handleManualRefresh}
               disabled={refreshing}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center justify-center gap-2 px-2 py-2 mt-8 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? t('deviceLogs.refreshing') : t('deviceLogs.refresh')}

@@ -169,58 +169,6 @@ export default function PredictiveCertificateAnalysis() {
   const locationAnalysisRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<any>(null);
 
-  // Novo estado para controlar o modal de embed
-  const [showEmbedModal, setShowEmbedModal] = useState(false);
-  const [embedUrl, setEmbedUrl] = useState('');
-  const [copySuccess, setCopySuccess] = useState(false);
-
-
-  // Função para gerar a URL embedded
-  const generateEmbedUrl = () => {
-    const currentUrl = window.location.href.split('?')[0]; // Remove query params existentes
-    const embedUrlWithParams = `${currentUrl}?embedded=true&token=${token}`;
-    setEmbedUrl(embedUrlWithParams);
-    setShowEmbedModal(true);
-  };
-
-  // Função para copiar a URL
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(embedUrl);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error('Erro ao copiar:', err);
-    }
-  };
-
-  // Função para copiar o iframe code
-  const copyIframeCode = async () => {
-    const iframeCode = `<iframe src="${embedUrl}" width="100%" height="800" frameborder="0" allowfullscreen></iframe>`;
-    try {
-      await navigator.clipboard.writeText(iframeCode);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error('Erro ao copiar:', err);
-    }
-  };
-
-  // Detectar se está em modo embedded
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const isEmbedded = urlParams.get('embedded') === 'true';
-    const urlToken = urlParams.get('token');
-
-    if (isEmbedded && urlToken) {
-      // Armazenar o token se estiver em modo embedded
-      sessionStorage.setItem('token', urlToken);
-      
-      // Opcional: adicionar estilos específicos para modo embedded
-      document.body.classList.add('embedded-mode');
-    }
-  }, []);
-
   // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
@@ -1385,17 +1333,7 @@ export default function PredictiveCertificateAnalysis() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Botão Embed */}
-            <button
-              onClick={generateEmbedUrl}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              <span className="font-medium">Embed</span>
-            </button>
-
+            
             <div className="text-right">
               <div className="text-sm text-slate-500">Last Update</div>
               <div className="text-lg font-semibold text-slate-700">
@@ -1409,130 +1347,6 @@ export default function PredictiveCertificateAnalysis() {
           </div>
         </div>
       </div>
-
-      {/* MODAL DE EMBED */}
-      {showEmbedModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              {/* Header do Modal */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 rounded-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-slate-800">Dashboard Embed</h3>
-                    <p className="text-sm text-slate-600">Compartilhe ou incorpore este dashboard</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowEmbedModal(false)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* URL Direta */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  🔗 URL Direta
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={embedUrl}
-                    readOnly
-                    className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    onClick={copyToClipboard}
-                    className={`px-6 py-3 rounded-lg font-medium transition-all ${
-                      copySuccess
-                        ? 'bg-green-500 text-white'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
-                  >
-                    {copySuccess ? (
-                      <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Copiado!
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Copiar
-                      </div>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Código iFrame */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  📋 Código iFrame (HTML)
-                </label>
-                <div className="relative">
-                  <textarea
-                    value={`<iframe src="${embedUrl}" width="100%" height="800" frameborder="0" allowfullscreen></iframe>`}
-                    readOnly
-                    rows={4}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                  />
-                  <button
-                    onClick={copyIframeCode}
-                    className="absolute top-3 right-3 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
-                  >
-                    {copySuccess ? '✓ Copiado!' : 'Copiar Código'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Preview */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  👁️ Preview
-                </label>
-                <div className="bg-slate-100 border-2 border-slate-200 rounded-lg p-4">
-                  <div className="bg-white rounded-lg shadow-sm p-4 max-h-60 overflow-auto">
-                    <p className="text-sm text-slate-600">
-                      O dashboard será exibido em tela cheia com todos os recursos disponíveis.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Informações de Segurança */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex gap-3">
-                  <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div>
-                    <h4 className="font-semibold text-blue-900 mb-1">Informações Importantes</h4>
-                    <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• O token de autenticação está incluído na URL</li>
-                      <li>• Compartilhe apenas com pessoas autorizadas</li>
-                      <li>• O dashboard mantém todas as funcionalidades</li>
-                      <li>• Dados em tempo real conectados ao sistema</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* KPIs PRINCIPAIS - ATUALIZADOS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
