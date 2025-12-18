@@ -9,7 +9,7 @@ export default function Home() {
   const { t } = useTranslation()
 
   return (
-     <Layout>
+     <Layout showEmbedButton={false}>
 
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
           

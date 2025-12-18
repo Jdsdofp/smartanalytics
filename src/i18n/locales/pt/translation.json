@@ -1034,7 +1034,27 @@
     "gpsCoverageRate": "Cobertura GPS",
     "devicesOnline": "Equipamentos online",
     "activeDevices": "Dispositivos ativos",
-    "recentGps": "Com GPS recente"
+    "recentGps": "Com GPS recente",
+    "export": {
+      "title": "Dashboard de Dispositivos IoT",
+      "quickExport": "Exportação Rápida",
+      "configure": "Configurar Exportação",
+      "configureTitle": "Configurar Exportação PDF",
+      "exporting": "Exportando...",
+      "error": "Erro ao exportar dashboard",
+      "orientation": "Orientação",
+      "portrait": "Retrato",
+      "landscape": "Paisagem",
+      "content": "Conteúdo",
+      "includeCards": "Incluir Cards",
+      "includeCardsDesc": "KPIs e métricas principais",
+      "includeCharts": "Incluir Gráficos",
+      "includeChartsDesc": "Visualizações e análises",
+      "includeTables": "Incluir Tabelas",
+      "includeTablesDesc": "Dados detalhados em formato tabular",
+      "info": "O PDF será gerado com base nas visualizações atuais do dashboard.",
+      "generate": "Gerar PDF"
+    }
   },
   "lowBatteryTable": {
     "title": "Status Dispositivos",
@@ -1516,6 +1536,253 @@
       "updatesDesc": "Seja notificado sobre novas funcionalidades e melhorias",
       "reports": "Relatórios Semanais",
       "reportsDesc": "Receba um resumo semanal das atividades"
+    }
+  },
+  "embed": {
+    "button": {
+      "title": "Gerar link de incorporação",
+      "label": "Embed",
+      "generating": "Gerando..."
+    },
+    "modal": {
+      "title": "Dashboard Embed",
+      "subtitle": "Compartilhe ou incorpore esta página",
+      "close": "Fechar"
+    },
+    "qrCode": {
+      "title": "QR Code",
+      "download": "Baixar QR Code",
+      "scanInfo": "Escaneie para acesso direto",
+      "loading": "Gerando QR Code..."
+    },
+    "url": {
+      "full": "URL Completa",
+      "short": "URL Curta (para QR Code)",
+      "copy": "Copiar",
+      "copied": "✓"
+    },
+    "iframe": {
+      "title": "Código HTML (Iframe)",
+      "copy": "Copiar"
+    },
+    "features": {
+      "qrCode": {
+        "title": "QR Code",
+        "description": "Acesso mobile rápido"
+      },
+      "url": {
+        "title": "URL",
+        "description": "Compartilhamento direto"
+      },
+      "iframe": {
+        "title": "Iframe",
+        "description": "Incorporar em sites"
+      }
+    },
+    "security": {
+      "title": "⚠️ Informações de Segurança",
+      "tokenIncluded": "Token incluído - compartilhe apenas com autorizados",
+      "shortUrlInfo": "URL curta facilita compartilhamento e QR Code",
+      "qrCodeDirect": "QR Code abre direto no navegador",
+      "realTimeData": "Dados atualizados em tempo real"
+    },
+    "errors": {
+      "copyFailed": "Erro ao copiar",
+      "shortenFailed": "Erro ao encurtar URL"
+    }
+  },
+   "boundaryAccessAnalytics": {
+    "tabs": {
+      "overview": "Overview",
+      "temporal": "Análise Temporal",
+      "heatmap": "Heatmap",
+      "anomalies": "Anomalias",
+      "flow": "Fluxo & Movimento",
+      "compliance": "Compliance",
+      "rankings": "Rankings"
+    },
+    "kpis": {
+      "visitsToday": "Visitas Hoje",
+      "hoursToday": "Horas Hoje",
+      "activePeople": "Pessoas Ativas",
+      "alertRate": "Taxa de Alertas",
+      "detectedAnomalies": "Anomalias Detectadas",
+      "averageZScore": "Z-Score Médio",
+      "extremeAnomalies": "Extreme (>3.0)",
+      "highAnomalies": "Alto (>2.0)",
+      "complianceRate": "Taxa de Conformidade",
+      "offHoursVisits": "Visitas Fora de Horário",
+      "longVisits": "Visitas >4h",
+      "weekendVisits": "Fim de Semana"
+    },
+    "charts": {
+      "topBoundaries": {
+        "title": "Top 10 Boundaries",
+        "subtitle": "Por duração total (30 dias)",
+        "xAxis": "Horas"
+      },
+      "shiftDistribution": {
+        "title": "Distribuição por Turno",
+        "subtitle": "Última semana",
+        "morning": "Manhã (6h-12h)",
+        "afternoon": "Tarde (12h-18h)",
+        "night": "Noite (18h-6h)"
+      },
+      "timeSeries": {
+        "title": "Time Series com Médias Móveis",
+        "subtitle": "Duração total por dia (últimos 30 dias)",
+        "current": "Atual",
+        "ma7d": "MA 7d",
+        "ma30d": "MA 30d",
+        "yAxis": "Horas"
+      },
+      "weeklyTrends": {
+        "title": "Tendências Semanais (WoW)",
+        "subtitle": "Últimas 8 semanas",
+        "currentWeek": "Semana Atual",
+        "previousWeek": "Semana Anterior",
+        "yAxis": "Horas"
+      },
+      "weeklyPattern": {
+        "title": "Padrão Semanal",
+        "subtitle": "Por dia da semana",
+        "yAxis": "Visitas",
+        "days": ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
+      },
+      "heatmap": {
+        "title": "Heatmap de Atividade",
+        "subtitle": "Hora x Dia da Semana (últimos 30 dias)"
+      },
+      "anomalies": {
+        "title": "Anomalias por Z-Score",
+        "subtitle": "Últimos 30 dias",
+        "xAxis": "Data",
+        "yAxis": "Duração (horas)",
+        "tooltip": {
+          "date": "Data",
+          "duration": "Duração",
+          "zScore": "Z-Score"
+        }
+      },
+      "sankey": {
+        "title": "Fluxo de Movimento (Sankey)",
+        "subtitle": "Transições entre boundaries (últimos 7 dias)"
+      },
+      "durationBuckets": {
+        "title": "Distribuição de Duração",
+        "subtitle": "Buckets de tempo",
+        "yAxis": "Visitas",
+        "buckets": ["<30min", "30m-2h", "2h-4h", "4h-8h", ">8h"]
+      },
+      "alertRate": {
+        "title": "Taxa de Alertas por Boundary",
+        "subtitle": "Últimos 30 dias",
+        "xAxis": "%"
+      },
+      "topPeople": {
+        "title": "Top 10 Pessoas",
+        "subtitle": "Por duração total (30 dias)",
+        "xAxis": "Horas (30d)"
+      },
+      "frequency": {
+        "title": "Top 10 por Frequência",
+        "subtitle": "Visitas por dia",
+        "xAxis": "Visitas/Dia"
+      }
+    },
+    "tables": {
+      "realTimeStatus": {
+        "title": "Status em Tempo Real",
+        "subtitle": "Pessoas dentro de boundaries agora",
+        "headers": {
+          "person": "Pessoa",
+          "boundary": "Boundary",
+          "entry": "Entrada",
+          "duration": "Duração",
+          "status": "Status"
+        },
+        "statuses": {
+          "normal": "Normal",
+          "long": "Longo"
+        }
+      },
+      "topAnomalies": {
+        "title": "Top 10 Anomalias",
+        "subtitle": "Ordenado por Z-Score",
+        "headers": {
+          "date": "Data",
+          "person": "Pessoa",
+          "boundary": "Boundary",
+          "duration": "Duração",
+          "average": "Média",
+          "zScore": "Z-Score",
+          "level": "Nível"
+        },
+        "levels": {
+          "extreme": "EXTREME",
+          "high": "HIGH"
+        }
+      },
+      "topTransitions": {
+        "title": "Top 20 Transições",
+        "subtitle": "Mais frequentes",
+        "headers": {
+          "from": "De",
+          "to": "Para",
+          "transitions": "Transições",
+          "avgTime": "Tempo Médio",
+          "type": "Tipo"
+        },
+        "types": {
+          "sameGroup": "SAME GROUP",
+          "crossGroup": "CROSS GROUP"
+        }
+      },
+      "complianceSummary": {
+        "title": "Resumo de Compliance",
+        "subtitle": "Por boundary",
+        "headers": {
+          "boundary": "Boundary",
+          "visits": "Visitas",
+          "alertRate": "Taxa Alertas",
+          "offHours": "Fora Horário",
+          "weekend": "Fim Semana",
+          "status": "Status"
+        },
+        "statuses": {
+          "ok": "OK",
+          "warning": "Atenção"
+        }
+      },
+      "detailedRanking": {
+        "title": "Ranking Detalhado",
+        "subtitle": "Últimos 30 dias",
+        "headers": {
+          "rank": "#",
+          "person": "Pessoa",
+          "mainBoundary": "Boundary Principal",
+          "duration": "Duração (30d)",
+          "visits": "Visitas",
+          "activeDays": "Dias Ativos",
+          "avgPerVisit": "Média/Visita"
+        }
+      }
+    },
+    "buttons": {
+      "days30": "30 dias",
+      "days7": "7 dias",
+      "days90": "90 dias"
+    },
+    "filters": {
+      "allBoundaries": "Todas as Boundaries",
+      "zoneA": "Zona A",
+      "zoneB": "Zona B",
+      "zoneC": "Zona C"
+    },
+    "labels": {
+      "hours": "h",
+      "percentage": "%",
+      "minutes": "min"
     }
   }
 }

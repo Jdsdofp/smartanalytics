@@ -1001,7 +1001,27 @@
     "gpsCoverageRate": "GPS Coverage",
     "devicesOnline": "Devices online",
     "activeDevices": "Active devices",
-    "recentGps": "With recent GPS"
+    "recentGps": "With recent GPS",
+    "export": {
+      "title": "IoT Devices Dashboard",
+      "quickExport": "Quick Export",
+      "configure": "Configure Export",
+      "configureTitle": "Configure PDF Export",
+      "exporting": "Exporting...",
+      "error": "Error exporting dashboard",
+      "orientation": "Orientation",
+      "portrait": "Portrait",
+      "landscape": "Landscape",
+      "content": "Content",
+      "includeCards": "Include Cards",
+      "includeCardsDesc": "KPIs and main metrics",
+      "includeCharts": "Include Charts",
+      "includeChartsDesc": "Visualizations and analysis",
+      "includeTables": "Include Tables",
+      "includeTablesDesc": "Detailed data in tabular format",
+      "info": "The PDF will be generated based on current dashboard visualizations.",
+      "generate": "Generate PDF"
+    }
   },
   "lowBatteryTable": {
     "title": "Devices Status",
@@ -1483,6 +1503,253 @@
       "updatesDesc": "Be notified about new features and improvements",
       "reports": "Weekly Reports",
       "reportsDesc": "Receive a weekly summary of activities"
+    }
+  },
+   "embed": {
+    "button": {
+      "title": "Generate embed link",
+      "label": "Embed",
+      "generating": "Generating..."
+    },
+    "modal": {
+      "title": "Dashboard Embed",
+      "subtitle": "Share or embed this page",
+      "close": "Close"
+    },
+    "qrCode": {
+      "title": "QR Code",
+      "download": "Download QR Code",
+      "scanInfo": "Scan for direct access",
+      "loading": "Generating QR Code..."
+    },
+    "url": {
+      "full": "Full URL",
+      "short": "Short URL (for QR Code)",
+      "copy": "Copy",
+      "copied": "✓"
+    },
+    "iframe": {
+      "title": "HTML Code (Iframe)",
+      "copy": "Copy"
+    },
+    "features": {
+      "qrCode": {
+        "title": "QR Code",
+        "description": "Quick mobile access"
+      },
+      "url": {
+        "title": "URL",
+        "description": "Direct sharing"
+      },
+      "iframe": {
+        "title": "Iframe",
+        "description": "Embed in websites"
+      }
+    },
+    "security": {
+      "title": "⚠️ Security Information",
+      "tokenIncluded": "Token included - share only with authorized users",
+      "shortUrlInfo": "Short URL facilitates sharing and QR Code",
+      "qrCodeDirect": "QR Code opens directly in browser",
+      "realTimeData": "Real-time updated data"
+    },
+    "errors": {
+      "copyFailed": "Failed to copy",
+      "shortenFailed": "Failed to shorten URL"
+    }
+  },
+   "boundaryAccessAnalytics": {
+    "tabs": {
+      "overview": "Overview",
+      "temporal": "Temporal Analysis",
+      "heatmap": "Heatmap",
+      "anomalies": "Anomalies",
+      "flow": "Flow & Movement",
+      "compliance": "Compliance",
+      "rankings": "Rankings"
+    },
+    "kpis": {
+      "visitsToday": "Today's Visits",
+      "hoursToday": "Today's Hours",
+      "activePeople": "Active People",
+      "alertRate": "Alert Rate",
+      "detectedAnomalies": "Detected Anomalies",
+      "averageZScore": "Average Z-Score",
+      "extremeAnomalies": "Extreme (>3.0)",
+      "highAnomalies": "High (>2.0)",
+      "complianceRate": "Compliance Rate",
+      "offHoursVisits": "Off-Hours Visits",
+      "longVisits": "Visits >4h",
+      "weekendVisits": "Weekend Visits"
+    },
+    "charts": {
+      "topBoundaries": {
+        "title": "Top 10 Boundaries",
+        "subtitle": "By total duration (30 days)",
+        "xAxis": "Hours"
+      },
+      "shiftDistribution": {
+        "title": "Shift Distribution",
+        "subtitle": "Last week",
+        "morning": "Morning (6AM-12PM)",
+        "afternoon": "Afternoon (12PM-6PM)",
+        "night": "Night (6PM-6AM)"
+      },
+      "timeSeries": {
+        "title": "Time Series with Moving Averages",
+        "subtitle": "Total duration per day (last 30 days)",
+        "current": "Current",
+        "ma7d": "MA 7d",
+        "ma30d": "MA 30d",
+        "yAxis": "Hours"
+      },
+      "weeklyTrends": {
+        "title": "Weekly Trends (WoW)",
+        "subtitle": "Last 8 weeks",
+        "currentWeek": "Current Week",
+        "previousWeek": "Previous Week",
+        "yAxis": "Hours"
+      },
+      "weeklyPattern": {
+        "title": "Weekly Pattern",
+        "subtitle": "By day of week",
+        "yAxis": "Visits",
+        "days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      },
+      "heatmap": {
+        "title": "Activity Heatmap",
+        "subtitle": "Hour x Day of Week (last 30 days)"
+      },
+      "anomalies": {
+        "title": "Anomalies by Z-Score",
+        "subtitle": "Last 30 days",
+        "xAxis": "Date",
+        "yAxis": "Duration (hours)",
+        "tooltip": {
+          "date": "Date",
+          "duration": "Duration",
+          "zScore": "Z-Score"
+        }
+      },
+      "sankey": {
+        "title": "Movement Flow (Sankey)",
+        "subtitle": "Transitions between boundaries (last 7 days)"
+      },
+      "durationBuckets": {
+        "title": "Duration Distribution",
+        "subtitle": "Time buckets",
+        "yAxis": "Visits",
+        "buckets": ["<30min", "30m-2h", "2h-4h", "4h-8h", ">8h"]
+      },
+      "alertRate": {
+        "title": "Alert Rate by Boundary",
+        "subtitle": "Last 30 days",
+        "xAxis": "%"
+      },
+      "topPeople": {
+        "title": "Top 10 People",
+        "subtitle": "By total duration (30 days)",
+        "xAxis": "Hours (30d)"
+      },
+      "frequency": {
+        "title": "Top 10 by Frequency",
+        "subtitle": "Visits per day",
+        "xAxis": "Visits/Day"
+      }
+    },
+    "tables": {
+      "realTimeStatus": {
+        "title": "Real-Time Status",
+        "subtitle": "People inside boundaries now",
+        "headers": {
+          "person": "Person",
+          "boundary": "Boundary",
+          "entry": "Entry",
+          "duration": "Duration",
+          "status": "Status"
+        },
+        "statuses": {
+          "normal": "Normal",
+          "long": "Long"
+        }
+      },
+      "topAnomalies": {
+        "title": "Top 10 Anomalies",
+        "subtitle": "Sorted by Z-Score",
+        "headers": {
+          "date": "Date",
+          "person": "Person",
+          "boundary": "Boundary",
+          "duration": "Duration",
+          "average": "Average",
+          "zScore": "Z-Score",
+          "level": "Level"
+        },
+        "levels": {
+          "extreme": "EXTREME",
+          "high": "HIGH"
+        }
+      },
+      "topTransitions": {
+        "title": "Top 20 Transitions",
+        "subtitle": "Most frequent",
+        "headers": {
+          "from": "From",
+          "to": "To",
+          "transitions": "Transitions",
+          "avgTime": "Avg Time",
+          "type": "Type"
+        },
+        "types": {
+          "sameGroup": "SAME GROUP",
+          "crossGroup": "CROSS GROUP"
+        }
+      },
+      "complianceSummary": {
+        "title": "Compliance Summary",
+        "subtitle": "By boundary",
+        "headers": {
+          "boundary": "Boundary",
+          "visits": "Visits",
+          "alertRate": "Alert Rate",
+          "offHours": "Off-Hours",
+          "weekend": "Weekend",
+          "status": "Status"
+        },
+        "statuses": {
+          "ok": "OK",
+          "warning": "Warning"
+        }
+      },
+      "detailedRanking": {
+        "title": "Detailed Ranking",
+        "subtitle": "Last 30 days",
+        "headers": {
+          "rank": "#",
+          "person": "Person",
+          "mainBoundary": "Main Boundary",
+          "duration": "Duration (30d)",
+          "visits": "Visits",
+          "activeDays": "Active Days",
+          "avgPerVisit": "Avg/Visit"
+        }
+      }
+    },
+    "buttons": {
+      "days30": "30 days",
+      "days7": "7 days",
+      "days90": "90 days"
+    },
+    "filters": {
+      "allBoundaries": "All Boundaries",
+      "zoneA": "Zone A",
+      "zoneB": "Zone B",
+      "zoneC": "Zone C"
+    },
+    "labels": {
+      "hours": "h",
+      "percentage": "%",
+      "minutes": "min"
     }
   }
 }

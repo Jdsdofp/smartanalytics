@@ -1000,7 +1000,27 @@
     "gpsCoverageRate": "Cobertura GPS",
     "devicesOnline": "Equipos en línea",
     "activeDevices": "Dispositivos activos",
-    "recentGps": "Con GPS reciente"
+    "recentGps": "Con GPS reciente",
+    "export": {
+      "title": "Panel de Dispositivos IoT",
+      "quickExport": "Exportación Rápida",
+      "configure": "Configurar Exportación",
+      "configureTitle": "Configurar Exportación PDF",
+      "exporting": "Exportando...",
+      "error": "Error al exportar panel",
+      "orientation": "Orientación",
+      "portrait": "Vertical",
+      "landscape": "Horizontal",
+      "content": "Contenido",
+      "includeCards": "Incluir Tarjetas",
+      "includeCardsDesc": "KPIs y métricas principales",
+      "includeCharts": "Incluir Gráficos",
+      "includeChartsDesc": "Visualizaciones y análisis",
+      "includeTables": "Incluir Tablas",
+      "includeTablesDesc": "Datos detallados en formato tabular",
+      "info": "El PDF se generará basado en las visualizaciones actuales del panel.",
+      "generate": "Generar PDF"
+    }
   },
   "lowBatteryTable": {
     "title": "Estado de los dispositivos",
@@ -1411,6 +1431,325 @@
       "exportAll": "Todos los Datos",
       "exportAllDesc": "Todos los registros disponibles",
       "noData": "No hay datos para exportar"
+    }
+  },
+   "profile": {
+    "title": "Mi Perfil",
+    "subtitle": "Administra tu información personal y preferencias",
+    "tabs": {
+      "profile": "Perfil",
+      "security": "Seguridad",
+      "preferences": "Preferencias",
+      "notifications": "Notificaciones"
+    },
+    "personalInfo": "Información Personal",
+    "personalInfoSubtitle": "Actualiza tu información básica",
+    "security": "Seguridad",
+    "securitySubtitle": "Administra tu contraseña y autenticación",
+    "preferences": "Preferencias",
+    "preferencesSubtitle": "Personaliza tu experiencia",
+    "notifications": "Notificaciones",
+    "notificationsSubtitle": "Configura cómo deseas recibir notificaciones",
+    "fields": {
+      "name": "Nombre Completo",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "department": "Departamento",
+      "position": "Cargo",
+      "currentPassword": "Contraseña Actual",
+      "newPassword": "Nueva Contraseña",
+      "confirmPassword": "Confirmar Nueva Contraseña",
+      "language": "Idioma",
+      "theme": "Tema",
+      "dateFormat": "Formato de Fecha",
+      "timeFormat": "Formato de Hora"
+    },
+    "theme": {
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    },
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "saving": "Guardando...",
+    "updating": "Actualizando...",
+    "changePassword": "Cambiar Contraseña",
+    "savePreferences": "Guardar Preferencias",
+    "saveNotifications": "Guardar Notificaciones",
+    "updateSuccess": "¡Perfil actualizado con éxito!",
+    "updateError": "Error al actualizar el perfil",
+    "passwordChanged": "¡Contraseña cambiada con éxito!",
+    "passwordChangeError": "Error al cambiar la contraseña",
+    "passwordMismatch": "Las contraseñas no coinciden",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
+    "passwordRequirements": "La contraseña debe tener al menos 8 caracteres",
+    "preferencesUpdated": "¡Preferencias actualizadas con éxito!",
+    "preferencesError": "Error al actualizar las preferencias",
+    "notificationsUpdated": "¡Notificaciones actualizadas con éxito!",
+    "notificationsError": "Error al actualizar las notificaciones",
+    "twoFactor": "Autenticación de Dos Factores",
+    "twoFactorAuth": "Autenticación en Dos Pasos",
+    "twoFactorDescription": "Agrega una capa adicional de seguridad a tu cuenta",
+    "enable": "Habilitar",
+    "notif": {
+      "email": "Notificaciones por Correo Electrónico",
+      "emailDesc": "Recibe notificaciones importantes por correo electrónico",
+      "push": "Notificaciones Push",
+      "pushDesc": "Recibe notificaciones en tiempo real en tu navegador",
+      "certificates": "Alertas de Certificados",
+      "certificatesDesc": "Recibe alertas cuando los certificados estén por vencer",
+      "updates": "Actualizaciones del Sistema",
+      "updatesDesc": "Recibe notificaciones sobre nuevas funciones y mejoras",
+      "reports": "Informes Semanales",
+      "reportsDesc": "Recibe un resumen semanal de actividades"
+    }
+  },
+  "embed": {
+    "button": {
+      "title": "Generar enlace de inserción",
+      "label": "Insertar",
+      "generating": "Generando..."
+    },
+    "modal": {
+      "title": "Inserción del Panel",
+      "subtitle": "Comparte o inserta esta página",
+      "close": "Cerrar"
+    },
+    "qrCode": {
+      "title": "Código QR",
+      "download": "Descargar Código QR",
+      "scanInfo": "Escanea para acceso directo",
+      "loading": "Generando Código QR..."
+    },
+    "url": {
+      "full": "URL Completa",
+      "short": "URL Corta (para Código QR)",
+      "copy": "Copiar",
+      "copied": "✓"
+    },
+    "iframe": {
+      "title": "Código HTML (Iframe)",
+      "copy": "Copiar"
+    },
+    "features": {
+      "qrCode": {
+        "title": "Código QR",
+        "description": "Acceso rápido desde el móvil"
+      },
+      "url": {
+        "title": "URL",
+        "description": "Compartir directamente"
+      },
+      "iframe": {
+        "title": "Iframe",
+        "description": "Insertar en sitios web"
+      }
+    },
+    "security": {
+      "title": "⚠️ Información de Seguridad",
+      "tokenIncluded": "Token incluido: comparte solo con usuarios autorizados",
+      "shortUrlInfo": "La URL corta facilita el uso compartido y el Código QR",
+      "qrCodeDirect": "El Código QR se abre directamente en el navegador",
+      "realTimeData": "Datos actualizados en tiempo real"
+    },
+    "errors": {
+      "copyFailed": "Error al copiar",
+      "shortenFailed": "Error al acortar la URL"
+    }
+  },
+  "boundaryAccessAnalytics": {
+    "tabs": {
+      "overview": "Resumen",
+      "temporal": "Análisis Temporal",
+      "heatmap": "Heatmap",
+      "anomalies": "Anomalías",
+      "flow": "Flujo & Movimiento",
+      "compliance": "Cumplimiento",
+      "rankings": "Rankings"
+    },
+    "kpis": {
+      "visitsToday": "Visitas Hoy",
+      "hoursToday": "Horas Hoy",
+      "activePeople": "Personas Activas",
+      "alertRate": "Tasa de Alertas",
+      "detectedAnomalies": "Anomalías Detectadas",
+      "averageZScore": "Z-Score Promedio",
+      "extremeAnomalies": "Extremo (>3.0)",
+      "highAnomalies": "Alto (>2.0)",
+      "complianceRate": "Tasa de Cumplimiento",
+      "offHoursVisits": "Visitas Fuera de Horario",
+      "longVisits": "Visitas >4h",
+      "weekendVisits": "Fin de Semana"
+    },
+    "charts": {
+      "topBoundaries": {
+        "title": "Top 10 Límites",
+        "subtitle": "Por duración total (30 días)",
+        "xAxis": "Horas"
+      },
+      "shiftDistribution": {
+        "title": "Distribución por Turno",
+        "subtitle": "Última semana",
+        "morning": "Mañana (6h-12h)",
+        "afternoon": "Tarde (12h-18h)",
+        "night": "Noche (18h-6h)"
+      },
+      "timeSeries": {
+        "title": "Serie Temporal con Medias Móviles",
+        "subtitle": "Duración total por día (últimos 30 días)",
+        "current": "Actual",
+        "ma7d": "MA 7d",
+        "ma30d": "MA 30d",
+        "yAxis": "Horas"
+      },
+      "weeklyTrends": {
+        "title": "Tendencias Semanales (WoW)",
+        "subtitle": "Últimas 8 semanas",
+        "currentWeek": "Semana Actual",
+        "previousWeek": "Semana Anterior",
+        "yAxis": "Horas"
+      },
+      "weeklyPattern": {
+        "title": "Patrón Semanal",
+        "subtitle": "Por día de la semana",
+        "yAxis": "Visitas",
+        "days": ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
+      },
+      "heatmap": {
+        "title": "Heatmap de Actividad",
+        "subtitle": "Hora x Día de la Semana (últimos 30 días)"
+      },
+      "anomalies": {
+        "title": "Anomalías por Z-Score",
+        "subtitle": "Últimos 30 días",
+        "xAxis": "Fecha",
+        "yAxis": "Duración (horas)",
+        "tooltip": {
+          "date": "Fecha",
+          "duration": "Duración",
+          "zScore": "Z-Score"
+        }
+      },
+      "sankey": {
+        "title": "Flujo de Movimiento (Sankey)",
+        "subtitle": "Transiciones entre límites (últimos 7 días)"
+      },
+      "durationBuckets": {
+        "title": "Distribución de Duración",
+        "subtitle": "Grupos de tiempo",
+        "yAxis": "Visitas",
+        "buckets": ["<30min", "30m-2h", "2h-4h", "4h-8h", ">8h"]
+      },
+      "alertRate": {
+        "title": "Tasa de Alertas por Límite",
+        "subtitle": "Últimos 30 días",
+        "xAxis": "%"
+      },
+      "topPeople": {
+        "title": "Top 10 Personas",
+        "subtitle": "Por duración total (30 días)",
+        "xAxis": "Horas (30d)"
+      },
+      "frequency": {
+        "title": "Top 10 por Frecuencia",
+        "subtitle": "Visitas por día",
+        "xAxis": "Visitas/Día"
+      }
+    },
+    "tables": {
+      "realTimeStatus": {
+        "title": "Estado en Tiempo Real",
+        "subtitle": "Personas dentro de límites ahora",
+        "headers": {
+          "person": "Persona",
+          "boundary": "Límite",
+          "entry": "Entrada",
+          "duration": "Duración",
+          "status": "Estado"
+        },
+        "statuses": {
+          "normal": "Normal",
+          "long": "Largo"
+        }
+      },
+      "topAnomalies": {
+        "title": "Top 10 Anomalías",
+        "subtitle": "Ordenado por Z-Score",
+        "headers": {
+          "date": "Fecha",
+          "person": "Persona",
+          "boundary": "Límite",
+          "duration": "Duración",
+          "average": "Promedio",
+          "zScore": "Z-Score",
+          "level": "Nivel"
+        },
+        "levels": {
+          "extreme": "EXTREMO",
+          "high": "ALTO"
+        }
+      },
+      "topTransitions": {
+        "title": "Top 20 Transiciones",
+        "subtitle": "Más frecuentes",
+        "headers": {
+          "from": "De",
+          "to": "A",
+          "transitions": "Transiciones",
+          "avgTime": "Tiempo Promedio",
+          "type": "Tipo"
+        },
+        "types": {
+          "sameGroup": "MISMO GRUPO",
+          "crossGroup": "CRUZAR GRUPO"
+        }
+      },
+      "complianceSummary": {
+        "title": "Resumen de Cumplimiento",
+        "subtitle": "Por límite",
+        "headers": {
+          "boundary": "Límite",
+          "visits": "Visitas",
+          "alertRate": "Tasa Alertas",
+          "offHours": "Fuera Horario",
+          "weekend": "Fin Semana",
+          "status": "Estado"
+        },
+        "statuses": {
+          "ok": "OK",
+          "warning": "Atención"
+        }
+      },
+      "detailedRanking": {
+        "title": "Ranking Detallado",
+        "subtitle": "Últimos 30 días",
+        "headers": {
+          "rank": "#",
+          "person": "Persona",
+          "mainBoundary": "Límite Principal",
+          "duration": "Duración (30d)",
+          "visits": "Visitas",
+          "activeDays": "Días Activos",
+          "avgPerVisit": "Promedio/Visita"
+        }
+      }
+    },
+    "buttons": {
+      "days30": "30 días",
+      "days7": "7 días",
+      "days90": "90 días"
+    },
+    "filters": {
+      "allBoundaries": "Todos los Límites",
+      "zoneA": "Zona A",
+      "zoneB": "Zona B",
+      "zoneC": "Zona C"
+    },
+    "labels": {
+      "hours": "h",
+      "percentage": "%",
+      "minutes": "min"
     }
   }
 }

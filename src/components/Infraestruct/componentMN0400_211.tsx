@@ -3204,7 +3204,7 @@ export default function DeviceLogsView() {
             <button
               onClick={handleManualRefresh}
               disabled={refreshing}
-              className="flex items-center justify-center gap-2 px-2 py-2 mt-8 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+              className="cursor-pointer flex items-center justify-center gap-2 px-2 py-2 mt-8 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
             >
               <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               {refreshing ? t('deviceLogs.refreshing') : t('deviceLogs.refresh')}
@@ -3224,9 +3224,9 @@ export default function DeviceLogsView() {
             { id: 'events', label: t('deviceLogs.tabs.events'), icon: ShieldExclamationIcon },
             { id: 'network', label: t('deviceLogs.tabs.network'), icon: SignalIcon },
             // { id: 'customers', label: t('deviceLogs.tabs.customers'), icon: MapPinIcon },
-              ...(location.pathname === '/MN0400_211' ? [
-      { id: 'rawdata', label: t('deviceLogs.tabs.rawData'), icon: DocumentChartBarIcon }
-    ] : [])
+            ...(location.pathname === '/MN0400_211' ? [
+              { id: 'rawdata', label: t('deviceLogs.tabs.rawData'), icon: DocumentChartBarIcon }
+            ] : [])
           ].map((tab) => (
             <button
               key={tab.id}
@@ -3266,6 +3266,7 @@ export default function DeviceLogsView() {
       {/* ✅ TAB OVERVIEW COM KPIs ATUALIZADOS */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
+
           {/* ✨ CARDS DE EQUIPAMENTOS */}
           {dashboardCards?.equipment_cards && (
             <div className="space-y-4">
@@ -4274,7 +4275,7 @@ export default function DeviceLogsView() {
           </div>
         </div>
       )}
-        
+
       {activeTab === 'rawdata' && (
         <RawDataExplorer />
       )}

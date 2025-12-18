@@ -1,4 +1,3 @@
-//src/components/Infraestruct/componentMN0400_133.tsx
 import { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import {
@@ -12,6 +11,7 @@ import {
   ArrowUpIcon,
   ArrowDownIcon
 } from '@heroicons/react/24/outline';
+import { t } from 'i18next';
 
 export default function BoundaryAccessAnalytics() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -84,7 +84,7 @@ export default function BoundaryAccessAnalytics() {
   const generateHeatmapData = () => {
     const data: any[] = [];
     const hours = Array.from({length: 24}, (_, i) => i);
-    const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const days = t('boundaryAccessAnalytics.charts.weeklyPattern.days', { returnObjects: true }) as string[];
     
     //@ts-ignore
     days.forEach((day: string, dayIdx) => {
@@ -129,7 +129,7 @@ export default function BoundaryAccessAnalytics() {
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 120, right: 50, top: 20, bottom: 50 },
-      xAxis: { type: 'value', name: 'Horas' },
+      xAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.topBoundaries.xAxis') },
       yAxis: {
         type: 'category',
         data: ['Zona J', 'Zona I', 'Zona H', 'Zona G', 'Zona F', 'Zona E', 'Zona D', 'Zona C', 'Zona B', 'Zona A']
@@ -143,7 +143,7 @@ export default function BoundaryAccessAnalytics() {
             { offset: 1, color: '#FF6B35' }
           ])
         },
-        label: { show: true, position: 'right', formatter: '{c}h' }
+        label: { show: true, position: 'right', formatter: '{c}' + t('boundaryAccessAnalytics.labels.hours') }
       }]
     };
     chart.setOption(option);
@@ -162,9 +162,9 @@ export default function BoundaryAccessAnalytics() {
         itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
         label: { show: true, formatter: '{b}: {d}%' },
         data: [
-          { value: 45, name: 'Manhã (6h-12h)', itemStyle: { color: '#0F4C81' } },
-          { value: 42, name: 'Tarde (12h-18h)', itemStyle: { color: '#FF6B35' } },
-          { value: 13, name: 'Noite (18h-6h)', itemStyle: { color: '#64748B' } }
+          { value: 45, name: t('boundaryAccessAnalytics.charts.shiftDistribution.morning'), itemStyle: { color: '#0F4C81' } },
+          { value: 42, name: t('boundaryAccessAnalytics.charts.shiftDistribution.afternoon'), itemStyle: { color: '#FF6B35' } },
+          { value: 13, name: t('boundaryAccessAnalytics.charts.shiftDistribution.night'), itemStyle: { color: '#64748B' } }
         ]
       }]
     };
@@ -178,20 +178,27 @@ export default function BoundaryAccessAnalytics() {
     
     const option = {
       tooltip: { trigger: 'axis' },
-      legend: { bottom: 10, data: ['Atual', 'MA 7d', 'MA 30d'] },
+      legend: { 
+        bottom: 10, 
+        data: [
+          t('boundaryAccessAnalytics.charts.timeSeries.current'), 
+          t('boundaryAccessAnalytics.charts.timeSeries.ma7d'), 
+          t('boundaryAccessAnalytics.charts.timeSeries.ma30d')
+        ] 
+      },
       grid: { left: 80, right: 80, top: 50, bottom: 80 },
       xAxis: { type: 'category', data: dates, boundaryGap: false },
-      yAxis: { type: 'value', name: 'Horas' },
+      yAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.timeSeries.yAxis') },
       series: [
         {
-          name: 'Atual',
+          name: t('boundaryAccessAnalytics.charts.timeSeries.current'),
           type: 'line',
           data: data,
           itemStyle: { color: '#0F4C81' },
           areaStyle: { opacity: 0.2 }
         },
         {
-          name: 'MA 7d',
+          name: t('boundaryAccessAnalytics.charts.timeSeries.ma7d'),
           type: 'line',
           data: ma7,
           smooth: true,
@@ -199,7 +206,7 @@ export default function BoundaryAccessAnalytics() {
           itemStyle: { color: '#FF6B35' }
         },
         {
-          name: 'MA 30d',
+          name: t('boundaryAccessAnalytics.charts.timeSeries.ma30d'),
           type: 'line',
           data: ma30,
           smooth: true,
@@ -216,19 +223,25 @@ export default function BoundaryAccessAnalytics() {
     const chart = echarts.init(chartRefs.weeklyTrends.current);
     const option = {
       tooltip: { trigger: 'axis' },
-      legend: { bottom: 10 },
+      legend: { 
+        bottom: 10,
+        data: [
+          t('boundaryAccessAnalytics.charts.weeklyTrends.currentWeek'),
+          t('boundaryAccessAnalytics.charts.weeklyTrends.previousWeek')
+        ]
+      },
       grid: { left: 80, right: 80, top: 20, bottom: 80 },
       xAxis: { type: 'category', data: ['S45', 'S46', 'S47', 'S48', 'S49', 'S50', 'S51', 'S52'] },
-      yAxis: { type: 'value', name: 'Horas' },
+      yAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.weeklyTrends.yAxis') },
       series: [
         {
-          name: 'Semana Atual',
+          name: t('boundaryAccessAnalytics.charts.weeklyTrends.currentWeek'),
           type: 'bar',
           data: [3200, 3450, 3100, 3580, 3320, 3690, 3420, 3750],
           itemStyle: { color: '#0F4C81' }
         },
         {
-          name: 'Semana Anterior',
+          name: t('boundaryAccessAnalytics.charts.weeklyTrends.previousWeek'),
           type: 'bar',
           data: [3100, 3250, 3300, 3400, 3200, 3500, 3300, 3420],
           itemStyle: { color: '#E2E8F0' }
@@ -241,11 +254,13 @@ export default function BoundaryAccessAnalytics() {
   const initWeeklyPatternChart = () => {
     if (!chartRefs.weeklyPattern.current) return;
     const chart = echarts.init(chartRefs.weeklyPattern.current);
+    const days = t('boundaryAccessAnalytics.charts.weeklyPattern.days', { returnObjects: true }) as string[];
+    
     const option = {
       tooltip: { trigger: 'axis' },
       grid: { left: 80, right: 80, top: 20, bottom: 80 },
-      xAxis: { type: 'category', data: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] },
-      yAxis: { type: 'value', name: 'Visitas' },
+      xAxis: { type: 'category', data: days },
+      yAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.weeklyPattern.yAxis') },
       series: [{
         type: 'line',
         data: [120, 842, 856, 823, 891, 867, 245],
@@ -266,6 +281,7 @@ export default function BoundaryAccessAnalytics() {
     if (!chartRefs.heatmap.current) return;
     const chart = echarts.init(chartRefs.heatmap.current);
     const data = generateHeatmapData();
+    const days = t('boundaryAccessAnalytics.charts.weeklyPattern.days', { returnObjects: true }) as string[];
     
     const option = {
       tooltip: { position: 'top' },
@@ -277,7 +293,7 @@ export default function BoundaryAccessAnalytics() {
       },
       yAxis: {
         type: 'category',
-        data: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+        data: days,
         splitArea: { show: true }
       },
       visualMap: {
@@ -320,12 +336,12 @@ export default function BoundaryAccessAnalytics() {
       tooltip: {
         trigger: 'item',
         formatter: (params: any) => {
-          return `Data: ${params.value[0]}<br/>Duração: ${params.value[1].toFixed(1)}h<br/>Z-Score: ${params.value[2].toFixed(1)}`;
+          return `${t('boundaryAccessAnalytics.charts.anomalies.tooltip.date')}: ${params.value[0]}<br/>${t('boundaryAccessAnalytics.charts.anomalies.tooltip.duration')}: ${params.value[1].toFixed(1)}h<br/>${t('boundaryAccessAnalytics.charts.anomalies.tooltip.zScore')}: ${params.value[2].toFixed(1)}`;
         }
       },
       grid: { left: 80, right: 80, top: 50, bottom: 80 },
-      xAxis: { type: 'category', name: 'Data' },
-      yAxis: { type: 'value', name: 'Duração (horas)' },
+      xAxis: { type: 'category', name: t('boundaryAccessAnalytics.charts.anomalies.xAxis') },
+      yAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.anomalies.yAxis') },
       visualMap: {
         min: 1.5,
         max: 4,
@@ -387,11 +403,13 @@ export default function BoundaryAccessAnalytics() {
   const initDurationBucketsChart = () => {
     if (!chartRefs.durationBuckets.current) return;
     const chart = echarts.init(chartRefs.durationBuckets.current);
+    const buckets = t('boundaryAccessAnalytics.charts.durationBuckets.buckets', { returnObjects: true }) as string[];
+    
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 80, right: 50, top: 20, bottom: 80 },
-      xAxis: { type: 'category', data: ['<30min', '30m-2h', '2h-4h', '4h-8h', '>8h'] },
-      yAxis: { type: 'value', name: 'Visitas' },
+      xAxis: { type: 'category', data: buckets },
+      yAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.durationBuckets.yAxis') },
       series: [{
         type: 'bar',
         data: [234, 567, 389, 142, 45],
@@ -413,7 +431,7 @@ export default function BoundaryAccessAnalytics() {
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 120, right: 50, top: 20, bottom: 50 },
-      xAxis: { type: 'value', name: '%', max: 10 },
+      xAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.alertRate.xAxis'), max: 10 },
       yAxis: { type: 'category', data: ['Zona E', 'Zona D', 'Zona C', 'Zona B', 'Zona A'] },
       series: [{
         type: 'bar',
@@ -423,7 +441,7 @@ export default function BoundaryAccessAnalytics() {
             return params.value > 5 ? '#EF4444' : params.value > 3 ? '#F59E0B' : '#10B981';
           }
         },
-        label: { show: true, position: 'right', formatter: '{c}%' }
+        label: { show: true, position: 'right', formatter: '{c}' + t('boundaryAccessAnalytics.labels.percentage') }
       }]
     };
     chart.setOption(option);
@@ -435,7 +453,7 @@ export default function BoundaryAccessAnalytics() {
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 120, right: 50, top: 20, bottom: 50 },
-      xAxis: { type: 'value', name: 'Horas (30d)' },
+      xAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.topPeople.xAxis') },
       yAxis: {
         type: 'category',
         data: ['P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1']
@@ -460,7 +478,7 @@ export default function BoundaryAccessAnalytics() {
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 120, right: 50, top: 20, bottom: 50 },
-      xAxis: { type: 'value', name: 'Visitas/Dia' },
+      xAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.frequency.xAxis') },
       yAxis: {
         type: 'category',
         data: ['P10', 'P9', 'P8', 'P7', 'P6', 'P5', 'P4', 'P3', 'P2', 'P1']
@@ -475,13 +493,13 @@ export default function BoundaryAccessAnalytics() {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: ChartBarIcon },
-    { id: 'temporal', label: 'Análise Temporal', icon: ClockIcon },
-    { id: 'heatmap', label: 'Heatmap', icon: FireIcon },
-    { id: 'anomalies', label: 'Anomalias', icon: ExclamationTriangleIcon },
-    { id: 'flow', label: 'Fluxo & Movimento', icon: ArrowPathIcon },
-    { id: 'compliance', label: 'Compliance', icon: ShieldCheckIcon },
-    { id: 'rankings', label: 'Rankings', icon: TrophyIcon }
+    { id: 'overview', label: t('boundaryAccessAnalytics.tabs.overview'), icon: ChartBarIcon },
+    { id: 'temporal', label: t('boundaryAccessAnalytics.tabs.temporal'), icon: ClockIcon },
+    { id: 'heatmap', label: t('boundaryAccessAnalytics.tabs.heatmap'), icon: FireIcon },
+    { id: 'anomalies', label: t('boundaryAccessAnalytics.tabs.anomalies'), icon: ExclamationTriangleIcon },
+    { id: 'flow', label: t('boundaryAccessAnalytics.tabs.flow'), icon: ArrowPathIcon },
+    { id: 'compliance', label: t('boundaryAccessAnalytics.tabs.compliance'), icon: ShieldCheckIcon },
+    { id: 'rankings', label: t('boundaryAccessAnalytics.tabs.rankings'), icon: TrophyIcon }
   ];
 
   return (
@@ -498,7 +516,7 @@ export default function BoundaryAccessAnalytics() {
         }
       `}</style>
 
-      {/* Navigation Tabs - Agora rola com a página */}
+      {/* Navigation Tabs */}
       <nav className="bg-white border-b-2 border-[#E2E8F0] px-8 shadow-sm">
         <div className="max-w-[1400px] mx-auto">
           <div className="flex gap-2 overflow-x-auto">
@@ -535,7 +553,7 @@ export default function BoundaryAccessAnalytics() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Visitas Hoje</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.visitsToday')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">1,247</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded text-sm font-mono">
                   <ArrowUpIcon className="w-3 h-3" />
@@ -545,7 +563,7 @@ export default function BoundaryAccessAnalytics() {
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Horas Hoje</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.hoursToday')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">3,892</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded text-sm font-mono">
                   <ArrowUpIcon className="w-3 h-3" />
@@ -555,7 +573,7 @@ export default function BoundaryAccessAnalytics() {
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Pessoas Ativas</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.activePeople')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">342</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded text-sm font-mono">
                   <ArrowDownIcon className="w-3 h-3" />
@@ -565,7 +583,7 @@ export default function BoundaryAccessAnalytics() {
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Taxa de Alertas</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.alertRate')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">4.2%</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded text-sm font-mono">
                   <ArrowDownIcon className="w-3 h-3" />
@@ -579,8 +597,8 @@ export default function BoundaryAccessAnalytics() {
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div>
-                    <div className="text-xl font-bold text-[#1A2332]">Top 10 Boundaries</div>
-                    <div className="text-sm text-[#64748B] mt-1">Por duração total (30 dias)</div>
+                    <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.topBoundaries.title')}</div>
+                    <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.topBoundaries.subtitle')}</div>
                   </div>
                 </div>
                 <div ref={chartRefs.topBoundaries} className="w-full h-[400px]"></div>
@@ -589,8 +607,8 @@ export default function BoundaryAccessAnalytics() {
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div>
-                    <div className="text-xl font-bold text-[#1A2332]">Distribuição por Turno</div>
-                    <div className="text-sm text-[#64748B] mt-1">Última semana</div>
+                    <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.shiftDistribution.title')}</div>
+                    <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.shiftDistribution.subtitle')}</div>
                   </div>
                 </div>
                 <div ref={chartRefs.shiftDistribution} className="w-full h-[400px]"></div>
@@ -601,19 +619,19 @@ export default function BoundaryAccessAnalytics() {
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
-                  <div className="text-xl font-bold text-[#1A2332]">Status em Tempo Real</div>
-                  <div className="text-sm text-[#64748B] mt-1">Pessoas dentro de boundaries agora</div>
+                  <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.tables.realTimeStatus.title')}</div>
+                  <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.tables.realTimeStatus.subtitle')}</div>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-[#F5F7FA]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Pessoa</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Boundary</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Entrada</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Duração</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.realTimeStatus.headers.person')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.realTimeStatus.headers.boundary')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.realTimeStatus.headers.entry')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.realTimeStatus.headers.duration')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.realTimeStatus.headers.status')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -623,7 +641,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">13:45</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">2h 15min</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">Normal</span>
+                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.normal')}</span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#0F4C81]/5 transition-colors">
@@ -632,7 +650,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">14:20</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">1h 40min</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">Normal</span>
+                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.normal')}</span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#0F4C81]/5 transition-colors">
@@ -641,7 +659,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">10:30</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">5h 30min</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">Longo</span>
+                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.long')}</span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#0F4C81]/5 transition-colors">
@@ -650,7 +668,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">15:10</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">50min</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">Normal</span>
+                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.normal')}</span>
                       </td>
                     </tr>
                   </tbody>
@@ -666,13 +684,13 @@ export default function BoundaryAccessAnalytics() {
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
-                  <div className="text-xl font-bold text-[#1A2332]">Time Series com Médias Móveis</div>
-                  <div className="text-sm text-[#64748B] mt-1">Duração total por dia (últimos 30 dias)</div>
+                  <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.timeSeries.title')}</div>
+                  <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.timeSeries.subtitle')}</div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-[#0F4C81] text-white border border-[#0F4C81] rounded-lg text-sm font-semibold">30 dias</button>
-                  <button className="px-4 py-2 bg-white border border-[#E2E8F0] rounded-lg text-sm font-semibold hover:border-[#0F4C81] hover:text-[#0F4C81]">7 dias</button>
-                  <button className="px-4 py-2 bg-white border border-[#E2E8F0] rounded-lg text-sm font-semibold hover:border-[#0F4C81] hover:text-[#0F4C81]">90 dias</button>
+                  <button className="px-4 py-2 bg-[#0F4C81] text-white border border-[#0F4C81] rounded-lg text-sm font-semibold">{t('boundaryAccessAnalytics.buttons.days30')}</button>
+                  <button className="px-4 py-2 bg-white border border-[#E2E8F0] rounded-lg text-sm font-semibold hover:border-[#0F4C81] hover:text-[#0F4C81]">{t('boundaryAccessAnalytics.buttons.days7')}</button>
+                  <button className="px-4 py-2 bg-white border border-[#E2E8F0] rounded-lg text-sm font-semibold hover:border-[#0F4C81] hover:text-[#0F4C81]">{t('boundaryAccessAnalytics.buttons.days90')}</button>
                 </div>
               </div>
               <div ref={chartRefs.timeseries} className="w-full h-[500px]"></div>
@@ -682,8 +700,8 @@ export default function BoundaryAccessAnalytics() {
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div>
-                    <div className="text-xl font-bold text-[#1A2332]">Tendências Semanais (WoW)</div>
-                    <div className="text-sm text-[#64748B] mt-1">Últimas 8 semanas</div>
+                    <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.weeklyTrends.title')}</div>
+                    <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.weeklyTrends.subtitle')}</div>
                   </div>
                 </div>
                 <div ref={chartRefs.weeklyTrends} className="w-full h-[400px]"></div>
@@ -692,8 +710,8 @@ export default function BoundaryAccessAnalytics() {
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div>
-                    <div className="text-xl font-bold text-[#1A2332]">Padrão Semanal</div>
-                    <div className="text-sm text-[#64748B] mt-1">Por dia da semana</div>
+                    <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.weeklyPattern.title')}</div>
+                    <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.weeklyPattern.subtitle')}</div>
                   </div>
                 </div>
                 <div ref={chartRefs.weeklyPattern} className="w-full h-[400px]"></div>
@@ -708,14 +726,14 @@ export default function BoundaryAccessAnalytics() {
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
-                  <div className="text-xl font-bold text-[#1A2332]">Heatmap de Atividade</div>
-                  <div className="text-sm text-[#64748B] mt-1">Hora x Dia da Semana (últimos 30 dias)</div>
+                  <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.heatmap.title')}</div>
+                  <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.heatmap.subtitle')}</div>
                 </div>
                 <select className="px-4 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold">
-                  <option>Todas as Boundaries</option>
-                  <option>Zona A</option>
-                  <option>Zona B</option>
-                  <option>Zona C</option>
+                  <option>{t('boundaryAccessAnalytics.filters.allBoundaries')}</option>
+                  <option>{t('boundaryAccessAnalytics.filters.zoneA')}</option>
+                  <option>{t('boundaryAccessAnalytics.filters.zoneB')}</option>
+                  <option>{t('boundaryAccessAnalytics.filters.zoneC')}</option>
                 </select>
               </div>
               <div ref={chartRefs.heatmap} className="w-full h-[500px]"></div>
@@ -729,7 +747,7 @@ export default function BoundaryAccessAnalytics() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Anomalias Detectadas</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.detectedAnomalies')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">23</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded text-sm font-mono">
                   <ArrowUpIcon className="w-3 h-3" />
@@ -739,7 +757,7 @@ export default function BoundaryAccessAnalytics() {
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Z-Score Médio</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.averageZScore')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">2.8</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-600 rounded text-sm font-mono">
                   <ArrowUpIcon className="w-3 h-3" />
@@ -749,7 +767,7 @@ export default function BoundaryAccessAnalytics() {
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Extreme ({'>'}3.0)</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.extremeAnomalies')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">7</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded text-sm font-mono">
                   <ArrowUpIcon className="w-3 h-3" />
@@ -759,7 +777,7 @@ export default function BoundaryAccessAnalytics() {
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">High ({'>'}2.0)</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.highAnomalies')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">16</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-600 rounded text-sm font-mono">
                   <ArrowUpIcon className="w-3 h-3" />
@@ -771,8 +789,8 @@ export default function BoundaryAccessAnalytics() {
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
-                  <div className="text-xl font-bold text-[#1A2332]">Anomalias por Z-Score</div>
-                  <div className="text-sm text-[#64748B] mt-1">Últimos 30 dias</div>
+                  <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.anomalies.title')}</div>
+                  <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.anomalies.subtitle')}</div>
                 </div>
               </div>
               <div ref={chartRefs.anomalies} className="w-full h-[500px]"></div>
@@ -781,21 +799,21 @@ export default function BoundaryAccessAnalytics() {
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
-                  <div className="text-xl font-bold text-[#1A2332]">Top 10 Anomalias</div>
-                  <div className="text-sm text-[#64748B] mt-1">Ordenado por Z-Score</div>
+                  <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.tables.topAnomalies.title')}</div>
+                  <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.tables.topAnomalies.subtitle')}</div>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-[#F5F7FA]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Data</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Pessoa</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Boundary</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Duração</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Média</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Z-Score</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Nível</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topAnomalies.headers.date')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topAnomalies.headers.person')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topAnomalies.headers.boundary')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topAnomalies.headers.duration')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topAnomalies.headers.average')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topAnomalies.headers.zScore')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topAnomalies.headers.level')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -807,7 +825,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">2.3h</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">3.8</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-red-100 text-red-600 rounded-xl text-xs font-semibold uppercase tracking-wide">EXTREME</span>
+                        <span className="inline-block px-3 py-1 bg-red-100 text-red-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.topAnomalies.levels.extreme')}</span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#0F4C81]/5 transition-colors">
@@ -818,7 +836,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">3.1h</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">3.2</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-red-100 text-red-600 rounded-xl text-xs font-semibold uppercase tracking-wide">EXTREME</span>
+                        <span className="inline-block px-3 py-1 bg-red-100 text-red-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.topAnomalies.levels.extreme')}</span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#0F4C81]/5 transition-colors">
@@ -829,7 +847,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">2.8h</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">2.9</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">HIGH</span>
+                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.topAnomalies.levels.high')}</span>
                       </td>
                     </tr>
                   </tbody>
@@ -845,8 +863,8 @@ export default function BoundaryAccessAnalytics() {
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
-                  <div className="text-xl font-bold text-[#1A2332]">Fluxo de Movimento (Sankey)</div>
-                  <div className="text-sm text-[#64748B] mt-1">Transições entre boundaries (últimos 7 dias)</div>
+                  <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.sankey.title')}</div>
+                  <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.sankey.subtitle')}</div>
                 </div>
               </div>
               <div ref={chartRefs.sankey} className="w-full h-[500px]"></div>
@@ -855,19 +873,19 @@ export default function BoundaryAccessAnalytics() {
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
-                  <div className="text-xl font-bold text-[#1A2332]">Top 20 Transições</div>
-                  <div className="text-sm text-[#64748B] mt-1">Mais frequentes</div>
+                  <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.tables.topTransitions.title')}</div>
+                  <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.tables.topTransitions.subtitle')}</div>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-[#F5F7FA]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">De</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Para</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Transições</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Tempo Médio</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Tipo</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topTransitions.headers.from')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topTransitions.headers.to')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topTransitions.headers.transitions')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topTransitions.headers.avgTime')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.topTransitions.headers.type')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -875,27 +893,27 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">Zona A</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">Zona B</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">142</td>
-                      <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">8.5 min</td>
+                      <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">8.5 {t('boundaryAccessAnalytics.labels.minutes')}</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-xl text-xs font-semibold uppercase tracking-wide">SAME GROUP</span>
+                        <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.topTransitions.types.sameGroup')}</span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#0F4C81]/5 transition-colors">
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">Zona B</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">Zona C</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">98</td>
-                      <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">12.3 min</td>
+                      <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">12.3 {t('boundaryAccessAnalytics.labels.minutes')}</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">CROSS GROUP</span>
+                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.topTransitions.types.crossGroup')}</span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#0F4C81]/5 transition-colors">
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">Zona C</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">Zona A</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">67</td>
-                      <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">15.7 min</td>
+                      <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">15.7 {t('boundaryAccessAnalytics.labels.minutes')}</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">CROSS GROUP</span>
+                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.topTransitions.types.crossGroup')}</span>
                       </td>
                     </tr>
                   </tbody>
@@ -911,7 +929,7 @@ export default function BoundaryAccessAnalytics() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Taxa de Conformidade</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.complianceRate')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">94.2%</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded text-sm font-mono">
                   <ArrowUpIcon className="w-3 h-3" />
@@ -921,7 +939,7 @@ export default function BoundaryAccessAnalytics() {
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Visitas Fora de Horário</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.offHoursVisits')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">8.3%</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded text-sm font-mono">
                   <ArrowUpIcon className="w-3 h-3" />
@@ -931,7 +949,7 @@ export default function BoundaryAccessAnalytics() {
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Visitas {'>'}4h</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.longVisits')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">12.1%</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded text-sm font-mono">
                   <ArrowUpIcon className="w-3 h-3" />
@@ -941,7 +959,7 @@ export default function BoundaryAccessAnalytics() {
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">Fim de Semana</div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">{t('boundaryAccessAnalytics.kpis.weekendVisits')}</div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">3.7%</div>
                 <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-600 rounded text-sm font-mono">
                   <ArrowDownIcon className="w-3 h-3" />
@@ -954,8 +972,8 @@ export default function BoundaryAccessAnalytics() {
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div>
-                    <div className="text-xl font-bold text-[#1A2332]">Distribuição de Duração</div>
-                    <div className="text-sm text-[#64748B] mt-1">Buckets de tempo</div>
+                    <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.durationBuckets.title')}</div>
+                    <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.durationBuckets.subtitle')}</div>
                   </div>
                 </div>
                 <div ref={chartRefs.durationBuckets} className="w-full h-[400px]"></div>
@@ -964,8 +982,8 @@ export default function BoundaryAccessAnalytics() {
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div>
-                    <div className="text-xl font-bold text-[#1A2332]">Taxa de Alertas por Boundary</div>
-                    <div className="text-sm text-[#64748B] mt-1">Últimos 30 dias</div>
+                    <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.alertRate.title')}</div>
+                    <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.alertRate.subtitle')}</div>
                   </div>
                 </div>
                 <div ref={chartRefs.alertRate} className="w-full h-[400px]"></div>
@@ -975,20 +993,20 @@ export default function BoundaryAccessAnalytics() {
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
-                  <div className="text-xl font-bold text-[#1A2332]">Resumo de Compliance</div>
-                  <div className="text-sm text-[#64748B] mt-1">Por boundary</div>
+                  <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.tables.complianceSummary.title')}</div>
+                  <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.tables.complianceSummary.subtitle')}</div>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-[#F5F7FA]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Boundary</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Visitas</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Taxa Alertas</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Fora Horário</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Fim Semana</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.complianceSummary.headers.boundary')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.complianceSummary.headers.visits')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.complianceSummary.headers.alertRate')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.complianceSummary.headers.offHours')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.complianceSummary.headers.weekend')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.complianceSummary.headers.status')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -999,7 +1017,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">5.8%</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">2.1%</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">OK</span>
+                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.complianceSummary.statuses.ok')}</span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#0F4C81]/5 transition-colors">
@@ -1009,7 +1027,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">12.3%</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">4.8%</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">Atenção</span>
+                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.complianceSummary.statuses.warning')}</span>
                       </td>
                     </tr>
                     <tr className="hover:bg-[#0F4C81]/5 transition-colors">
@@ -1019,7 +1037,7 @@ export default function BoundaryAccessAnalytics() {
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">6.1%</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">3.2%</td>
                       <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">OK</span>
+                        <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-xl text-xs font-semibold uppercase tracking-wide">{t('boundaryAccessAnalytics.tables.complianceSummary.statuses.ok')}</span>
                       </td>
                     </tr>
                   </tbody>
@@ -1036,8 +1054,8 @@ export default function BoundaryAccessAnalytics() {
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div>
-                    <div className="text-xl font-bold text-[#1A2332]">Top 10 Pessoas</div>
-                    <div className="text-sm text-[#64748B] mt-1">Por duração total (30 dias)</div>
+                    <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.topPeople.title')}</div>
+                    <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.topPeople.subtitle')}</div>
                   </div>
                 </div>
                 <div ref={chartRefs.topPeople} className="w-full h-[400px]"></div>
@@ -1046,8 +1064,8 @@ export default function BoundaryAccessAnalytics() {
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div>
-                    <div className="text-xl font-bold text-[#1A2332]">Top 10 por Frequência</div>
-                    <div className="text-sm text-[#64748B] mt-1">Visitas por dia</div>
+                    <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.charts.frequency.title')}</div>
+                    <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.charts.frequency.subtitle')}</div>
                   </div>
                 </div>
                 <div ref={chartRefs.frequency} className="w-full h-[400px]"></div>
@@ -1057,21 +1075,21 @@ export default function BoundaryAccessAnalytics() {
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
-                  <div className="text-xl font-bold text-[#1A2332]">Ranking Detalhado</div>
-                  <div className="text-sm text-[#64748B] mt-1">Últimos 30 dias</div>
+                  <div className="text-xl font-bold text-[#1A2332]">{t('boundaryAccessAnalytics.tables.detailedRanking.title')}</div>
+                  <div className="text-sm text-[#64748B] mt-1">{t('boundaryAccessAnalytics.tables.detailedRanking.subtitle')}</div>
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-[#F5F7FA]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">#</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Pessoa</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Boundary Principal</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Duração (30d)</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Visitas</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Dias Ativos</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">Média/Visita</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.detailedRanking.headers.rank')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.detailedRanking.headers.person')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.detailedRanking.headers.mainBoundary')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.detailedRanking.headers.duration')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.detailedRanking.headers.visits')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.detailedRanking.headers.activeDays')}</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">{t('boundaryAccessAnalytics.tables.detailedRanking.headers.avgPerVisit')}</th>
                     </tr>
                   </thead>
                   <tbody>
