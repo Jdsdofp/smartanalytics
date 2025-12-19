@@ -1293,7 +1293,7 @@ const DetailsModal = ({ device, isOpen, onClose }: DetailsModalProps) => {
                   )}
 
                   {activeDetailsTab === 'route' && (
-                    <div className="space-y-4">
+                    <div className="space-y-4" >
                       {deviceDetails?.route24h && deviceDetails.route24h.length > 0 ? (
                         <>
                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -3269,7 +3269,7 @@ export default function DeviceLogsView() {
 
           {/* ✨ CARDS DE EQUIPAMENTOS */}
           {dashboardCards?.equipment_cards && (
-            <div className="space-y-4">
+            <div className="space-y-4" data-export="equipment-cards">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg">
                   <DevicePhoneMobileIcon className="h-6 w-6 text-white" />
