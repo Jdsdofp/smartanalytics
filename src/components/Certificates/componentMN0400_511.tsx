@@ -1546,7 +1546,7 @@ export default function PredictiveCertificateAnalysis() {
 
       {/* TABS */}
       <div className="mb-6">
-        <div className="border-b border-slate-200">
+        <div className="border-b border-slate-200 overflow-x-auto">
           <nav className="flex space-x-8">
             {tabs.map(tab => (
               <button
