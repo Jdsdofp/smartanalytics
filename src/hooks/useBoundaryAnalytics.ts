@@ -1,7 +1,7 @@
 // src/hooks/useBoundaryAnalytics.ts
 import { useState, useEffect } from 'react';
 // https://apinode.smartxhub.cloud
-const API_BASE_URL = 'http://localhost:4000/api/dashboard/boundary'; // Altere para a URL correta da sua API
+const API_BASE_URL = 'https://apinode.smartxhub.cloud/api/dashboard/boundary'; // Altere para a URL correta da sua API
 // const baseURL = '/api/dashboard/boundary';
 
 interface DashboardKPIs {
