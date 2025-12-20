@@ -1,4 +1,7 @@
 // src/components/Map/GPSMapViewer.tsx
+
+// Adicione estas importações no início do arquivo
+import { GeoJSON as LeafletGeoJSON } from 'react-leaflet';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -318,6 +321,20 @@ interface GPSStats {
   max_accuracy: number | string | null;
 }
 
+// Adicione esta interface após as outras interfaces
+interface Zone {
+  id: number;
+  company_id: number;
+  group_name: string;
+  boundary_name: string;
+  code: string;
+  active: boolean;
+  date_start: string;
+  date_end: string;
+  notes: string;
+  geojson_data: any;
+}
+
 // =====================================
 // 🗺️ COMPONENTES AUXILIARES DO MAPA
 // =====================================
@@ -392,6 +409,14 @@ const GPSMapViewer = () => {
 
   const playIntervalRef = useRef<any | null>(null);
 
+
+  // 🆕 ESTADOS PARA ZONES
+  const [zones, setZones] = useState<Zone[]>([]);
+  const [showZones, setShowZones] = useState(true);
+  const [zonesError, setZonesError] = useState<string | null>(null);
+
+  const [loadingZones, setLoadingZones] = useState(false);
+
   // =====================================
   // 🔍 FUNÇÃO AUXILIAR PARA BUSCA
   // =====================================
@@ -401,9 +426,9 @@ const GPSMapViewer = () => {
 
   const filterDevicesBySearch = (devices: DeviceInfo[], search: string): DeviceInfo[] => {
     if (!search) return devices;
-    
+
     const searchLower = search.toLowerCase();
-    return devices.filter(device => 
+    return devices.filter(device =>
       device.person_code.toLowerCase().includes(searchLower) ||
       device.person_name.toLowerCase().includes(searchLower)
     );
@@ -423,7 +448,7 @@ const GPSMapViewer = () => {
       const day = String(date.getDate()).padStart(2, '0');
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
-      
+
       return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
@@ -550,6 +575,114 @@ const GPSMapViewer = () => {
     }
   };
 
+
+  // 🆕 FUNÇÃO PARA BUSCAR ZONES
+  // src/components/Map/GPSMapViewer.tsx
+
+  // 🆕 FUNÇÃO PARA BUSCAR ZONES COM MAIS LOGS
+  const fetchZones = useCallback(async () => {
+    console.log('🔄 [GPSMapViewer] Iniciando fetchZones...');
+    console.log('🔄 [GPSMapViewer] CompanyId:', companyId);
+
+    setLoadingZones(true);
+    setZonesError(null); // Limpar erro anterior
+
+
+    try {
+      const url = `https://apinode.smartxhub.cloud/api/dashboard/devices/${companyId}/zones/active`;
+      console.log('🔄 [GPSMapViewer] Fazendo fetch para:', url);
+
+      const response = await fetch(url);
+
+      console.log('📡 [GPSMapViewer] Response status:', response.status);
+      console.log('📡 [GPSMapViewer] Response ok:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ [GPSMapViewer] Response error:', errorText);
+        throw new Error(`Falha ao carregar zonas: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('📦 [GPSMapViewer] Result:', result);
+
+      if (result.success && Array.isArray(result.data)) {
+        console.log('✅ [GPSMapViewer] Zones carregadas:', result.data.length);
+
+        if (result.data.length > 0) {
+          console.log('📊 [GPSMapViewer] Primeira zone:', result.data[0]);
+          console.log('📊 [GPSMapViewer] GeoJSON da primeira zone:', result.data[0]?.geojson_data);
+        }
+
+        setZones(result.data);
+      } else {
+        console.warn('⚠️ [GPSMapViewer] Resposta inválida:', result);
+      }
+    } catch (err) {
+      console.error('❌ [GPSMapViewer] Erro ao buscar zonas:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Erro desconhecido';
+      console.error('Erro ao buscar zonas:', errorMsg);
+      setZonesError(errorMsg);
+    } finally {
+      setLoadingZones(false);
+      console.log('🏁 [GPSMapViewer] fetchZones finalizado');
+    }
+  }, [companyId]);
+
+  // 🆕 CARREGAR ZONES AO MONTAR O COMPONENTE
+  useEffect(() => {
+    fetchZones();
+  }, [fetchZones]);
+
+  // 🆕 FUNÇÃO PARA ESTILIZAR AS ZONES
+  const getZoneStyle = (feature: any) => {
+    const color = feature.properties.color?.replace('%23', '#') || '#5319FF';
+
+    return {
+      color: color,
+      weight: feature.properties.weight || 3,
+      opacity: feature.properties.opacity || 1,
+      fillColor: feature.properties.fillColor || color,
+      fillOpacity: feature.properties.fillOpacity || 0.2,
+      dashArray: feature.properties.dashArray || null,
+    };
+  };
+
+  // 🆕 FUNÇÃO PARA POPUP DAS ZONES
+  const onEachZone = (feature: any, layer: L.Layer, zoneInfo: Zone) => {
+    const popupContent = `
+      <div style="font-family: Arial, sans-serif; min-width: 200px;">
+        <h3 style="margin: 0 0 10px 0; color: #333;">${zoneInfo.boundary_name}</h3>
+        <p style="margin: 5px 0;"><strong>Grupo:</strong> ${zoneInfo.group_name}</p>
+        <p style="margin: 5px 0;"><strong>Código:</strong> ${zoneInfo.code}</p>
+        <p style="margin: 5px 0;"><strong>Status:</strong> 
+          <span style="color: ${zoneInfo.active ? 'green' : 'red'}">
+            ${zoneInfo.active ? '✓ Ativa' : '✗ Inativa'}
+          </span>
+        </p>
+        ${zoneInfo.notes ? `<p style="margin: 5px 0;"><strong>Obs:</strong> ${zoneInfo.notes}</p>` : ''}
+      </div>
+    `;
+
+    layer.bindPopup(popupContent);
+
+    // Adicionar eventos de hover
+    layer.on({
+      mouseover: (e) => {
+        const layer = e.target;
+        layer.setStyle({
+          weight: 5,
+          fillOpacity: 0.4,
+        });
+      },
+      mouseout: (e) => {
+        const layer = e.target;
+        layer.setStyle(getZoneStyle(feature));
+      },
+    });
+  };
+
+
   // =====================================
   // 🎮 CONTROLES DE PLAYBACK
   // =====================================
@@ -577,17 +710,17 @@ const GPSMapViewer = () => {
     setIsPlaying(!isPlaying);
     setShouldApplyPlayerZoom(true);
   };
-  
+
   const stopPlayback = () => {
     setIsPlaying(false);
     setCurrentPointIndex(0);
     setShouldApplyPlayerZoom(false);
   };
-  
+
   const goToNext = () => {
     setCurrentPointIndex((prev) => Math.min(prev + 1, data.length - 1));
   };
-  
+
   const goToPrevious = () => {
     setCurrentPointIndex((prev) => Math.max(prev - 1, 0));
   };
@@ -706,6 +839,35 @@ const GPSMapViewer = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {/* 🆕 BOTÃO PARA TOGGLE DAS ZONES */}
+              <button
+                  onClick={() => {
+                    setShowZones(!showZones);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    showZones
+                      ? 'bg-purple-500 hover:bg-purple-600 text-white'
+                      : 'bg-white/20 hover:bg-white/30 text-white'
+                  }`}
+                  title={showZones ? 'Ocultar Cercas' : 'Mostrar Cercas'}
+                >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"
+                  />
+                </svg>
+                Cercas ({zones.length})
+              </button>
+
               <button
                 onClick={() => setShowHeatmap(!showHeatmap)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showHeatmap
@@ -728,6 +890,17 @@ const GPSMapViewer = () => {
             </div>
           </div>
         </div>
+
+        {zonesError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center gap-2">
+              <ExclamationCircleIcon className="h-5 w-5 text-red-600" />
+              <p className="text-sm text-red-600">
+                Erro ao carregar cercas: {zonesError}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Filtros */}
         {showFilters && (
@@ -888,7 +1061,7 @@ const GPSMapViewer = () => {
                   <div className="mt-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">
-                        {t('gpsMap.filters.selected', {count: filters.dev_eui.length})}
+                        {t('gpsMap.filters.selected', { count: filters.dev_eui.length })}
                       </span>
                       <button
                         onClick={deselectAllDevices}
@@ -1248,6 +1421,16 @@ const GPSMapViewer = () => {
 
               <HeatmapLayer points={validData} show={showHeatmap} />
 
+              {/* 🆕 RENDERIZAR AS ZONES */}
+              {showZones && zones.map((zone) => (
+                <LeafletGeoJSON
+                  key={zone.id}
+                  data={zone.geojson_data}
+                  style={getZoneStyle}
+                  onEachFeature={(feature, layer) => onEachZone(feature, layer, zone)}
+                />
+              ))}
+
               {/* Marcadores - MOSTRAR TODOS OS PONTOS */}
               {validData.map((point, index) => {
                 const isStart = index === 0;
@@ -1325,7 +1508,7 @@ const GPSMapViewer = () => {
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             {new Date(point.timestamp).toLocaleDateString(t('gpsMap.gpsMap.popup.locale'))}
-                            
+
                           </div>
                         </div>
 
@@ -1436,6 +1619,54 @@ const GPSMapViewer = () => {
                 >
                   Próxima
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {/* 🆕 ADICIONAR LEGENDA DAS ZONES */}
+        {validData.length > 0 && zones.length > 0 && showZones && (
+          <div className="bg-purple-50 border-t border-purple-200 px-6 py-4">
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  🗺️ Cercas Virtuais ({zones.length})
+                </h4>
+                 <button
+                  onClick={fetchZones}
+                  disabled={loadingZones}
+                  className="text-xs text-purple-600 hover:text-purple-800 flex items-center gap-1"
+                  title="Recarregar cercas"
+                >
+                  <ArrowPathIcon className={`h-4 w-4 ${loadingZones ? 'animate-spin' : ''}`} />
+                  Atualizar
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {zones.map((zone) => {
+                  const color = zone.geojson_data?.features?.[0]?.properties?.color?.replace('%23', '#') || '#5319FF';
+
+                  return (
+                    <div
+                      key={zone.id}
+                      className="flex items-center gap-3 p-3 bg-white rounded-lg border border-purple-200 hover:shadow-md transition-shadow"
+                    >
+                      <div
+                        className="w-4 h-4 rounded border-2 border-white shadow-sm flex-shrink-0"
+                        style={{ backgroundColor: color }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {zone.boundary_name}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {zone.group_name} • {zone.code}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

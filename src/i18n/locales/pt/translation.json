@@ -1209,7 +1209,7 @@
     "activityCards": {
       "activeLastHour": "Ativos na Última Hora",
       "silent24h": "Silenciosos (+24h)",
-      "inactiveToday": "Inativos Hoje",
+      "inactiveToday": "Relatório GPS hoje",
       "devices": "Dispositivos"
     },
     "gpsCards": {

@@ -1176,7 +1176,7 @@
     "activityCards": {
       "activeLastHour": "Active Last Hour",
       "silent24h": "Silent (+24h)",
-      "inactiveToday": "Inactive Today",
+      "inactiveToday": "GPS Report Today",
       "devices": "Devices"
     },
     "gpsCards": {

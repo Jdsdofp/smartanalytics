@@ -3301,7 +3301,7 @@ export default function DeviceLogsView() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <ActivityCard card={dashboardCards.activity_cards.active_last_hour} cardKey="activeLastHour" isLoading={refreshing} />
                 <ActivityCard card={dashboardCards.activity_cards.silent_24h} cardKey="silent24h" isLoading={refreshing} />
-                <ActivityCard card={dashboardCards.activity_cards.inactive_today} cardKey="inactiveToday" isLoading={refreshing} />
+                <ActivityCard card={dashboardCards.activity_cards.gps_reported_today} cardKey="inactiveToday" isLoading={refreshing} />
               </div>
             </div>
           )}
