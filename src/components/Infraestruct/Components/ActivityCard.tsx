@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   BoltIcon, 
   ClockIcon, 
-  NoSymbolIcon 
+  MapPinIcon
 } from '@heroicons/react/24/outline';
 
 interface CardData {
@@ -40,14 +40,14 @@ const cardConfig = {
     glowColor: '#f59e0b'
   },
   inactiveToday: {
-    gradient: 'from-rose-500 to-pink-600',
-    bgGradient: 'from-rose-50 to-pink-100',
-    icon: NoSymbolIcon,
-    iconColor: 'text-rose-600',
-    borderColor: 'border-rose-200',
-    hoverShadow: 'hover:shadow-rose-200/50',
-    pulseColor: 'bg-rose-400',
-    glowColor: '#f43f5e'
+    gradient: 'from-rose-500 to-purple-600',
+    bgGradient: 'from-rose-50 to-purple-100',
+    icon: MapPinIcon,
+    iconColor: 'text-purple-600',
+    borderColor: 'border-purple-200',
+    hoverShadow: 'hover:shadow-purple-200/50',
+    pulseColor: 'bg-purple-400',
+    glowColor: '#b53ff4ff'
   }
 };
 
