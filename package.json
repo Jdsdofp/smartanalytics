@@ -40,6 +40,7 @@
     "react-leaflet": "^5.0.0",
     "react-leaflet-cluster": "^4.0.0",
     "react-router-dom": "^7.9.3",
+    "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.1.13",
     "use-debounce": "^10.0.6",
     "xlsx": "0.18.5",

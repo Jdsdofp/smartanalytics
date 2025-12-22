@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   SignalIcon,
-  SignalSlashIcon,
+  // SignalSlashIcon,
   BoltIcon,
   MapPinIcon,
   ExclamationTriangleIcon,
@@ -2372,6 +2372,7 @@ export default function DeviceLogsView() {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
+  //@ts-ignore
   const [motionDevices, setMotionDevices] = useState<DevicePosition[]>([]);
   const [gatewayQuality, setGatewayQuality] = useState<GatewaySignal[]>([]);
   const [eventTypes, setEventTypes] = useState<EventTypeStats[]>([]);
@@ -2443,20 +2444,20 @@ export default function DeviceLogsView() {
   //@ts-ignore
   const [healthScoreData, setHealthScoreData] = useState<any[]>([]);
 
-  const openMapModal = (device: DevicePosition) => {
-    setSelectedDevice(device);
-    setIsMapModalOpen(true);
-  };
+  // const openMapModal = (device: DevicePosition) => {
+  //   setSelectedDevice(device);
+  //   setIsMapModalOpen(true);
+  // };
 
   const closeMapModal = () => {
     setIsMapModalOpen(false);
     setSelectedDevice(null);
   };
 
-  const openDetailsModal = (device: DevicePosition) => {
-    setSelectedDevice(device);
-    setIsDetailsModalOpen(true);
-  };
+  // const openDetailsModal = (device: DevicePosition) => {
+  //   setSelectedDevice(device);
+  //   setIsDetailsModalOpen(true);
+  // };
 
   const closeDetailsModal = () => {
     setIsDetailsModalOpen(false);
@@ -3096,10 +3097,10 @@ export default function DeviceLogsView() {
   };
 
 
-  const filteredMotionDevices = motionDevices.filter(d =>
-    d.dev_eui.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    d.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredMotionDevices = motionDevices.filter(d =>
+  //   d.dev_eui.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //   d.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
 
   const filteredCustomers = customerStats.filter(c =>
     c.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -3771,7 +3772,7 @@ export default function DeviceLogsView() {
       {activeTab === 'devices' && (
         <div className="space-y-6">
           <GPSRouteMapLeaflet />
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
@@ -3782,12 +3783,12 @@ export default function DeviceLogsView() {
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-          </div>
+          </div> */}
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <DevicePhoneMobileIcon className="h-6 w-6" />
-              {t('deviceLogs.deviceMotion.title', { count: filteredMotionDevices.length })}
+              {t('deviceLogs.deviceMotion.title', { count: filteredMotionDevices?.length })}
             </h3>
 
             <div className="overflow-y-hidden max-h-[600px]">
@@ -3857,9 +3858,9 @@ export default function DeviceLogsView() {
                 sortableColumns={['dynamic_motion_state', 'battery_level']} // Colunas que podem ser ordenadas
               />
             </div>
-          </div>
+          </div> */}
 
-          {overview.device_alerts.offline_count > 0 && (
+          {/* {overview.device_alerts.offline_count > 0 && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <SignalSlashIcon className="h-6 w-6 text-gray-500" />
@@ -3894,7 +3895,7 @@ export default function DeviceLogsView() {
                 data={overview.device_alerts.offline_devices}
               />
             </div>
-          )}
+          )} */}
 
           <DevicePayloadStatsGrid />
 
