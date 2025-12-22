@@ -4,10 +4,12 @@
 import { GeoJSON as LeafletGeoJSON } from 'react-leaflet';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-polylinedecorator';
 import 'leaflet.heat';
+import * as L from "leaflet";
+
 import {
   MapPinIcon,
   ArrowPathIcon,
@@ -144,6 +146,50 @@ const createCurrentWorkerIcon = (color: string = '#eab308') => {
   });
 };
 
+
+// =====================================
+// 🔢 ÍCONE CUSTOMIZADO PARA CLUSTERS
+// =====================================
+const createClusterCustomIcon = (cluster: any) => {
+  const count = cluster.getChildCount();
+  
+  let sizeClass = 'small';
+  if (count > 50) {
+    sizeClass = 'large';
+  } else if (count > 10) {
+    sizeClass = 'medium';
+  }
+
+  return L.divIcon({
+    html: `
+      <div class="custom-cluster-icon ${sizeClass}">
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        ">
+          <span style="font-size: ${sizeClass === 'large' ? '18px' : '16px'};">
+            👷
+          </span>
+          <span style="
+            font-weight: bold;
+            margin-top: -2px;
+            font-size: ${sizeClass === 'large' ? '14px' : '12px'};
+          ">
+            ${count}
+          </span>
+        </div>
+      </div>
+    `,
+    className: 'custom-cluster-marker',
+    iconSize: L.point(
+      sizeClass === 'large' ? 60 : sizeClass === 'medium' ? 50 : 40,
+      sizeClass === 'large' ? 60 : sizeClass === 'medium' ? 50 : 40
+    ),
+  });
+};
+
 // =====================================
 // 🔥 COMPONENTE PARA MAPA DE CALOR
 // =====================================
@@ -259,7 +305,7 @@ const MAP_TYPES = {
     maxZoom: 22
   },
 };
-
+//@ts-ignore
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -416,6 +462,8 @@ const GPSMapViewer = () => {
   const [zonesError, setZonesError] = useState<string | null>(null);
 
   const [loadingZones, setLoadingZones] = useState(false);
+
+  const [clusteringEnabled, setClusteringEnabled] = useState(true);
 
   // =====================================
   // 🔍 FUNÇÃO AUXILIAR PARA BUSCA
@@ -839,6 +887,32 @@ const GPSMapViewer = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setClusteringEnabled(!clusteringEnabled)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  clusteringEnabled
+                    ? 'bg-purple-500 hover:bg-purple-600 text-white'
+                    : 'bg-white/20 hover:bg-white/30 text-white'
+                }`}
+                title={clusteringEnabled ? 'Desativar Agrupamento' : 'Ativar Agrupamento'}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 6.878V6a2.25 2.25 0 012.25-2.25h7.5A2.25 2.25 0 0118 6v.878m-12 0c.235-.083.487-.128.75-.128h10.5c.263 0 .515.045.75.128m-12 0A2.25 2.25 0 004.5 9v.878m13.5-3A2.25 2.25 0 0119.5 9v.878m0 0a2.246 2.246 0 00-.75-.128H5.25c-.263 0-.515.045-.75.128m15 0A2.25 2.25 0 0121 12v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6c0-.98.626-1.813 1.5-2.122"
+                  />
+                </svg>
+                Agrupar ({clusteringEnabled ? 'ON' : 'OFF'})
+              </button>
+
               {/* 🆕 BOTÃO PARA TOGGLE DAS ZONES */}
               <button
                   onClick={() => {
@@ -1432,6 +1506,18 @@ const GPSMapViewer = () => {
               ))}
 
               {/* Marcadores - MOSTRAR TODOS OS PONTOS */}
+
+              {clusteringEnabled ? (
+              <MarkerClusterGroup
+                chunkedLoading
+                iconCreateFunction={createClusterCustomIcon}
+                maxClusterRadius={50}
+                spiderfyOnMaxZoom={true}
+                showCoverageOnHover={true}
+                zoomToBoundsOnClick={true}
+                removeOutsideVisibleBounds={true}
+              >
+
               {validData.map((point, index) => {
                 const isStart = index === 0;
                 const isEnd = index === validData.length - 1;
@@ -1593,6 +1679,172 @@ const GPSMapViewer = () => {
                   </Marker>
                 );
               })}
+            </MarkerClusterGroup>
+            ) : (
+              <>
+                {validData.map((point, index) => {
+                const isStart = index === 0;
+                const isEnd = index === validData.length - 1;
+                const isCurrent = index === currentPointIndex;
+
+                const deviceColor = getDeviceColor(point.dev_eui, uniqueDevices);
+                const photoUrl = getUserPhotoUrl(point);
+                const userName = point.Item_Name || t('gpsMap.gpsMap.popup.unknownWorker');
+
+                let icon;
+                let status;
+
+                if (isStart) {
+                  icon = createWorkerIcon('#22c55e', photoUrl, userName);
+                  status = t('gpsRouteMap.markers.start');
+                } else if (isEnd) {
+                  icon = createWorkerIcon('#ef4444', photoUrl, userName);
+                  status = t('gpsRouteMap.markers.end');
+                } else if (isCurrent) {
+                  icon = createCurrentWorkerIcon('#eab308');
+                  status = t('gpsRouteMap.markers.currentPosition');
+                } else {
+                  icon = createWorkerIcon(deviceColor, photoUrl, userName);
+                  status = `${t('gpsRouteMap.markers.point')} ${index + 1}`;
+                }
+
+                return (
+                  <Marker
+                    key={`${point.dev_eui}-${index}`}
+                    position={[point.gps_latitude, point.gps_longitude]}
+                    icon={icon}
+                  >
+                    <Popup>
+                      <div className="p-2 min-w-[240px] max-w-[280px]">
+                        <div className="flex items-center gap-3 mb-3 pb-2 border-b border-gray-200">
+                          <div className="flex-shrink-0">
+                            {point.Image_hash ? (
+                              <img
+                                src={`https://smartmachine.smartxhub.cloud/imagem/${point.Image_hash}`}
+                                alt={point.Item_Name || t('gpsMap.gpsMap.popup.unknownWorker')}
+                                className="w-12 h-12 rounded-full object-cover border-2 border-gray-300"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-blue-100 border-2 border-blue-300 flex items-center justify-center">
+                                <span className="text-lg">👷</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 text-sm truncate">
+                              {point.Item_Name || t('gpsMap.gpsMap.popup.unknownWorker')}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <div
+                                className="w-3 h-3 rounded-full border-2 border-white shadow-sm"
+                                style={{ backgroundColor: deviceColor }}
+                              />
+                              <code className="text-xs text-gray-600 font-mono truncate">
+                                {point.dev_eui}
+                              </code>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mb-3">
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                              {status}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {new Date(point.timestamp).toLocaleTimeString(t('gpsMap.gpsMap.popup.locale'))}
+                            </span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {new Date(point.timestamp).toLocaleDateString(t('gpsMap.gpsMap.popup.locale'))}
+
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 text-sm">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <span className="text-gray-600 font-medium">{t('gpsMap.gpsMap.popup.latitude')}:</span>
+                              <div className="text-gray-900 font-mono text-xs">{point.gps_latitude}</div>
+                            </div>
+                            <div>
+                              <span className="text-gray-600 font-medium">{t('gpsMap.gpsMap.popup.longitude')}:</span>
+                              <div className="text-gray-900 font-mono text-xs">{point.gps_longitude}</div>
+                            </div>
+                          </div>
+
+                          {/* <div className="flex items-center justify-between">
+                             <span className="text-gray-600 font-medium">{t('gpsMap.gpsMap.popup.accuracy')}:</span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${point.gps_accuracy < 10 ? 'bg-green-100 text-green-800' :
+                              point.gps_accuracy < 25 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                              {point.gps_accuracy}m
+                            </span>
+                          </div> */}
+
+                          <div className="pt-2 border-t border-gray-100 space-y-1">
+                            {point.battery_level && (
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1">
+                                  <BoltIcon className="h-4 w-4 text-yellow-600" />
+                                  <span className="text-gray-600 font-medium">{t('gpsMap.gpsMap.popup.battery')}:</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-16 bg-gray-200 rounded-full h-2">
+                                    <div
+                                      className={`h-2 rounded-full ${point.battery_level > 50 ? 'bg-green-500' :
+                                        point.battery_level > 20 ? 'bg-yellow-500' : 'bg-red-500'
+                                        }`}
+                                      style={{ width: `${point.battery_level}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="text-xs font-medium w-8">{point.battery_level}%</span>
+                                </div>
+                              </div>
+                            )}
+
+                            {point.dynamic_motion_state && (
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-600 font-medium">{t('gpsMap.gpsMap.popup.status')}:</span>
+                                <div className="flex items-center gap-1">
+                                  {point.dynamic_motion_state === 'MOVING' ? (
+                                    <>
+                                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                      <span className="text-green-600 font-medium text-xs">{t('gpsMap.gpsMap.popup.moving')}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="w-2 h-2 rounded-full bg-gray-400" />
+                                      <span className="text-gray-600 text-xs">{t('gpsMap.gpsMap.popup.stopped')}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="mt-3 pt-2 border-t border-gray-200">
+                          <button
+                            onClick={() => {
+                              setSelectedPoint(point);
+                              setIsModalOpen(true);
+                            }}
+                            className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex items-center justify-center gap-2"
+                          >
+                            <MapPinIcon className="h-4 w-4" />
+                            {t('gpsMap.gpsMap.markers.viewDetails')}
+                          </button>
+                        </div>
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              })}
+              </>
+              )}
             </MapContainer>
           )}
         </div>

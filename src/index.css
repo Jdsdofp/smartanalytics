@@ -372,3 +372,54 @@
     right: 1rem;
   }
 }
+
+
+
+
+
+
+/* Estilos personalizados para clusters */
+.custom-cluster-icon {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border: 3px solid white;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.custom-cluster-icon.small {
+  width: 40px;
+  height: 40px;
+  font-size: 12px;
+}
+
+.custom-cluster-icon.medium {
+  width: 50px;
+  height: 50px;
+  font-size: 14px;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+}
+
+.custom-cluster-icon.large {
+  width: 60px;
+  height: 60px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  animation: cluster-pulse 2s infinite;
+}
+
+@keyframes cluster-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.6);
+  }
+}
