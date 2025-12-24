@@ -1,325 +1,216 @@
 // src/hooks/useBoundaryAnalytics.ts
 import { useState, useEffect } from 'react';
-// https://apinode.smartxhub.cloud
-const API_BASE_URL = 'https://apinode.smartxhub.cloud/api/dashboard/boundary'; // Altere para a URL correta da sua API
-// const baseURL = '/api/dashboard/boundary';
+import axios from 'axios';
 
-interface DashboardKPIs {
-  total_hours_today: number;
-  total_visits_today: number;
-  total_hours_yesterday: number;
-  total_visits_yesterday: number;
-  total_hours_7d: number;
-  total_visits_7d: number;
-  total_hours_30d: number;
-  total_visits_30d: number;
-  people_inside: number;
-  alerts_today: number;
-  total_boundaries: number;
-  total_people: number;
-}
+const API_BASE_URL = 'http://localhost:4000/api';
 
-interface TopBoundary {
-  boundary_id: number;
-  boundary_name: string;
-  group_name: string;
-  duration_hours: number;
-  visits: number;
-}
-
-interface ShiftDistribution {
-  morning: number;
-  afternoon: number;
-  night: number;
-  total: number;
-}
-
-interface TimeSeries {
-  entry_date: string;
-  date_display: string;
-  daily_duration_hours: number;
-  daily_visits: number;
-  ma_7d_duration_hours: number;
-  ma_7d_visits: number;
-  ma_30d_duration_hours: number;
-  ma_30d_visits: number;
-  trend_direction: string;
-  volatility_7d: number;
-}
-
-interface WeeklyTrend {
-  year_week: string;
-  boundary_name: string;
-  duration_current_week_hours: number;
-  visits_current_week: number;
-  duration_last_week_hours: number;
-  visits_last_week: number;
-  wow_duration_change_pct: number;
-}
-
-interface WeeklyPattern {
-  day_of_week: number;
-  day_name: string;
-  avg_duration_hours: number;
-  avg_visits: number;
-}
-
-interface HeatmapData {
-  entry_hour: number;
-  entry_day_of_week: number;
-  total_entries: number;
-  total_duration: number;
-}
-
-interface Anomaly {
-  entry_date: string;
-  item_name: string;
-  boundary_name: string;
-  duration_hours: number;
-  avg_duration_hours: number;
-  z_score_duration: number;
-  anomaly_level: string;
-}
-
-interface AnomalyKPIs {
-  detected_anomalies: number;
-  avg_z_score: number;
-  extreme_anomalies: number;
-  high_anomalies: number;
-}
-
-interface SankeyData {
+interface SankeyDataItem {
   source: string;
   target: string;
   value: number;
+  avg_time: string;
 }
 
-interface Transition {
+interface TopTransitionItem {
   from_boundary_name: string;
   to_boundary_name: string;
   transition_count: number;
-  avg_minutes: number;
-  transition_type: string;
+  avg_minutes: string;
 }
 
-interface ComplianceMetrics {
-  avg_compliance_rate: number;
-  avg_alert_rate: number;
-  avg_off_hours_pct: number;
-  avg_weekend_pct: number;
-  avg_long_visit_pct: number;
-}
-
-interface DurationBuckets {
-  very_short: number;
-  short: number;
-  medium: number;
-  long: number;
-  very_long: number;
-}
-
-interface AlertRate {
-  boundary_id: number;
-  boundary_name: string;
-  alert_rate_pct: number;
-  total_visits: number;
-}
-
-interface ComplianceSummary {
-  boundary_name: string;
-  total_visits: number;
-  alert_rate_pct: number;
-  off_hours_entry_pct: number;
-  weekend_visit_pct: number;
-  status: string;
-}
-
-interface TopPerson {
-  item_id: number;
-  item_name: string;
-  primary_boundary_name: string;
-  total_duration_hours: number;
-  total_visits: number;
-}
-
-interface FrequencyAnalysis {
-  item_name: string;
-  boundary_name: string;
-  avg_visits_per_day: number;
-  total_visits: number;
-}
-
-interface RealTimeStatus {
-  item_id: number;
-  item_name: string;
-  boundary_id: number;
-  boundary_name: string;
-  last_entry: string;
-  duration_today_hours: number;
-  is_currently_inside: number;
-  total_alerts: number;
-  status: 'NORMAL' | 'LONG' | 'ALERT';
-}
-
-export const useBoundaryAnalytics = (
-  companyId: string | number,
-  activeTab: string,
-  selectedPeriod: '7d' | '30d' | '90d' = '30d'
-) => {
-  // Estados para cada tipo de dado
-  const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
-  const [topBoundaries, setTopBoundaries] = useState<TopBoundary[]>([]);
-  const [shiftDistribution, setShiftDistribution] = useState<ShiftDistribution | null>(null);
-  const [timeSeries, setTimeSeries] = useState<TimeSeries[]>([]);
-  const [weeklyTrends, setWeeklyTrends] = useState<WeeklyTrend[]>([]);
-  const [weeklyPattern, setWeeklyPattern] = useState<WeeklyPattern[]>([]);
-  const [heatmap, setHeatmap] = useState<HeatmapData[]>([]);
-  const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
-  const [anomalyKPIs, setAnomalyKPIs] = useState<AnomalyKPIs | null>(null);
-  const [sankeyData, setSankeyData] = useState<SankeyData[]>([]);
-  const [topTransitions, setTopTransitions] = useState<Transition[]>([]);
-  const [complianceMetrics, setComplianceMetrics] = useState<ComplianceMetrics | null>(null);
-  const [durationBuckets, setDurationBuckets] = useState<DurationBuckets | null>(null);
-  const [alertRate, setAlertRate] = useState<AlertRate[]>([]);
-  const [complianceSummary, setComplianceSummary] = useState<ComplianceSummary[]>([]);
-  const [topPeople, setTopPeople] = useState<TopPerson[]>([]);
-  const [frequencyAnalysis, setFrequencyAnalysis] = useState<FrequencyAnalysis[]>([]);
-  const [realTimeStatus, setRealTimeStatus] = useState<RealTimeStatus[]>([]);
-  
-  const [loading, setLoading] = useState(true);
+export const useBoundaryAnalytics = (companyId: number, activeTab: string, selectedPeriod: '7d' | '30d' | '90d') => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Estados para cada tipo de dado
+  const [kpis, setKpis] = useState<any>(null);
+  const [topBoundaries, setTopBoundaries] = useState<any[]>([]);
+  const [shiftDistribution, setShiftDistribution] = useState<any>(null);
+  const [timeSeries, setTimeSeries] = useState<any[]>([]);
+  const [weeklyTrends, setWeeklyTrends] = useState<any[]>([]);
+  const [weeklyPattern, setWeeklyPattern] = useState<any[]>([]);
+  const [heatmap, setHeatmap] = useState<any[]>([]);
+  const [anomalies, setAnomalies] = useState<any[]>([]);
+  const [sankeyData, setSankeyData] = useState<SankeyDataItem[]>([]);
+  const [topTransitions, setTopTransitions] = useState<TopTransitionItem[]>([]);
+  const [durationBuckets, setDurationBuckets] = useState<any>(null);
+  const [alertRate, setAlertRate] = useState<any[]>([]);
+  const [topPeople, setTopPeople] = useState<any[]>([]);
+  const [frequencyAnalysis, setFrequencyAnalysis] = useState<any[]>([]);
+  const [realTimeStatus, setRealTimeStatus] = useState<any[]>([]);
 
-  // Helper function para fazer fetch
-  const fetchData = async <T,>(endpoint: string): Promise<T> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/${companyId}/${endpoint}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const json = await response.json();
-      return json.data;
-    } catch (err) {
-      console.error(`Error fetching ${endpoint}:`, err);
-      throw err;
-    }
+  // Função para converter dados do Sankey para o formato esperado
+  const convertSankeyData = (apiData: any[]): SankeyDataItem[] => {
+    return apiData.map(item => ({
+      source: item.source,
+      target: item.target,
+      value: item.value,
+      avg_time: item.avg_time
+    }));
   };
 
-  // Carregar dados baseado na tab ativa
+  // Função para converter dados de Top Transitions
+  const convertTopTransitions = (apiData: any[]): TopTransitionItem[] => {
+    return apiData.map(item => ({
+      from_boundary_name: item.from_boundary_name,
+      to_boundary_name: item.to_boundary_name,
+      transition_count: item.transition_count,
+      avg_minutes: item.avg_minutes
+    }));
+  };
+
+  // Carregar dados baseado na aba ativa
   useEffect(() => {
-    const loadData = async () => {
+    if (!companyId) return;
+
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // Dados básicos sempre carregados
-        if (activeTab === 'overview') {
-          const [kpisData, topBoundariesData, shiftData, statusData] = await Promise.all([
-            fetchData<DashboardKPIs>('kpis'),
-            fetchData<TopBoundary[]>(`top-boundaries?period=${selectedPeriod}&limit=10`),
-            fetchData<ShiftDistribution>('shift-distribution'),
-            fetchData<RealTimeStatus[]>('real-time-status?limit=10')
-          ]);
+        switch (activeTab) {
+          case 'overview':
+            await Promise.all([
+              fetchKPIs(),
+              fetchTopBoundaries(),
+              fetchShiftDistribution(),
+              fetchRealTimeStatus()
+            ]);
+            break;
 
-          setKpis(kpisData);
-          setTopBoundaries(topBoundariesData);
-          setShiftDistribution(shiftData);
-          setRealTimeStatus(statusData);
+          case 'temporal':
+            await Promise.all([
+              fetchTimeSeries(),
+              fetchWeeklyTrends(),
+              fetchWeeklyPattern()
+            ]);
+            break;
+
+          case 'heatmap':
+            await fetchHeatmap();
+            break;
+
+          case 'anomalies':
+            await fetchAnomalies();
+            break;
+
+          case 'flow':
+            await Promise.all([
+              fetchSankeyData(),
+              fetchTopTransitions()
+            ]);
+            break;
+
+          case 'compliance':
+            await Promise.all([
+              fetchDurationBuckets(),
+              fetchAlertRate()
+            ]);
+            break;
+
+          case 'rankings':
+            await Promise.all([
+              fetchTopPeople(),
+              fetchFrequencyAnalysis()
+            ]);
+            break;
         }
-
-        // Temporal
-        else if (activeTab === 'temporal') {
-          const days = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90;
-          
-          const [timeSeriesData, weeklyTrendsData, weeklyPatternData] = await Promise.all([
-            fetchData<TimeSeries[]>(`time-series?days=${days}`),
-            fetchData<WeeklyTrend[]>('weekly-trends?weeks=8'),
-            fetchData<WeeklyPattern[]>('weekly-pattern')
-          ]);
-
-          setTimeSeries(timeSeriesData);
-          setWeeklyTrends(weeklyTrendsData);
-          setWeeklyPattern(weeklyPatternData);
-        }
-
-        // Heatmap
-        else if (activeTab === 'heatmap') {
-          const heatmapData = await fetchData<HeatmapData[]>('heatmap');
-          setHeatmap(heatmapData);
-        }
-
-        // Anomalies
-        else if (activeTab === 'anomalies') {
-          const [anomaliesData, anomalyKPIsData] = await Promise.all([
-            fetchData<Anomaly[]>('anomalies?minZScore=2.0&days=30'),
-            fetchData<AnomalyKPIs>('anomaly-kpis')
-          ]);
-
-          setAnomalies(anomaliesData);
-          setAnomalyKPIs(anomalyKPIsData);
-        }
-
-        // Flow
-        else if (activeTab === 'flow') {
-          const [sankeyFlowData, transitionsData] = await Promise.all([
-            fetchData<SankeyData[]>('sankey?minTransitions=5'),
-            fetchData<Transition[]>('top-transitions?limit=20')
-          ]);
-
-          setSankeyData(sankeyFlowData);
-          setTopTransitions(transitionsData);
-        }
-
-        // Compliance
-        else if (activeTab === 'compliance') {
-          const [complianceData, bucketsData, alertRateData, summaryData] = await Promise.all([
-            fetchData<ComplianceMetrics>('compliance-metrics'),
-            fetchData<DurationBuckets>('duration-buckets'),
-            fetchData<AlertRate[]>('alert-rate'),
-            fetchData<ComplianceSummary[]>('compliance-summary')
-          ]);
-
-          setComplianceMetrics(complianceData);
-          setDurationBuckets(bucketsData);
-          setAlertRate(alertRateData);
-          setComplianceSummary(summaryData);
-        }
-
-        // Rankings
-        else if (activeTab === 'rankings') {
-          const [topPeopleData, frequencyData] = await Promise.all([
-            fetchData<TopPerson[]>('top-people?limit=10&metric=duration'),
-            fetchData<FrequencyAnalysis[]>('frequency?minFrequency=2')
-          ]);
-
-          setTopPeople(topPeopleData);
-          setFrequencyAnalysis(frequencyData);
-        }
-
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      } catch (err: any) {
+        setError(err.message || 'Erro ao carregar dados');
       } finally {
         setLoading(false);
       }
     };
 
-    loadData();
+    fetchData();
   }, [companyId, activeTab, selectedPeriod]);
 
-  // Carregar KPIs sempre (para o header)
-  useEffect(() => {
-    const loadKPIs = async () => {
-      try {
-        const kpisData = await fetchData<DashboardKPIs>('kpis');
-        setKpis(kpisData);
-      } catch (err) {
-        console.error('Error loading KPIs:', err);
-      }
-    };
+  // Funções de fetch individuais
+  const fetchKPIs = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/kpis`);
+    setKpis(data.data);
+  };
 
-    if (!kpis) {
-      loadKPIs();
+  const fetchTopBoundaries = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/top-boundaries?limit=10`);
+    setTopBoundaries(data.data);
+  };
+
+  const fetchShiftDistribution = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/shift-distribution`);
+    setShiftDistribution(data.data);
+  };
+
+  const fetchTimeSeries = async () => {
+    const days = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90;
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/time-series?days=${days}`);
+    setTimeSeries(data.data);
+  };
+
+  const fetchWeeklyTrends = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/weekly-trends?weeks=8`);
+    setWeeklyTrends(data.data);
+  };
+
+  const fetchWeeklyPattern = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/weekly-pattern`);
+    setWeeklyPattern(data.data);
+  };
+
+  const fetchHeatmap = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/heatmap?days=30`);
+    setHeatmap(data.data);
+  };
+
+  const fetchAnomalies = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/anomalies?limit=100`);
+    setAnomalies(data.data);
+  };
+
+  const fetchSankeyData = async () => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/sankey?minTransitions=5`);
+      setSankeyData(convertSankeyData(data.data));
+    } catch (err) {
+      console.error('Error fetching sankey data:', err);
+      setSankeyData([]);
     }
-  }, [companyId]);
+  };
+
+  const fetchTopTransitions = async () => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/top-transitions?limit=20`);
+      setTopTransitions(convertTopTransitions(data.data));
+    } catch (err) {
+      console.error('Error fetching top transitions:', err);
+      setTopTransitions([]);
+    }
+  };
+
+  const fetchDurationBuckets = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/duration-buckets`);
+    setDurationBuckets(data.data);
+  };
+
+  const fetchAlertRate = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/alert-rate?limit=10`);
+    setAlertRate(data.data);
+  };
+
+  const fetchTopPeople = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/top-people?limit=10`);
+    setTopPeople(data.data);
+  };
+
+  const fetchFrequencyAnalysis = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/frequency?limit=10`);
+    setFrequencyAnalysis(data.data);
+  };
+
+  const fetchRealTimeStatus = async () => {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/real-time-status?limit=20`);
+    setRealTimeStatus(data.data);
+  };
 
   return {
     kpis,
@@ -330,13 +221,10 @@ export const useBoundaryAnalytics = (
     weeklyPattern,
     heatmap,
     anomalies,
-    anomalyKPIs,
     sankeyData,
     topTransitions,
-    complianceMetrics,
     durationBuckets,
     alertRate,
-    complianceSummary,
     topPeople,
     frequencyAnalysis,
     realTimeStatus,

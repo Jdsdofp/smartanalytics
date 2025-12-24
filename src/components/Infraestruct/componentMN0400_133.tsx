@@ -35,7 +35,6 @@ export default function BoundaryAccessAnalytics() {
     //@ts-ignore
     anomalyKPIs,
     sankeyData,
-    //@ts-ignore
     topTransitions,
     //@ts-ignore
     complianceMetrics,
@@ -59,6 +58,7 @@ export default function BoundaryAccessAnalytics() {
     heatmap: useRef(null),
     anomalies: useRef(null),
     sankey: useRef(null),
+    topTransitions: useRef(null),
     durationBuckets: useRef(null),
     alertRate: useRef(null),
     topPeople: useRef(null),
@@ -79,7 +79,7 @@ export default function BoundaryAccessAnalytics() {
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [activeTab, topBoundaries, timeSeries, weeklyTrends, heatmap, anomalies, sankeyData]);
+  }, [activeTab, topBoundaries, timeSeries, weeklyTrends, heatmap, anomalies, sankeyData, topTransitions]);
 
   const initCharts = (section: string) => {
     if (section === 'overview') {
@@ -95,6 +95,7 @@ export default function BoundaryAccessAnalytics() {
       initAnomaliesChart();
     } else if (section === 'flow') {
       initSankeyChart();
+      initTopTransitionsChart();
     } else if (section === 'compliance') {
       initDurationBucketsChart();
       initAlertRateChart();
@@ -455,31 +456,143 @@ export default function BoundaryAccessAnalytics() {
     chart.setOption(option);
   };
 
+  // ✅ MELHOR SOLUÇÃO: Graph Network ao invés de Sankey (suporta ciclos)
   const initSankeyChart = () => {
     if (!chartRefs.sankey.current || !sankeyData.length) return;
     const chart = echarts.init(chartRefs.sankey.current);
     
-    // Extrair nós únicos
-    const nodes = new Set<string>();
+    // Extrair nós únicos e calcular valores
+    const nodeValueMap = new Map<string, number>();
     sankeyData.forEach(d => {
-      nodes.add(d.source);
-      nodes.add(d.target);
+      nodeValueMap.set(d.source, (nodeValueMap.get(d.source) || 0) + d.value);
+      nodeValueMap.set(d.target, (nodeValueMap.get(d.target) || 0) + d.value);
     });
     
-    const option = {
-      tooltip: { trigger: 'item' },
+    const nodes = Array.from(nodeValueMap.entries()).map(([name, value]) => ({
+      name,
+      symbolSize: Math.sqrt(value) * 3, // Tamanho proporcional
+      value,
+      itemStyle: {
+        color: '#0F4C81'
+      },
+      label: {
+        show: true,
+        fontSize: 11,
+        fontWeight: 'bold'
+      }
+    }));
+    
+    const links = sankeyData.map(d => ({
+      source: d.source,
+      target: d.target,
+      value: d.value,
+      avg_time: d.avg_time,
+      lineStyle: {
+        width: Math.sqrt(d.value) * 0.5,
+        color: '#FF6B35',
+        opacity: 0.4,
+        curveness: 0.2
+      },
+      label: {
+        show: d.value > 100, // Mostrar label apenas para links importantes
+        formatter: '{c}',
+        fontSize: 10
+      }
+    }));
+    
+    const option: any = {
+      tooltip: {
+        trigger: 'item',
+        formatter: (params: any) => {
+          if (params.dataType === 'edge') {
+            return `${params.data.source} → ${params.data.target}<br/>
+                    ${t('boundaryAccessAnalytics.charts.sankey.tooltip.transitions')}: ${params.data.value}<br/>
+                    ${t('boundaryAccessAnalytics.charts.sankey.tooltip.avgTime')}: ${params.data.avg_time} min`;
+          }
+          return `${params.name}<br/>Total: ${params.value}`;
+        }
+      },
+      animationDurationUpdate: 1500,
+      animationEasingUpdate: 'quinticInOut',
       series: [{
-        type: 'sankey',
-        layout: 'none',
-        emphasis: { focus: 'adjacency' },
-        data: Array.from(nodes).map(name => ({ name })),
-        links: sankeyData.map(d => ({
-          source: d.source,
-          target: d.target,
-          value: d.value
-        })),
-        itemStyle: { color: '#0F4C81', borderColor: '#0F4C81' },
-        lineStyle: { color: 'gradient', curveness: 0.5 }
+        type: 'graph',
+        layout: 'force',
+        data: nodes,
+        links: links,
+        roam: true,
+        draggable: true,
+        force: {
+          repulsion: 300,
+          gravity: 0.1,
+          edgeLength: [100, 200],
+          layoutAnimation: true
+        },
+        emphasis: {
+          focus: 'adjacency',
+          lineStyle: {
+            width: 10
+          }
+        },
+        lineStyle: {
+          color: 'source',
+          curveness: 0.3
+        }
+      }]
+    };
+    
+    chart.setOption(option);
+  };
+
+  // ✅ NOVO: Gráfico de Top Transitions (barras horizontais)
+  const initTopTransitionsChart = () => {
+    if (!chartRefs.topTransitions.current || !topTransitions.length) return;
+    const chart = echarts.init(chartRefs.topTransitions.current);
+    
+    // Reverter para exibir do menor para o maior (de baixo para cima)
+    const sortedData = [...topTransitions].reverse();
+    
+    const option = {
+      tooltip: { 
+        trigger: 'axis', 
+        axisPointer: { type: 'shadow' },
+        formatter: (params: any) => {
+          const data = params[0];
+          const item = sortedData[data.dataIndex];
+          return `${item.from_boundary_name} → ${item.to_boundary_name}<br/>
+                  ${t('boundaryAccessAnalytics.charts.topTransitions.tooltip.count')}: ${item.transition_count}<br/>
+                  ${t('boundaryAccessAnalytics.charts.topTransitions.tooltip.avgTime')}: ${item.avg_minutes} min`;
+        }
+      },
+      grid: { left: 180, right: 80, top: 20, bottom: 50 },
+      xAxis: { 
+        type: 'value', 
+        name: t('boundaryAccessAnalytics.charts.topTransitions.xAxis') 
+      },
+      yAxis: {
+        type: 'category',
+        data: sortedData.map(d => `${d.from_boundary_name} → ${d.to_boundary_name}`),
+        axisLabel: {
+          fontSize: 11,
+          overflow: 'truncate',
+          width: 170
+        }
+      },
+      series: [{
+        type: 'bar',
+        data: sortedData.map(d => d.transition_count),
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+            { offset: 0, color: '#0F4C81' },
+            { offset: 1, color: '#FF6B35' }
+          ]),
+          borderRadius: [0, 4, 4, 0]
+        },
+        label: { 
+          show: true, 
+          position: 'right', 
+          formatter: '{c}',
+          fontSize: 11
+        }
       }]
     };
     chart.setOption(option);
@@ -738,7 +851,7 @@ export default function BoundaryAccessAnalytics() {
                     ) : (
                       <ArrowDownIcon className="w-3 h-3" />
                     )}
-                    {Math.abs(calculateChange(kpis.total_visits_today, kpis.total_visits_yesterday))}%
+                    {Math.abs(calculateChange(kpis.total_visits_today, kpis.total_visits_yesterday)).toFixed(1)}%
                   </div>
                 )}
               </div>
@@ -762,7 +875,7 @@ export default function BoundaryAccessAnalytics() {
                     ) : (
                       <ArrowDownIcon className="w-3 h-3" />
                     )}
-                    {Math.abs(calculateChange(kpis.total_hours_today, kpis.total_hours_yesterday))}%
+                    {Math.abs(calculateChange(kpis.total_hours_today, kpis.total_hours_yesterday)).toFixed(1)}%
                   </div>
                 )}
               </div>
@@ -783,7 +896,7 @@ export default function BoundaryAccessAnalytics() {
                   {t('boundaryAccessAnalytics.kpis.alertRate')}
                 </div>
                 <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
-                  {((kpis.alerts_today / kpis.total_visits_today) * 100)}%
+                  {((kpis.alerts_today / kpis.total_visits_today) * 100).toFixed(1)}%
                 </div>
               </div>
             </div>
@@ -1041,10 +1154,11 @@ export default function BoundaryAccessAnalytics() {
           </div>
         )}
 
-        {/* SECTION 5: Flow (Sankey) */}
+        {/* SECTION 5: Flow (Sankey + Top Transitions) */}
         {activeTab === 'flow' && (
           <div className="animate-fade-in">
-            <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+            {/* Sankey Diagram */}
+            <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
                   <div className="text-xl font-bold text-[#1A2332]">
@@ -1056,7 +1170,28 @@ export default function BoundaryAccessAnalytics() {
                 </div>
               </div>
               {sankeyData.length > 0 ? (
-                <div ref={chartRefs.sankey} className="w-full h-[500px]"></div>
+                <div ref={chartRefs.sankey} className="w-full h-[600px]"></div>
+              ) : (
+                <div className="flex items-center justify-center h-[600px] text-[#64748B]">
+                  {t('boundaryAccessAnalytics.messages.noData')}
+                </div>
+              )}
+            </div>
+
+            {/* Top Transitions Chart */}
+            <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+              <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
+                <div>
+                  <div className="text-xl font-bold text-[#1A2332]">
+                    {t('boundaryAccessAnalytics.charts.topTransitions.title')}
+                  </div>
+                  <div className="text-sm text-[#64748B] mt-1">
+                    {t('boundaryAccessAnalytics.charts.topTransitions.subtitle')}
+                  </div>
+                </div>
+              </div>
+              {topTransitions.length > 0 ? (
+                <div ref={chartRefs.topTransitions} className="w-full h-[500px]"></div>
               ) : (
                 <div className="flex items-center justify-center h-[500px] text-[#64748B]">
                   {t('boundaryAccessAnalytics.messages.noData')}
