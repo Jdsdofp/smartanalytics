@@ -924,8 +924,8 @@ const GPSRouteMapLeaflet = () => {
             <button
               onClick={() => setShowZones(!showZones)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showZones
-                  ? 'bg-purple-500 hover:bg-purple-600 text-white'
-                  : 'bg-white/20 hover:bg-white/30 text-white'
+                ? 'bg-purple-500 hover:bg-purple-600 text-white'
+                : 'bg-white/20 hover:bg-white/30 text-white'
                 }`}
               title={showZones ? 'Ocultar Cercas' : 'Mostrar Cercas'}
             >
