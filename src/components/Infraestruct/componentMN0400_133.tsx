@@ -17,9 +17,26 @@ import { useBoundaryAnalytics } from '../../hooks/useBoundaryAnalytics';
 import { useCompany } from '../../hooks/useCompany';
 
 
+// Componente de Loading para os gráficos
+const ChartLoader = () => (
+  <div className="w-full h-full flex items-center justify-center">
+    <div className="text-center">
+      <div className="relative w-16 h-16 mx-auto mb-4">
+        <div className="absolute top-0 left-0 w-full h-full border-4 border-[#E2E8F0] rounded-full"></div>
+        <div className="absolute top-0 left-0 w-full h-full border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      <p className="text-sm text-[#64748B] font-medium">Carregando gráfico...</p>
+    </div>
+  </div>
+);
+
+
+
 export default function BoundaryAccessAnalytics() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d');
+  const [chartLoadingStates, setChartLoadingStates] = useState<Record<string, boolean>>({});
+
   const {companyId} = useCompany()
   
   // Custom hook para gerenciar todos os dados
@@ -32,16 +49,10 @@ export default function BoundaryAccessAnalytics() {
     weeklyPattern,
     heatmap,
     anomalies,
-    //@ts-ignore
-    anomalyKPIs,
     sankeyData,
     topTransitions,
-    //@ts-ignore
-    complianceMetrics,
     durationBuckets,
     alertRate,
-    //@ts-ignore
-    complianceSummary,
     topPeople,
     frequencyAnalysis,
     realTimeStatus,
@@ -65,8 +76,54 @@ export default function BoundaryAccessAnalytics() {
     frequency: useRef(null)
   };
 
+  // Atualizar estados de loading baseado na aba ativa e dados disponíveis
   useEffect(() => {
-    initCharts(activeTab);
+    const newLoadingStates: Record<string, boolean> = {};
+    
+    if (activeTab === 'overview') {
+      newLoadingStates.topBoundaries = topBoundaries.length === 0;
+      newLoadingStates.shiftDistribution = !shiftDistribution;
+    } else if (activeTab === 'temporal') {
+      newLoadingStates.timeseries = timeSeries.length === 0;
+      newLoadingStates.weeklyTrends = weeklyTrends.length === 0;
+      newLoadingStates.weeklyPattern = weeklyPattern.length === 0;
+    } else if (activeTab === 'heatmap') {
+      newLoadingStates.heatmap = heatmap.length === 0;
+    } else if (activeTab === 'anomalies') {
+      newLoadingStates.anomalies = anomalies.length === 0;
+    } else if (activeTab === 'flow') {
+      newLoadingStates.sankey = sankeyData.length === 0;
+      newLoadingStates.topTransitions = topTransitions.length === 0;
+    } else if (activeTab === 'compliance') {
+      newLoadingStates.durationBuckets = !durationBuckets;
+      newLoadingStates.alertRate = alertRate.length === 0;
+    } else if (activeTab === 'rankings') {
+      newLoadingStates.topPeople = topPeople.length === 0;
+      newLoadingStates.frequency = frequencyAnalysis.length === 0;
+    }
+    
+    setChartLoadingStates(newLoadingStates);
+  }, [
+    activeTab,
+    topBoundaries,
+    shiftDistribution,
+    timeSeries,
+    weeklyTrends,
+    weeklyPattern,
+    heatmap,
+    anomalies,
+    sankeyData,
+    topTransitions,
+    durationBuckets,
+    alertRate,
+    topPeople,
+    frequencyAnalysis
+  ]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      initCharts(activeTab);
+    }, 100);
     
     const handleResize = () => {
       Object.values(chartRefs).forEach(ref => {
@@ -78,40 +135,56 @@ export default function BoundaryAccessAnalytics() {
     };
     
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [activeTab, topBoundaries, timeSeries, weeklyTrends, heatmap, anomalies, sankeyData, topTransitions]);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [
+    activeTab, 
+    topBoundaries, 
+    shiftDistribution,
+    timeSeries, 
+    weeklyTrends, 
+    weeklyPattern,
+    heatmap, 
+    anomalies, 
+    sankeyData, 
+    topTransitions,
+    durationBuckets,
+    alertRate,
+    topPeople,
+    frequencyAnalysis
+  ]);
 
   const initCharts = (section: string) => {
     if (section === 'overview') {
-      initTopBoundariesChart();
-      initShiftDistributionChart();
+      if (topBoundaries.length > 0) initTopBoundariesChart();
+      if (shiftDistribution) initShiftDistributionChart();
     } else if (section === 'temporal') {
-      initTimeSeriesChart();
-      initWeeklyTrendsChart();
-      initWeeklyPatternChart();
+      if (timeSeries.length > 0) initTimeSeriesChart();
+      if (weeklyTrends.length > 0) initWeeklyTrendsChart();
+      if (weeklyPattern.length > 0) initWeeklyPatternChart();
     } else if (section === 'heatmap') {
-      initHeatmapChart();
+      if (heatmap.length > 0) initHeatmapChart();
     } else if (section === 'anomalies') {
-      initAnomaliesChart();
+      if (anomalies.length > 0) initAnomaliesChart();
     } else if (section === 'flow') {
-      initSankeyChart();
-      initTopTransitionsChart();
+      if (sankeyData.length > 0) initSankeyChart();
+      if (topTransitions.length > 0) initTopTransitionsChart();
     } else if (section === 'compliance') {
-      initDurationBucketsChart();
-      initAlertRateChart();
+      if (durationBuckets) initDurationBucketsChart();
+      if (alertRate.length > 0) initAlertRateChart();
     } else if (section === 'rankings') {
-      initTopPeopleChart();
-      initFrequencyChart();
+      if (topPeople.length > 0) initTopPeopleChart();
+      if (frequencyAnalysis.length > 0) initFrequencyChart();
     }
   };
 
   // ✅ CHART INIT FUNCTIONS COM DADOS REAIS
-
   const initTopBoundariesChart = () => {
     if (!chartRefs.topBoundaries.current || !topBoundaries.length) return;
     const chart = echarts.init(chartRefs.topBoundaries.current);
     
-    // Reverter para exibir do menor para o maior (de baixo para cima)
     const sortedData = [...topBoundaries].reverse();
     
     const option = {
@@ -349,10 +422,9 @@ export default function BoundaryAccessAnalytics() {
     if (!chartRefs.heatmap.current || !heatmap.length) return;
     const chart = echarts.init(chartRefs.heatmap.current);
     
-    // Transform data para formato do heatmap
     const heatmapData = heatmap.map(d => [
       d.entry_hour,
-      d.entry_day_of_week - 1, // 0-6 para domingo-sábado
+      d.entry_day_of_week - 1,
       d.total_entries
     ]);
     
@@ -399,18 +471,11 @@ export default function BoundaryAccessAnalytics() {
     if (!chartRefs.anomalies.current || !anomalies.length) return;
     const chart = echarts.init(chartRefs.anomalies.current);
     
-    // Transformar dados reais em formato de scatter plot
-    // Cada ponto será [data, duração, z-score]
     //@ts-ignore
     const scatterData = anomalies.slice(0, 50).map((d: any, idx: number) => {
-      // Extrair data do entry_datetime
       const date = new Date(d.entry_datetime);
       const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-      
-      // Gerar duração aleatória como exemplo (seria vindo do DB idealmente)
       const duration = 1 + Math.random() * 8;
-      
-      // Gerar z-score baseado em desvio padrão simulado
       const zScore = 1.5 + Math.random() * 2.5;
       
       return [dateStr, duration, zScore];
@@ -456,12 +521,10 @@ export default function BoundaryAccessAnalytics() {
     chart.setOption(option);
   };
 
-  // ✅ MELHOR SOLUÇÃO: Graph Network ao invés de Sankey (suporta ciclos)
   const initSankeyChart = () => {
     if (!chartRefs.sankey.current || !sankeyData.length) return;
     const chart = echarts.init(chartRefs.sankey.current);
     
-    // Extrair nós únicos e calcular valores
     const nodeValueMap = new Map<string, number>();
     sankeyData.forEach(d => {
       nodeValueMap.set(d.source, (nodeValueMap.get(d.source) || 0) + d.value);
@@ -470,7 +533,7 @@ export default function BoundaryAccessAnalytics() {
     
     const nodes = Array.from(nodeValueMap.entries()).map(([name, value]) => ({
       name,
-      symbolSize: Math.sqrt(value) * 3, // Tamanho proporcional
+      symbolSize: Math.sqrt(value) * 3,
       value,
       itemStyle: {
         color: '#0F4C81'
@@ -494,7 +557,7 @@ export default function BoundaryAccessAnalytics() {
         curveness: 0.2
       },
       label: {
-        show: d.value > 100, // Mostrar label apenas para links importantes
+        show: d.value > 100,
         formatter: '{c}',
         fontSize: 10
       }
@@ -543,12 +606,10 @@ export default function BoundaryAccessAnalytics() {
     chart.setOption(option);
   };
 
-  // ✅ NOVO: Gráfico de Top Transitions (barras horizontais)
   const initTopTransitionsChart = () => {
     if (!chartRefs.topTransitions.current || !topTransitions.length) return;
     const chart = echarts.init(chartRefs.topTransitions.current);
     
-    // Reverter para exibir do menor para o maior (de baixo para cima)
     const sortedData = [...topTransitions].reverse();
     
     const option = {
@@ -559,7 +620,7 @@ export default function BoundaryAccessAnalytics() {
           const data = params[0];
           const item = sortedData[data.dataIndex];
           return `${item.from_boundary_name} → ${item.to_boundary_name}<br/>
-                  ${t('boundaryAccessAnalytics.charts.topTransitions.tooltip.count')}: ${item.transition_count}<br/>
+                  ${t('boundaryAccessAnalytics.tables.topTransitions.tooltip.count')}: ${item.transition_count}<br/>
                   ${t('boundaryAccessAnalytics.charts.topTransitions.tooltip.avgTime')}: ${item.avg_minutes} min`;
         }
       },
@@ -728,7 +789,6 @@ export default function BoundaryAccessAnalytics() {
     chart.setOption(option);
   };
 
-  // Calcular variação percentual
   const calculateChange = (current: number, previous: number) => {
     if (!previous) return 0;
     return ((current - previous) / previous) * 100;
@@ -744,7 +804,6 @@ export default function BoundaryAccessAnalytics() {
     { id: 'rankings', label: t('boundaryAccessAnalytics.tabs.rankings'), icon: TrophyIcon }
   ];
 
-  // Loading state
   if (loading && !kpis) {
     return (
       <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center">
@@ -756,7 +815,6 @@ export default function BoundaryAccessAnalytics() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center">
@@ -797,7 +855,6 @@ export default function BoundaryAccessAnalytics() {
         }
       `}</style>
 
-      {/* Navigation Tabs */}
       <nav className="bg-white border-b-2 border-[#E2E8F0] px-8 shadow-sm">
         <div className="max-w-[1400px] mx-auto">
           <div className="flex gap-2 overflow-x-auto">
@@ -825,7 +882,6 @@ export default function BoundaryAccessAnalytics() {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="max-w-[1400px] mx-auto p-8">
         {/* SECTION 1: Overview */}
         {activeTab === 'overview' && kpis && (
@@ -914,7 +970,11 @@ export default function BoundaryAccessAnalytics() {
                     </div>
                   </div>
                 </div>
-                <div ref={chartRefs.topBoundaries} className="w-full h-[400px]"></div>
+                {chartLoadingStates.topBoundaries ? (
+                  <ChartLoader />
+                ) : (
+                  <div ref={chartRefs.topBoundaries} className="w-full h-[400px]"></div>
+                )}
               </div>
 
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
@@ -928,7 +988,11 @@ export default function BoundaryAccessAnalytics() {
                     </div>
                   </div>
                 </div>
-                <div ref={chartRefs.shiftDistribution} className="w-full h-[400px]"></div>
+                {chartLoadingStates.shiftDistribution ? (
+                  <ChartLoader />
+                ) : (
+                  <div ref={chartRefs.shiftDistribution} className="w-full h-[400px]"></div>
+                )}
               </div>
             </div>
 
@@ -1008,7 +1072,6 @@ export default function BoundaryAccessAnalytics() {
         {/* SECTION 2: Temporal */}
         {activeTab === 'temporal' && (
           <div className="animate-fade-in">
-            {/* Time Series Card */}
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
               <div className="flex justify-between items-start pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
@@ -1052,18 +1115,14 @@ export default function BoundaryAccessAnalytics() {
                   </button>
                 </div>
               </div>
-              {timeSeries.length > 0 ? (
-                <div ref={chartRefs.timeseries} className="w-full h-[500px]"></div>
+              {chartLoadingStates.timeseries ? (
+                <ChartLoader />
               ) : (
-                <div className="flex items-center justify-center h-[500px] text-[#64748B]">
-                  {t('boundaryAccessAnalytics.messages.noData')}
-                </div>
+                <div ref={chartRefs.timeseries} className="w-full h-[500px]"></div>
               )}
             </div>
 
-            {/* Bottom Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Weekly Trends */}
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div className="text-lg font-bold text-[#1A2332]">
@@ -1073,16 +1132,13 @@ export default function BoundaryAccessAnalytics() {
                     {t('boundaryAccessAnalytics.charts.weeklyTrends.subtitle')}
                   </div>
                 </div>
-                {weeklyTrends.length > 0 ? (
-                  <div ref={chartRefs.weeklyTrends} className="w-full h-[400px]"></div>
+                {chartLoadingStates.weeklyTrends ? (
+                  <ChartLoader />
                 ) : (
-                  <div className="flex items-center justify-center h-[400px] text-[#64748B]">
-                    {t('boundaryAccessAnalytics.messages.noData')}
-                  </div>
+                  <div ref={chartRefs.weeklyTrends} className="w-full h-[400px]"></div>
                 )}
               </div>
 
-              {/* Weekly Pattern */}
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="pb-4 mb-4 border-b border-[#E2E8F0]">
                   <div className="text-lg font-bold text-[#1A2332]">
@@ -1092,12 +1148,10 @@ export default function BoundaryAccessAnalytics() {
                     {t('boundaryAccessAnalytics.charts.weeklyPattern.subtitle')}
                   </div>
                 </div>
-                {weeklyPattern.length > 0 ? (
-                  <div ref={chartRefs.weeklyPattern} className="w-full h-[400px]"></div>
+                {chartLoadingStates.weeklyPattern ? (
+                  <ChartLoader />
                 ) : (
-                  <div className="flex items-center justify-center h-[400px] text-[#64748B]">
-                    {t('boundaryAccessAnalytics.messages.noData')}
-                  </div>
+                  <div ref={chartRefs.weeklyPattern} className="w-full h-[400px]"></div>
                 )}
               </div>
             </div>
@@ -1118,12 +1172,10 @@ export default function BoundaryAccessAnalytics() {
                   </div>
                 </div>
               </div>
-              {heatmap.length > 0 ? (
-                <div ref={chartRefs.heatmap} className="w-full h-[500px]"></div>
+              {chartLoadingStates.heatmap ? (
+                <ChartLoader />
               ) : (
-                <div className="flex items-center justify-center h-[500px] text-[#64748B]">
-                  {t('boundaryAccessAnalytics.messages.noData')}
-                </div>
+                <div ref={chartRefs.heatmap} className="w-full h-[500px]"></div>
               )}
             </div>
           </div>
@@ -1143,21 +1195,18 @@ export default function BoundaryAccessAnalytics() {
                   </div>
                 </div>
               </div>
-              {anomalies.length > 0 ? (
-                <div ref={chartRefs.anomalies} className="w-full h-[500px]"></div>
+              {chartLoadingStates.anomalies ? (
+                <ChartLoader />
               ) : (
-                <div className="flex items-center justify-center h-[500px] text-[#64748B]">
-                  {t('boundaryAccessAnalytics.messages.noData')}
-                </div>
+                <div ref={chartRefs.anomalies} className="w-full h-[500px]"></div>
               )}
             </div>
           </div>
         )}
 
-        {/* SECTION 5: Flow (Sankey + Top Transitions) */}
+        {/* SECTION 5: Flow */}
         {activeTab === 'flow' && (
           <div className="animate-fade-in">
-            {/* Sankey Diagram */}
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
@@ -1169,33 +1218,28 @@ export default function BoundaryAccessAnalytics() {
                   </div>
                 </div>
               </div>
-              {sankeyData.length > 0 ? (
-                <div ref={chartRefs.sankey} className="w-full h-[600px]"></div>
+              {chartLoadingStates.sankey ? (
+                <ChartLoader />
               ) : (
-                <div className="flex items-center justify-center h-[600px] text-[#64748B]">
-                  {t('boundaryAccessAnalytics.messages.noData')}
-                </div>
+                <div ref={chartRefs.sankey} className="w-full h-[600px]"></div>
               )}
             </div>
 
-            {/* Top Transitions Chart */}
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
                   <div className="text-xl font-bold text-[#1A2332]">
-                    {t('boundaryAccessAnalytics.charts.topTransitions.title')}
+                    {t('boundaryAccessAnalytics.tables.topTransitions.title')}
                   </div>
                   <div className="text-sm text-[#64748B] mt-1">
-                    {t('boundaryAccessAnalytics.charts.topTransitions.subtitle')}
+                    {t('boundaryAccessAnalytics.tables.topTransitions.subtitle')}
                   </div>
                 </div>
               </div>
-              {topTransitions.length > 0 ? (
-                <div ref={chartRefs.topTransitions} className="w-full h-[500px]"></div>
+              {chartLoadingStates.topTransitions ? (
+                <ChartLoader />
               ) : (
-                <div className="flex items-center justify-center h-[500px] text-[#64748B]">
-                  {t('boundaryAccessAnalytics.messages.noData')}
-                </div>
+                <div ref={chartRefs.topTransitions} className="w-full h-[500px]"></div>
               )}
             </div>
           </div>
@@ -1216,12 +1260,10 @@ export default function BoundaryAccessAnalytics() {
                     </div>
                   </div>
                 </div>
-                {durationBuckets ? (
-                  <div ref={chartRefs.durationBuckets} className="w-full h-[400px]"></div>
+                {chartLoadingStates.durationBuckets ? (
+                  <ChartLoader />
                 ) : (
-                  <div className="flex items-center justify-center h-[400px] text-[#64748B]">
-                    {t('boundaryAccessAnalytics.messages.noData')}
-                  </div>
+                  <div ref={chartRefs.durationBuckets} className="w-full h-[400px]"></div>
                 )}
               </div>
 
@@ -1236,12 +1278,10 @@ export default function BoundaryAccessAnalytics() {
                     </div>
                   </div>
                 </div>
-                {alertRate.length > 0 ? (
-                  <div ref={chartRefs.alertRate} className="w-full h-[400px]"></div>
+                {chartLoadingStates.alertRate ? (
+                  <ChartLoader />
                 ) : (
-                  <div className="flex items-center justify-center h-[400px] text-[#64748B]">
-                    {t('boundaryAccessAnalytics.messages.noData')}
-                  </div>
+                  <div ref={chartRefs.alertRate} className="w-full h-[400px]"></div>
                 )}
               </div>
             </div>
@@ -1263,12 +1303,10 @@ export default function BoundaryAccessAnalytics() {
                     </div>
                   </div>
                 </div>
-                {topPeople.length > 0 ? (
-                  <div ref={chartRefs.topPeople} className="w-full h-[400px]"></div>
+                {chartLoadingStates.topPeople ? (
+                  <ChartLoader />
                 ) : (
-                  <div className="flex items-center justify-center h-[400px] text-[#64748B]">
-                    {t('boundaryAccessAnalytics.messages.noData')}
-                  </div>
+                  <div ref={chartRefs.topPeople} className="w-full h-[400px]"></div>
                 )}
               </div>
 
@@ -1283,35 +1321,16 @@ export default function BoundaryAccessAnalytics() {
                     </div>
                   </div>
                 </div>
-                {frequencyAnalysis.length > 0 ? (
-                  <div ref={chartRefs.frequency} className="w-full h-[400px]"></div>
+                {chartLoadingStates.frequency ? (
+                  <ChartLoader />
                 ) : (
-                  <div className="flex items-center justify-center h-[400px] text-[#64748B]">
-                    {t('boundaryAccessAnalytics.messages.noData')}
-                  </div>
+                  <div ref={chartRefs.frequency} className="w-full h-[400px]"></div>
                 )}
               </div>
             </div>
           </div>
         )}
       </main>
-
-      <style>{`
-        .animate-fade-in {
-          animation: fadeIn 0.4s ease;
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }
