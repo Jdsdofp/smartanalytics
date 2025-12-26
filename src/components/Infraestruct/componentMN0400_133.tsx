@@ -15,6 +15,7 @@ import {
 import { t } from 'i18next';
 import { useBoundaryAnalytics } from '../../hooks/useBoundaryAnalytics';
 import { useCompany } from '../../hooks/useCompany';
+import BoundaryHeatmap from './Components/BoundaryHeatmap';
 
 
 // Componente de Loading para os gráficos
@@ -61,6 +62,7 @@ export default function BoundaryAccessAnalytics() {
     frequencyAnalysis,
     detailedRanking,
     realTimeStatus,
+    boundaryMapData,
     loading,
     error
   } = useBoundaryAnalytics(companyId as any, activeTab, selectedPeriod);
@@ -88,6 +90,7 @@ export default function BoundaryAccessAnalytics() {
     if (activeTab === 'overview') {
       newLoadingStates.topBoundaries = topBoundaries.length === 0;
       newLoadingStates.shiftDistribution = !shiftDistribution;
+      newLoadingStates.boundaryMap = boundaryMapData.length === 0;
     } else if (activeTab === 'temporal') {
       newLoadingStates.timeseries = timeSeries.length === 0;
       newLoadingStates.weeklyTrends = weeklyTrends.length === 0;
@@ -115,6 +118,7 @@ export default function BoundaryAccessAnalytics() {
     activeTab,
     topBoundaries,
     shiftDistribution,
+    boundaryMapData,
     timeSeries,
     weeklyTrends,
     weeklyPattern,
@@ -914,6 +918,27 @@ export default function BoundaryAccessAnalytics() {
     return ((current - previous) / previous) * 100;
   };
 
+  // Adicionar função helper para calcular centro do mapa
+function calculateMapCenter(boundaries: any[]): [number, number] {
+  if (boundaries.length === 0) {
+    return [-5.089167, -42.801944]; // Default Teresina
+  }
+
+  const validBoundaries = boundaries.filter(
+    b => b.centroid_lat && b.centroid_lng && 
+    !isNaN(b.centroid_lat) && !isNaN(b.centroid_lng)
+  );
+
+  if (validBoundaries.length === 0) {
+    return [-5.089167, -42.801944]; // Default Teresina
+  }
+
+  const avgLat = validBoundaries.reduce((sum, b) => sum + b.centroid_lat, 0) / validBoundaries.length;
+  const avgLng = validBoundaries.reduce((sum, b) => sum + b.centroid_lng, 0) / validBoundaries.length;
+
+  return [avgLat, avgLng];
+}
+
   const tabs = [
     { id: 'overview', label: t('boundaryAccessAnalytics.tabs.overview'), icon: ChartBarIcon },
     { id: 'temporal', label: t('boundaryAccessAnalytics.tabs.temporal'), icon: ClockIcon },
@@ -1190,6 +1215,57 @@ export default function BoundaryAccessAnalytics() {
 
               </div>
             )}
+
+            {/* NOVO: Mapa de Calor */}
+    <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
+      <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
+        <div>
+          <div className="text-xl font-bold text-[#1A2332]">
+            {t('boundaryAccessAnalytics.maps.heatmap.title')}
+          </div>
+          <div className="text-sm text-[#64748B] mt-1">
+            {t('boundaryAccessAnalytics.maps.heatmap.subtitle')}
+          </div>
+        </div>
+        
+        {/* Legenda */}
+        <div className="flex items-center gap-4">
+          <div className="text-xs text-[#64748B] uppercase font-semibold">
+            {t('boundaryAccessAnalytics.maps.heatmap.legend')}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-[#0F4C81]"></div>
+              <span className="text-xs text-[#64748B]">Baixo</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
+              <span className="text-xs text-[#64748B]">Médio</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-[#F59E0B]"></div>
+              <span className="text-xs text-[#64748B]">Alto</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-[#EF4444]"></div>
+              <span className="text-xs text-[#64748B]">Crítico</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="w-full h-[600px]">
+        {topBoundaries.length === 0 ? (
+          <ChartLoader />
+        ) : (
+          <BoundaryHeatmap 
+            boundaries={boundaryMapData} 
+            center={calculateMapCenter(boundaryMapData)} 
+            zoom={13}
+          />
+        )}
+      </div>
+    </div>
           </div>
         )}
 

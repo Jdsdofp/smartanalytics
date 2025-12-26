@@ -69,6 +69,18 @@ interface DetailedRankingItem {
   avg_per_visit: string;
 }
 
+// Adicionar interface para dados do mapa
+interface BoundaryMapData {
+  boundary_id: number;
+  boundary_name: string;
+  geojson_data: any;
+  centroid_lat: number;
+  centroid_lng: number;
+  visits: number;
+  duration_hours: number;
+  is_currently_inside: number;
+}
+
 export const useBoundaryAnalytics = (
   companyId: number,
   activeTab: string,
@@ -96,6 +108,8 @@ export const useBoundaryAnalytics = (
   const [complianceMetrics, setComplianceMetrics] = useState<ComplianceMetrics | null>(null);
   // Adicionar estado
   const [detailedRanking, setDetailedRanking] = useState<DetailedRankingItem[]>([]);
+    // Adicionar novo estado para dados do mapa
+  const [boundaryMapData, setBoundaryMapData] = useState<BoundaryMapData[]>([]);
 
 
   const [sankeyData, setSankeyData] = useState<SankeyDataItem[]>([]);
@@ -142,6 +156,7 @@ export const useBoundaryAnalytics = (
               fetchTopBoundaries(),
               fetchShiftDistribution(),
               fetchRealTimeStatus(),
+              fetchBoundaryMapData(),
             ]);
             break;
 
@@ -222,6 +237,34 @@ export const useBoundaryAnalytics = (
       `${API_BASE_URL}/dashboard/boundary/${companyId}/shift-distribution`
     );
     setShiftDistribution(data.data);
+  };
+
+  // Adicionar função de fetch para dados do mapa
+  const fetchBoundaryMapData = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/map-data`
+      );
+      
+      // Processar dados para garantir formato correto
+      const processedData = (data.data || []).map((item: any) => ({
+        boundary_id: item.boundary_id,
+        boundary_name: item.boundary_name,
+        geojson_data: typeof item.geojson_data === 'string' 
+          ? JSON.parse(item.geojson_data) 
+          : item.geojson_data,
+        centroid_lat: parseFloat(item.centroid_lat || item.lat || 0),
+        centroid_lng: parseFloat(item.centroid_lng || item.log || 0),
+        visits: parseInt(item.visits || 0),
+        duration_hours: parseFloat(item.duration_hours || 0),
+        is_currently_inside: parseInt(item.is_currently_inside || 0)
+      }));
+
+      setBoundaryMapData(processedData);
+    } catch (err) {
+      console.error("Error fetching boundary map data:", err);
+      setBoundaryMapData([]);
+    }
   };
 
   const fetchTimeSeries = async () => {
@@ -395,6 +438,7 @@ const fetchDetailedRanking = async () => {
     frequencyAnalysis,
     detailedRanking,
     realTimeStatus,
+    boundaryMapData,
     loading,
     error,
   };
