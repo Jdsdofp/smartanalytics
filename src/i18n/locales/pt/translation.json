@@ -1308,16 +1308,15 @@
       "concurrentRenewalsAnalysis": "Análise de Renovações Concorrentes",
       "strategicImportance": "Importância Estratégica",
       "strategicDistribution": "Distribuição Estratégica dos Certificados",
-       "certificateStatus": {
-      "VALID": "Válido",
-      "EXPIRED": "Expirado",
-      "EXPIRING_SOON": "Expirando em Breve",
-      "EXPIRING_MEDIUM": "Expirando em Médio Prazo",
-      "NO_EXPIRATION": "Sem Expiração",
-      "ON_HOLD": "Em Espera"
-    }
+      "certificateStatus": {
+        "VALID": "Válido",
+        "EXPIRED": "Expirado",
+        "EXPIRING_SOON": "Expirando em Breve",
+        "EXPIRING_MEDIUM": "Expirando em Médio Prazo",
+        "NO_EXPIRATION": "Sem Expiração",
+        "ON_HOLD": "Em Espera"
+      }
     },
-   
 
     "calendar": {
       "certificateExpirationCalendar": "Calendário de Expiração de Certificados",
@@ -1591,7 +1590,7 @@
       "shortenFailed": "Erro ao encurtar URL"
     }
   },
-   "boundaryAccessAnalytics": {
+  "boundaryAccessAnalytics": {
     "tabs": {
       "overview": "Overview",
       "temporal": "Análise Temporal",
@@ -1599,7 +1598,9 @@
       "anomalies": "Anomalias",
       "flow": "Fluxo & Movimento",
       "compliance": "Compliance",
-      "rankings": "Rankings"
+      "rankings": "Rankings",
+      "load": "Carregando gráfico...",
+      "days": "{{days}} Dias"
     },
     "kpis": {
       "visitsToday": "Visitas Hoje",
@@ -1731,7 +1732,8 @@
           "to": "Para",
           "transitions": "Transições",
           "avgTime": "Tempo Médio",
-          "type": "Tipo"
+          "type": "Tipo",
+          "count": "Contagem"
         },
         "types": {
           "sameGroup": "SAME GROUP",
@@ -1783,6 +1785,74 @@
       "hours": "h",
       "percentage": "%",
       "minutes": "min"
+    },
+    "anomalyKpis": {
+      "detectedAnomalies": "Anomalias Detectadas",
+      "totalDetected": "Total de anomalias identificadas",
+      "extremeAnomalies": "Anomalias Extremas",
+      "critical": "CRÍTICO",
+      "highAnomalies": "Anomalias Altas",
+      "warning": "ALERTA",
+      "avgZScore": "Z-Score Médio",
+      "standardDeviation": "Desvio padrão normalizado"
+    },
+    "table": {
+      "topAnomalies": {
+        "title": "Top 10 Anomalias",
+        "subtitle": "Ordenado por Z-Score",
+        "noData": "Nenhuma anomalia detectada",
+        "headers": {
+          "datetime": "Data/Hora",
+          "person": "Pessoa",
+          "boundary": "Perímetro",
+          "duration": "Duração",
+          "zScore": "Z-Score",
+          "level": "Nível"
+        },
+        "levels": {
+          "extreme": "EXTREMO",
+          "high": "ALTO",
+          "moderate": "MODERADO"
+        },
+        "detailedRanking": {
+          "title": "Ranking Detalhado Top 10",
+          "subtitle": "Análise completa de permanência por pessoa",
+          "headers": {
+            "rank": "Rank",
+            "person": "Pessoa",
+            "boundary": "Perímetro",
+            "duration": "Duração Total",
+            "visits": "Visitas",
+            "activeDays": "Dias Ativos",
+            "avgPerVisit": "Média/Visita"
+          }
+        }
+      },
+      "complianceSummary": {
+        "title": "Resumo de Conformidade",
+        "subtitle": "Análise de compliance por perímetro",
+        "headers": {
+          "boundary": "Perímetro",
+          "totalVisits": "Total Visitas",
+          "alertRate": "Taxa Alerta",
+          "offHours": "Fora Horário",
+          "weekend": "Final Semana",
+          "status": "Status"
+        },
+        "statuses": {
+          "ok": "OK",
+          "warning": "ATENÇÃO",
+          "critical": "CRÍTICO"
+        }
+      }
+    },
+    "complianceMetrics": {
+      "totalVisits": "Total de Visitas",
+      "allBoundaries": "Todos os perímetros",
+      "totalAlerts": "Total de Alertas",
+      "avgRate": "média",
+      "offHoursEntries": "Entradas Fora de Horário",
+      "weekendVisits": "Visitas Fim de Semana"
     }
   }
 }

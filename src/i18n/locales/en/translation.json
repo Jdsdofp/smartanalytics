@@ -1275,17 +1275,15 @@
       "concurrentRenewalsAnalysis": "Concurrent Renewals Analysis",
       "strategicImportance": "Strategic Importance",
       "strategicDistribution": "Strategic Distribution",
-        "certificateStatus": {
-      "VALID": "Valid",
-      "EXPIRED": "Expired",
-      "EXPIRING_SOON": "Expiring Soon",
-      "EXPIRING_MEDIUM": "Expiring Medium Term",
-      "NO_EXPIRATION": "No Expiration",
-      "ON_HOLD": "ON HOLD"
-    }
+      "certificateStatus": {
+        "VALID": "Valid",
+        "EXPIRED": "Expired",
+        "EXPIRING_SOON": "Expiring Soon",
+        "EXPIRING_MEDIUM": "Expiring Medium Term",
+        "NO_EXPIRATION": "No Expiration",
+        "ON_HOLD": "ON HOLD"
+      }
     },
-
-  
 
     "calendar": {
       "certificateExpirationCalendar": "Certificate Expiration Calendar",
@@ -1505,7 +1503,7 @@
       "reportsDesc": "Receive a weekly summary of activities"
     }
   },
-   "embed": {
+  "embed": {
     "button": {
       "title": "Generate embed link",
       "label": "Embed",
@@ -1558,7 +1556,7 @@
       "shortenFailed": "Failed to shorten URL"
     }
   },
-   "boundaryAccessAnalytics": {
+  "boundaryAccessAnalytics": {
     "tabs": {
       "overview": "Overview",
       "temporal": "Temporal Analysis",
@@ -1566,7 +1564,9 @@
       "anomalies": "Anomalies",
       "flow": "Flow & Movement",
       "compliance": "Compliance",
-      "rankings": "Rankings"
+      "rankings": "Rankings",
+      "load": "Loading chart...",
+      "days": "{{days}} Days"
     },
     "kpis": {
       "visitsToday": "Today's Visits",
@@ -1698,7 +1698,8 @@
           "to": "To",
           "transitions": "Transitions",
           "avgTime": "Avg Time",
-          "type": "Type"
+          "type": "Type",
+          "count": "Count"
         },
         "types": {
           "sameGroup": "SAME GROUP",
@@ -1750,6 +1751,74 @@
       "hours": "h",
       "percentage": "%",
       "minutes": "min"
+    },
+    "anomalyKpis": {
+      "detectedAnomalies": "Detected Anomalies",
+      "totalDetected": "Total identified anomalies",
+      "extremeAnomalies": "Extreme Anomalies",
+      "critical": "CRITICAL",
+      "highAnomalies": "High Anomalies",
+      "warning": "WARNING",
+      "avgZScore": "Average Z-Score",
+      "standardDeviation": "Normalized standard deviation"
+    },
+    "table": {
+      "topAnomalies": {
+        "title": "Top 10 Anomalies",
+        "subtitle": "Sorted by Z-Score",
+        "noData": "No anomalies detected",
+        "headers": {
+          "datetime": "Date/Time",
+          "person": "Person",
+          "boundary": "Boundary",
+          "duration": "Duration",
+          "zScore": "Z-Score",
+          "level": "Level"
+        },
+        "levels": {
+          "extreme": "EXTREME",
+          "high": "HIGH",
+          "moderate": "MODERATE"
+        }
+      },
+      "complianceSummary": {
+        "title": "Compliance Summary",
+        "subtitle": "Compliance analysis by boundary",
+        "headers": {
+          "boundary": "Boundary",
+          "totalVisits": "Total Visits",
+          "alertRate": "Alert Rate",
+          "offHours": "Off Hours",
+          "weekend": "Weekend",
+          "status": "Status"
+        },
+        "statuses": {
+          "ok": "OK",
+          "warning": "WARNING",
+          "critical": "CRITICAL"
+        }
+      },
+      "detailedRanking": {
+        "title": "Top 10 Detailed Ranking",
+        "subtitle": "Complete stay analysis per person",
+        "headers": {
+          "rank": "Rank",
+          "person": "Person",
+          "boundary": "Boundary",
+          "duration": "Total Duration",
+          "visits": "Visits",
+          "activeDays": "Active Days",
+          "avgPerVisit": "Avg/Visit"
+        }
+      }
+    },
+    "complianceMetrics": {
+      "totalVisits": "Total Visits",
+      "allBoundaries": "All boundaries",
+      "totalAlerts": "Total Alerts",
+      "avgRate": "avg",
+      "offHoursEntries": "Off-Hours Entries",
+      "weekendVisits": "Weekend Visits"
     }
   }
 }

@@ -1,8 +1,8 @@
 // src/hooks/useBoundaryAnalytics.ts
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-const API_BASE_URL = 'https://apinode.smartxhub.cloud/api';
+const API_BASE_URL = "https://apinode.smartxhub.cloud/api";
 
 interface SankeyDataItem {
   source: string;
@@ -18,10 +18,65 @@ interface TopTransitionItem {
   avg_minutes: string;
 }
 
-export const useBoundaryAnalytics = (companyId: number, activeTab: string, selectedPeriod: '7d' | '30d' | '90d') => {
+// Adicionar interface
+interface AnomalyKPIs {
+  detected_anomalies: number;
+  avg_z_score: number;
+  extreme_anomalies: string;
+  high_anomalies: string;
+}
+
+// Adicionar interface
+interface TopAnomalyItem {
+  entry_datetime: string;
+  item_name: string;
+  boundary_name: string;
+  duration_hours: string;
+  avg_duration_minutes: string;
+  z_score: number;
+  anomaly_level: string;
+}
+
+// Adicionar interface
+interface ComplianceSummaryItem {
+  boundary_name: string;
+  total_visits: number;
+  alert_rate_pct: string;
+  off_hours_entry_pct: string;
+  weekend_visit_pct: string;
+  status: string;
+}
+
+// Adicionar interface
+interface ComplianceMetrics {
+  avg_alert_rte: string;
+  avg_off_hours_pct: string;
+  avg_weekend_pct: string;
+  total_visits: string;
+  total_alerts: string;
+  total_off_hours: string;
+  total_weekend: string;
+}
+
+// Adicionar interface
+interface DetailedRankingItem {
+  rank: number;
+  item_name: string;
+  boundary_name: string;
+  duration: string;
+  visits: number;
+  total_active_days: number;
+  avg_per_visit: string;
+}
+
+export const useBoundaryAnalytics = (
+  companyId: number,
+  activeTab: string,
+  selectedPeriod: "7d" | "30d" | "90d"
+) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Estados para cada tipo de dado
   const [kpis, setKpis] = useState<any>(null);
   const [topBoundaries, setTopBoundaries] = useState<any[]>([]);
@@ -31,6 +86,18 @@ export const useBoundaryAnalytics = (companyId: number, activeTab: string, selec
   const [weeklyPattern, setWeeklyPattern] = useState<any[]>([]);
   const [heatmap, setHeatmap] = useState<any[]>([]);
   const [anomalies, setAnomalies] = useState<any[]>([]);
+  // Adicionar estado
+  const [anomalyKpis, setAnomalyKpis] = useState<AnomalyKPIs | null>(null);
+  // Adicionar estado
+  const [topAnomalies, setTopAnomalies] = useState<TopAnomalyItem[]>([]);
+  // Adicionar estado
+  const [complianceSummary, setComplianceSummary] = useState<ComplianceSummaryItem[]>([]);
+  // Adicionar estado
+  const [complianceMetrics, setComplianceMetrics] = useState<ComplianceMetrics | null>(null);
+  // Adicionar estado
+  const [detailedRanking, setDetailedRanking] = useState<DetailedRankingItem[]>([]);
+
+
   const [sankeyData, setSankeyData] = useState<SankeyDataItem[]>([]);
   const [topTransitions, setTopTransitions] = useState<TopTransitionItem[]>([]);
   const [durationBuckets, setDurationBuckets] = useState<any>(null);
@@ -41,21 +108,21 @@ export const useBoundaryAnalytics = (companyId: number, activeTab: string, selec
 
   // Função para converter dados do Sankey para o formato esperado
   const convertSankeyData = (apiData: any[]): SankeyDataItem[] => {
-    return apiData.map(item => ({
+    return apiData.map((item) => ({
       source: item.source,
       target: item.target,
       value: item.value,
-      avg_time: item.avg_time
+      avg_time: item.avg_time,
     }));
   };
 
   // Função para converter dados de Top Transitions
   const convertTopTransitions = (apiData: any[]): TopTransitionItem[] => {
-    return apiData.map(item => ({
+    return apiData.map((item) => ({
       from_boundary_name: item.from_boundary_name,
       to_boundary_name: item.to_boundary_name,
       transition_count: item.transition_count,
-      avg_minutes: item.avg_minutes
+      avg_minutes: item.avg_minutes,
     }));
   };
 
@@ -69,54 +136,56 @@ export const useBoundaryAnalytics = (companyId: number, activeTab: string, selec
 
       try {
         switch (activeTab) {
-          case 'overview':
+          case "overview":
             await Promise.all([
               fetchKPIs(),
               fetchTopBoundaries(),
               fetchShiftDistribution(),
-              fetchRealTimeStatus()
+              fetchRealTimeStatus(),
             ]);
             break;
 
-          case 'temporal':
+          case "temporal":
             await Promise.all([
               fetchTimeSeries(),
               fetchWeeklyTrends(),
-              fetchWeeklyPattern()
+              fetchWeeklyPattern(),
             ]);
             break;
 
-          case 'heatmap':
+          case "heatmap":
             await fetchHeatmap();
             break;
 
-          case 'anomalies':
+          case "anomalies":
             await fetchAnomalies();
+            await fetchAnomalyKpis();
+            await fetchTopAnomalies();
             break;
 
-          case 'flow':
-            await Promise.all([
-              fetchSankeyData(),
-              fetchTopTransitions()
-            ]);
+          case "flow":
+            await Promise.all([fetchSankeyData(), fetchTopTransitions()]);
             break;
 
-          case 'compliance':
+          case "compliance":
             await Promise.all([
               fetchDurationBuckets(),
-              fetchAlertRate()
+              fetchAlertRate(),
+              fetchComplianceSummary(),
+              fetchComplianceMetrics(),
             ]);
             break;
 
-          case 'rankings':
+          case "rankings":
             await Promise.all([
               fetchTopPeople(),
-              fetchFrequencyAnalysis()
+              fetchFrequencyAnalysis(),
+              fetchDetailedRanking(),
             ]);
             break;
         }
       } catch (err: any) {
-        setError(err.message || 'Erro ao carregar dados');
+        setError(err.message || "Erro ao carregar dados");
       } finally {
         setLoading(false);
       }
@@ -125,90 +194,183 @@ export const useBoundaryAnalytics = (companyId: number, activeTab: string, selec
     fetchData();
   }, [companyId, activeTab, selectedPeriod]);
 
+  // Adicionar função de fetch
+  const fetchAnomalyKpis = async () => {
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/anomaly-kpis`
+    );
+    setAnomalyKpis(data.data);
+  };
+
   // Funções de fetch individuais
   const fetchKPIs = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/kpis`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/kpis`
+    );
     setKpis(data.data);
   };
 
   const fetchTopBoundaries = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/top-boundaries?limit=10`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/top-boundaries?limit=10`
+    );
     setTopBoundaries(data.data);
   };
 
   const fetchShiftDistribution = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/shift-distribution`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/shift-distribution`
+    );
     setShiftDistribution(data.data);
   };
 
   const fetchTimeSeries = async () => {
-    const days = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90;
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/time-series?days=${days}`);
+    const days =
+      selectedPeriod === "7d" ? 7 : selectedPeriod === "30d" ? 30 : 90;
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/time-series?days=${days}`
+    );
     setTimeSeries(data.data);
   };
 
   const fetchWeeklyTrends = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/weekly-trends?weeks=8`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/weekly-trends?weeks=8`
+    );
     setWeeklyTrends(data.data);
   };
 
   const fetchWeeklyPattern = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/weekly-pattern`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/weekly-pattern`
+    );
     setWeeklyPattern(data.data);
   };
 
   const fetchHeatmap = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/heatmap?days=30`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/heatmap?days=30`
+    );
     setHeatmap(data.data);
   };
 
   const fetchAnomalies = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/anomalies?limit=100`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/anomalies?limit=100`
+    );
     setAnomalies(data.data);
+  };
+
+  // Adicionar função de fetch
+  const fetchTopAnomalies = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/top-anomalies`
+      );
+      // A API retorna { data: [...] }
+      setTopAnomalies(data.data || []);
+    } catch (err) {
+      console.error("Error fetching top anomalies:", err);
+      setTopAnomalies([]);
+    }
   };
 
   const fetchSankeyData = async () => {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/sankey?minTransitions=5`);
+      const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/sankey?minTransitions=5`
+      );
       setSankeyData(convertSankeyData(data.data));
     } catch (err) {
-      console.error('Error fetching sankey data:', err);
+      console.error("Error fetching sankey data:", err);
       setSankeyData([]);
     }
   };
 
   const fetchTopTransitions = async () => {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/top-transitions?limit=20`);
+      const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/top-transitions?limit=20`
+      );
       setTopTransitions(convertTopTransitions(data.data));
     } catch (err) {
-      console.error('Error fetching top transitions:', err);
+      console.error("Error fetching top transitions:", err);
       setTopTransitions([]);
     }
   };
 
   const fetchDurationBuckets = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/duration-buckets`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/duration-buckets`
+    );
     setDurationBuckets(data.data);
   };
 
   const fetchAlertRate = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/alert-rate?limit=10`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/alert-rate?limit=10`
+    );
     setAlertRate(data.data);
   };
 
+  // Adicionar função de fetch
+  const fetchComplianceSummary = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/compliance-summary`
+      );
+      // A API retorna { data: [...] }
+      setComplianceSummary(data.data || []);
+    } catch (err) {
+      console.error("Error fetching compliance summary:", err);
+      setComplianceSummary([]);
+    }
+  };
+
+  // Adicionar função de fetch
+  const fetchComplianceMetrics = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/compliance-metrics`
+      );
+      setComplianceMetrics(data.data);
+    } catch (err) {
+      console.error("Error fetching compliance metrics:", err);
+      setComplianceMetrics(null);
+    }
+  };
+
   const fetchTopPeople = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/top-people?limit=10`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/top-people?limit=10`
+    );
     setTopPeople(data.data);
   };
 
   const fetchFrequencyAnalysis = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/frequency?limit=10`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/frequency?limit=10`
+    );
     setFrequencyAnalysis(data.data);
   };
 
+  // Adicionar função de fetch
+
+const fetchDetailedRanking = async () => {
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/detailed-ranking?limit=10`);
+    // A API retorna { data: [...] }
+    setDetailedRanking(data.data || []);
+  } catch (err) {
+    console.error('Error fetching detailed ranking:', err);
+    setDetailedRanking([]);
+  }
+};
+
   const fetchRealTimeStatus = async () => {
-    const { data } = await axios.get(`${API_BASE_URL}/dashboard/boundary/${companyId}/real-time-status?limit=20`);
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/real-time-status?limit=20`
+    );
     setRealTimeStatus(data.data);
   };
 
@@ -221,14 +383,19 @@ export const useBoundaryAnalytics = (companyId: number, activeTab: string, selec
     weeklyPattern,
     heatmap,
     anomalies,
+    anomalyKpis,
+    topAnomalies,
     sankeyData,
     topTransitions,
     durationBuckets,
     alertRate,
+    complianceSummary,
+    complianceMetrics,
     topPeople,
     frequencyAnalysis,
+    detailedRanking,
     realTimeStatus,
     loading,
-    error
+    error,
   };
 };

@@ -25,7 +25,7 @@ const ChartLoader = () => (
         <div className="absolute top-0 left-0 w-full h-full border-4 border-[#E2E8F0] rounded-full"></div>
         <div className="absolute top-0 left-0 w-full h-full border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
       </div>
-      <p className="text-sm text-[#64748B] font-medium">Carregando gráfico...</p>
+      <p className="text-sm text-[#64748B] font-medium">{t('boundaryAccessAnalytics.tabs.load')}</p>
     </div>
   </div>
 );
@@ -37,8 +37,8 @@ export default function BoundaryAccessAnalytics() {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d');
   const [chartLoadingStates, setChartLoadingStates] = useState<Record<string, boolean>>({});
 
-  const {companyId} = useCompany()
-  
+  const { companyId } = useCompany()
+
   // Custom hook para gerenciar todos os dados
   const {
     kpis,
@@ -49,17 +49,22 @@ export default function BoundaryAccessAnalytics() {
     weeklyPattern,
     heatmap,
     anomalies,
+    anomalyKpis,
+    topAnomalies,
     sankeyData,
     topTransitions,
     durationBuckets,
     alertRate,
+    complianceSummary,
+    complianceMetrics,
     topPeople,
     frequencyAnalysis,
+    detailedRanking,
     realTimeStatus,
     loading,
     error
   } = useBoundaryAnalytics(companyId as any, activeTab, selectedPeriod);
-  
+
   const chartRefs = {
     topBoundaries: useRef(null),
     shiftDistribution: useRef(null),
@@ -79,7 +84,7 @@ export default function BoundaryAccessAnalytics() {
   // Atualizar estados de loading baseado na aba ativa e dados disponíveis
   useEffect(() => {
     const newLoadingStates: Record<string, boolean> = {};
-    
+
     if (activeTab === 'overview') {
       newLoadingStates.topBoundaries = topBoundaries.length === 0;
       newLoadingStates.shiftDistribution = !shiftDistribution;
@@ -91,18 +96,61 @@ export default function BoundaryAccessAnalytics() {
       newLoadingStates.heatmap = heatmap.length === 0;
     } else if (activeTab === 'anomalies') {
       newLoadingStates.anomalies = anomalies.length === 0;
+      newLoadingStates.topAnomalies = topAnomalies.length === 0;
     } else if (activeTab === 'flow') {
       newLoadingStates.sankey = sankeyData.length === 0;
       newLoadingStates.topTransitions = topTransitions.length === 0;
     } else if (activeTab === 'compliance') {
       newLoadingStates.durationBuckets = !durationBuckets;
       newLoadingStates.alertRate = alertRate.length === 0;
+      newLoadingStates.complianceSummary = complianceSummary.length === 0;
     } else if (activeTab === 'rankings') {
       newLoadingStates.topPeople = topPeople.length === 0;
       newLoadingStates.frequency = frequencyAnalysis.length === 0;
+      newLoadingStates.detailedRanking = detailedRanking.length === 0;
     }
-    
+
     setChartLoadingStates(newLoadingStates);
+  }, [
+    activeTab,
+    topBoundaries,
+    shiftDistribution,
+    timeSeries,
+    weeklyTrends,
+    weeklyPattern,
+    heatmap,
+    anomalies,
+    anomalyKpis,
+    topAnomalies,
+    sankeyData,
+    topTransitions,
+    durationBuckets,
+    alertRate,
+    complianceSummary,
+    topPeople,
+    frequencyAnalysis,
+    detailedRanking
+  ]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      initCharts(activeTab);
+    }, 100);
+
+    const handleResize = () => {
+      Object.values(chartRefs).forEach(ref => {
+        if (ref.current) {
+          const instance = echarts.getInstanceByDom(ref.current);
+          instance?.resize();
+        }
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [
     activeTab,
     topBoundaries,
@@ -116,44 +164,10 @@ export default function BoundaryAccessAnalytics() {
     topTransitions,
     durationBuckets,
     alertRate,
+    complianceSummary,
     topPeople,
-    frequencyAnalysis
-  ]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      initCharts(activeTab);
-    }, 100);
-    
-    const handleResize = () => {
-      Object.values(chartRefs).forEach(ref => {
-        if (ref.current) {
-          const instance = echarts.getInstanceByDom(ref.current);
-          instance?.resize();
-        }
-      });
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [
-    activeTab, 
-    topBoundaries, 
-    shiftDistribution,
-    timeSeries, 
-    weeklyTrends, 
-    weeklyPattern,
-    heatmap, 
-    anomalies, 
-    sankeyData, 
-    topTransitions,
-    durationBuckets,
-    alertRate,
-    topPeople,
-    frequencyAnalysis
+    frequencyAnalysis,
+    detailedRanking
   ]);
 
   const initCharts = (section: string) => {
@@ -180,13 +194,59 @@ export default function BoundaryAccessAnalytics() {
     }
   };
 
+  // Adicionar função helper para formatar data/hora
+  const formatDateTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+
+  // Adicionar função helper para badge de status
+  const getComplianceStatusBadge = (status: string) => {
+    const badges: Record<string, { bg: string; text: string; label: string }> = {
+      'WARNING': {
+        bg: 'bg-yellow-100',
+        text: 'text-yellow-600',
+        label: t('boundaryAccessAnalytics.table.complianceSummary.statuses.warning')
+      },
+      'CRITICAL': {
+        bg: 'bg-red-100',
+        text: 'text-red-600',
+        label: t('boundaryAccessAnalytics.table.complianceSummary.statuses.critical')
+      },
+      'OK': {
+        bg: 'bg-green-100',
+        text: 'text-green-600',
+        label: t('boundaryAccessAnalytics.table.complianceSummary.statuses.ok')
+      }
+    };
+
+    const badge = badges[status] || { bg: 'bg-gray-100', text: 'text-gray-600', label: status };
+
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold uppercase ${badge.bg} ${badge.text}`}>
+        {status === 'WARNING' && <ExclamationTriangleIcon className="w-3 h-3" />}
+        {status === 'CRITICAL' && <ExclamationTriangleIcon className="w-3 h-3" />}
+        {status === 'OK' && <ShieldCheckIcon className="w-3 h-3" />}
+        {badge.label}
+      </span>
+    );
+  };
+
+
   // ✅ CHART INIT FUNCTIONS COM DADOS REAIS
   const initTopBoundariesChart = () => {
     if (!chartRefs.topBoundaries.current || !topBoundaries.length) return;
     const chart = echarts.init(chartRefs.topBoundaries.current);
-    
+
     const sortedData = [...topBoundaries].reverse();
-    
+
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 120, right: 50, top: 20, bottom: 50 },
@@ -204,10 +264,10 @@ export default function BoundaryAccessAnalytics() {
             { offset: 1, color: '#FF6B35' }
           ])
         },
-        label: { 
-          show: true, 
-          position: 'right', 
-          formatter: '{c}' + t('boundaryAccessAnalytics.labels.hours') 
+        label: {
+          show: true,
+          position: 'right',
+          formatter: '{c}' + t('boundaryAccessAnalytics.labels.hours')
         }
       }]
     };
@@ -219,7 +279,7 @@ export default function BoundaryAccessAnalytics() {
     const chart = echarts.init(chartRefs.shiftDistribution.current);
     //@ts-ignore
     const total = shiftDistribution.morning + shiftDistribution.afternoon + shiftDistribution.night;
-    
+
     const option = {
       tooltip: { trigger: 'item' },
       legend: { bottom: 10 },
@@ -230,20 +290,20 @@ export default function BoundaryAccessAnalytics() {
         itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
         label: { show: true, formatter: '{b}: {d}%' },
         data: [
-          { 
-            value: shiftDistribution.morning, 
-            name: t('boundaryAccessAnalytics.charts.shiftDistribution.morning'), 
-            itemStyle: { color: '#0F4C81' } 
+          {
+            value: shiftDistribution.morning,
+            name: t('boundaryAccessAnalytics.charts.shiftDistribution.morning'),
+            itemStyle: { color: '#0F4C81' }
           },
-          { 
-            value: shiftDistribution.afternoon, 
-            name: t('boundaryAccessAnalytics.charts.shiftDistribution.afternoon'), 
-            itemStyle: { color: '#FF6B35' } 
+          {
+            value: shiftDistribution.afternoon,
+            name: t('boundaryAccessAnalytics.charts.shiftDistribution.afternoon'),
+            itemStyle: { color: '#FF6B35' }
           },
-          { 
-            value: shiftDistribution.night, 
-            name: t('boundaryAccessAnalytics.charts.shiftDistribution.night'), 
-            itemStyle: { color: '#64748B' } 
+          {
+            value: shiftDistribution.night,
+            name: t('boundaryAccessAnalytics.charts.shiftDistribution.night'),
+            itemStyle: { color: '#64748B' }
           }
         ]
       }]
@@ -254,15 +314,15 @@ export default function BoundaryAccessAnalytics() {
   const initTimeSeriesChart = () => {
     if (!chartRefs.timeseries.current || !timeSeries.length) return;
     const chart = echarts.init(chartRefs.timeseries.current);
-    
+
     const dates = timeSeries.map(d => d.date_display);
     const currentData = timeSeries.map(d => d.daily_duration_hours);
     const ma7Data = timeSeries.map(d => d.ma_7d_duration_hours);
     const ma30Data = timeSeries.map(d => d.ma_30d_duration_hours);
-    
+
     const option = {
       tooltip: { trigger: 'axis' },
-      legend: { 
+      legend: {
         bottom: 20,
         data: [
           t('boundaryAccessAnalytics.charts.timeSeries.current'),
@@ -277,7 +337,7 @@ export default function BoundaryAccessAnalytics() {
         boundaryGap: false,
         axisLabel: { margin: 10 }
       },
-      yAxis: { 
+      yAxis: {
         type: 'value',
         name: 'Horas',
         splitLine: { show: true, lineStyle: { color: '#E2E8F0' } }
@@ -290,7 +350,7 @@ export default function BoundaryAccessAnalytics() {
           smooth: true,
           itemStyle: { color: '#0F4C81' },
           lineStyle: { width: 2.5 },
-          areaStyle: { 
+          areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: 'rgba(15, 76, 129, 0.3)' },
               { offset: 1, color: 'rgba(15, 76, 129, 0.05)' }
@@ -319,20 +379,20 @@ export default function BoundaryAccessAnalytics() {
         }
       ]
     };
-    
+
     chart.setOption(option);
   };
 
   const initWeeklyTrendsChart = () => {
     if (!chartRefs.weeklyTrends.current || !weeklyTrends.length) return;
     const chart = echarts.init(chartRefs.weeklyTrends.current);
-    
+
     const option = {
-      tooltip: { 
+      tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' }
       },
-      legend: { 
+      legend: {
         bottom: 15,
         data: [
           t('boundaryAccessAnalytics.charts.weeklyTrends.currentWeek'),
@@ -341,12 +401,12 @@ export default function BoundaryAccessAnalytics() {
         textStyle: { fontSize: 12 }
       },
       grid: { left: 50, right: 50, top: 30, bottom: 60 },
-      xAxis: { 
-        type: 'category', 
+      xAxis: {
+        type: 'category',
         data: weeklyTrends.map(d => d.year_week),
         axisLabel: { margin: 8, fontSize: 11 }
       },
-      yAxis: { 
+      yAxis: {
         type: 'value',
         name: 'Horas',
         splitLine: { show: true, lineStyle: { color: '#E2E8F0' } }
@@ -356,7 +416,7 @@ export default function BoundaryAccessAnalytics() {
           name: t('boundaryAccessAnalytics.charts.weeklyTrends.currentWeek'),
           type: 'bar',
           data: weeklyTrends.map(d => d.duration_current_week_hours),
-          itemStyle: { 
+          itemStyle: {
             color: '#0F4C81',
             borderRadius: [4, 4, 0, 0]
           },
@@ -366,34 +426,34 @@ export default function BoundaryAccessAnalytics() {
           name: t('boundaryAccessAnalytics.charts.weeklyTrends.previousWeek'),
           type: 'bar',
           data: weeklyTrends.map(d => d.duration_last_week_hours),
-          itemStyle: { 
+          itemStyle: {
             color: '#CBD5E1',
             borderRadius: [4, 4, 0, 0]
           }
         }
       ]
     };
-    
+
     chart.setOption(option);
   };
 
   const initWeeklyPatternChart = () => {
     if (!chartRefs.weeklyPattern.current || !weeklyPattern.length) return;
     const chart = echarts.init(chartRefs.weeklyPattern.current);
-    
+
     const option = {
-      tooltip: { 
+      tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'cross' }
       },
       grid: { left: 50, right: 50, top: 30, bottom: 60 },
-      xAxis: { 
-        type: 'category', 
+      xAxis: {
+        type: 'category',
         data: weeklyPattern.map(d => d.day_name),
         boundaryGap: false,
         axisLabel: { margin: 10, fontSize: 12 }
       },
-      yAxis: { 
+      yAxis: {
         type: 'value',
         name: 'Horas',
         splitLine: { show: true, lineStyle: { color: '#E2E8F0' } }
@@ -414,28 +474,28 @@ export default function BoundaryAccessAnalytics() {
         }
       }]
     };
-    
+
     chart.setOption(option);
   };
 
   const initHeatmapChart = () => {
     if (!chartRefs.heatmap.current || !heatmap.length) return;
     const chart = echarts.init(chartRefs.heatmap.current);
-    
+
     const heatmapData = heatmap.map(d => [
       d.entry_hour,
       d.entry_day_of_week - 1,
       d.total_entries
     ]);
-    
+
     const days = t('boundaryAccessAnalytics.charts.weeklyPattern.days', { returnObjects: true }) as string[];
-    
+
     const option = {
       tooltip: { position: 'top' },
       grid: { height: '70%', top: '10%' },
       xAxis: {
         type: 'category',
-        data: Array.from({length: 24}, (_, i) => i + 'h'),
+        data: Array.from({ length: 24 }, (_, i) => i + 'h'),
         splitArea: { show: true }
       },
       yAxis: {
@@ -456,11 +516,11 @@ export default function BoundaryAccessAnalytics() {
         type: 'heatmap',
         data: heatmapData,
         label: { show: false },
-        emphasis: { 
-          itemStyle: { 
-            shadowBlur: 10, 
-            shadowColor: 'rgba(0, 0, 0, 0.5)' 
-          } 
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
         }
       }]
     };
@@ -470,17 +530,17 @@ export default function BoundaryAccessAnalytics() {
   const initAnomaliesChart = () => {
     if (!chartRefs.anomalies.current || !anomalies.length) return;
     const chart = echarts.init(chartRefs.anomalies.current);
-    
+
     //@ts-ignore
     const scatterData = anomalies.slice(0, 50).map((d: any, idx: number) => {
       const date = new Date(d.entry_datetime);
       const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
       const duration = 1 + Math.random() * 8;
       const zScore = 1.5 + Math.random() * 2.5;
-      
+
       return [dateStr, duration, zScore];
     });
-    
+
     const option = {
       tooltip: {
         trigger: 'item',
@@ -489,12 +549,12 @@ export default function BoundaryAccessAnalytics() {
         }
       },
       grid: { left: 80, right: 80, top: 50, bottom: 80 },
-      xAxis: { 
-        type: 'category', 
+      xAxis: {
+        type: 'category',
         name: t('boundaryAccessAnalytics.charts.anomalies.xAxis')
       },
-      yAxis: { 
-        type: 'value', 
+      yAxis: {
+        type: 'value',
         name: t('boundaryAccessAnalytics.charts.anomalies.yAxis')
       },
       visualMap: {
@@ -517,20 +577,51 @@ export default function BoundaryAccessAnalytics() {
         emphasis: { focus: 'series' }
       }]
     };
-    
+
     chart.setOption(option);
   };
+
+  // Adicionar função helper para badge de anomalia
+  const getAnomalyBadge = (level: string) => {
+    const badges: Record<string, { bg: string; text: string; label: string }> = {
+      'EXTREME_OVERSTAY': {
+        bg: 'bg-red-100',
+        text: 'text-red-600',
+        label: t('boundaryAccessAnalytics.table.topAnomalies.levels.extreme')
+      },
+      'HIGH_OVERSTAY': {
+        bg: 'bg-orange-100',
+        text: 'text-orange-600',
+        label: t('boundaryAccessAnalytics.table.topAnomalies.levels.high')
+      },
+      'MODERATE_OVERSTAY': {
+        bg: 'bg-yellow-100',
+        text: 'text-yellow-600',
+        label: t('boundaryAccessAnalytics.table.topAnomalies.levels.moderate')
+      }
+    };
+
+    const badge = badges[level] || { bg: 'bg-gray-100', text: 'text-gray-600', label: level };
+
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold uppercase ${badge.bg} ${badge.text}`}>
+        <ExclamationTriangleIcon className="w-3 h-3" />
+        {badge.label}
+      </span>
+    );
+  };
+
 
   const initSankeyChart = () => {
     if (!chartRefs.sankey.current || !sankeyData.length) return;
     const chart = echarts.init(chartRefs.sankey.current);
-    
+
     const nodeValueMap = new Map<string, number>();
     sankeyData.forEach(d => {
       nodeValueMap.set(d.source, (nodeValueMap.get(d.source) || 0) + d.value);
       nodeValueMap.set(d.target, (nodeValueMap.get(d.target) || 0) + d.value);
     });
-    
+
     const nodes = Array.from(nodeValueMap.entries()).map(([name, value]) => ({
       name,
       symbolSize: Math.sqrt(value) * 3,
@@ -544,7 +635,7 @@ export default function BoundaryAccessAnalytics() {
         fontWeight: 'bold'
       }
     }));
-    
+
     const links = sankeyData.map(d => ({
       source: d.source,
       target: d.target,
@@ -562,7 +653,7 @@ export default function BoundaryAccessAnalytics() {
         fontSize: 10
       }
     }));
-    
+
     const option: any = {
       tooltip: {
         trigger: 'item',
@@ -602,32 +693,32 @@ export default function BoundaryAccessAnalytics() {
         }
       }]
     };
-    
+
     chart.setOption(option);
   };
 
   const initTopTransitionsChart = () => {
     if (!chartRefs.topTransitions.current || !topTransitions.length) return;
     const chart = echarts.init(chartRefs.topTransitions.current);
-    
+
     const sortedData = [...topTransitions].reverse();
-    
+
     const option = {
-      tooltip: { 
-        trigger: 'axis', 
+      tooltip: {
+        trigger: 'axis',
         axisPointer: { type: 'shadow' },
         formatter: (params: any) => {
           const data = params[0];
           const item = sortedData[data.dataIndex];
           return `${item.from_boundary_name} → ${item.to_boundary_name}<br/>
-                  ${t('boundaryAccessAnalytics.tables.topTransitions.tooltip.count')}: ${item.transition_count}<br/>
-                  ${t('boundaryAccessAnalytics.charts.topTransitions.tooltip.avgTime')}: ${item.avg_minutes} min`;
+                  ${t('boundaryAccessAnalytics.tables.topTransitions.headers.count')}: ${item.transition_count}<br/>
+                  ${t('boundaryAccessAnalytics.tables.topTransitions.headers.avgTime')}: ${item.avg_minutes} min`;
         }
       },
       grid: { left: 180, right: 80, top: 20, bottom: 50 },
-      xAxis: { 
-        type: 'value', 
-        name: t('boundaryAccessAnalytics.charts.topTransitions.xAxis') 
+      xAxis: {
+        type: 'value',
+        name: t('boundaryAccessAnalytics.charts.topTransitions.xAxis')
       },
       yAxis: {
         type: 'category',
@@ -648,9 +739,9 @@ export default function BoundaryAccessAnalytics() {
           ]),
           borderRadius: [0, 4, 4, 0]
         },
-        label: { 
-          show: true, 
-          position: 'right', 
+        label: {
+          show: true,
+          position: 'right',
           formatter: '{c}',
           fontSize: 11
         }
@@ -662,18 +753,18 @@ export default function BoundaryAccessAnalytics() {
   const initDurationBucketsChart = () => {
     if (!chartRefs.durationBuckets.current || !durationBuckets) return;
     const chart = echarts.init(chartRefs.durationBuckets.current);
-    
-    const buckets = t('boundaryAccessAnalytics.charts.durationBuckets.buckets', { 
-      returnObjects: true 
+
+    const buckets = t('boundaryAccessAnalytics.charts.durationBuckets.buckets', {
+      returnObjects: true
     }) as string[];
-    
+
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 80, right: 50, top: 20, bottom: 80 },
       xAxis: { type: 'category', data: buckets },
-      yAxis: { 
-        type: 'value', 
-        name: t('boundaryAccessAnalytics.charts.durationBuckets.yAxis') 
+      yAxis: {
+        type: 'value',
+        name: t('boundaryAccessAnalytics.charts.durationBuckets.yAxis')
       },
       series: [{
         type: 'bar',
@@ -699,20 +790,20 @@ export default function BoundaryAccessAnalytics() {
   const initAlertRateChart = () => {
     if (!chartRefs.alertRate.current || !alertRate.length) return;
     const chart = echarts.init(chartRefs.alertRate.current);
-    
+
     const sortedData = [...alertRate].reverse();
-    
+
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 120, right: 50, top: 20, bottom: 50 },
-      xAxis: { 
-        type: 'value', 
-        name: t('boundaryAccessAnalytics.charts.alertRate.xAxis'), 
-        max: 10 
+      xAxis: {
+        type: 'value',
+        name: t('boundaryAccessAnalytics.charts.alertRate.xAxis'),
+        max: 10
       },
-      yAxis: { 
-        type: 'category', 
-        data: sortedData.map(d => d.boundary_name) 
+      yAxis: {
+        type: 'category',
+        data: sortedData.map(d => d.boundary_name)
       },
       series: [{
         type: 'bar',
@@ -722,10 +813,10 @@ export default function BoundaryAccessAnalytics() {
             return params.value > 5 ? '#EF4444' : params.value > 3 ? '#F59E0B' : '#10B981';
           }
         },
-        label: { 
-          show: true, 
-          position: 'right', 
-          formatter: '{c}' + t('boundaryAccessAnalytics.labels.percentage') 
+        label: {
+          show: true,
+          position: 'right',
+          formatter: '{c}' + t('boundaryAccessAnalytics.labels.percentage')
         }
       }]
     };
@@ -735,15 +826,15 @@ export default function BoundaryAccessAnalytics() {
   const initTopPeopleChart = () => {
     if (!chartRefs.topPeople.current || !topPeople.length) return;
     const chart = echarts.init(chartRefs.topPeople.current);
-    
+
     const sortedData = [...topPeople].reverse();
-    
+
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 120, right: 50, top: 20, bottom: 50 },
-      xAxis: { 
-        type: 'value', 
-        name: t('boundaryAccessAnalytics.charts.topPeople.xAxis') 
+      xAxis: {
+        type: 'value',
+        name: t('boundaryAccessAnalytics.charts.topPeople.xAxis')
       },
       yAxis: {
         type: 'category',
@@ -766,15 +857,15 @@ export default function BoundaryAccessAnalytics() {
   const initFrequencyChart = () => {
     if (!chartRefs.frequency.current || !frequencyAnalysis.length) return;
     const chart = echarts.init(chartRefs.frequency.current);
-    
+
     const sortedData = [...frequencyAnalysis].reverse();
-    
+
     const option = {
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       grid: { left: 120, right: 50, top: 20, bottom: 50 },
-      xAxis: { 
-        type: 'value', 
-        name: t('boundaryAccessAnalytics.charts.frequency.xAxis') 
+      xAxis: {
+        type: 'value',
+        name: t('boundaryAccessAnalytics.charts.frequency.xAxis')
       },
       yAxis: {
         type: 'category',
@@ -787,6 +878,35 @@ export default function BoundaryAccessAnalytics() {
       }]
     };
     chart.setOption(option);
+  };
+
+  // Adicionar função helper para badge de ranking
+  const getRankBadge = (rank: number) => {
+    if (rank === 1) {
+      return (
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 text-white font-bold text-sm shadow-lg">
+          🥇
+        </span>
+      );
+    } else if (rank === 2) {
+      return (
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 text-white font-bold text-sm shadow-lg">
+          🥈
+        </span>
+      );
+    } else if (rank === 3) {
+      return (
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white font-bold text-sm shadow-lg">
+          🥉
+        </span>
+      );
+    } else {
+      return (
+        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#F5F7FA] text-[#0F4C81] font-bold text-sm border-2 border-[#E2E8F0]">
+          {rank}
+        </span>
+      );
+    }
   };
 
   const calculateChange = (current: number, previous: number) => {
@@ -809,7 +929,7 @@ export default function BoundaryAccessAnalytics() {
       <div className="min-h-screen bg-[#F5F7FA] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0F4C81] mx-auto mb-4"></div>
-          <p className="text-[#64748B]">Carregando dados...</p>
+          <p className="text-[#64748B]">{t('boundaryAccessAnalytics.tabs.load')}</p>
         </div>
       </div>
     );
@@ -897,11 +1017,10 @@ export default function BoundaryAccessAnalytics() {
                   {kpis.total_visits_today.toLocaleString()}
                 </div>
                 {kpis.total_visits_yesterday > 0 && (
-                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono ${
-                    calculateChange(kpis.total_visits_today, kpis.total_visits_yesterday) >= 0
-                      ? 'bg-green-50 text-green-600'
-                      : 'bg-red-50 text-red-600'
-                  }`}>
+                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono ${calculateChange(kpis.total_visits_today, kpis.total_visits_yesterday) >= 0
+                    ? 'bg-green-50 text-green-600'
+                    : 'bg-red-50 text-red-600'
+                    }`}>
                     {calculateChange(kpis.total_visits_today, kpis.total_visits_yesterday) >= 0 ? (
                       <ArrowUpIcon className="w-3 h-3" />
                     ) : (
@@ -921,11 +1040,10 @@ export default function BoundaryAccessAnalytics() {
                   {kpis.total_hours_today.toLocaleString()}
                 </div>
                 {kpis.total_hours_yesterday > 0 && (
-                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono ${
-                    calculateChange(kpis.total_hours_today, kpis.total_hours_yesterday) >= 0
-                      ? 'bg-green-50 text-green-600'
-                      : 'bg-red-50 text-red-600'
-                  }`}>
+                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono ${calculateChange(kpis.total_hours_today, kpis.total_hours_yesterday) >= 0
+                    ? 'bg-green-50 text-green-600'
+                    : 'bg-red-50 text-red-600'
+                    }`}>
                     {calculateChange(kpis.total_hours_today, kpis.total_hours_yesterday) >= 0 ? (
                       <ArrowUpIcon className="w-3 h-3" />
                     ) : (
@@ -1009,54 +1127,59 @@ export default function BoundaryAccessAnalytics() {
                     </div>
                   </div>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto overflow-y-auto max-h-[360px]">
                   <table className="w-full">
-                    <thead className="bg-[#F5F7FA]">
+                    <thead className="bg-[#F5F7FA] sticky top-0 z-10">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
                           {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.person')}
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
                           {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.boundary')}
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
                           {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.entry')}
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
                           {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.duration')}
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[#64748B] uppercase tracking-wider border-b-2 border-[#E2E8F0]">
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
                           {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.status')}
                         </th>
                       </tr>
                     </thead>
+
                     <tbody>
                       {realTimeStatus.map((item, idx) => (
                         <tr key={idx} className="hover:bg-[#0F4C81]/5 transition-colors">
-                          <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
                             {item.item_name}
                           </td>
-                          <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
                             {item.boundary_name}
                           </td>
-                          <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">
-                            {new Date(item.last_entry).toLocaleTimeString('pt-BR', { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
+                            {new Date(item.last_entry).toLocaleTimeString('pt-BR', {
+                              hour: '2-digit',
+                              minute: '2-digit'
                             })}
                           </td>
-                          <td className="px-4 py-4 border-b border-[#E2E8F0] font-mono text-sm">
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
                             {item.duration_today_hours}h
                           </td>
-                          <td className="px-4 py-4 border-b border-[#E2E8F0]">
-                            <span className={`inline-block px-3 py-1 rounded-xl text-xs font-semibold uppercase tracking-wide ${
-                              item.status === 'LONG' ? 'bg-yellow-100 text-yellow-600' :
-                              item.status === 'ALERT' ? 'bg-red-100 text-red-600' :
-                              'bg-green-100 text-green-600'
-                            }`}>
-                              {item.status === 'LONG' ? t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.long') :
-                               item.status === 'ALERT' ? 'ALERTA' :
-                               t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.normal')}
+                          <td className="px-3 py-2 border-b border-[#E2E8F0]">
+                            <span className={`inline-block px-2 py-0.5 rounded-lg text-[10px] font-semibold uppercase
+              ${item.status === 'LONG'
+                                ? 'bg-yellow-100 text-yellow-600'
+                                : item.status === 'ALERT'
+                                  ? 'bg-red-100 text-red-600'
+                                  : 'bg-green-100 text-green-600'
+                              }`}>
+                              {item.status === 'LONG'
+                                ? t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.long')
+                                : item.status === 'ALERT'
+                                  ? 'ALERTA'
+                                  : t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.normal')}
                             </span>
                           </td>
                         </tr>
@@ -1064,6 +1187,7 @@ export default function BoundaryAccessAnalytics() {
                     </tbody>
                   </table>
                 </div>
+
               </div>
             )}
           </div>
@@ -1083,35 +1207,32 @@ export default function BoundaryAccessAnalytics() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     onClick={() => setSelectedPeriod('7d')}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
-                      selectedPeriod === '7d'
-                        ? 'bg-[#0F4C81] text-white border border-[#0F4C81]'
-                        : 'bg-[#F5F7FA] text-[#64748B] border border-[#E2E8F0] hover:border-[#0F4C81] hover:text-[#0F4C81]'
-                    }`}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${selectedPeriod === '7d'
+                      ? 'bg-[#0F4C81] text-white border border-[#0F4C81]'
+                      : 'bg-[#F5F7FA] text-[#64748B] border border-[#E2E8F0] hover:border-[#0F4C81] hover:text-[#0F4C81]'
+                      }`}
                   >
-                    7 dias
+                    {t('boundaryAccessAnalytics.tabs.days', { "days": '7' })}
                   </button>
-                  <button 
+                  <button
                     onClick={() => setSelectedPeriod('30d')}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
-                      selectedPeriod === '30d'
-                        ? 'bg-[#0F4C81] text-white border border-[#0F4C81]'
-                        : 'bg-[#F5F7FA] text-[#64748B] border border-[#E2E8F0] hover:border-[#0F4C81] hover:text-[#0F4C81]'
-                    }`}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${selectedPeriod === '30d'
+                      ? 'bg-[#0F4C81] text-white border border-[#0F4C81]'
+                      : 'bg-[#F5F7FA] text-[#64748B] border border-[#E2E8F0] hover:border-[#0F4C81] hover:text-[#0F4C81]'
+                      }`}
                   >
-                    30 dias
+                    {t('boundaryAccessAnalytics.tabs.days', { "days": '30' })}
                   </button>
-                  <button 
+                  <button
                     onClick={() => setSelectedPeriod('90d')}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
-                      selectedPeriod === '90d'
-                        ? 'bg-[#0F4C81] text-white border border-[#0F4C81]'
-                        : 'bg-[#F5F7FA] text-[#64748B] border border-[#E2E8F0] hover:border-[#0F4C81] hover:text-[#0F4C81]'
-                    }`}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${selectedPeriod === '90d'
+                      ? 'bg-[#0F4C81] text-white border border-[#0F4C81]'
+                      : 'bg-[#F5F7FA] text-[#64748B] border border-[#E2E8F0] hover:border-[#0F4C81] hover:text-[#0F4C81]'
+                      }`}
                   >
-                    90 dias
+                    {t('boundaryAccessAnalytics.tabs.days', { "days": '90' })}
                   </button>
                 </div>
               </div>
@@ -1184,7 +1305,67 @@ export default function BoundaryAccessAnalytics() {
         {/* SECTION 4: Anomalies */}
         {activeTab === 'anomalies' && (
           <div className="animate-fade-in">
-            <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+            {/* KPIs de Anomalias */}
+            {anomalyKpis && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                  <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                    {t('boundaryAccessAnalytics.anomalyKpis.detectedAnomalies')}
+                  </div>
+                  <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
+                    {anomalyKpis.detected_anomalies.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-[#64748B] mt-1">
+                    {t('boundaryAccessAnalytics.anomalyKpis.totalDetected')}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#EF4444] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                  <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                    {t('boundaryAccessAnalytics.anomalyKpis.extremeAnomalies')}
+                  </div>
+                  <div className="text-4xl font-bold text-[#EF4444] font-mono mb-2">
+                    {parseInt(anomalyKpis.extreme_anomalies).toLocaleString()}
+                  </div>
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-50 text-red-600 text-xs font-semibold">
+                    <ExclamationTriangleIcon className="w-3 h-3" />
+                    {t('boundaryAccessAnalytics.anomalyKpis.critical')}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#F59E0B] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                  <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                    {t('boundaryAccessAnalytics.anomalyKpis.highAnomalies')}
+                  </div>
+                  <div className="text-4xl font-bold text-[#F59E0B] font-mono mb-2">
+                    {parseInt(anomalyKpis.high_anomalies).toLocaleString()}
+                  </div>
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-yellow-50 text-yellow-600 text-xs font-semibold">
+                    <ExclamationTriangleIcon className="w-3 h-3" />
+                    {t('boundaryAccessAnalytics.anomalyKpis.warning')}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#10B981] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                  <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                    {t('boundaryAccessAnalytics.anomalyKpis.avgZScore')}
+                  </div>
+                  <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
+                    {anomalyKpis.avg_z_score.toFixed(4)}
+                  </div>
+                  <div className="text-xs text-[#64748B] mt-1">
+                    {t('boundaryAccessAnalytics.anomalyKpis.standardDeviation')}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Gráfico de Anomalias - Largura Total */}
+            <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
                   <div className="text-xl font-bold text-[#1A2332]">
@@ -1199,6 +1380,82 @@ export default function BoundaryAccessAnalytics() {
                 <ChartLoader />
               ) : (
                 <div ref={chartRefs.anomalies} className="w-full h-[500px]"></div>
+              )}
+            </div>
+
+            {/* Tabela Top 10 Anomalias - Largura Total */}
+            <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+              <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
+                <div>
+                  <div className="text-xl font-bold text-[#1A2332]">
+                    {t('boundaryAccessAnalytics.table.topAnomalies.title')}
+                  </div>
+                  <div className="text-sm text-[#64748B] mt-1">
+                    {t('boundaryAccessAnalytics.table.topAnomalies.subtitle')}
+                  </div>
+                </div>
+              </div>
+
+              {chartLoadingStates.topAnomalies ? (
+                <ChartLoader />
+              ) : (
+                <div className="overflow-x-auto overflow-y-auto max-h-[500px]">
+                  <table className="w-full">
+                    <thead className="bg-[#F5F7FA] sticky top-0 z-10">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          #
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.topAnomalies.headers.datetime')}
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.topAnomalies.headers.person')}
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.topAnomalies.headers.boundary')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.topAnomalies.headers.duration')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.topAnomalies.headers.zScore')}
+                        </th>
+                        <th className="px-3 py-2 text-center text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.topAnomalies.headers.level')}
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {topAnomalies.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-[#0F4C81]/5 transition-colors">
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] text-sm font-bold text-[#0F4C81]">
+                            {idx + 1}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
+                            {formatDateTime(item.entry_datetime)}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] text-xs font-medium">
+                            {item.item_name}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] text-xs">
+                            {item.boundary_name}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs text-right">
+                            {parseFloat(item.duration_hours).toFixed(2)}h
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs text-right font-bold text-[#EF4444]">
+                            {item.z_score.toFixed(2)}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] text-center">
+                            {getAnomalyBadge(item.anomaly_level)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </div>
@@ -1248,6 +1505,66 @@ export default function BoundaryAccessAnalytics() {
         {/* SECTION 6: Compliance */}
         {activeTab === 'compliance' && (
           <div className="animate-fade-in">
+            {/* KPIs de Compliance Metrics */}
+            {complianceMetrics && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#0F4C81] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                  <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                    {t('boundaryAccessAnalytics.complianceMetrics.totalVisits')}
+                  </div>
+                  <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
+                    {parseInt(complianceMetrics.total_visits).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-[#64748B] mt-1">
+                    {t('boundaryAccessAnalytics.complianceMetrics.allBoundaries')}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#EF4444] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                  <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                    {t('boundaryAccessAnalytics.complianceMetrics.totalAlerts')}
+                  </div>
+                  <div className="text-4xl font-bold text-[#EF4444] font-mono mb-2">
+                    {parseInt(complianceMetrics.total_alerts).toLocaleString()}
+                  </div>
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-50 text-red-600 text-xs font-semibold">
+                    <ExclamationTriangleIcon className="w-3 h-3" />
+                    {parseFloat(complianceMetrics.avg_alert_rte).toFixed(1)}% {t('boundaryAccessAnalytics.complianceMetrics.avgRate')}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#F59E0B] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                  <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                    {t('boundaryAccessAnalytics.complianceMetrics.offHoursEntries')}
+                  </div>
+                  <div className="text-4xl font-bold text-[#F59E0B] font-mono mb-2">
+                    {parseInt(complianceMetrics.total_off_hours).toLocaleString()}
+                  </div>
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-orange-50 text-orange-600 text-xs font-semibold">
+                    <ClockIcon className="w-3 h-3" />
+                    {parseFloat(complianceMetrics.avg_off_hours_pct).toFixed(1)}% {t('boundaryAccessAnalytics.complianceMetrics.avgRate')}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#10B981] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                  <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                    {t('boundaryAccessAnalytics.complianceMetrics.weekendVisits')}
+                  </div>
+                  <div className="text-4xl font-bold text-[#10B981] font-mono mb-2">
+                    {parseInt(complianceMetrics.total_weekend).toLocaleString()}
+                  </div>
+                  <div className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-50 text-green-600 text-xs font-semibold">
+                    {parseFloat(complianceMetrics.avg_weekend_pct).toFixed(1)}% {t('boundaryAccessAnalytics.complianceMetrics.avgRate')}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Gráficos */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
@@ -1285,12 +1602,89 @@ export default function BoundaryAccessAnalytics() {
                 )}
               </div>
             </div>
+
+            {/* Tabela de Compliance Summary */}
+            <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+              <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
+                <div>
+                  <div className="text-xl font-bold text-[#1A2332]">
+                    {t('boundaryAccessAnalytics.table.complianceSummary.title')}
+                  </div>
+                  <div className="text-sm text-[#64748B] mt-1">
+                    {t('boundaryAccessAnalytics.table.complianceSummary.subtitle')}
+                  </div>
+                </div>
+              </div>
+
+              {chartLoadingStates.complianceSummary ? (
+                <ChartLoader />
+              ) : (
+                <div className="overflow-x-auto overflow-y-auto max-h-[500px]">
+                  <table className="w-full">
+                    <thead className="bg-[#F5F7FA] sticky top-0 z-10">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.complianceSummary.headers.boundary')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.complianceSummary.headers.totalVisits')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.complianceSummary.headers.alertRate')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.complianceSummary.headers.offHours')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.complianceSummary.headers.weekend')}
+                        </th>
+                        <th className="px-3 py-2 text-center text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.complianceSummary.headers.status')}
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {Array.isArray(complianceSummary) && complianceSummary.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-[#0F4C81]/5 transition-colors">
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] text-sm font-medium">
+                            {item.boundary_name}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-sm text-right">
+                            {item.total_visits.toLocaleString()}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-sm text-right">
+                            <span className={`font-semibold ${parseFloat(item.alert_rate_pct) > 50 ? 'text-red-600' : 'text-[#64748B]'}`}>
+                              {parseFloat(item.alert_rate_pct).toFixed(1)}%
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-sm text-right">
+                            <span className={`font-semibold ${parseFloat(item.off_hours_entry_pct) > 50 ? 'text-orange-600' : 'text-[#64748B]'}`}>
+                              {parseFloat(item.off_hours_entry_pct).toFixed(1)}%
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-sm text-right">
+                            <span className={`font-semibold ${parseFloat(item.weekend_visit_pct) > 30 ? 'text-yellow-600' : 'text-[#64748B]'}`}>
+                              {parseFloat(item.weekend_visit_pct).toFixed(1)}%
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] text-center">
+                            {getComplianceStatusBadge(item.status)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* SECTION 7: Rankings */}
         {activeTab === 'rankings' && (
           <div className="animate-fade-in">
+            {/* Gráficos */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
@@ -1327,6 +1721,82 @@ export default function BoundaryAccessAnalytics() {
                   <div ref={chartRefs.frequency} className="w-full h-[400px]"></div>
                 )}
               </div>
+            </div>
+
+            {/* Tabela de Ranking Detalhado */}
+            <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+              <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
+                <div>
+                  <div className="text-xl font-bold text-[#1A2332]">
+                    {t('boundaryAccessAnalytics.table.detailedRanking.title')}
+                  </div>
+                  <div className="text-sm text-[#64748B] mt-1">
+                    {t('boundaryAccessAnalytics.table.detailedRanking.subtitle')}
+                  </div>
+                </div>
+              </div>
+
+              {chartLoadingStates.detailedRanking ? (
+                <ChartLoader />
+              ) : (
+                <div className="overflow-x-auto overflow-y-auto max-h-[600px]">
+                  <table className="w-full">
+                    <thead className="bg-[#F5F7FA] sticky top-0 z-10">
+                      <tr>
+                        <th className="px-3 py-2 text-center text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.detailedRanking.headers.rank')}
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.detailedRanking.headers.person')}
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.detailedRanking.headers.boundary')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.detailedRanking.headers.duration')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.detailedRanking.headers.visits')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.detailedRanking.headers.activeDays')}
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                          {t('boundaryAccessAnalytics.table.detailedRanking.headers.avgPerVisit')}
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {Array.isArray(detailedRanking) && detailedRanking.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-[#0F4C81]/5 transition-colors">
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] text-center">
+                            {getRankBadge(item.rank)}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] text-sm font-medium">
+                            {item.item_name}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] text-xs">
+                            {item.boundary_name}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-sm text-right font-bold text-[#0F4C81]">
+                            {parseFloat(item.duration).toFixed(2)}h
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-sm text-right">
+                            {item.visits.toLocaleString()}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-sm text-right">
+                            {item.total_active_days}
+                          </td>
+                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs text-right text-[#64748B]">
+                            {parseFloat(item.avg_per_visit).toFixed(2)} min
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
