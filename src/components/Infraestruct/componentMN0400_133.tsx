@@ -63,6 +63,7 @@ export default function BoundaryAccessAnalytics() {
     detailedRanking,
     realTimeStatus,
     boundaryMapData,
+    activeZones,
     loading,
     error
   } = useBoundaryAnalytics(companyId as any, activeTab, selectedPeriod);
@@ -1229,29 +1230,37 @@ function calculateMapCenter(boundaries: any[]): [number, number] {
         </div>
         
         {/* Legenda */}
-        <div className="flex items-center gap-4">
-          <div className="text-xs text-[#64748B] uppercase font-semibold">
-            {t('boundaryAccessAnalytics.maps.heatmap.legend')}
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-[#0F4C81]"></div>
-              <span className="text-xs text-[#64748B]">Baixo</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
-              <span className="text-xs text-[#64748B]">Médio</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-[#F59E0B]"></div>
-              <span className="text-xs text-[#64748B]">Alto</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded-full bg-[#EF4444]"></div>
-              <span className="text-xs text-[#64748B]">Crítico</span>
-            </div>
-          </div>
-        </div>
+<div className="flex items-center gap-4">
+  <div className="text-xs text-[#64748B] uppercase font-semibold">
+    {t('boundaryAccessAnalytics.maps.heatmap.legend')}
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
+      <div className="w-3 h-3 rounded-full bg-[#0F4C81]"></div>
+      <span className="text-xs text-[#64748B]">
+        {t('boundaryAccessAnalytics.maps.heatmap.density.low')}
+      </span>
+    </div>
+    <div className="flex items-center gap-1">
+      <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
+      <span className="text-xs text-[#64748B]">
+        {t('boundaryAccessAnalytics.maps.heatmap.density.medium')}
+      </span>
+    </div>
+    <div className="flex items-center gap-1">
+      <div className="w-3 h-3 rounded-full bg-[#F59E0B]"></div>
+      <span className="text-xs text-[#64748B]">
+        {t('boundaryAccessAnalytics.maps.heatmap.density.high')}
+      </span>
+    </div>
+    <div className="flex items-center gap-1">
+      <div className="w-3 h-3 rounded-full bg-[#EF4444]"></div>
+      <span className="text-xs text-[#64748B]">
+        {t('boundaryAccessAnalytics.maps.heatmap.density.critical')}
+      </span>
+    </div>
+  </div>
+</div>
       </div>
       
       <div className="w-full h-[600px]">
@@ -1261,6 +1270,7 @@ function calculateMapCenter(boundaries: any[]): [number, number] {
           <BoundaryHeatmap 
             boundaries={boundaryMapData} 
             center={calculateMapCenter(boundaryMapData)} 
+            zones={activeZones}
             zoom={13}
           />
         )}

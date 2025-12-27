@@ -1819,6 +1819,38 @@
       "avgRate": "avg",
       "offHoursEntries": "Off-Hours Entries",
       "weekendVisits": "Weekend Visits"
+    },
+    "maps": {
+      "heatmap": {
+        "title": "Heatmap – Access Density",
+        "subtitle": "Geographical visualization of access intensity by boundary",
+        "legend": "Intensity",
+                "density": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "critical": "Critical"
+        }
+      }
+    },
+     "mapTypes": {
+      "streets": "Streets",
+      "satellite": "Satellite",
+      "terrain": "Terrain",
+      "dark": "Dark"
+    },
+      "boundaryMarkerMap": {
+    "popup": {
+      "visits": "Visits",
+      "duration": "Duration",
+      "peopleInside": "People inside"
+    },
+     "zonePopup": {
+      "code": "Code",
+      "group": "Group",
+      "active": "ACTIVE",
+      "inactive": "INACTIVE"
     }
+  }
   }
 }

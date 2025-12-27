@@ -81,6 +81,17 @@ interface BoundaryMapData {
   is_currently_inside: number;
 }
 
+// Adicionar interface para zonas
+interface ActiveZone {
+  id: number;
+  company_id: number;
+  group_name: string;
+  boundary_name: string;
+  code: string;
+  active: number;
+  geojson_data: any;
+}
+
 export const useBoundaryAnalytics = (
   companyId: number,
   activeTab: string,
@@ -110,6 +121,8 @@ export const useBoundaryAnalytics = (
   const [detailedRanking, setDetailedRanking] = useState<DetailedRankingItem[]>([]);
     // Adicionar novo estado para dados do mapa
   const [boundaryMapData, setBoundaryMapData] = useState<BoundaryMapData[]>([]);
+    // Adicionar novo estado para zonas ativas
+  const [activeZones, setActiveZones] = useState<ActiveZone[]>([]);
 
 
   const [sankeyData, setSankeyData] = useState<SankeyDataItem[]>([]);
@@ -157,6 +170,7 @@ export const useBoundaryAnalytics = (
               fetchShiftDistribution(),
               fetchRealTimeStatus(),
               fetchBoundaryMapData(),
+              fetchActiveZones(),
             ]);
             break;
 
@@ -264,6 +278,19 @@ export const useBoundaryAnalytics = (
     } catch (err) {
       console.error("Error fetching boundary map data:", err);
       setBoundaryMapData([]);
+    }
+  };
+
+  // Adicionar função de fetch para zonas ativas
+  const fetchActiveZones = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/devices/${companyId}/zones/active`
+      );
+      setActiveZones(data.data || []);
+    } catch (err) {
+      console.error("Error fetching active zones:", err);
+      setActiveZones([]);
     }
   };
 
@@ -439,6 +466,7 @@ const fetchDetailedRanking = async () => {
     detailedRanking,
     realTimeStatus,
     boundaryMapData,
+    activeZones,
     loading,
     error,
   };

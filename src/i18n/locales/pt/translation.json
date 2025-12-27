@@ -1853,6 +1853,38 @@
       "avgRate": "média",
       "offHoursEntries": "Entradas Fora de Horário",
       "weekendVisits": "Visitas Fim de Semana"
+    },
+    "maps": {
+      "heatmap": {
+        "title": "Mapa de Calor - Densidade de Acessos",
+        "subtitle": "Visualização geográfica da intensidade de acessos por boundary",
+        "legend": "Intensidade",
+        "density": {
+          "low": "Baixo",
+          "medium": "Médio",
+          "high": "Alto",
+          "critical": "Crítico"
+        }
+      }
+    },
+    "mapTypes": {
+      "streets": "Ruas",
+      "satellite": "Satélite",
+      "terrain": "Terreno",
+      "dark": "Escuro"
+    },
+    "boundaryMarkerMap": {
+      "popup": {
+        "visits": "Visitas",
+        "duration": "Duração",
+        "peopleInside": "Pessoas dentro"
+      },
+       "zonePopup": {
+      "code": "Código",
+      "group": "Grupo",
+      "active": "ATIVA",
+      "inactive": "INATIVA"
+    }
     }
   }
 }
