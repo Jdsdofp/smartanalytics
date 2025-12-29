@@ -1164,42 +1164,211 @@ export default function BoundaryAccessAnalytics() {
               </div>
             </div>
 
-            {/* Charts Grid */}
+            {/* Charts Grid com Ações */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
-                <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
-                  <div>
-                    <div className="text-xl font-bold text-[#1A2332]">
-                      {t('boundaryAccessAnalytics.charts.topBoundaries.title')}
+              {/* Top Boundaries Chart */}
+              <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+                {/* Header com Gradiente e Ações */}
+                <div className="bg-gradient-to-r from-[#0F4C81] to-[#1a5c9e] p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white">
+                          {t('boundaryAccessAnalytics.charts.topBoundaries.title')}
+                        </h3>
+                        <p className="text-white/80 text-sm mt-0.5">
+                          {t('boundaryAccessAnalytics.charts.topBoundaries.subtitle')}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-sm text-[#64748B] mt-1">
-                      {t('boundaryAccessAnalytics.charts.topBoundaries.subtitle')}
+                  </div>
+
+                  {/* Ações Rápidas */}
+                  <div className="flex items-center gap-2">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
+                      <svg className="w-4 h-4 text-white group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      <span className="text-white text-xs font-semibold">Exportar</span>
+                    </button>
+
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
+                      <svg className="w-4 h-4 text-white group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span className="text-white text-xs font-semibold">Atualizar</span>
+                    </button>
+
+                    <div className="flex-1"></div>
+
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-white text-xs font-semibold uppercase tracking-wider">
+                        Live
+                      </span>
                     </div>
                   </div>
                 </div>
-                {chartLoadingStates.topBoundaries ? (
-                  <ChartLoader />
-                ) : (
-                  <div ref={chartRefs.topBoundaries} className="w-full h-[400px]"></div>
-                )}
+
+                {/* Conteúdo do Chart */}
+                <div className="p-6 bg-gradient-to-b from-gray-50/50 to-white">
+                  {chartLoadingStates.topBoundaries ? (
+                    <div className="w-full h-[400px] flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="relative w-20 h-20 mx-auto mb-4">
+                          <div className="absolute inset-0 border-4 border-[#E2E8F0] rounded-full"></div>
+                          <div className="absolute inset-0 border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+                          <div className="absolute inset-2 border-4 border-[#0F4C81]/30 border-b-transparent rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
+                        </div>
+                        <p className="text-sm text-[#1A2332] font-semibold mb-1">Carregando dados...</p>
+                        <p className="text-xs text-[#64748B]">Por favor, aguarde</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      {/* Decoração de Fundo */}
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#0F4C81]/5 to-transparent rounded-full blur-3xl -z-0"></div>
+                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-[#10B981]/5 to-transparent rounded-full blur-3xl -z-0"></div>
+
+                      {/* Chart Container com Bordas */}
+                      <div className="relative bg-white rounded-xl border-2 border-[#E2E8F0] p-4 shadow-sm hover:shadow-md transition-shadow">
+                        <div ref={chartRefs.topBoundaries} className="w-full h-[400px]"></div>
+                      </div>
+
+                      {/* Info Footer */}
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-[#0F4C81]/5 rounded-xl border border-[#0F4C81]/10">
+                          <svg className="w-4 h-4 text-[#0F4C81]" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-xs text-[#0F4C81] font-medium">
+                            Clique nas barras para detalhes
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-[#64748B]">
+                          Última atualização: <span className="font-semibold text-[#1A2332]">Agora</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
-                <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
-                  <div>
-                    <div className="text-xl font-bold text-[#1A2332]">
-                      {t('boundaryAccessAnalytics.charts.shiftDistribution.title')}
+              {/* Shift Distribution Chart */}
+              <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+                {/* Header com Gradiente e Ações */}
+                <div className="bg-gradient-to-r from-[#10B981] to-[#059669] p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white">
+                          {t('boundaryAccessAnalytics.charts.shiftDistribution.title')}
+                        </h3>
+                        <p className="text-white/80 text-sm mt-0.5">
+                          {t('boundaryAccessAnalytics.charts.shiftDistribution.subtitle')}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-sm text-[#64748B] mt-1">
-                      {t('boundaryAccessAnalytics.charts.shiftDistribution.subtitle')}
+                  </div>
+
+                  {/* Ações Rápidas */}
+                  <div className="flex items-center gap-2">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
+                      <svg className="w-4 h-4 text-white group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      <span className="text-white text-xs font-semibold">Exportar</span>
+                    </button>
+
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
+                      <svg className="w-4 h-4 text-white group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span className="text-white text-xs font-semibold">Atualizar</span>
+                    </button>
+
+                    <div className="flex-1"></div>
+
+                    <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-white text-xs font-semibold uppercase tracking-wider">
+                        Turnos
+                      </span>
                     </div>
                   </div>
                 </div>
-                {chartLoadingStates.shiftDistribution ? (
-                  <ChartLoader />
-                ) : (
-                  <div ref={chartRefs.shiftDistribution} className="w-full h-[400px]"></div>
-                )}
+
+                {/* Conteúdo do Chart */}
+                <div className="p-6 bg-gradient-to-b from-green-50/30 to-white">
+                  {chartLoadingStates.shiftDistribution ? (
+                    <div className="w-full h-[400px] flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="relative w-20 h-20 mx-auto mb-4">
+                          <div className="absolute inset-0 border-4 border-[#E2E8F0] rounded-full"></div>
+                          <div className="absolute inset-0 border-4 border-[#10B981] border-t-transparent rounded-full animate-spin"></div>
+                          <div className="absolute inset-2 border-4 border-[#10B981]/30 border-b-transparent rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
+                        </div>
+                        <p className="text-sm text-[#1A2332] font-semibold mb-1">Carregando dados...</p>
+                        <p className="text-xs text-[#64748B]">Por favor, aguarde</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      {/* Decoração de Fundo */}
+                      <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-[#10B981]/5 to-transparent rounded-full blur-3xl -z-0"></div>
+                      <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-[#F59E0B]/5 to-transparent rounded-full blur-3xl -z-0"></div>
+
+                      {/* Chart Container com Bordas */}
+                      <div className="relative bg-white rounded-xl border-2 border-[#E2E8F0] p-4 shadow-sm hover:shadow-md transition-shadow">
+                        <div ref={chartRefs.shiftDistribution} className="w-full h-[400px]"></div>
+                      </div>
+
+                      {/* Legenda de Turnos Melhorada */}
+                      <div className="mt-4 grid grid-cols-3 gap-3">
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border-2 border-blue-200 hover:scale-105 transition-transform cursor-pointer group/legend">
+                          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 shadow-md group-hover/legend:scale-110 transition-transform"></div>
+                          <div>
+                            <p className="text-sm font-bold text-blue-700">Manhã</p>
+                            <p className="text-xs text-blue-600">06:00 - 14:00</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl border-2 border-amber-200 hover:scale-105 transition-transform cursor-pointer group/legend">
+                          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 shadow-md group-hover/legend:scale-110 transition-transform"></div>
+                          <div>
+                            <p className="text-sm font-bold text-amber-700">Tarde</p>
+                            <p className="text-xs text-amber-600">14:00 - 22:00</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-xl border-2 border-indigo-200 hover:scale-105 transition-transform cursor-pointer group/legend">
+                          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-md group-hover/legend:scale-110 transition-transform"></div>
+                          <div>
+                            <p className="text-sm font-bold text-indigo-700">Noite</p>
+                            <p className="text-xs text-indigo-600">22:00 - 06:00</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Info Footer */}
+                      <div className="mt-4 text-center text-xs text-[#64748B]">
+                        Distribuição baseada em <span className="font-semibold text-[#1A2332]">{/* total de registros aqui */} registros</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
