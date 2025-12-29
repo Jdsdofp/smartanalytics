@@ -976,7 +976,7 @@ export default function BoundaryAccessAnalytics() {
       );
     }
   };
-
+  //@ts-ignore
   const calculateChange = (current: number, previous: number) => {
     if (!previous) return 0;
     return ((current - previous) / previous) * 100;
@@ -1096,7 +1096,7 @@ export default function BoundaryAccessAnalytics() {
         {activeTab === 'overview' && kpis && (
           <div className="animate-fade-in">
             {/* KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
                 <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
@@ -1162,7 +1162,310 @@ export default function BoundaryAccessAnalytics() {
                   {((kpis.alerts_today / kpis.total_visits_today) * 100).toFixed(1)}%
                 </div>
               </div>
+            </div> */}
+
+
+
+            {/* KPIs Grid Principal */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+              {/* KPI 1: Pessoas Ativas Agora */}
+              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                  {t('boundaryAccessAnalytics.kpis.activeNow')}
+                </div>
+                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-1">
+                  {kpis.active_now}
+                </div>
+                <div className="text-xs text-[#64748B]">
+                  {t('boundaryAccessAnalytics.kpis.ofTotal', {
+                    total: kpis.active_people_today
+                  })} {t('boundaryAccessAnalytics.kpis.peopleToday')}
+                </div>
+              </div>
+
+              {/* KPI 2: Visitas Hoje */}
+              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#4ECDC4] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                  {t('boundaryAccessAnalytics.kpis.visitsToday')}
+                </div>
+                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
+                  {kpis.visits_today.toLocaleString()}
+                </div>
+                {kpis.visits_yesterday > 0 && (
+                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono ${kpis.visits_trend >= 0
+                    ? 'bg-green-50 text-green-600'
+                    : 'bg-red-50 text-red-600'
+                    }`}>
+                    {kpis.visits_trend >= 0 ? (
+                      <ArrowUpIcon className="w-3 h-3" />
+                    ) : (
+                      <ArrowDownIcon className="w-3 h-3" />
+                    )}
+                    {Math.abs(kpis.visits_trend).toFixed(1)}%
+                  </div>
+                )}
+              </div>
+
+              {/* KPI 3: Tempo Médio por Visita */}
+              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#95E1D3] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                  {t('boundaryAccessAnalytics.kpis.avgDuration')}
+                </div>
+                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-1">
+                  {kpis.avg_duration_today.toFixed(1)}h
+                </div>
+                <div className="text-xs text-[#64748B]">
+                  {kpis.hours_today.toFixed(0)}h {t('boundaryAccessAnalytics.kpis.totalToday')}
+                </div>
+              </div>
+
+              {/* KPI 4: Taxa de Visitas Atípicas (substitui Alert Rate) */}
+              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+                <div className={`absolute top-0 left-0 w-1 h-full transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 ${kpis.problematic_rate_today > 50 ? 'bg-red-500' :
+                  kpis.problematic_rate_today > 30 ? 'bg-orange-500' :
+                    'bg-yellow-500'
+                  }`}></div>
+                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                  {t('boundaryAccessAnalytics.kpis.atypicalVisits')}
+                </div>
+                <div className={`text-4xl font-bold font-mono mb-1 ${kpis.problematic_rate_today > 50 ? 'text-red-600' :
+                  kpis.problematic_rate_today > 30 ? 'text-orange-600' :
+                    'text-[#0F4C81]'
+                  }`}>
+                  {kpis.problematic_rate_today.toFixed(1)}%
+                </div>
+                <div className="text-xs text-[#64748B] flex items-center gap-2">
+                  <span className="text-orange-600">⚡ {kpis.very_short_today} {t('boundaryAccessAnalytics.kpis.short')}</span>
+                  <span className="text-blue-600">⏱ {kpis.very_long_today} {t('boundaryAccessAnalytics.kpis.long')}</span>
+                </div>
+              </div>
             </div>
+
+            {/* KPIs Secundários - Métricas de Contexto */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+
+              {/* Zonas Ativas */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm text-blue-600 font-semibold mb-1">
+                      {t('boundaryAccessAnalytics.kpis.activeBoundaries')}
+                    </div>
+                    <div className="text-2xl font-bold text-blue-900">
+                      {kpis.active_boundaries_today}/{kpis.total_boundaries}
+                    </div>
+                  </div>
+                  <div className="text-blue-400">
+                    <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Variação Semanal */}
+              <div className={`bg-gradient-to-br rounded-lg p-4 border ${kpis.weekly_trend >= 0
+                ? 'from-green-50 to-green-100 border-green-200'
+                : 'from-red-50 to-red-100 border-red-200'
+                }`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className={`text-sm font-semibold mb-1 ${kpis.weekly_trend >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                      {t('boundaryAccessAnalytics.kpis.weeklyTrend')}
+                    </div>
+                    <div className={`text-2xl font-bold ${kpis.weekly_trend >= 0 ? 'text-green-900' : 'text-red-900'
+                      }`}>
+                      {kpis.weekly_trend >= 0 ? '+' : ''}{kpis.weekly_trend.toFixed(1)}%
+                    </div>
+                  </div>
+                  <div className={kpis.weekly_trend >= 0 ? 'text-green-400' : 'text-red-400'}>
+                    {kpis.weekly_trend >= 0 ? (
+                      <ArrowUpIcon className="w-10 h-10" />
+                    ) : (
+                      <ArrowDownIcon className="w-10 h-10" />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Taxa de Visitas Curtas */}
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-4 border border-amber-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm text-amber-600 font-semibold mb-1">
+                      {t('boundaryAccessAnalytics.kpis.shortVisitsRate')}
+                    </div>
+                    <div className="text-2xl font-bold text-amber-900">
+                      {kpis.very_short_rate.toFixed(1)}%
+                    </div>
+                  </div>
+                  <div className="text-amber-400">
+                    <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Taxa de Visitas Longas */}
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm text-purple-600 font-semibold mb-1">
+                      {t('boundaryAccessAnalytics.kpis.longVisitsRate')}
+                    </div>
+                    <div className="text-2xl font-bold text-purple-900">
+                      {kpis.very_long_rate.toFixed(1)}%
+                    </div>
+                  </div>
+                  <div className="text-purple-400">
+                    <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            {/* KPIs Secundários - Estilo Visual com Gráficos */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Zonas Ativas - Donut Chart */}
+              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+                <div className="text-center mb-4">
+                  <div className="text-sm text-[#64748B] font-semibold mb-2">
+                    {t('boundaryAccessAnalytics.kpis.activeBoundaries')}
+                  </div>
+                  <div className="relative inline-block">
+                    <svg className="w-32 h-32 transform -rotate-90">
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="52"
+                        stroke="#E2E8F0"
+                        strokeWidth="12"
+                        fill="none"
+                      />
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="52"
+                        stroke="url(#blueGradient)"
+                        strokeWidth="12"
+                        fill="none"
+                        strokeDasharray={`${(kpis.active_boundaries_today / kpis.total_boundaries) * 327} 327`}
+                        strokeLinecap="round"
+                      />
+                      <defs>
+                        <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#3B82F6" />
+                          <stop offset="100%" stopColor="#1D4ED8" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <div className="text-3xl font-bold text-[#0F4C81]">
+                        {kpis.active_boundaries_today}
+                      </div>
+                      <div className="text-xs text-[#64748B]">
+                        de {kpis.total_boundaries}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-2xl font-bold text-blue-600">
+                    {((kpis.active_boundaries_today / kpis.total_boundaries) * 100).toFixed(0)}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Visitas Curtas - Gauge Style */}
+              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+                <div className="text-center">
+                  <div className="text-sm text-[#64748B] font-semibold mb-4">
+                    {t('boundaryAccessAnalytics.kpis.shortVisits')}
+                  </div>
+                  <div className="relative w-32 h-32 mx-auto">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="56"
+                        stroke="#FEF3C7"
+                        strokeWidth="16"
+                        fill="none"
+                      />
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="56"
+                        stroke="#F59E0B"
+                        strokeWidth="16"
+                        fill="none"
+                        strokeDasharray={`${(kpis.very_short_rate / 100) * 352} 352`}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-amber-600">
+                          {kpis.very_short_rate.toFixed(0)}%
+                        </div>
+                        <div className="text-xs text-[#64748B]">
+                          &lt;5min
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visitas Longas - Gauge Style */}
+              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+                <div className="text-center">
+                  <div className="text-sm text-[#64748B] font-semibold mb-4">
+                    {t('boundaryAccessAnalytics.kpis.longVisits')}
+                  </div>
+                  <div className="relative w-32 h-32 mx-auto">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="56"
+                        stroke="#F3E8FF"
+                        strokeWidth="16"
+                        fill="none"
+                      />
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r="56"
+                        stroke="#A855F7"
+                        strokeWidth="16"
+                        fill="none"
+                        strokeDasharray={`${(kpis.very_long_rate / 100) * 352} 352`}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-purple-600">
+                          {kpis.very_long_rate.toFixed(0)}%
+                        </div>
+                        <div className="text-xs text-[#64748B]">
+                          &gt;8h
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
 
             {/* Charts Grid com Ações */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -1371,6 +1674,8 @@ export default function BoundaryAccessAnalytics() {
                 </div>
               </div>
             </div>
+
+
 
             {/* Status Table */}
             {(realTimeStatus.length > 0 || realTimeLoading) && (

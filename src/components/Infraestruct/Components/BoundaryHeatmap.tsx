@@ -63,6 +63,7 @@ const MAP_TYPES = {
   },
 };
 
+
 const HeatmapLayer = ({ boundaries }: { boundaries: BoundaryHeatmapProps['boundaries'] }) => {
   const map = useMap();
   const heatLayerRef = useRef<L.HeatLayer | null>(null);

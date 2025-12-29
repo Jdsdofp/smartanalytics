@@ -1603,18 +1603,26 @@
       "days": "{{days}} Dias"
     },
     "kpis": {
+      "activeNow": "Pessoas Ativas Agora",
+      "ofTotal": "de {{total}}",
+      "peopleToday": "pessoas hoje",
       "visitsToday": "Visitas Hoje",
-      "hoursToday": "Horas Hoje",
-      "activePeople": "Pessoas Ativas",
-      "alertRate": "Taxa de Alertas",
-      "detectedAnomalies": "Anomalias Detectadas",
-      "averageZScore": "Z-Score Médio",
-      "extremeAnomalies": "Extreme (>3.0)",
-      "highAnomalies": "Alto (>2.0)",
-      "complianceRate": "Taxa de Conformidade",
-      "offHoursVisits": "Visitas Fora de Horário",
-      "longVisits": "Visitas >4h",
-      "weekendVisits": "Fim de Semana"
+      "avgDuration": "Tempo Médio por Visita",
+      "totalToday": "totais hoje",
+      "atypicalVisits": "Visitas Atípicas",
+      "short": "curtas",
+      "long": "longas",
+      "activeBoundaries": "Zonas Ativas Hoje",
+      "weeklyTrend": "Variação Semanal",
+      "shortVisits": "Visitas Rápidas",
+      "shortVisitsRate": "Visitas Rápidas (<5min)",
+      "longVisits": "Visitas Longas",
+      "longVisitsRate": "Visitas Longas (>8h)",
+      "detailedMetrics": "Métricas Detalhadas",
+      "quickStats": "Estatísticas Rápidas",
+      "active": "ativas",
+      "lessThan5Min": "Menos de 5 minutos",
+      "moreThan8Hours": "Mais de 8 horas"
     },
     "charts": {
       "topBoundaries": {

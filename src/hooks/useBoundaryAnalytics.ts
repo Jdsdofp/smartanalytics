@@ -1,7 +1,8 @@
 // src/hooks/useBoundaryAnalytics.ts
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+//https://apinode.smartxhub.cloud prod
+//http://localhost:4000 dev
 const API_BASE_URL = "https://apinode.smartxhub.cloud/api";
 
 interface SankeyDataItem {
