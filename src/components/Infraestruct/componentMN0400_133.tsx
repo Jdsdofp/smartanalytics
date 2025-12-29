@@ -32,11 +32,51 @@ const ChartLoader = () => (
 );
 
 
+// Criar hook de debounce
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 
 export default function BoundaryAccessAnalytics() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d');
   const [chartLoadingStates, setChartLoadingStates] = useState<Record<string, boolean>>({});
+  // Adicionar estados de filtro no início do componente
+  const [realTimeFilters, setRealTimeFilters] = useState({
+    itemName: '',
+    boundaryName: '',
+    status: '',
+    minDuration: '',
+    maxDuration: '',
+    page: 1,
+    limit: 20
+  });
+  //@ts-ignore
+  const [tempFilters, setTempFilters] = useState({
+    itemName: '',
+    boundaryName: '',
+    status: '',
+    minDuration: '',
+    maxDuration: '',
+    page: 1,
+    limit: 20
+  });
+
+  const debouncedItemName = useDebounce(tempFilters.itemName, 500);
+  const debouncedBoundaryName = useDebounce(tempFilters.boundaryName, 500);
 
   const { companyId } = useCompany()
 
@@ -62,11 +102,13 @@ export default function BoundaryAccessAnalytics() {
     frequencyAnalysis,
     detailedRanking,
     realTimeStatus,
+    realTimePagination,
+    realTimeLoading,
     boundaryMapData,
     activeZones,
     loading,
     error
-  } = useBoundaryAnalytics(companyId as any, activeTab, selectedPeriod);
+  } = useBoundaryAnalytics(companyId as any, activeTab, selectedPeriod, realTimeFilters);
 
   const chartRefs = {
     topBoundaries: useRef(null),
@@ -174,6 +216,25 @@ export default function BoundaryAccessAnalytics() {
     frequencyAnalysis,
     detailedRanking
   ]);
+
+
+  useEffect(() => {
+    setRealTimeFilters({
+      ...tempFilters,
+      itemName: debouncedItemName,
+      boundaryName: debouncedBoundaryName
+    });
+  }, [debouncedItemName, debouncedBoundaryName, tempFilters.status, tempFilters.minDuration, tempFilters.maxDuration]);
+
+
+    // Funções de paginação
+  const handlePageChange = (newPage: number) => {
+    setRealTimeFilters({ ...realTimeFilters, page: newPage });
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    setRealTimeFilters({ ...realTimeFilters, limit: newLimit, page: 1 });
+  };
 
   const initCharts = (section: string) => {
     if (section === 'overview') {
@@ -920,25 +981,25 @@ export default function BoundaryAccessAnalytics() {
   };
 
   // Adicionar função helper para calcular centro do mapa
-function calculateMapCenter(boundaries: any[]): [number, number] {
-  if (boundaries.length === 0) {
-    return [-5.089167, -42.801944]; // Default Teresina
+  function calculateMapCenter(boundaries: any[]): [number, number] {
+    if (boundaries.length === 0) {
+      return [-5.089167, -42.801944]; // Default Teresina
+    }
+
+    const validBoundaries = boundaries.filter(
+      b => b.centroid_lat && b.centroid_lng &&
+        !isNaN(b.centroid_lat) && !isNaN(b.centroid_lng)
+    );
+
+    if (validBoundaries.length === 0) {
+      return [-5.089167, -42.801944]; // Default Teresina
+    }
+
+    const avgLat = validBoundaries.reduce((sum, b) => sum + b.centroid_lat, 0) / validBoundaries.length;
+    const avgLng = validBoundaries.reduce((sum, b) => sum + b.centroid_lng, 0) / validBoundaries.length;
+
+    return [avgLat, avgLng];
   }
-
-  const validBoundaries = boundaries.filter(
-    b => b.centroid_lat && b.centroid_lng && 
-    !isNaN(b.centroid_lat) && !isNaN(b.centroid_lng)
-  );
-
-  if (validBoundaries.length === 0) {
-    return [-5.089167, -42.801944]; // Default Teresina
-  }
-
-  const avgLat = validBoundaries.reduce((sum, b) => sum + b.centroid_lat, 0) / validBoundaries.length;
-  const avgLng = validBoundaries.reduce((sum, b) => sum + b.centroid_lng, 0) / validBoundaries.length;
-
-  return [avgLat, avgLng];
-}
 
   const tabs = [
     { id: 'overview', label: t('boundaryAccessAnalytics.tabs.overview'), icon: ChartBarIcon },
@@ -1141,141 +1202,369 @@ function calculateMapCenter(boundaries: any[]): [number, number] {
             </div>
 
             {/* Status Table */}
-            {realTimeStatus.length > 0 && (
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
-                <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
-                  <div>
-                    <div className="text-xl font-bold text-[#1A2332]">
-                      {t('boundaryAccessAnalytics.tables.realTimeStatus.title')}
+{(realTimeStatus.length > 0 || realTimeLoading) && (
+  <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
+    <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
+      <div>
+        <div className="text-xl font-bold text-[#1A2332]">
+          {t('boundaryAccessAnalytics.tables.realTimeStatus.title')}
+        </div>
+        <div className="text-sm text-[#64748B] mt-1">
+          {t('boundaryAccessAnalytics.tables.realTimeStatus.subtitle')}
+        </div>
+      </div>
+    </div>
+
+    {/* Filtros */}
+    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+      <div>
+        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
+          Pessoa
+        </label>
+        <input
+          type="text"
+          placeholder="Buscar por nome..."
+          value={realTimeFilters.itemName}
+          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, itemName: e.target.value, page: 1 })}
+          disabled={realTimeLoading}
+          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
+          Boundary
+        </label>
+        <input
+          type="text"
+          placeholder="Buscar boundary..."
+          value={realTimeFilters.boundaryName}
+          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, boundaryName: e.target.value, page: 1 })}
+          disabled={realTimeLoading}
+          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
+          Status
+        </label>
+        <select
+          value={realTimeFilters.status}
+          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, status: e.target.value, page: 1 })}
+          disabled={realTimeLoading}
+          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+        >
+          <option value="">Todos</option>
+          <option value="NORMAL">Normal</option>
+          <option value="LONG">Longo</option>
+          <option value="ALERT">Alerta</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
+          Duração Mín (h)
+        </label>
+        <input
+          type="number"
+          placeholder="0"
+          min="0"
+          step="0.5"
+          value={realTimeFilters.minDuration}
+          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, minDuration: e.target.value, page: 1 })}
+          disabled={realTimeLoading}
+          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
+          Duração Máx (h)
+        </label>
+        <input
+          type="number"
+          placeholder="24"
+          min="0"
+          step="0.5"
+          value={realTimeFilters.maxDuration}
+          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, maxDuration: e.target.value, page: 1 })}
+          disabled={realTimeLoading}
+          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+        />
+      </div>
+    </div>
+
+    {/* Botões de Ação e Contador */}
+    <div className="flex justify-between items-center mb-4">
+      <div className="text-sm text-[#64748B]">
+        {realTimeLoading ? (
+          <span className="flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+            Carregando...
+          </span>
+        ) : (
+          <>
+            Mostrando {realTimeStatus.length} de {realTimePagination.totalRecords} resultado
+            {realTimePagination.totalRecords !== 1 ? 's' : ''}
+            {(realTimeFilters.itemName || realTimeFilters.boundaryName || realTimeFilters.status || 
+              realTimeFilters.minDuration || realTimeFilters.maxDuration) && ' (filtrado)'}
+          </>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <button
+          onClick={() => setRealTimeFilters({
+            itemName: '',
+            boundaryName: '',
+            status: '',
+            minDuration: '',
+            maxDuration: '',
+            page: 1,
+            limit: 20
+          })}
+          disabled={realTimeLoading}
+          className="px-4 py-2 text-sm font-semibold text-[#64748B] bg-[#F5F7FA] rounded-lg hover:bg-[#E2E8F0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Limpar Filtros
+        </button>
+
+        <select
+          value={realTimeFilters.limit}
+          onChange={(e) => handleLimitChange(Number(e.target.value))}
+          disabled={realTimeLoading}
+          className="px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <option value={10}>10 por página</option>
+          <option value={20}>20 por página</option>
+          <option value={50}>50 por página</option>
+          <option value={100}>100 por página</option>
+        </select>
+      </div>
+    </div>
+
+    {/* Tabela com Loading State */}
+    <div className="relative">
+      {realTimeLoading && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center rounded-lg">
+          <div className="text-center">
+            <div className="relative w-16 h-16 mx-auto mb-4">
+              <div className="absolute top-0 left-0 w-full h-full border-4 border-[#E2E8F0] rounded-full"></div>
+              <div className="absolute top-0 left-0 w-full h-full border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p className="text-sm text-[#64748B] font-medium">Carregando dados...</p>
+          </div>
+        </div>
+      )}
+
+      <div className="overflow-x-auto overflow-y-auto max-h-[360px]">
+        <table className="w-full">
+          <thead className="bg-[#F5F7FA] sticky top-0 z-10">
+            <tr>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.person')}
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.boundary')}
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.entry')}
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.duration')}
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
+                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.status')}
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {!realTimeLoading && realTimeStatus.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-3 py-8 text-center text-[#64748B]">
+                  <div className="flex flex-col items-center gap-2">
+                    <ExclamationTriangleIcon className="w-12 h-12 text-[#E2E8F0]" />
+                    <p className="font-medium">Nenhum resultado encontrado</p>
+                    <p className="text-sm">Tente ajustar os filtros</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              realTimeStatus.map((item, idx) => (
+                <tr key={idx} className="hover:bg-[#0F4C81]/5 transition-colors">
+                  <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
+                    {item.item_name}
+                  </td>
+                  <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
+                    {item.boundary_name}
+                  </td>
+                  <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
+                    {new Date(item.last_entry).toLocaleTimeString('pt-BR', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </td>
+                  <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
+                    {item.duration_today_hours}h
+                  </td>
+                  <td className="px-3 py-2 border-b border-[#E2E8F0]">
+                    <span className={`inline-block px-2 py-0.5 rounded-lg text-[10px] font-semibold uppercase
+                      ${item.status === 'LONG'
+                        ? 'bg-yellow-100 text-yellow-600'
+                        : item.status === 'ALERT'
+                          ? 'bg-red-100 text-red-600'
+                          : 'bg-green-100 text-green-600'
+                      }`}>
+                      {item.status === 'LONG'
+                        ? t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.long')
+                        : item.status === 'ALERT'
+                          ? 'ALERTA'
+                          : t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.normal')}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {/* Paginação */}
+    {!realTimeLoading && realTimePagination.totalPages > 1 && (
+      <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#E2E8F0]">
+        <div className="text-sm text-[#64748B]">
+          Página {realTimePagination.currentPage} de {realTimePagination.totalPages}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => handlePageChange(1)}
+            disabled={!realTimePagination.hasPrevPage || realTimeLoading}
+            className="px-3 py-1 text-sm font-semibold text-[#0F4C81] bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F5F7FA] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            ««
+          </button>
+          
+          <button
+            onClick={() => handlePageChange(realTimePagination.currentPage - 1)}
+            disabled={!realTimePagination.hasPrevPage || realTimeLoading}
+            className="px-3 py-1 text-sm font-semibold text-[#0F4C81] bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F5F7FA] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            ‹
+          </button>
+
+          {/* Números de página */}
+          {Array.from({ length: Math.min(5, realTimePagination.totalPages) }, (_, i) => {
+            let pageNum;
+            if (realTimePagination.totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (realTimePagination.currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (realTimePagination.currentPage >= realTimePagination.totalPages - 2) {
+              pageNum = realTimePagination.totalPages - 4 + i;
+            } else {
+              pageNum = realTimePagination.currentPage - 2 + i;
+            }
+
+            return (
+              <button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                disabled={realTimeLoading}
+                className={`px-3 py-1 text-sm font-semibold rounded-lg transition-colors disabled:cursor-not-allowed
+                  ${realTimePagination.currentPage === pageNum
+                    ? 'bg-[#0F4C81] text-white'
+                    : 'text-[#0F4C81] bg-white border border-[#E2E8F0] hover:bg-[#F5F7FA]'
+                  }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            onClick={() => handlePageChange(realTimePagination.currentPage + 1)}
+            disabled={!realTimePagination.hasNextPage || realTimeLoading}
+            className="px-3 py-1 text-sm font-semibold text-[#0F4C81] bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F5F7FA] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            ›
+          </button>
+
+          <button
+            onClick={() => handlePageChange(realTimePagination.totalPages)}
+            disabled={!realTimePagination.hasNextPage || realTimeLoading}
+            className="px-3 py-1 text-sm font-semibold text-[#0F4C81] bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F5F7FA] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            »»
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
+            {/* NOVO: Mapa de Calor */}
+            <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
+              <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
+                <div>
+                  <div className="text-xl font-bold text-[#1A2332]">
+                    {t('boundaryAccessAnalytics.maps.heatmap.title')}
+                  </div>
+                  <div className="text-sm text-[#64748B] mt-1">
+                    {t('boundaryAccessAnalytics.maps.heatmap.subtitle')}
+                  </div>
+                </div>
+
+                {/* Legenda */}
+                <div className="flex items-center gap-4">
+                  <div className="text-xs text-[#64748B] uppercase font-semibold">
+                    {t('boundaryAccessAnalytics.maps.heatmap.legend')}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-[#0F4C81]"></div>
+                      <span className="text-xs text-[#64748B]">
+                        {t('boundaryAccessAnalytics.maps.heatmap.density.low')}
+                      </span>
                     </div>
-                    <div className="text-sm text-[#64748B] mt-1">
-                      {t('boundaryAccessAnalytics.tables.realTimeStatus.subtitle')}
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
+                      <span className="text-xs text-[#64748B]">
+                        {t('boundaryAccessAnalytics.maps.heatmap.density.medium')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-[#F59E0B]"></div>
+                      <span className="text-xs text-[#64748B]">
+                        {t('boundaryAccessAnalytics.maps.heatmap.density.high')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded-full bg-[#EF4444]"></div>
+                      <span className="text-xs text-[#64748B]">
+                        {t('boundaryAccessAnalytics.maps.heatmap.density.critical')}
+                      </span>
                     </div>
                   </div>
                 </div>
-                <div className="overflow-x-auto overflow-y-auto max-h-[360px]">
-                  <table className="w-full">
-                    <thead className="bg-[#F5F7FA] sticky top-0 z-10">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                          {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.person')}
-                        </th>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                          {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.boundary')}
-                        </th>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                          {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.entry')}
-                        </th>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                          {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.duration')}
-                        </th>
-                        <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                          {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.status')}
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {realTimeStatus.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-[#0F4C81]/5 transition-colors">
-                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
-                            {item.item_name}
-                          </td>
-                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
-                            {item.boundary_name}
-                          </td>
-                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
-                            {new Date(item.last_entry).toLocaleTimeString('pt-BR', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </td>
-                          <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
-                            {item.duration_today_hours}h
-                          </td>
-                          <td className="px-3 py-2 border-b border-[#E2E8F0]">
-                            <span className={`inline-block px-2 py-0.5 rounded-lg text-[10px] font-semibold uppercase
-              ${item.status === 'LONG'
-                                ? 'bg-yellow-100 text-yellow-600'
-                                : item.status === 'ALERT'
-                                  ? 'bg-red-100 text-red-600'
-                                  : 'bg-green-100 text-green-600'
-                              }`}>
-                              {item.status === 'LONG'
-                                ? t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.long')
-                                : item.status === 'ALERT'
-                                  ? 'ALERTA'
-                                  : t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.normal')}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
               </div>
-            )}
 
-            {/* NOVO: Mapa de Calor */}
-    <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
-      <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
-        <div>
-          <div className="text-xl font-bold text-[#1A2332]">
-            {t('boundaryAccessAnalytics.maps.heatmap.title')}
-          </div>
-          <div className="text-sm text-[#64748B] mt-1">
-            {t('boundaryAccessAnalytics.maps.heatmap.subtitle')}
-          </div>
-        </div>
-        
-        {/* Legenda */}
-<div className="flex items-center gap-4">
-  <div className="text-xs text-[#64748B] uppercase font-semibold">
-    {t('boundaryAccessAnalytics.maps.heatmap.legend')}
-  </div>
-  <div className="flex items-center gap-2">
-    <div className="flex items-center gap-1">
-      <div className="w-3 h-3 rounded-full bg-[#0F4C81]"></div>
-      <span className="text-xs text-[#64748B]">
-        {t('boundaryAccessAnalytics.maps.heatmap.density.low')}
-      </span>
-    </div>
-    <div className="flex items-center gap-1">
-      <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
-      <span className="text-xs text-[#64748B]">
-        {t('boundaryAccessAnalytics.maps.heatmap.density.medium')}
-      </span>
-    </div>
-    <div className="flex items-center gap-1">
-      <div className="w-3 h-3 rounded-full bg-[#F59E0B]"></div>
-      <span className="text-xs text-[#64748B]">
-        {t('boundaryAccessAnalytics.maps.heatmap.density.high')}
-      </span>
-    </div>
-    <div className="flex items-center gap-1">
-      <div className="w-3 h-3 rounded-full bg-[#EF4444]"></div>
-      <span className="text-xs text-[#64748B]">
-        {t('boundaryAccessAnalytics.maps.heatmap.density.critical')}
-      </span>
-    </div>
-  </div>
-</div>
-      </div>
-      
-      <div className="w-full h-[600px]">
-        {topBoundaries.length === 0 ? (
-          <ChartLoader />
-        ) : (
-          <BoundaryHeatmap 
-            boundaries={boundaryMapData} 
-            center={calculateMapCenter(boundaryMapData)} 
-            zones={activeZones}
-            zoom={13}
-          />
-        )}
-      </div>
-    </div>
+              <div className="w-full h-[600px]">
+                {topBoundaries.length === 0 ? (
+                  <ChartLoader />
+                ) : (
+                  <BoundaryHeatmap
+                    boundaries={boundaryMapData}
+                    center={calculateMapCenter(boundaryMapData)}
+                    zones={activeZones}
+                    zoom={13}
+                  />
+                )}
+              </div>
+            </div>
           </div>
         )}
 

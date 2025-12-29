@@ -189,36 +189,36 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
         {/* Zonas/Cercas (GeoJSON Polygons) */}
         {/* Zonas/Cercas (GeoJSON Polygons) */}
         {validZones.map((zone) => {
-  try {
-    const geoJsonData = typeof zone.geojson_data === 'string' 
-      ? JSON.parse(zone.geojson_data) 
-      : zone.geojson_data;
+          try {
+            const geoJsonData = typeof zone.geojson_data === 'string'
+              ? JSON.parse(zone.geojson_data)
+              : zone.geojson_data;
 
-    const feature = geoJsonData.features?.[0];
-    const color = feature?.properties?.color 
-      ? decodeColor(feature.properties.color) 
-      : '#0F4C81';
+            const feature = geoJsonData.features?.[0];
+            const color = feature?.properties?.color
+              ? decodeColor(feature.properties.color)
+              : '#0F4C81';
 
-    const isActive = zone.active === 1;
-    const statusText = isActive 
-      ? t('boundaryAccessAnalytics.boundaryMarkerMap.zonePopup.active')
-      : t('boundaryAccessAnalytics.boundaryMarkerMap.zonePopup.inactive');
-    const statusColor = isActive ? '#10B981' : '#EF4444';
+            const isActive = zone.active === 1;
+            const statusText = isActive
+              ? t('boundaryAccessAnalytics.boundaryMarkerMap.zonePopup.active')
+              : t('boundaryAccessAnalytics.boundaryMarkerMap.zonePopup.inactive');
+            const statusColor = isActive ? '#10B981' : '#EF4444';
 
-    return (
-      <GeoJSON
-        key={zone.id}
-        data={geoJsonData}
-        style={{
-          color: color,
-          weight: 2,
-          opacity: 0.8,
-          fillOpacity: 0.15,
-          fillColor: color
-        }}
-        // @ts-ignore
-        onEachFeature={(feature, layer) => {
-          layer.bindPopup(`
+            return (
+              <GeoJSON
+                key={zone.id}
+                data={geoJsonData}
+                style={{
+                  color: color,
+                  weight: 2,
+                  opacity: 0.8,
+                  fillOpacity: 0.15,
+                  fillColor: color
+                }}
+                // @ts-ignore
+                onEachFeature={(feature, layer) => {
+                  layer.bindPopup(`
             <div style="font-family: 'Outfit', sans-serif; min-width: 180px;">
               <div style="font-weight: bold; font-size: 13px; color: #0F4C81; margin-bottom: 6px; border-bottom: 2px solid #E2E8F0; padding-bottom: 4px;">
                 ${zone.boundary_name}
@@ -238,14 +238,14 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
               </div>
             </div>
           `);
-        }}
-      />
-    );
-  } catch (error) {
-    console.error(`Error rendering zone ${zone.id}:`, error);
-    return null;
-  }
-})}
+                }}
+              />
+            );
+          } catch (error) {
+            console.error(`Error rendering zone ${zone.id}:`, error);
+            return null;
+          }
+        })}
 
 
         {/* Marcadores dos Boundaries */}
@@ -262,46 +262,46 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
               fillOpacity: 0.8
             }}
           >
-             <Popup>
-                <div style={{ fontFamily: "'Outfit', sans-serif" }}>
-                  <div style={{ 
-                    fontWeight: 'bold', 
-                    fontSize: '14px', 
-                    color: '#0F4C81', 
-                    marginBottom: '8px',
-                    borderBottom: '2px solid #E2E8F0',
-                    paddingBottom: '4px'
-                  }}>
-                    {boundary.boundary_name}
+            <Popup>
+              <div style={{ fontFamily: "'Outfit', sans-serif" }}>
+                <div style={{
+                  fontWeight: 'bold',
+                  fontSize: '14px',
+                  color: '#0F4C81',
+                  marginBottom: '8px',
+                  borderBottom: '2px solid #E2E8F0',
+                  paddingBottom: '4px'
+                }}>
+                  {boundary.boundary_name}
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748B', lineHeight: '1.6' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <strong>{t('boundaryAccessAnalytics.boundaryMarkerMap.popup.visits')}:</strong>
+                    <span style={{ fontFamily: 'monospace', color: '#0F4C81', fontWeight: 'bold' }}>
+                      {boundary.visits}
+                    </span>
                   </div>
-                  <div style={{ fontSize: '12px', color: '#64748B', lineHeight: '1.6' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <strong>{t('boundaryAccessAnalytics.boundaryMarkerMap.popup.visits')}:</strong> 
-                      <span style={{ fontFamily: 'monospace', color: '#0F4C81', fontWeight: 'bold' }}>
-                        {boundary.visits}
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <strong>{t('boundaryAccessAnalytics.boundaryMarkerMap.popup.duration')}:</strong> 
-                      <span style={{ fontFamily: 'monospace' }}>
-                        {boundary.duration_hours.toFixed(1)}h
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <strong>{t('boundaryAccessAnalytics.boundaryMarkerMap.popup.peopleInside')}:</strong> 
-                      <span 
-                        style={{ 
-                          fontFamily: 'monospace',
-                          color: boundary.is_currently_inside > 0 ? '#10B981' : '#64748B',
-                          fontWeight: boundary.is_currently_inside > 0 ? 'bold' : 'normal'
-                        }}
-                      >
-                        {boundary.is_currently_inside}
-                      </span>
-                    </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <strong>{t('boundaryAccessAnalytics.boundaryMarkerMap.popup.duration')}:</strong>
+                    <span style={{ fontFamily: 'monospace' }}>
+                      {boundary.duration_hours.toFixed(1)}h
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <strong>{t('boundaryAccessAnalytics.boundaryMarkerMap.popup.peopleInside')}:</strong>
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        color: boundary.is_currently_inside > 0 ? '#10B981' : '#64748B',
+                        fontWeight: boundary.is_currently_inside > 0 ? 'bold' : 'normal'
+                      }}
+                    >
+                      {boundary.is_currently_inside}
+                    </span>
                   </div>
                 </div>
-              </Popup>
+              </div>
+            </Popup>
           </CircleMarker>
         ))}
       </MapContainer>

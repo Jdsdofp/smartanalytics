@@ -92,10 +92,34 @@ interface ActiveZone {
   geojson_data: any;
 }
 
-export const useBoundaryAnalytics = (
+// Adicionar interfaces
+interface RealTimeFilters {
+  itemName?: string;
+  boundaryName?: string;
+  status?: string;
+  minDuration?: string;
+  maxDuration?: string;
+  page?: number;
+  limit?: number;
+}
+//@ts-ignore
+interface RealTimeStatusResponse {
+  data: any[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalRecords: number;
+    limit: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}
+
+export const  useBoundaryAnalytics = (
   companyId: number,
   activeTab: string,
-  selectedPeriod: "7d" | "30d" | "90d"
+  selectedPeriod: "7d" | "30d" | "90d",
+  realTimeFilters?: RealTimeFilters // Adicionar parâmetro
 ) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -123,6 +147,7 @@ export const useBoundaryAnalytics = (
   const [boundaryMapData, setBoundaryMapData] = useState<BoundaryMapData[]>([]);
     // Adicionar novo estado para zonas ativas
   const [activeZones, setActiveZones] = useState<ActiveZone[]>([]);
+  
 
 
   const [sankeyData, setSankeyData] = useState<SankeyDataItem[]>([]);
@@ -132,6 +157,15 @@ export const useBoundaryAnalytics = (
   const [topPeople, setTopPeople] = useState<any[]>([]);
   const [frequencyAnalysis, setFrequencyAnalysis] = useState<any[]>([]);
   const [realTimeStatus, setRealTimeStatus] = useState<any[]>([]);
+  const [realTimePagination, setRealTimePagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalRecords: 0,
+    limit: 20,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
+  const [realTimeLoading, setRealTimeLoading] = useState(false);
 
   // Função para converter dados do Sankey para o formato esperado
   const convertSankeyData = (apiData: any[]): SankeyDataItem[] => {
@@ -221,7 +255,7 @@ export const useBoundaryAnalytics = (
     };
 
     fetchData();
-  }, [companyId, activeTab, selectedPeriod]);
+  }, [companyId, activeTab, selectedPeriod, realTimeFilters]);
 
   // Adicionar função de fetch
   const fetchAnomalyKpis = async () => {
@@ -437,11 +471,44 @@ const fetchDetailedRanking = async () => {
   }
 };
 
+ // Atualizar fetchRealTimeStatus
   const fetchRealTimeStatus = async () => {
-    const { data } = await axios.get(
-      `${API_BASE_URL}/dashboard/boundary/${companyId}/real-time-status?limit=20`
-    );
-    setRealTimeStatus(data.data);
+    setRealTimeLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.append('limit', String(realTimeFilters?.limit || 20));
+      params.append('page', String(realTimeFilters?.page || 1));
+
+      if (realTimeFilters?.itemName) {
+        params.append('itemName', realTimeFilters.itemName);
+      }
+      if (realTimeFilters?.boundaryName) {
+        params.append('boundaryName', realTimeFilters.boundaryName);
+      }
+      if (realTimeFilters?.status) {
+        params.append('status', realTimeFilters.status);
+      }
+      if (realTimeFilters?.minDuration) {
+        params.append('minDuration', realTimeFilters.minDuration);
+      }
+      if (realTimeFilters?.maxDuration) {
+        params.append('maxDuration', realTimeFilters.maxDuration);
+      }
+
+      const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/real-time-status?${params.toString()}`
+      );
+      
+      setRealTimeStatus(data.data || []);
+      if (data.pagination) {
+        setRealTimePagination(data.pagination);
+      }
+    } catch (err) {
+      console.error('Error fetching real-time status:', err);
+      setRealTimeStatus([]);
+    } finally {
+      setRealTimeLoading(false);
+    }
   };
 
   return {
@@ -465,6 +532,8 @@ const fetchDetailedRanking = async () => {
     frequencyAnalysis,
     detailedRanking,
     realTimeStatus,
+    realTimePagination,
+    realTimeLoading,
     boundaryMapData,
     activeZones,
     loading,
