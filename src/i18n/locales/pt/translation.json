@@ -1705,6 +1705,47 @@
         "statuses": {
           "normal": "Normal",
           "long": "Longo"
+        },
+        "filters": {
+          "person": "Pessoa",
+          "allPersons": "Todas as pessoas",
+          "boundary": "Boundary",
+          "allBoundaries": "Todas as boundaries",
+          "status": "Status",
+          "allStatus": "Todos",
+          "minDuration": "Duração Mín (h)",
+          "maxDuration": "Duração Máx (h)"
+        },
+        "statusOptions": {
+          "normal": "Normal",
+          "long": "Longo",
+          "alert": "Alerta"
+        },
+        "loading": {
+          "spinner": "Carregando...",
+          "data": "Carregando dados..."
+        },
+        "results": {
+          "showing": "Mostrando",
+          "of": "de",
+          "result": "resultado",
+          "results": "resultados",
+          "filtered": "filtrado",
+          "noneFound": "Nenhum resultado encontrado",
+          "tryFilters": "Tente ajustar os filtros"
+        },
+        "actions": {
+          "clearFilters": "Limpar Filtros"
+        },
+        "pagination": {
+          "page": "Página",
+          "of": "de",
+          "perPage": {
+            "10": "10 por página",
+            "20": "20 por página",
+            "50": "50 por página",
+            "100": "100 por página"
+          }
         }
       },
       "topAnomalies": {
@@ -1879,12 +1920,12 @@
         "duration": "Duração",
         "peopleInside": "Pessoas dentro"
       },
-       "zonePopup": {
-      "code": "Código",
-      "group": "Grupo",
-      "active": "ATIVA",
-      "inactive": "INATIVA"
-    }
+      "zonePopup": {
+        "code": "Código",
+        "group": "Grupo",
+        "active": "ATIVA",
+        "inactive": "INATIVA"
+      }
     }
   }
 }

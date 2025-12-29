@@ -104,6 +104,8 @@ export default function BoundaryAccessAnalytics() {
     realTimeStatus,
     realTimePagination,
     realTimeLoading,
+    filterOptions,
+    filterOptionsLoading,
     boundaryMapData,
     activeZones,
     loading,
@@ -227,7 +229,7 @@ export default function BoundaryAccessAnalytics() {
   }, [debouncedItemName, debouncedBoundaryName, tempFilters.status, tempFilters.minDuration, tempFilters.maxDuration]);
 
 
-    // Funções de paginação
+  // Funções de paginação
   const handlePageChange = (newPage: number) => {
     setRealTimeFilters({ ...realTimeFilters, page: newPage });
   };
@@ -1202,301 +1204,603 @@ export default function BoundaryAccessAnalytics() {
             </div>
 
             {/* Status Table */}
+            {/* Status Table */}
 {(realTimeStatus.length > 0 || realTimeLoading) && (
-  <div className="bg-white rounded-xl border border-[#E2E8F0] p-6">
-    <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
-      <div>
-        <div className="text-xl font-bold text-[#1A2332]">
-          {t('boundaryAccessAnalytics.tables.realTimeStatus.title')}
+  <div className="bg-white rounded-2xl border border-[#E2E8F0] shadow-sm overflow-hidden">
+    {/* Header com Gradiente */}
+    <div className="bg-gradient-to-r from-[#0F4C81] to-[#1a5c9e] p-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-white">
+              {t('boundaryAccessAnalytics.tables.realTimeStatus.title')}
+            </h3>
+            <p className="text-sm text-white/80 mt-0.5">
+              {t('boundaryAccessAnalytics.tables.realTimeStatus.subtitle')}
+            </p>
+          </div>
         </div>
-        <div className="text-sm text-[#64748B] mt-1">
-          {t('boundaryAccessAnalytics.tables.realTimeStatus.subtitle')}
+        
+        {/* Badge de Status Ao Vivo */}
+        <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl">
+          <div className="relative">
+            <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></div>
+            <div className="absolute inset-0 w-2.5 h-2.5 bg-green-400 rounded-full animate-ping"></div>
+          </div>
+          <span className="text-sm font-semibold text-white">AO VIVO</span>
         </div>
       </div>
     </div>
 
-    {/* Filtros */}
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-      <div>
-        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
-          Pessoa
-        </label>
-        <input
-          type="text"
-          placeholder="Buscar por nome..."
-          value={realTimeFilters.itemName}
-          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, itemName: e.target.value, page: 1 })}
-          disabled={realTimeLoading}
-          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
-        />
+    {/* Filtros Modernos */}
+    <div className="p-6 bg-gradient-to-b from-gray-50 to-white border-b border-[#E2E8F0]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {/* Filtro de Pessoa */}
+        <div className="group">
+          <label className="flex items-center gap-2 text-xs font-bold text-[#64748B] mb-2 uppercase tracking-wider">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            {t('boundaryAccessAnalytics.tables.realTimeStatus.filters.person')}
+          </label>
+          <div className="relative">
+            <select
+              value={realTimeFilters.itemName}
+              onChange={(e) => setRealTimeFilters({ ...realTimeFilters, itemName: e.target.value, page: 1 })}
+              disabled={realTimeLoading || filterOptionsLoading}
+              className="w-full pl-10 pr-4 py-2.5 text-sm border-2 border-[#E2E8F0] rounded-xl 
+                       focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 focus:border-[#0F4C81] 
+                       disabled:bg-gray-50 disabled:cursor-not-allowed
+                       transition-all duration-200 appearance-none cursor-pointer
+                       hover:border-[#0F4C81]/50 group-hover:shadow-sm"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+              }}
+            >
+              <option value="">{t('boundaryAccessAnalytics.tables.realTimeStatus.filters.allPersons')}</option>
+              {filterOptions.items.map((item) => (
+                <option key={item.item_id} value={item.item_name}>
+                  {item.item_name} {item.item_code && `(${item.item_code})`}
+                </option>
+              ))}
+            </select>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-5 h-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtro de Boundary */}
+        <div className="group">
+          <label className="flex items-center gap-2 text-xs font-bold text-[#64748B] mb-2 uppercase tracking-wider">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {t('boundaryAccessAnalytics.tables.realTimeStatus.filters.boundary')}
+          </label>
+          <div className="relative">
+            <select
+              value={realTimeFilters.boundaryName}
+              onChange={(e) => setRealTimeFilters({ ...realTimeFilters, boundaryName: e.target.value, page: 1 })}
+              disabled={realTimeLoading || filterOptionsLoading}
+              className="w-full pl-10 pr-4 py-2.5 text-sm border-2 border-[#E2E8F0] rounded-xl 
+                       focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 focus:border-[#0F4C81] 
+                       disabled:bg-gray-50 disabled:cursor-not-allowed
+                       transition-all duration-200 appearance-none cursor-pointer
+                       hover:border-[#0F4C81]/50 group-hover:shadow-sm"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+              }}
+            >
+              <option value="">{t('boundaryAccessAnalytics.tables.realTimeStatus.filters.allBoundaries')}</option>
+              {filterOptions.boundaries.map((boundary) => (
+                <option key={boundary.boundary_id} value={boundary.boundary_name}>
+                  {boundary.boundary_name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-5 h-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtro de Status */}
+        <div className="group">
+          <label className="flex items-center gap-2 text-xs font-bold text-[#64748B] mb-2 uppercase tracking-wider">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {t('boundaryAccessAnalytics.tables.realTimeStatus.filters.status')}
+          </label>
+          <div className="relative">
+            <select
+              value={realTimeFilters.status}
+              onChange={(e) => setRealTimeFilters({ ...realTimeFilters, status: e.target.value, page: 1 })}
+              disabled={realTimeLoading}
+              className="w-full pl-10 pr-4 py-2.5 text-sm border-2 border-[#E2E8F0] rounded-xl 
+                       focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 focus:border-[#0F4C81] 
+                       disabled:bg-gray-50 disabled:cursor-not-allowed
+                       transition-all duration-200 appearance-none cursor-pointer
+                       hover:border-[#0F4C81]/50 group-hover:shadow-sm"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+              }}
+            >
+              <option value="">{t('boundaryAccessAnalytics.tables.realTimeStatus.filters.allStatus')}</option>
+              <option value="NORMAL">{t('boundaryAccessAnalytics.tables.realTimeStatus.statusOptions.normal')}</option>
+              <option value="LONG">{t('boundaryAccessAnalytics.tables.realTimeStatus.statusOptions.long')}</option>
+              <option value="ALERT">{t('boundaryAccessAnalytics.tables.realTimeStatus.statusOptions.alert')}</option>
+            </select>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-5 h-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Duração Mín */}
+        <div className="group">
+          <label className="flex items-center gap-2 text-xs font-bold text-[#64748B] mb-2 uppercase tracking-wider">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {t('boundaryAccessAnalytics.tables.realTimeStatus.filters.minDuration')}
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              placeholder="0h"
+              min="0"
+              step="0.5"
+              value={realTimeFilters.minDuration}
+              onChange={(e) => setRealTimeFilters({ ...realTimeFilters, minDuration: e.target.value, page: 1 })}
+              disabled={realTimeLoading}
+              className="w-full pl-10 pr-4 py-2.5 text-sm border-2 border-[#E2E8F0] rounded-xl 
+                       focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 focus:border-[#0F4C81] 
+                       disabled:bg-gray-50 disabled:cursor-not-allowed
+                       transition-all duration-200
+                       hover:border-[#0F4C81]/50 group-hover:shadow-sm"
+            />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-5 h-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Duração Máx */}
+        <div className="group">
+          <label className="flex items-center gap-2 text-xs font-bold text-[#64748B] mb-2 uppercase tracking-wider">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {t('boundaryAccessAnalytics.tables.realTimeStatus.filters.maxDuration')}
+          </label>
+          <div className="relative">
+            <input
+              type="number"
+              placeholder="24h"
+              min="0"
+              step="0.5"
+              value={realTimeFilters.maxDuration}
+              onChange={(e) => setRealTimeFilters({ ...realTimeFilters, maxDuration: e.target.value, page: 1 })}
+              disabled={realTimeLoading}
+              className="w-full pl-10 pr-4 py-2.5 text-sm border-2 border-[#E2E8F0] rounded-xl 
+                       focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 focus:border-[#0F4C81] 
+                       disabled:bg-gray-50 disabled:cursor-not-allowed
+                       transition-all duration-200
+                       hover:border-[#0F4C81]/50 group-hover:shadow-sm"
+            />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-5 h-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
-          Boundary
-        </label>
-        <input
-          type="text"
-          placeholder="Buscar boundary..."
-          value={realTimeFilters.boundaryName}
-          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, boundaryName: e.target.value, page: 1 })}
-          disabled={realTimeLoading}
-          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
-        />
-      </div>
+      {/* Barra de Ações */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mt-6 pt-6 border-t border-[#E2E8F0]">
+        {/* Contador de Resultados */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border-2 border-[#E2E8F0]">
+            {realTimeLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-sm font-medium text-[#64748B]">
+                  {t('boundaryAccessAnalytics.tables.realTimeStatus.loading.spinner')}
+                </span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5 text-[#0F4C81]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="text-sm font-semibold text-[#1A2332]">
+                  {realTimeStatus.length}
+                </span>
+                <span className="text-sm text-[#64748B]">
+                  {t('boundaryAccessAnalytics.tables.realTimeStatus.results.of')} {realTimePagination.totalRecords}
+                </span>
+                {(realTimeFilters.itemName || realTimeFilters.boundaryName || realTimeFilters.status ||
+                  realTimeFilters.minDuration || realTimeFilters.maxDuration) && (
+                  <span className="inline-flex items-center gap-1 ml-2 px-2 py-0.5 bg-[#0F4C81]/10 text-[#0F4C81] rounded-lg text-xs font-semibold">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    {t('boundaryAccessAnalytics.tables.realTimeStatus.results.filtered')}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+        </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
-          Status
-        </label>
-        <select
-          value={realTimeFilters.status}
-          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, status: e.target.value, page: 1 })}
-          disabled={realTimeLoading}
-          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
-        >
-          <option value="">Todos</option>
-          <option value="NORMAL">Normal</option>
-          <option value="LONG">Longo</option>
-          <option value="ALERT">Alerta</option>
-        </select>
-      </div>
+        {/* Botões de Ação */}
+        <div className="flex items-center gap-3">
+          {/* Limpar Filtros */}
+          <button
+            onClick={() => setRealTimeFilters({
+              itemName: '',
+              boundaryName: '',
+              status: '',
+              minDuration: '',
+              maxDuration: '',
+              page: 1,
+              limit: 20
+            })}
+            disabled={realTimeLoading}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#64748B] 
+                     bg-white border-2 border-[#E2E8F0] rounded-xl 
+                     hover:bg-gray-50 hover:border-gray-300 hover:text-[#1A2332]
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-all duration-200 shadow-sm hover:shadow"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            {t('boundaryAccessAnalytics.tables.realTimeStatus.actions.clearFilters')}
+          </button>
 
-      <div>
-        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
-          Duração Mín (h)
-        </label>
-        <input
-          type="number"
-          placeholder="0"
-          min="0"
-          step="0.5"
-          value={realTimeFilters.minDuration}
-          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, minDuration: e.target.value, page: 1 })}
-          disabled={realTimeLoading}
-          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
-        />
-      </div>
-
-      <div>
-        <label className="block text-xs font-semibold text-[#64748B] mb-1 uppercase">
-          Duração Máx (h)
-        </label>
-        <input
-          type="number"
-          placeholder="24"
-          min="0"
-          step="0.5"
-          value={realTimeFilters.maxDuration}
-          onChange={(e) => setRealTimeFilters({ ...realTimeFilters, maxDuration: e.target.value, page: 1 })}
-          disabled={realTimeLoading}
-          className="w-full px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
-        />
+          {/* Items por Página */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+              Mostrar:
+            </span>
+            <select
+              value={realTimeFilters.limit}
+              onChange={(e) => handleLimitChange(Number(e.target.value))}
+              disabled={realTimeLoading}
+              className="pl-3 pr-8 py-2.5 text-sm font-medium border-2 border-[#E2E8F0] rounded-xl 
+                       focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 focus:border-[#0F4C81]
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       transition-all duration-200 appearance-none cursor-pointer bg-white
+                       hover:border-[#0F4C81]/50 shadow-sm hover:shadow"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+              }}
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
-    {/* Botões de Ação e Contador */}
-    <div className="flex justify-between items-center mb-4">
-      <div className="text-sm text-[#64748B]">
-        {realTimeLoading ? (
-          <span className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
-            Carregando...
-          </span>
-        ) : (
-          <>
-            Mostrando {realTimeStatus.length} de {realTimePagination.totalRecords} resultado
-            {realTimePagination.totalRecords !== 1 ? 's' : ''}
-            {(realTimeFilters.itemName || realTimeFilters.boundaryName || realTimeFilters.status || 
-              realTimeFilters.minDuration || realTimeFilters.maxDuration) && ' (filtrado)'}
-          </>
-        )}
-      </div>
-
-      <div className="flex gap-2">
-        <button
-          onClick={() => setRealTimeFilters({
-            itemName: '',
-            boundaryName: '',
-            status: '',
-            minDuration: '',
-            maxDuration: '',
-            page: 1,
-            limit: 20
-          })}
-          disabled={realTimeLoading}
-          className="px-4 py-2 text-sm font-semibold text-[#64748B] bg-[#F5F7FA] rounded-lg hover:bg-[#E2E8F0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Limpar Filtros
-        </button>
-
-        <select
-          value={realTimeFilters.limit}
-          onChange={(e) => handleLimitChange(Number(e.target.value))}
-          disabled={realTimeLoading}
-          className="px-3 py-2 text-sm border border-[#E2E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0F4C81] disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <option value={10}>10 por página</option>
-          <option value={20}>20 por página</option>
-          <option value={50}>50 por página</option>
-          <option value={100}>100 por página</option>
-        </select>
-      </div>
-    </div>
-
-    {/* Tabela com Loading State */}
+    {/* Tabela Estilizada */}
     <div className="relative">
       {realTimeLoading && (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex items-center justify-center rounded-lg">
+        <div className="absolute inset-0 bg-white/90 backdrop-blur-md z-20 flex items-center justify-center">
           <div className="text-center">
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="absolute top-0 left-0 w-full h-full border-4 border-[#E2E8F0] rounded-full"></div>
-              <div className="absolute top-0 left-0 w-full h-full border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+            <div className="relative w-20 h-20 mx-auto mb-4">
+              <div className="absolute inset-0 border-4 border-[#E2E8F0] rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+              <div className="absolute inset-2 border-4 border-[#0F4C81]/30 border-b-transparent rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
             </div>
-            <p className="text-sm text-[#64748B] font-medium">Carregando dados...</p>
+            <p className="text-sm text-[#1A2332] font-semibold mb-1">
+              {t('boundaryAccessAnalytics.tables.realTimeStatus.loading.data')}
+            </p>
+            <p className="text-xs text-[#64748B]">Aguarde um momento...</p>
           </div>
         </div>
       )}
 
-      <div className="overflow-x-auto overflow-y-auto max-h-[360px]">
-        <table className="w-full">
-          <thead className="bg-[#F5F7FA] sticky top-0 z-10">
-            <tr>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.person')}
-              </th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.boundary')}
-              </th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.entry')}
-              </th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.duration')}
-              </th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-[#64748B] uppercase border-b-2 border-[#E2E8F0]">
-                {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.status')}
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {!realTimeLoading && realTimeStatus.length === 0 ? (
+      <div className="overflow-x-auto">
+        <div className="max-h-[500px] overflow-y-auto">
+          <table className="w-full">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
               <tr>
-                <td colSpan={5} className="px-3 py-8 text-center text-[#64748B]">
-                  <div className="flex flex-col items-center gap-2">
-                    <ExclamationTriangleIcon className="w-12 h-12 text-[#E2E8F0]" />
-                    <p className="font-medium">Nenhum resultado encontrado</p>
-                    <p className="text-sm">Tente ajustar os filtros</p>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              realTimeStatus.map((item, idx) => (
-                <tr key={idx} className="hover:bg-[#0F4C81]/5 transition-colors">
-                  <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
-                    {item.item_name}
-                  </td>
-                  <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
-                    {item.boundary_name}
-                  </td>
-                  <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
-                    {new Date(item.last_entry).toLocaleTimeString('pt-BR', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </td>
-                  <td className="px-3 py-2 border-b border-[#E2E8F0] font-mono text-xs">
-                    {item.duration_today_hours}h
-                  </td>
-                  <td className="px-3 py-2 border-b border-[#E2E8F0]">
-                    <span className={`inline-block px-2 py-0.5 rounded-lg text-[10px] font-semibold uppercase
-                      ${item.status === 'LONG'
-                        ? 'bg-yellow-100 text-yellow-600'
-                        : item.status === 'ALERT'
-                          ? 'bg-red-100 text-red-600'
-                          : 'bg-green-100 text-green-600'
-                      }`}>
-                      {item.status === 'LONG'
-                        ? t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.long')
-                        : item.status === 'ALERT'
-                          ? 'ALERTA'
-                          : t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.normal')}
+                <th className="px-6 py-4 text-left">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#0F4C81]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span className="text-xs font-bold text-[#1A2332] uppercase tracking-wider">
+                      {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.person')}
                     </span>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#0F4C81]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    <span className="text-xs font-bold text-[#1A2332] uppercase tracking-wider">
+                      {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.boundary')}
+                    </span>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#0F4C81]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs font-bold text-[#1A2332] uppercase tracking-wider">
+                      {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.entry')}
+                    </span>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#0F4C81]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs font-bold text-[#1A2332] uppercase tracking-wider">
+                      {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.duration')}
+                    </span>
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-left">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#0F4C81]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs font-bold text-[#1A2332] uppercase tracking-wider">
+                      {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.status')}
+                    </span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-[#E2E8F0]">
+              {!realTimeLoading && realTimeStatus.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-16">
+                    <div className="flex flex-col items-center gap-4 text-center">
+                      <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center">
+                        <ExclamationTriangleIcon className="w-10 h-10 text-gray-400" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold text-[#1A2332] mb-1">
+                          {t('boundaryAccessAnalytics.tables.realTimeStatus.results.noneFound')}
+                        </p>
+                        <p className="text-sm text-[#64748B]">
+                          {t('boundaryAccessAnalytics.tables.realTimeStatus.results.tryFilters')}
+                        </p>
+                      </div>
+                    </div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                realTimeStatus.map((item, idx) => (
+                  <tr 
+                    key={idx} 
+                    className="group hover:bg-gradient-to-r hover:from-[#0F4C81]/5 hover:to-transparent 
+                             transition-all duration-200 cursor-pointer"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#0F4C81] to-[#1a5c9e] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:shadow-md transition-shadow">
+                          {item.item_name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-sm font-semibold text-[#1A2332] group-hover:text-[#0F4C81] transition-colors">
+                          {item.item_name}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-[#0F4C81] rounded-full"></div>
+                        <span className="text-sm text-[#64748B] group-hover:text-[#1A2332] transition-colors">
+                          {item.boundary_name}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 group-hover:bg-white rounded-lg border border-[#E2E8F0] transition-colors">
+                        <svg className="w-4 h-4 text-[#0F4C81]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm font-mono font-medium text-[#1A2332]">
+                          {new Date(item.last_entry).toLocaleTimeString('pt-BR', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 group-hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span className="text-sm font-mono font-bold text-blue-700">
+                          {item.duration_today_hours}h
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm
+                        ${item.status === 'LONG'
+                          ? 'bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700 border border-yellow-200'
+                          : item.status === 'ALERT'
+                            ? 'bg-gradient-to-r from-red-100 to-red-50 text-red-700 border border-red-200'
+                            : 'bg-gradient-to-r from-green-100 to-green-50 text-green-700 border border-green-200'
+                        }`}>
+                        {item.status === 'LONG' ? (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                        ) : item.status === 'ALERT' ? (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                        {item.status === 'LONG'
+                          ? t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.long')
+                          : item.status === 'ALERT'
+                            ? 'ALERTA'
+                            : t('boundaryAccessAnalytics.tables.realTimeStatus.statuses.normal')}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    {/* Paginação */}
+    {/* Paginação Moderna */}
     {!realTimeLoading && realTimePagination.totalPages > 1 && (
-      <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#E2E8F0]">
-        <div className="text-sm text-[#64748B]">
-          Página {realTimePagination.currentPage} de {realTimePagination.totalPages}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-6 bg-gradient-to-b from-white to-gray-50 border-t border-[#E2E8F0]">
+        {/* Info da Página */}
+        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border-2 border-[#E2E8F0] shadow-sm">
+          <svg className="w-5 h-5 text-[#0F4C81]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span className="text-sm font-medium text-[#64748B]">
+            {t('boundaryAccessAnalytics.tables.realTimeStatus.pagination.page')}
+          </span>
+          <span className="text-sm font-bold text-[#0F4C81]">
+            {realTimePagination.currentPage}
+          </span>
+          <span className="text-sm text-[#64748B]">
+            {t('boundaryAccessAnalytics.tables.realTimeStatus.results.of')}
+          </span>
+          <span className="text-sm font-bold text-[#1A2332]">
+            {realTimePagination.totalPages}
+          </span>
         </div>
 
-        <div className="flex gap-2">
+        {/* Controles de Navegação */}
+        <div className="flex items-center gap-2">
+          {/* Primeira Página */}
           <button
             onClick={() => handlePageChange(1)}
             disabled={!realTimePagination.hasPrevPage || realTimeLoading}
-            className="px-3 py-1 text-sm font-semibold text-[#0F4C81] bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F5F7FA] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 flex items-center justify-center text-[#0F4C81] bg-white border-2 border-[#E2E8F0] 
+                     rounded-xl hover:bg-[#0F4C81] hover:text-white hover:border-[#0F4C81]
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#0F4C81]
+                     transition-all duration-200 shadow-sm hover:shadow font-bold"
+            title="Primeira página"
           >
             ««
           </button>
-          
+
+          {/* Página Anterior */}
           <button
             onClick={() => handlePageChange(realTimePagination.currentPage - 1)}
             disabled={!realTimePagination.hasPrevPage || realTimeLoading}
-            className="px-3 py-1 text-sm font-semibold text-[#0F4C81] bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F5F7FA] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 flex items-center justify-center text-[#0F4C81] bg-white border-2 border-[#E2E8F0] 
+                     rounded-xl hover:bg-[#0F4C81] hover:text-white hover:border-[#0F4C81]
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#0F4C81]
+                     transition-all duration-200 shadow-sm hover:shadow font-bold"
+            title="Página anterior"
           >
             ‹
           </button>
 
-          {/* Números de página */}
-          {Array.from({ length: Math.min(5, realTimePagination.totalPages) }, (_, i) => {
-            let pageNum;
-            if (realTimePagination.totalPages <= 5) {
-              pageNum = i + 1;
-            } else if (realTimePagination.currentPage <= 3) {
-              pageNum = i + 1;
-            } else if (realTimePagination.currentPage >= realTimePagination.totalPages - 2) {
-              pageNum = realTimePagination.totalPages - 4 + i;
-            } else {
-              pageNum = realTimePagination.currentPage - 2 + i;
-            }
+          {/* Números de Página */}
+          <div className="flex items-center gap-2">
+            {Array.from({ length: Math.min(5, realTimePagination.totalPages) }, (_, i) => {
+              let pageNum;
+              if (realTimePagination.totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (realTimePagination.currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (realTimePagination.currentPage >= realTimePagination.totalPages - 2) {
+                pageNum = realTimePagination.totalPages - 4 + i;
+              } else {
+                pageNum = realTimePagination.currentPage - 2 + i;
+              }
 
-            return (
-              <button
-                key={pageNum}
-                onClick={() => handlePageChange(pageNum)}
-                disabled={realTimeLoading}
-                className={`px-3 py-1 text-sm font-semibold rounded-lg transition-colors disabled:cursor-not-allowed
-                  ${realTimePagination.currentPage === pageNum
-                    ? 'bg-[#0F4C81] text-white'
-                    : 'text-[#0F4C81] bg-white border border-[#E2E8F0] hover:bg-[#F5F7FA]'
-                  }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  disabled={realTimeLoading}
+                  className={`min-w-[40px] h-10 px-3 flex items-center justify-center rounded-xl font-bold text-sm
+                           transition-all duration-200 shadow-sm hover:shadow
+                           disabled:cursor-not-allowed
+                    ${realTimePagination.currentPage === pageNum
+                      ? 'bg-gradient-to-r from-[#0F4C81] to-[#1a5c9e] text-white border-2 border-[#0F4C81] shadow-md scale-105'
+                      : 'text-[#0F4C81] bg-white border-2 border-[#E2E8F0] hover:bg-[#F5F7FA] hover:border-[#0F4C81]/50'
+                    }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
 
+          {/* Próxima Página */}
           <button
             onClick={() => handlePageChange(realTimePagination.currentPage + 1)}
             disabled={!realTimePagination.hasNextPage || realTimeLoading}
-            className="px-3 py-1 text-sm font-semibold text-[#0F4C81] bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F5F7FA] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 flex items-center justify-center text-[#0F4C81] bg-white border-2 border-[#E2E8F0] 
+                     rounded-xl hover:bg-[#0F4C81] hover:text-white hover:border-[#0F4C81]
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#0F4C81]
+                     transition-all duration-200 shadow-sm hover:shadow font-bold"
+            title="Próxima página"
           >
             ›
           </button>
 
+          {/* Última Página */}
           <button
             onClick={() => handlePageChange(realTimePagination.totalPages)}
             disabled={!realTimePagination.hasNextPage || realTimeLoading}
-            className="px-3 py-1 text-sm font-semibold text-[#0F4C81] bg-white border border-[#E2E8F0] rounded-lg hover:bg-[#F5F7FA] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-10 h-10 flex items-center justify-center text-[#0F4C81] bg-white border-2 border-[#E2E8F0] 
+                     rounded-xl hover:bg-[#0F4C81] hover:text-white hover:border-[#0F4C81]
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#0F4C81]
+                     transition-all duration-200 shadow-sm hover:shadow font-bold"
+            title="Última página"
           >
             »»
           </button>

@@ -115,6 +115,23 @@ interface RealTimeStatusResponse {
   };
 }
 
+// Adicionar interfaces
+interface FilterOption {
+  boundary_id?: number;
+  boundary_name?: string;
+  item_id?: number;
+  item_code?: string;
+  item_name?: string;
+  group_name?: string;
+}
+
+interface FilterOptions {
+  boundaries: FilterOption[];
+  items: FilterOption[];
+  groups: FilterOption[];
+  statuses: { value: string; label: string; }[];
+}
+
 export const  useBoundaryAnalytics = (
   companyId: number,
   activeTab: string,
@@ -166,6 +183,14 @@ export const  useBoundaryAnalytics = (
     hasPrevPage: false
   });
   const [realTimeLoading, setRealTimeLoading] = useState(false);
+  
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    boundaries: [],
+    items: [],
+    groups: [],
+    statuses: []
+  });
+  const [filterOptionsLoading, setFilterOptionsLoading] = useState(false);
 
   // Função para converter dados do Sankey para o formato esperado
   const convertSankeyData = (apiData: any[]): SankeyDataItem[] => {
@@ -256,6 +281,29 @@ export const  useBoundaryAnalytics = (
 
     fetchData();
   }, [companyId, activeTab, selectedPeriod, realTimeFilters]);
+
+
+    // Carregar opções de filtros
+  useEffect(() => {
+    if (!companyId) return;
+
+    const fetchFilterOptions = async () => {
+      setFilterOptionsLoading(true);
+      try {
+        const { data } = await axios.get(
+          `${API_BASE_URL}/dashboard/boundary/${companyId}/filter-options`
+        );
+        setFilterOptions(data.data);
+      } catch (err) {
+        console.error('Error fetching filter options:', err);
+      } finally {
+        setFilterOptionsLoading(false);
+      }
+    };
+
+    fetchFilterOptions();
+  }, [companyId]);
+
 
   // Adicionar função de fetch
   const fetchAnomalyKpis = async () => {
@@ -534,6 +582,8 @@ const fetchDetailedRanking = async () => {
     realTimeStatus,
     realTimePagination,
     realTimeLoading,
+    filterOptions,
+    filterOptionsLoading,
     boundaryMapData,
     activeZones,
     loading,

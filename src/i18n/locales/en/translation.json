@@ -1671,6 +1671,47 @@
         "statuses": {
           "normal": "Normal",
           "long": "Long"
+        },
+        "filters": {
+          "person": "Person",
+          "allPersons": "All people",
+          "boundary": "Boundary",
+          "allBoundaries": "All boundaries",
+          "status": "Status",
+          "allStatus": "All",
+          "minDuration": "Min Duration (h)",
+          "maxDuration": "Max Duration (h)"
+        },
+        "statusOptions": {
+          "normal": "Normal",
+          "long": "Long",
+          "alert": "Alert"
+        },
+        "loading": {
+          "spinner": "Loading...",
+          "data": "Loading data..."
+        },
+        "results": {
+          "showing": "Showing",
+          "of": "of",
+          "result": "result",
+          "results": "results",
+          "filtered": "filtered",
+          "noneFound": "No results found",
+          "tryFilters": "Try adjusting the filters"
+        },
+        "actions": {
+          "clearFilters": "Clear Filters"
+        },
+        "pagination": {
+          "page": "Page",
+          "of": "of",
+          "perPage": {
+            "10": "10 per page",
+            "20": "20 per page",
+            "50": "50 per page",
+            "100": "100 per page"
+          }
         }
       },
       "topAnomalies": {
@@ -1825,7 +1866,7 @@
         "title": "Heatmap – Access Density",
         "subtitle": "Geographical visualization of access intensity by boundary",
         "legend": "Intensity",
-                "density": {
+        "density": {
           "low": "Low",
           "medium": "Medium",
           "high": "High",
@@ -1833,24 +1874,24 @@
         }
       }
     },
-     "mapTypes": {
+    "mapTypes": {
       "streets": "Streets",
       "satellite": "Satellite",
       "terrain": "Terrain",
       "dark": "Dark"
     },
-  "boundaryMarkerMap": {
-    "popup": {
-      "visits": "Visits",
-      "duration": "Duration",
-      "peopleInside": "People inside"
-    },
-     "zonePopup": {
-      "code": "Code",
-      "group": "Group",
-      "active": "ACTIVE",
-      "inactive": "INACTIVE"
+    "boundaryMarkerMap": {
+      "popup": {
+        "visits": "Visits",
+        "duration": "Duration",
+        "peopleInside": "People inside"
+      },
+      "zonePopup": {
+        "code": "Code",
+        "group": "Group",
+        "active": "ACTIVE",
+        "inactive": "INACTIVE"
+      }
     }
-  }
   }
 }
