@@ -201,8 +201,8 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
 
     const isActive = zone.active === 1;
     const statusText = isActive 
-      ? t('boundaryMarkerMap.zonePopup.active')
-      : t('boundaryMarkerMap.zonePopup.inactive');
+      ? t('boundaryAccessAnalytics.boundaryMarkerMap.zonePopup.active')
+      : t('boundaryAccessAnalytics.boundaryMarkerMap.zonePopup.inactive');
     const statusColor = isActive ? '#10B981' : '#EF4444';
 
     return (
@@ -225,10 +225,10 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
               </div>
               <div style="font-size: 11px; color: #64748B; line-height: 1.6;">
                 <div style="margin-bottom: 3px;">
-                  <strong>${t('boundaryMarkerMap.zonePopup.code')}:</strong> <span style="font-family: monospace;">${zone.code}</span>
+                  <strong>${t('boundaryAccessAnalytics.boundaryMarkerMap.zonePopup.code')}:</strong> <span style="font-family: monospace;">${zone.code}</span>
                 </div>
                 <div style="margin-bottom: 3px;">
-                  <strong>${t('boundaryMarkerMap.zonePopup.group')}:</strong> ${zone.group_name}
+                  <strong>${t('boundaryAccessAnalytics.boundaryMarkerMap.zonePopup.group')}:</strong> ${zone.group_name}
                 </div>
                 <div>
                   <span style="display: inline-block; padding: 2px 6px; background: ${statusColor}; color: white; border-radius: 4px; font-size: 9px; font-weight: bold;">
@@ -282,13 +282,13 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
                       </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <strong>{t('boundaryAccessAnalytics.boundary.MarkerMap.popup.duration')}:</strong> 
+                      <strong>{t('boundaryAccessAnalytics.boundaryMarkerMap.popup.duration')}:</strong> 
                       <span style={{ fontFamily: 'monospace' }}>
                         {boundary.duration_hours.toFixed(1)}h
                       </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <strong>{t('boundaryAccessAnalytics.boundary.MarkerMap.popup.peopleInside')}:</strong> 
+                      <strong>{t('boundaryAccessAnalytics.boundaryMarkerMap.popup.peopleInside')}:</strong> 
                       <span 
                         style={{ 
                           fontFamily: 'monospace',
