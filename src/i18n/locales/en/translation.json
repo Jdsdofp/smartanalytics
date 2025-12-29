@@ -1689,7 +1689,8 @@
         },
         "loading": {
           "spinner": "Loading...",
-          "data": "Loading data..."
+          "data": "Loading data...",
+          "wait": "Please wait a moment..."
         },
         "results": {
           "showing": "Showing",
@@ -1871,6 +1872,12 @@
           "medium": "Medium",
           "high": "High",
           "critical": "Critical"
+        },
+        "summary": {
+          "totalBoundaries": "Total Boundaries",
+          "zoneActive": "Active Zones",
+          "heatmap": "Access Heat Map",
+          "legendModal": "The colored areas represent geographic fences (geofences) configured in the system."
         }
       }
     },

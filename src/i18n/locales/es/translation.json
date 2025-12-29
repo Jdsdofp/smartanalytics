@@ -1689,7 +1689,8 @@
         },
         "loading": {
           "spinner": "Cargando...",
-          "data": "Cargando datos..."
+          "data": "Cargando datos...",
+          "wait": "Por favor espere un momento..."
         },
         "results": {
           "showing": "Mostrando",
@@ -1871,6 +1872,12 @@
           "medium": "Medio",
           "high": "Alto",
           "critical": "Crítico"
+        },
+        "summary": {
+          "totalBoundaries": "Total de Boundaries",
+          "zoneActive": "Zonas activas",
+          "heatmap": "Acceder al mapa de calor",
+          "legendModal": "Las áreas coloreadas representan cercas geográficas (geofences) configuradas en el sistema."
         }
       }
     },

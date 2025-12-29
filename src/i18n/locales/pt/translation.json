@@ -1723,7 +1723,8 @@
         },
         "loading": {
           "spinner": "Carregando...",
-          "data": "Carregando dados..."
+          "data": "Carregando dados...",
+          "wait": "Aguarde um momento..."
         },
         "results": {
           "showing": "Mostrando",
@@ -1905,6 +1906,12 @@
           "medium": "Médio",
           "high": "Alto",
           "critical": "Crítico"
+        },
+        "summary": {
+          "totalBoundaries": "Total de Boundaries",
+          "zoneActive": "Zonas Ativas",
+          "heatmap": "Mapa de Calor de Acessos",
+          "legendModal": "As áreas coloridas representam cercas geográficas (geofences) configuradas no sistema"
         }
       }
     },
