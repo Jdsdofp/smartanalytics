@@ -221,34 +221,74 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
     };
   };
 
-  //função getp
-  // ✅ NOVA FUNÇÃO: Remover ciclos mantendo a transição mais forte
-  const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionByDuration[] => {
-    const edges = new Map<string, BoundaryTransitionByDuration>();
-
-    // Agrupar transições bidirecionais
-    data.forEach(item => {
-      const key1 = `${item.from_boundary}→${item.to_boundary}`;
-      const key2 = `${item.to_boundary}→${item.from_boundary}`;
-
-      // Se já existe a transição reversa
-      if (edges.has(key2)) {
-        const existing = edges.get(key2)!;
-
-        // Manter apenas a transição com maior volume
-        if (item.transition_count > existing.transition_count) {
-          edges.delete(key2);
-          edges.set(key1, item);
-        }
-        // Se a existente é maior, não adiciona a atual
-      } else {
-        // Se não existe reversa, adiciona normalmente
-        edges.set(key1, item);
+// ✅ FUNÇÃO MELHORADA: Detecta e remove TODOS os ciclos
+const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionByDuration[] => {
+  const cleanLinks: BoundaryTransitionByDuration[] = [];
+  
+  // Função para verificar se adicionar este link criaria um ciclo
+  const wouldCreateCycle = (
+    newLink: BoundaryTransitionByDuration,
+    existingLinks: BoundaryTransitionByDuration[]
+  ): boolean => {
+    // Construir grafo com os links existentes + novo link
+    const graph = new Map<string, string[]>();
+    
+    [...existingLinks, newLink].forEach(link => {
+      if (!graph.has(link.from_boundary)) {
+        graph.set(link.from_boundary, []);
       }
+      graph.get(link.from_boundary)!.push(link.to_boundary);
     });
 
-    return Array.from(edges.values());
+    // DFS para detectar ciclo
+    const visited = new Set<string>();
+    const recursionStack = new Set<string>();
+
+    const hasCycleDFS = (node: string): boolean => {
+      visited.add(node);
+      recursionStack.add(node);
+
+      const neighbors = graph.get(node) || [];
+      for (const neighbor of neighbors) {
+        if (!visited.has(neighbor)) {
+          if (hasCycleDFS(neighbor)) return true;
+        } else if (recursionStack.has(neighbor)) {
+          return true; // Ciclo detectado!
+        }
+      }
+
+      recursionStack.delete(node);
+      return false;
+    };
+
+    // Verificar todos os nós
+    for (const [node] of graph) {
+      if (!visited.has(node)) {
+        if (hasCycleDFS(node)) return true;
+      }
+    }
+
+    return false;
   };
+
+  // Ordenar por volume (maior primeiro) para priorizar transições mais importantes
+  const sortedData = [...data].sort((a, b) => b.transition_count - a.transition_count);
+
+  // Adicionar links um por um, pulando os que causam ciclos
+  for (const link of sortedData) {
+    if (!wouldCreateCycle(link, cleanLinks)) {
+      cleanLinks.push(link);
+    } else {
+      console.warn(
+        `⚠️ Link removido (criaria ciclo): ${link.from_boundary} → ${link.to_boundary} (${link.transition_count} transições)`
+      );
+    }
+  }
+
+  console.log(`✅ Links processados: ${data.length} → ${cleanLinks.length} (${data.length - cleanLinks.length} removidos)`);
+  
+  return cleanLinks;
+};
 
   const getColorForBoundary = (boundary: string): string => {
     const colors = [

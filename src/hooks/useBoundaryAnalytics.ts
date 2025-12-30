@@ -144,6 +144,33 @@ interface BoundaryTransitionByDuration {
   sample_users: string;
 }
 
+// ✅ ADICIONAR INTERFACE
+interface WeekdayWeekendData {
+  boundary_id: number;
+  boundary_name: string;
+  day_type: string;
+  days_analyzed: number;
+  total_visits: string;
+  avg_visits_per_day: string;
+  total_unique_items: string;
+  avg_unique_items_per_day: string;
+  avg_duration_minutes: string;
+  avg_total_hours_per_day: string;
+  morning_percentage: string;
+  afternoon_percentage: string;
+  night_percentage: string;
+  very_short_pct: string;
+  short_pct: string;
+  medium_pct: string;
+  long_pct: string;
+  very_long_pct: string;
+  alert_percentage: string;
+  total_alarm1: string | null;
+  total_alarm2: string | null;
+  total_mandown: string | null;
+  total_tamper: string | null;
+}
+
 export const  useBoundaryAnalytics = (
   companyId: number,
   activeTab: string,
@@ -178,6 +205,9 @@ export const  useBoundaryAnalytics = (
   const [activeZones, setActiveZones] = useState<ActiveZone[]>([]);
   // Adicionar estado
   const [boundaryTransitionsByDuration, setBoundaryTransitionsByDuration] = useState<BoundaryTransitionByDuration[]>([]);
+    // ✅ ADICIONAR ESTADO
+  const [weekdayWeekendData, setWeekdayWeekendData] = useState<WeekdayWeekendData[]>([]);
+
 
   
 
@@ -246,6 +276,7 @@ export const  useBoundaryAnalytics = (
               fetchBoundaryMapData(),
               fetchActiveZones(),
               fetchBoundaryTransitionsByDuration(),
+              fetchWeekdayWeekendData(),
             ]);
             break;
 
@@ -254,6 +285,7 @@ export const  useBoundaryAnalytics = (
               fetchTimeSeries(),
               fetchWeeklyTrends(),
               fetchWeeklyPattern(),
+              fetchWeekdayWeekendData(),
             ]);
             break;
 
@@ -319,6 +351,21 @@ export const  useBoundaryAnalytics = (
 
     fetchFilterOptions();
   }, [companyId]);
+
+
+
+  // ✅ ADICIONAR FUNÇÃO DE FETCH
+  const fetchWeekdayWeekendData = async () => {
+    try {
+      const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/weekday-vs-weekend-analysis`
+      );
+      setWeekdayWeekendData(data.data || []);
+    } catch (err) {
+      console.error('Error fetching weekday vs weekend data:', err);
+      setWeekdayWeekendData([]);
+    }
+  };
 
 
   // Adicionar função de fetch
@@ -618,6 +665,7 @@ const fetchDetailedRanking = async () => {
     boundaryMapData,
     activeZones,
     boundaryTransitionsByDuration,
+    weekdayWeekendData, // ✅ ADICIONAR AQUI
     loading,
     error,
   };
