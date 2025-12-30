@@ -133,6 +133,17 @@ interface FilterOptions {
   statuses: { value: string; label: string; }[];
 }
 
+
+// Adicionar interface ANTES do export
+interface BoundaryTransitionByDuration {
+  from_boundary: string;
+  to_boundary: string;
+  duration_range: string;
+  transition_count: number;
+  avg_duration: number;
+  sample_users: string;
+}
+
 export const  useBoundaryAnalytics = (
   companyId: number,
   activeTab: string,
@@ -165,6 +176,9 @@ export const  useBoundaryAnalytics = (
   const [boundaryMapData, setBoundaryMapData] = useState<BoundaryMapData[]>([]);
     // Adicionar novo estado para zonas ativas
   const [activeZones, setActiveZones] = useState<ActiveZone[]>([]);
+  // Adicionar estado
+  const [boundaryTransitionsByDuration, setBoundaryTransitionsByDuration] = useState<BoundaryTransitionByDuration[]>([]);
+
   
 
 
@@ -231,6 +245,7 @@ export const  useBoundaryAnalytics = (
               fetchRealTimeStatus(),
               fetchBoundaryMapData(),
               fetchActiveZones(),
+              fetchBoundaryTransitionsByDuration(),
             ]);
             break;
 
@@ -335,6 +350,21 @@ export const  useBoundaryAnalytics = (
     );
     setShiftDistribution(data.data);
   };
+
+
+
+  // Adicionar função de fetch
+const fetchBoundaryTransitionsByDuration = async () => {
+  try {
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/transitions-by-duration`
+    );
+    setBoundaryTransitionsByDuration(data.data || []);
+  } catch (err) {
+    console.error('Error fetching boundary transitions by duration:', err);
+    setBoundaryTransitionsByDuration([]);
+  }
+};
 
   // Adicionar função de fetch para dados do mapa
   const fetchBoundaryMapData = async () => {
@@ -587,6 +617,7 @@ const fetchDetailedRanking = async () => {
     filterOptionsLoading,
     boundaryMapData,
     activeZones,
+    boundaryTransitionsByDuration,
     loading,
     error,
   };

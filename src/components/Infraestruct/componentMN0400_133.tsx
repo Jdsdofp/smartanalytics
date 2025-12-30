@@ -16,6 +16,7 @@ import { t } from 'i18next';
 import { useBoundaryAnalytics } from '../../hooks/useBoundaryAnalytics';
 import { useCompany } from '../../hooks/useCompany';
 import BoundaryHeatmap from './Components/BoundaryHeatmap';
+import BoundaryTransitionSankey from './Components/BoundaryDurationChart';
 
 
 // Componente de Loading para os gráficos
@@ -106,6 +107,7 @@ export default function BoundaryAccessAnalytics() {
     realTimeLoading,
     filterOptions,
     filterOptionsLoading,
+    boundaryTransitionsByDuration,
     boundaryMapData,
     activeZones,
     loading,
@@ -136,6 +138,8 @@ export default function BoundaryAccessAnalytics() {
       newLoadingStates.topBoundaries = topBoundaries.length === 0;
       newLoadingStates.shiftDistribution = !shiftDistribution;
       newLoadingStates.boundaryMap = boundaryMapData.length === 0;
+      newLoadingStates.boundaryTransitions = boundaryTransitionsByDuration.length === 0; // ✅ ADICIONAR
+
     } else if (activeTab === 'temporal') {
       newLoadingStates.timeseries = timeSeries.length === 0;
       newLoadingStates.weeklyTrends = weeklyTrends.length === 0;
@@ -178,6 +182,7 @@ export default function BoundaryAccessAnalytics() {
     complianceSummary,
     topPeople,
     frequencyAnalysis,
+    boundaryTransitionsByDuration,
     detailedRanking
   ]);
 
@@ -216,6 +221,7 @@ export default function BoundaryAccessAnalytics() {
     complianceSummary,
     topPeople,
     frequencyAnalysis,
+    boundaryTransitionsByDuration,
     detailedRanking
   ]);
 
@@ -1034,9 +1040,10 @@ export default function BoundaryAccessAnalytics() {
       </div>
     );
   }
-
+//bg-[#F5F7FA]
   return (
-    <div className="min-h-screen bg-[#F5F7FA]">
+
+    <div className="min-h-screen">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800&display=swap');
         
@@ -1064,7 +1071,7 @@ export default function BoundaryAccessAnalytics() {
         }
       `}</style>
 
-      <nav className="bg-white border-b-2 border-[#E2E8F0] px-8 shadow-sm">
+      <nav className="border-b-2 border-[#E2E8F0] px-8 shadow-sm">
         <div className="max-w-[1400px] mx-auto">
           <div className="flex gap-2 overflow-x-auto">
             {tabs.map((tab) => {
@@ -1267,6 +1274,8 @@ export default function BoundaryAccessAnalytics() {
                 </div>
               </div>
 
+              
+
               {/* Variação Semanal */}
               <div className={`bg-gradient-to-br rounded-lg p-4 border ${kpis.weekly_trend >= 0
                 ? 'from-green-50 to-green-100 border-green-200'
@@ -1464,6 +1473,32 @@ export default function BoundaryAccessAnalytics() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Logo após os KPIs Secundários - Estilo Visual com Gráficos */}
+            <div className="mb-8">
+              {chartLoadingStates.boundaryDuration !== false && topBoundaries.length === 0 ? (
+                <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden p-6">
+                  <div className="w-full h-[450px] flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="relative w-20 h-20 mx-auto mb-4">
+                        <div className="absolute inset-0 border-4 border-[#E2E8F0] rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="absolute inset-2 border-4 border-[#0F4C81]/30 border-b-transparent rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
+                      </div>
+                      <p className="text-sm text-[#1A2332] font-semibold mb-1">Carregando análise de duração...</p>
+                      <p className="text-xs text-[#64748B]">Por favor, aguarde</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                
+                  <BoundaryTransitionSankey
+                    data={boundaryTransitionsByDuration}
+                    loading={loading}
+                    title="Fluxo de Movimentação entre Áreas"
+                  />
+              )}
             </div>
 
 
