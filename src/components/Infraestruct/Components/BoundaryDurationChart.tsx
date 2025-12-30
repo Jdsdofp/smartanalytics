@@ -62,13 +62,16 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
     const option = getChartOption();
     chart.setOption(option);
   };
-
+  //teste de nova função
   const getChartOption = (): echarts.EChartsOption => {
     if (!data || data.length === 0) return {};
 
+    // ✅ DETECTAR E REMOVER CICLOS
+    const processedData = removeCycles(data);
+
     // Extrair todas as boundaries únicas
     const boundariesSet = new Set<string>();
-    data.forEach(item => {
+    processedData.forEach(item => {
       boundariesSet.add(item.from_boundary);
       boundariesSet.add(item.to_boundary);
     });
@@ -97,9 +100,9 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
     }));
 
     // Criar links agrupados por faixa de duração
-    const links = data.map(item => {
-      const avgDuration = typeof item.avg_duration === 'string' 
-        ? parseFloat(item.avg_duration) 
+    const links = processedData.map(item => {
+      const avgDuration = typeof item.avg_duration === 'string'
+        ? parseFloat(item.avg_duration)
         : item.avg_duration;
 
       return {
@@ -135,40 +138,40 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
         formatter: (params: any) => {
           if (params.dataType === 'edge') {
             const users = params.data.sample_users.split('|||').slice(0, 5);
-            
+
             let tooltip = `<div style="font-weight: bold; margin-bottom: 8px; color: #111827;">`;
             tooltip += `${params.data.source} → ${params.data.target}</div>`;
             tooltip += `<div style="margin-bottom: 4px;">Transições: <strong>${params.value}</strong></div>`;
             tooltip += `<div style="margin-bottom: 4px;">Duração: <strong>${params.data.duration_range}</strong></div>`;
             tooltip += `<div style="margin-bottom: 8px;">Média: <strong>${params.data.avg_duration.toFixed(2)}h</strong></div>`;
-            
+
             tooltip += '<div style="font-weight: 600; margin-bottom: 4px; border-top: 1px solid #e5e7eb; padding-top: 4px;">Exemplos de Usuários:</div>';
             users.forEach((user: string) => {
               tooltip += `<div style="font-size: 11px; color: #4b5563;">• ${user}</div>`;
             });
-            
+
             if (params.data.sample_users.split('|||').length > 5) {
               tooltip += `<div style="font-size: 11px; color: #6b7280; font-style: italic; margin-top: 4px;">... e mais ${params.data.sample_users.split('|||').length - 5}</div>`;
             }
-            
+
             return tooltip;
           }
-          
-          const boundaryData = data.filter(d => 
+
+          const boundaryData = data.filter(d =>
             d.from_boundary === params.name || d.to_boundary === params.name
           );
-          
+
           const totalFrom = boundaryData
             .filter(d => d.from_boundary === params.name)
             .reduce((sum, d) => sum + d.transition_count, 0);
-          
+
           const totalTo = boundaryData
             .filter(d => d.to_boundary === params.name)
             .reduce((sum, d) => sum + d.transition_count, 0);
-          
+
           return `<div style="font-weight: bold; margin-bottom: 8px; color: #111827;">${params.name}</div>
-                  <div style="margin-bottom: 4px;">Saídas: <strong>${totalFrom}</strong></div>
-                  <div>Entradas: <strong>${totalTo}</strong></div>`;
+                <div style="margin-bottom: 4px;">Saídas: <strong>${totalFrom}</strong></div>
+                <div>Entradas: <strong>${totalTo}</strong></div>`;
         }
       },
       series: [
@@ -218,17 +221,46 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
     };
   };
 
+  //função getp
+  // ✅ NOVA FUNÇÃO: Remover ciclos mantendo a transição mais forte
+  const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionByDuration[] => {
+    const edges = new Map<string, BoundaryTransitionByDuration>();
+
+    // Agrupar transições bidirecionais
+    data.forEach(item => {
+      const key1 = `${item.from_boundary}→${item.to_boundary}`;
+      const key2 = `${item.to_boundary}→${item.from_boundary}`;
+
+      // Se já existe a transição reversa
+      if (edges.has(key2)) {
+        const existing = edges.get(key2)!;
+
+        // Manter apenas a transição com maior volume
+        if (item.transition_count > existing.transition_count) {
+          edges.delete(key2);
+          edges.set(key1, item);
+        }
+        // Se a existente é maior, não adiciona a atual
+      } else {
+        // Se não existe reversa, adiciona normalmente
+        edges.set(key1, item);
+      }
+    });
+
+    return Array.from(edges.values());
+  };
+
   const getColorForBoundary = (boundary: string): string => {
     const colors = [
-      '#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', 
+      '#3b82f6', '#8b5cf6', '#10b981', '#f59e0b',
       '#ef4444', '#06b6d4', '#ec4899', '#84cc16'
     ];
-    
+
     let hash = 0;
     for (let i = 0; i < boundary.length; i++) {
       hash = boundary.charCodeAt(i) + ((hash << 5) - hash);
     }
-    
+
     return colors[Math.abs(hash) % colors.length];
   };
 
@@ -342,8 +374,8 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
                 { range: '8h+', color: '#dc2626', label: '> 8h' }
               ].map(({ range, color, label }) => (
                 <div key={range} className="flex items-center gap-2">
-                  <div 
-                    className="w-4 h-4 rounded-full shadow-sm" 
+                  <div
+                    className="w-4 h-4 rounded-full shadow-sm"
                     style={{ backgroundColor: color }}
                   ></div>
                   <span className="text-xs font-medium text-gray-700">{label}</span>
