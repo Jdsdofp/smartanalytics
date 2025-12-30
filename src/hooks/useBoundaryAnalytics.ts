@@ -191,6 +191,27 @@ interface BoundaryTrendData {
   total_alarm_events: string | null;
 }
 
+interface BoundaryAnomalyData {
+  entry_date: string;
+  boundary_id: number;
+  boundary_name: string;
+  day_type: string;
+  total_visits: number;
+  avg_visit_duration_minutes: string;
+  alert_rate: string;
+  expected_visits: string;
+  expected_duration: string;
+  expected_alert_rate: string;
+  visits_zscore: number;
+  duration_zscore: number;
+  alert_rate_zscore: number | null;
+  anomaly_type: string;
+  alarm1_count: string | null;
+  alarm2_count: string | null;
+  mandown_count: string | null;
+  tamper_count: string | null;
+}
+
 export const  useBoundaryAnalytics = (
   companyId: number,
   activeTab: string,
@@ -229,6 +250,8 @@ export const  useBoundaryAnalytics = (
   const [weekdayWeekendData, setWeekdayWeekendData] = useState<WeekdayWeekendData[]>([]);
   // ✅ ADICIONAR ESTADO
   const [boundaryTrends, setBoundaryTrends] = useState<BoundaryTrendData[]>([]);
+  // Estados para diferentes tipos de dados
+  const [boundaryAnomalies, setBoundaryAnomalies] = useState<BoundaryAnomalyData[]>([]);
 
 
   
@@ -300,6 +323,8 @@ export const  useBoundaryAnalytics = (
               fetchBoundaryTransitionsByDuration(),
               fetchWeekdayWeekendData(),
               fetchBoundaryTrends(),
+              fetchWeekdayWeekendAnalysis(),
+              fetchBoundaryAnomalies()
             ]);
             break;
 
@@ -389,6 +414,33 @@ export const  useBoundaryAnalytics = (
     } catch (err) {
       console.error('Error fetching weekday vs weekend data:', err);
       setWeekdayWeekendData([]);
+    }
+  };
+
+
+   // Fetch weekday vs weekend analysis
+  const fetchWeekdayWeekendAnalysis = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/weekday-vs-weekend-analysis`
+      );
+      setWeekdayWeekendData(response.data.data || []);
+    } catch (err) {
+      console.error('Error fetching weekday-weekend analysis:', err);
+      throw err;
+    }
+  };
+
+    // Fetch boundary anomalies
+  const fetchBoundaryAnomalies = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/dashboard/boundary/${companyId}/boundary-anomalies`
+      );
+      setBoundaryAnomalies(response.data.data || []);
+    } catch (err) {
+      console.error('Error fetching boundary anomalies:', err);
+      throw err;
     }
   };
 
@@ -707,6 +759,7 @@ const fetchDetailedRanking = async () => {
     boundaryTransitionsByDuration,
     weekdayWeekendData, // ✅ ADICIONAR AQUI
     boundaryTrends, 
+    boundaryAnomalies,
     loading,
     error,
   };

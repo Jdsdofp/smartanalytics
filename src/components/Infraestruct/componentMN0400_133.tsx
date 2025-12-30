@@ -19,6 +19,7 @@ import BoundaryHeatmap from './Components/BoundaryHeatmap';
 import BoundaryTransitionSankey from './Components/BoundaryDurationChart';
 import WeekdayWeekendComparison from './Components/WeekdayWeekendComparison';
 import BoundaryTrendsChart from './Components/BoundaryTrendsChart';
+import BoundaryAnomaliesChart from './Components/BoundaryAnomaliesChart';
 
 
 // Componente de Loading para os gráficos
@@ -112,6 +113,7 @@ export default function BoundaryAccessAnalytics() {
     boundaryTransitionsByDuration,
     weekdayWeekendData,
     boundaryTrends,
+    boundaryAnomalies,
     boundaryMapData,
     activeZones,
     loading,
@@ -1520,6 +1522,8 @@ export default function BoundaryAccessAnalytics() {
               data={boundaryTrends}
               loading={loading}
             />
+
+            <BoundaryAnomaliesChart data={boundaryAnomalies} loading={loading} />
 
 
             {/* Charts Grid com Ações */}
