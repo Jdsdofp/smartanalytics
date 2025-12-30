@@ -18,6 +18,7 @@ import { useCompany } from '../../hooks/useCompany';
 import BoundaryHeatmap from './Components/BoundaryHeatmap';
 import BoundaryTransitionSankey from './Components/BoundaryDurationChart';
 import WeekdayWeekendComparison from './Components/WeekdayWeekendComparison';
+import BoundaryTrendsChart from './Components/BoundaryTrendsChart';
 
 
 // Componente de Loading para os gráficos
@@ -110,6 +111,7 @@ export default function BoundaryAccessAnalytics() {
     filterOptionsLoading,
     boundaryTransitionsByDuration,
     weekdayWeekendData,
+    boundaryTrends,
     boundaryMapData,
     activeZones,
     loading,
@@ -142,6 +144,7 @@ export default function BoundaryAccessAnalytics() {
       newLoadingStates.boundaryMap = boundaryMapData.length === 0;
       newLoadingStates.boundaryTransitions = boundaryTransitionsByDuration.length === 0; // ✅ ADICIONAR
       newLoadingStates.weekdayWeekendData = weekdayWeekendData.length === 0;
+      newLoadingStates.boundaryTrends = boundaryTrends.length === 0; 
 
     } else if (activeTab === 'temporal') {
       newLoadingStates.timeseries = timeSeries.length === 0;
@@ -186,6 +189,7 @@ export default function BoundaryAccessAnalytics() {
     topPeople,
     frequencyAnalysis,
     boundaryTransitionsByDuration,
+    boundaryTrends,
     detailedRanking
   ]);
 
@@ -225,6 +229,7 @@ export default function BoundaryAccessAnalytics() {
     topPeople,
     frequencyAnalysis,
     boundaryTransitionsByDuration,
+    boundaryTrends,
     detailedRanking
   ]);
 
@@ -1504,11 +1509,16 @@ export default function BoundaryAccessAnalytics() {
               )}
             </div>
 
-                  {/* ✅ Adicionar o componente de comparação */}
-            <WeekdayWeekendComparison 
-              data={weekdayWeekendData} 
+            {/* ✅ Adicionar o componente de comparação */}
+            <WeekdayWeekendComparison
+              data={weekdayWeekendData}
               loading={loading}
               title="Análise: Dia Útil vs Final de Semana"
+            />
+
+            <BoundaryTrendsChart
+              data={boundaryTrends}
+              loading={loading}
             />
 
 

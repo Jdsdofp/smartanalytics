@@ -171,6 +171,26 @@ interface WeekdayWeekendData {
   total_tamper: string | null;
 }
 
+// ✅ ADICIONAR INTERFACE
+interface BoundaryTrendData {
+  period: string;
+  boundary_id: number;
+  boundary_name: string;
+  total_visits: string;
+  avg_daily_visits: string;
+  total_unique_items: string;
+  avg_daily_unique_items: string;
+  avg_duration: string;
+  avg_total_hours: string;
+  visits_change: string | null;
+  visits_change_pct: string | null;
+  morning_visits: string;
+  afternoon_visits: string;
+  night_visits: string;
+  total_alerts: string;
+  total_alarm_events: string | null;
+}
+
 export const  useBoundaryAnalytics = (
   companyId: number,
   activeTab: string,
@@ -207,6 +227,8 @@ export const  useBoundaryAnalytics = (
   const [boundaryTransitionsByDuration, setBoundaryTransitionsByDuration] = useState<BoundaryTransitionByDuration[]>([]);
     // ✅ ADICIONAR ESTADO
   const [weekdayWeekendData, setWeekdayWeekendData] = useState<WeekdayWeekendData[]>([]);
+  // ✅ ADICIONAR ESTADO
+  const [boundaryTrends, setBoundaryTrends] = useState<BoundaryTrendData[]>([]);
 
 
   
@@ -277,6 +299,7 @@ export const  useBoundaryAnalytics = (
               fetchActiveZones(),
               fetchBoundaryTransitionsByDuration(),
               fetchWeekdayWeekendData(),
+              fetchBoundaryTrends(),
             ]);
             break;
 
@@ -354,6 +377,8 @@ export const  useBoundaryAnalytics = (
 
 
 
+
+
   // ✅ ADICIONAR FUNÇÃO DE FETCH
   const fetchWeekdayWeekendData = async () => {
     try {
@@ -366,6 +391,21 @@ export const  useBoundaryAnalytics = (
       setWeekdayWeekendData([]);
     }
   };
+
+
+
+// ✅ ADICIONAR FUNÇÃO DE FETCH
+const fetchBoundaryTrends = async () => {
+  try {
+    const { data } = await axios.get(
+      `${API_BASE_URL}/dashboard/boundary/${companyId}/boundary-trends`
+    );
+    setBoundaryTrends(data.data || []);
+  } catch (err) {
+    console.error('Error fetching boundary trends:', err);
+    setBoundaryTrends([]);
+  }
+};
 
 
   // Adicionar função de fetch
@@ -666,6 +706,7 @@ const fetchDetailedRanking = async () => {
     activeZones,
     boundaryTransitionsByDuration,
     weekdayWeekendData, // ✅ ADICIONAR AQUI
+    boundaryTrends, 
     loading,
     error,
   };
