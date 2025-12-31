@@ -1907,6 +1907,97 @@
         "active": "ACTIVA",
         "inactive": "INACTIVA"
       }
-    }
+    },
+      "weekdayWeekendComparison": {
+    "title": "Análisis: Día Laborable vs Fin de Semana",
+    "subtitle": "Comparativo de patrones de visitación y comportamiento",
+    "dayTypes": {
+      "weekday": "Día Laborable",
+      "weekend": "Fin de Semana"
+    },
+    "chartTypes": {
+      "visits": "Visitas",
+      "duration": "Duración",
+      "alerts": "Alertas",
+      "period": "Período"
+    },
+    "viewModes": {
+      "bar": "Barras",
+      "radar": "Radar",
+      "heatmap": "Mapa de Calor"
+    },
+    "metrics": {
+      "visits": "Total de Visitas",
+      "duration": "Duración Promedio (min)",
+      "period": "Período Tarde (%)",
+      "alerts": "Tasa de Alertas (%)"
+    },
+    "timePeriods": {
+      "morning": "Mañana",
+      "afternoon": "Tarde",
+      "night": "Noche"
+    },
+    "statsCards": {
+      "weekdayVisits": "DÍA LABORABLE - VISITAS",
+      "weekendVisits": "FIN DE SEMANA - VISITAS",
+      "weekdayAvgDuration": "DÍA LABORABLE - DURACIÓN PROMEDIO",
+      "weekendAvgDuration": "FIN DE SEMANA - DURACIÓN PROMEDIO",
+      "visitsLabel": "visitas"
+    },
+    "radarChart": {
+      "title": "Patrones: {{boundary}}",
+      "indicators": {
+        "morning": "Mañana (%)",
+        "afternoon": "Tarde (%)",
+        "night": "Noche (%)",
+        "shortVisits": "Visitas Cortas (%)",
+        "mediumVisits": "Visitas Medias (%)",
+        "alertRate": "Tasa Alertas (%)"
+      }
+    },
+    "heatmapChart": {
+      "periods": {
+        "morningWeekday": "Mañana\n(Laborable)",
+        "afternoonWeekday": "Tarde\n(Laborable)",
+        "nightWeekday": "Noche\n(Laborable)",
+        "morningWeekend": "Mañana\n(Fin Semana)",
+        "afternoonWeekend": "Tarde\n(Fin Semana)",
+        "nightWeekend": "Noche\n(Fin Semana)"
+      },
+      "seriesName": "Visitas (%)",
+      "visualMap": {
+        "high": "Alto",
+        "low": "Bajo"
+      }
+    },
+    "tooltips": {
+      "hoverForDetails": "Pase el mouse sobre los elementos para más detalles"
+    },
+    "states": {
+      "loading": "Cargando análisis comparativo...",
+      "noData": {
+        "title": "Sin datos disponibles",
+        "description": "No hay datos suficientes para análisis comparativo"
+      }
+    },
+    "format": {
+      "visits": {
+        "short": "{{value}}",
+        "long": "{{value}} visitas"
+      },
+      "duration": {
+        "short": "{{value}}m",
+        "long": "{{value}} min"
+      },
+      "percentage": "{{value}}%",
+      "updatedAt": "Actualizado: {{date}}"
+    },
+    "legend": {
+      "weekday": "Día Laborable",
+      "weekend": "Fin de Semana"
+    },
+    "comparison": "Comparación",
+    "emptyState": "Sin datos disponibles para análisis"
+  }
   }
 }

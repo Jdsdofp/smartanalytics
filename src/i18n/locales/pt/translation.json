@@ -1941,6 +1941,97 @@
         "active": "ATIVA",
         "inactive": "INATIVA"
       }
+    },
+    "weekdayWeekendComparison": {
+      "title": "Análise: Dia Útil vs Final de Semana",
+      "subtitle": "Comparativo de padrões de visitação e comportamento",
+      "dayTypes": {
+        "weekday": "Dia Útil",
+        "weekend": "Final de Semana"
+      },
+      "chartTypes": {
+        "visits": "Visitas",
+        "duration": "Duração",
+        "alerts": "Alertas",
+        "period": "Período"
+      },
+      "viewModes": {
+        "bar": "Barras",
+        "radar": "Radar",
+        "heatmap": "Heatmap"
+      },
+      "metrics": {
+        "visits": "Total de Visitas",
+        "duration": "Duração Média (min)",
+        "period": "Período Tarde (%)",
+        "alerts": "Taxa de Alertas (%)"
+      },
+      "timePeriods": {
+        "morning": "Manhã",
+        "afternoon": "Tarde",
+        "night": "Noite"
+      },
+      "statsCards": {
+        "weekdayVisits": "DIA ÚTIL - VISITAS",
+        "weekendVisits": "FIM DE SEMANA - VISITAS",
+        "weekdayAvgDuration": "DIA ÚTIL - DURAÇÃO MÉDIA",
+        "weekendAvgDuration": "FIM DE SEMANA - DURAÇÃO MÉDIA",
+        "visitsLabel": "visitas"
+      },
+      "radarChart": {
+        "title": "Padrões: {{boundary}}",
+        "indicators": {
+          "morning": "Manhã (%)",
+          "afternoon": "Tarde (%)",
+          "night": "Noite (%)",
+          "shortVisits": "Visitas Curtas (%)",
+          "mediumVisits": "Visitas Médias (%)",
+          "alertRate": "Taxa Alertas (%)"
+        }
+      },
+      "heatmapChart": {
+        "periods": {
+          "morningWeekday": "Manhã\n(Dia Útil)",
+          "afternoonWeekday": "Tarde\n(Dia Útil)",
+          "nightWeekday": "Noite\n(Dia Útil)",
+          "morningWeekend": "Manhã\n(FDS)",
+          "afternoonWeekend": "Tarde\n(FDS)",
+          "nightWeekend": "Noite\n(FDS)"
+        },
+        "seriesName": "Visitas (%)",
+        "visualMap": {
+          "high": "Alto",
+          "low": "Baixo"
+        }
+      },
+      "tooltips": {
+        "hoverForDetails": "Passe o mouse sobre os elementos para mais detalhes"
+      },
+      "states": {
+        "loading": "Carregando análise comparativa...",
+        "noData": {
+          "title": "Nenhum dado disponível",
+          "description": "Não há dados suficientes para análise comparativa"
+        }
+      },
+      "format": {
+        "visits": {
+          "short": "{{value}}",
+          "long": "{{value}} visitas"
+        },
+        "duration": {
+          "short": "{{value}}m",
+          "long": "{{value}} min"
+        },
+        "percentage": "{{value}}%",
+        "updatedAt": "Atualizado em: {{date}}"
+      },
+      "legend": {
+        "weekday": "Dia Útil",
+        "weekend": "Final de Semana"
+      },
+      "comparison": "Comparação",
+      "emptyState": "Nenhum dado disponível para análise"
     }
   }
 }

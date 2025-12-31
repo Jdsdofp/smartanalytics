@@ -1907,6 +1907,97 @@
         "active": "ACTIVE",
         "inactive": "INACTIVE"
       }
-    }
+    },
+    "weekdayWeekendComparison": {
+    "title": "Analysis: Weekday vs Weekend",
+    "subtitle": "Comparison of visitation patterns and behavior",
+    "dayTypes": {
+      "weekday": "Weekday",
+      "weekend": "Weekend"
+    },
+    "chartTypes": {
+      "visits": "Visits",
+      "duration": "Duration",
+      "alerts": "Alerts",
+      "period": "Period"
+    },
+    "viewModes": {
+      "bar": "Bars",
+      "radar": "Radar",
+      "heatmap": "Heatmap"
+    },
+    "metrics": {
+      "visits": "Total Visits",
+      "duration": "Average Duration (min)",
+      "period": "Afternoon Period (%)",
+      "alerts": "Alert Rate (%)"
+    },
+    "timePeriods": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "night": "Night"
+    },
+    "statsCards": {
+      "weekdayVisits": "WEEKDAY - VISITS",
+      "weekendVisits": "WEEKEND - VISITS",
+      "weekdayAvgDuration": "WEEKDAY - AVG DURATION",
+      "weekendAvgDuration": "WEEKEND - AVG DURATION",
+      "visitsLabel": "visits"
+    },
+    "radarChart": {
+      "title": "Patterns: {{boundary}}",
+      "indicators": {
+        "morning": "Morning (%)",
+        "afternoon": "Afternoon (%)",
+        "night": "Night (%)",
+        "shortVisits": "Short Visits (%)",
+        "mediumVisits": "Medium Visits (%)",
+        "alertRate": "Alert Rate (%)"
+      }
+    },
+    "heatmapChart": {
+      "periods": {
+        "morningWeekday": "Morning\n(Weekday)",
+        "afternoonWeekday": "Afternoon\n(Weekday)",
+        "nightWeekday": "Night\n(Weekday)",
+        "morningWeekend": "Morning\n(Weekend)",
+        "afternoonWeekend": "Afternoon\n(Weekend)",
+        "nightWeekend": "Night\n(Weekend)"
+      },
+      "seriesName": "Visits (%)",
+      "visualMap": {
+        "high": "High",
+        "low": "Low"
+      }
+    },
+    "tooltips": {
+      "hoverForDetails": "Hover over elements for more details"
+    },
+    "states": {
+      "loading": "Loading comparative analysis...",
+      "noData": {
+        "title": "No data available",
+        "description": "There is not enough data for comparative analysis"
+      }
+    },
+    "format": {
+      "visits": {
+        "short": "{{value}}",
+        "long": "{{value}} visits"
+      },
+      "duration": {
+        "short": "{{value}}m",
+        "long": "{{value}} min"
+      },
+      "percentage": "{{value}}%",
+      "updatedAt": "Updated at: {{date}}"
+    },
+    "legend": {
+      "weekday": "Weekday",
+      "weekend": "Weekend"
+    },
+    "comparison": "Comparison",
+    "emptyState": "No data available for analysis"
+  }
   }
 }

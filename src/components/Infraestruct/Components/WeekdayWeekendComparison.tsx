@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { ArrowPathIcon, CalendarIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { t } from 'i18next';
 
 interface WeekdayWeekendData {
   boundary_id: number;
@@ -40,8 +41,7 @@ type ViewMode = 'bar' | 'radar' | 'heatmap';
 
 const WeekdayWeekendComparison: React.FC<Props> = ({
   data,
-  loading,
-  title = 'Análise: Dia Útil vs Final de Semana'
+  loading
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstanceRef = useRef<echarts.ECharts | null>(null);
@@ -567,9 +567,9 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
               <CalendarIcon className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-white mb-1">{title}</h3>
+              <h3 className="text-2xl font-bold text-white mb-1">{t('boundaryAccessAnalytics.weekdayWeekendComparison.title')}</h3>
               <p className="text-white/80 text-sm">
-                Comparativo de padrões de visitação e comportamento
+                {t('boundaryAccessAnalytics.weekdayWeekendComparison.subtitle')}
               </p>
             </div>
           </div>
@@ -577,14 +577,14 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
           {showChart && (
             <div className="hidden lg:flex items-center gap-4">
               <div className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-                <p className="text-xs text-white/80 font-medium">Dia Útil</p>
+                <p className="text-xs text-white/80 font-medium">{t('boundaryAccessAnalytics.weekdayWeekendComparison.dayTypes.weekday')}</p>
                 <p className="text-xl font-bold text-white">{weekdayTotal.toLocaleString()}</p>
-                <p className="text-xs text-white/70">visitas</p>
+                <p className="text-xs text-white/70">{t('boundaryAccessAnalytics.weekdayWeekendComparison.chartTypes.visits')}</p>
               </div>
               <div className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-                <p className="text-xs text-white/80 font-medium">Final de Semana</p>
+                <p className="text-xs text-white/80 font-medium">{t('boundaryAccessAnalytics.weekdayWeekendComparison.dayTypes.weekend')}</p>
                 <p className="text-xl font-bold text-white">{weekendTotal.toLocaleString()}</p>
-                <p className="text-xs text-white/70">visitas</p>
+                <p className="text-xs text-white/70">{t('boundaryAccessAnalytics.weekdayWeekendComparison.chartTypes.visits')}</p>
               </div>
             </div>
           )}
@@ -606,7 +606,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
                 }`}
               >
                 <ChartBarIcon className="w-4 h-4 inline mr-1" />
-                Barras
+                {t('boundaryAccessAnalytics.weekdayWeekendComparison.viewModes.bar')}
               </button>
               <button
                 onClick={() => setViewMode('radar')}
@@ -616,7 +616,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Radar
+                {t('boundaryAccessAnalytics.weekdayWeekendComparison.viewModes.radar')}
               </button>
               <button
                 onClick={() => setViewMode('heatmap')}
@@ -626,7 +626,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Heatmap
+                {t('boundaryAccessAnalytics.weekdayWeekendComparison.viewModes.heatmap')}
               </button>
             </div>
 
@@ -641,7 +641,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Visitas
+                  {t('boundaryAccessAnalytics.weekdayWeekendComparison.chartTypes.visits')}
                 </button>
                 <button
                   onClick={() => setChartType('duration')}
@@ -651,7 +651,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Duração
+                  {t('boundaryAccessAnalytics.weekdayWeekendComparison.chartTypes.duration')}
                 </button>
                 <button
                   onClick={() => setChartType('alerts')}
@@ -661,7 +661,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Alertas
+                  {t('boundaryAccessAnalytics.weekdayWeekendComparison.chartTypes.alerts')}
                 </button>
               </div>
             )}
@@ -673,7 +673,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
           <div className="flex items-center justify-center h-[500px]">
             <div className="flex flex-col items-center gap-3">
               <ArrowPathIcon className="w-8 h-8 text-blue-500 animate-spin" />
-              <p className="text-gray-600 text-sm">Carregando análise comparativa...</p>
+              <p className="text-gray-600 text-sm">{t('boundaryAccessAnalytics.weekdayWeekendComparison.states.loading')}</p>
             </div>
           </div>
         )}
@@ -683,9 +683,9 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
           <div className="flex items-center justify-center h-[500px]">
             <div className="text-center">
               <CalendarIcon className="w-16 h-16 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhum dado disponível</p>
+              <p className="text-gray-500 font-medium">{t('boundaryAccessAnalytics.weekdayWeekendComparison.states.noData.title')}</p>
               <p className="text-gray-400 text-sm mt-1">
-                Não há dados suficientes para análise comparativa
+                {t('boundaryAccessAnalytics.weekdayWeekendComparison.states.noData.description')}
               </p>
             </div>
           </div>
@@ -704,19 +704,19 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
           {/* Stats Cards */}
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200">
-              <p className="text-xs text-blue-600 font-semibold mb-1">DIA ÚTIL - VISITAS</p>
+              <p className="text-xs text-blue-600 font-semibold mb-1">{t('boundaryAccessAnalytics.weekdayWeekendComparison.statsCards.weekdayVisits')}</p>
               <p className="text-2xl font-bold text-blue-900">{weekdayTotal.toLocaleString()}</p>
             </div>
             <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border-2 border-green-200">
-              <p className="text-xs text-green-600 font-semibold mb-1">FIM DE SEMANA - VISITAS</p>
+              <p className="text-xs text-green-600 font-semibold mb-1">{t('boundaryAccessAnalytics.weekdayWeekendComparison.statsCards.weekendVisits')}</p>
               <p className="text-2xl font-bold text-green-900">{weekendTotal.toLocaleString()}</p>
             </div>
             <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-200">
-              <p className="text-xs text-purple-600 font-semibold mb-1">DIA ÚTIL - DURAÇÃO MÉDIA</p>
+              <p className="text-xs text-purple-600 font-semibold mb-1">{t('boundaryAccessAnalytics.weekdayWeekendComparison.statsCards.weekdayAvgDuration')}</p>
               <p className="text-2xl font-bold text-purple-900">{weekdayAvgDuration.toFixed(0)}m</p>
             </div>
             <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border-2 border-orange-200">
-              <p className="text-xs text-orange-600 font-semibold mb-1">FIM DE SEMANA - DURAÇÃO MÉDIA</p>
+              <p className="text-xs text-orange-600 font-semibold mb-1">{t('boundaryAccessAnalytics.weekdayWeekendComparison.statsCards.weekendAvgDuration')}</p>
               <p className="text-2xl font-bold text-orange-900">{weekendAvgDuration.toFixed(0)}m</p>
             </div>
           </div>
@@ -728,12 +728,12 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <span className="text-xs text-blue-700 font-medium">
-                Passe o mouse sobre os elementos para mais detalhes
+                {t('boundaryAccessAnalytics.weekdayWeekendComparison.tooltips.hoverForDetails')}
               </span>
             </div>
 
             <div className="text-xs text-gray-500">
-              Atualizado em: <span className="font-semibold text-gray-700">{new Date().toLocaleString('pt-BR')}</span>
+             {t('boundaryAccessAnalytics.weekdayWeekendComparison.format.updatedAt', { date: new Date().toLocaleString('pt-BR') })} <span className="font-semibold text-gray-700"></span>
             </div>
           </div>
         </div>
