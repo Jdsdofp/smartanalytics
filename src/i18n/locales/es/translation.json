@@ -1675,7 +1675,9 @@
           "boundary": "Límite",
           "entry": "Entrada",
           "duration": "Duración",
-          "status": "Estado"
+          "status": "Estado",
+          "live": "En vivo",
+          "show": "VER"
         },
         "statuses": {
           "normal": "Normal",

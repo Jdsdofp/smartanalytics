@@ -20,20 +20,72 @@ import BoundaryTransitionSankey from './Components/BoundaryDurationChart';
 import WeekdayWeekendComparison from './Components/WeekdayWeekendComparison';
 import BoundaryTrendsChart from './Components/BoundaryTrendsChart';
 import BoundaryAnomaliesChart from './Components/BoundaryAnomaliesChart';
+import { useTheme } from '../../context/ThemeContext';
+
+
+
+// ✅ ADICIONAR função helper para cores do dark mode
+const getChartColors = (darkMode: boolean) => ({
+  // Cores principais
+  primary: darkMode ? '#60A5FA' : '#0F4C81',
+  primaryDark: darkMode ? '#3B82F6' : '#0284c7',
+  accent: darkMode ? '#FB923C' : '#FF6B35',
+
+  // Cores de fundo
+  backgroundColor: darkMode ? '#1F2937' : '#FFFFFF',
+  gridColor: darkMode ? '#374151' : '#E2E8F0',
+
+  // Cores de texto
+  textColor: darkMode ? '#E5E7EB' : '#1A2332',
+  textColorSecondary: darkMode ? '#9CA3AF' : '#64748B',
+
+  // Cores para séries
+  series: {
+    blue: darkMode ? '#60A5FA' : '#0F4C81',
+    orange: darkMode ? '#FB923C' : '#FF6B35',
+    green: darkMode ? '#34D399' : '#10B981',
+    red: darkMode ? '#F87171' : '#EF4444',
+    yellow: darkMode ? '#FBBF24' : '#F59E0B',
+    purple: darkMode ? '#A78BFA' : '#A855F7',
+    gray: darkMode ? '#6B7280' : '#64748B',
+  },
+
+  // Gradientes
+  gradients: {
+    primary: darkMode
+      ? ['#60A5FA', '#3B82F6']
+      : ['#0F4C81', '#FF6B35'],
+    success: darkMode
+      ? ['#34D399', '#10B981']
+      : ['#10B981', '#059669'],
+    warning: darkMode
+      ? ['#FBBF24', '#F59E0B']
+      : ['#F59E0B', '#D97706'],
+  }
+});
+
 
 
 // Componente de Loading para os gráficos
-const ChartLoader = () => (
-  <div className="w-full h-full flex items-center justify-center">
-    <div className="text-center">
-      <div className="relative w-16 h-16 mx-auto mb-4">
-        <div className="absolute top-0 left-0 w-full h-full border-4 border-[#E2E8F0] rounded-full"></div>
-        <div className="absolute top-0 left-0 w-full h-full border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+const ChartLoader = () => {
+  const { darkMode } = useTheme();
+  return (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="text-center">
+        <div className="relative w-16 h-16 mx-auto mb-4">
+          <div className={`absolute top-0 left-0 w-full h-full border-4 rounded-full ${darkMode ? 'border-gray-700' : 'border-[#E2E8F0]'
+            }`}></div>
+          <div className={`absolute top-0 left-0 w-full h-full border-4 border-t-transparent rounded-full animate-spin ${darkMode ? 'border-blue-500' : 'border-[#0F4C81]'
+            }`}></div>
+        </div>
+        <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-[#64748B]'
+          }`}>
+          {t('boundaryAccessAnalytics.tabs.load')}
+        </p>
       </div>
-      <p className="text-sm text-[#64748B] font-medium">{t('boundaryAccessAnalytics.tabs.load')}</p>
     </div>
-  </div>
-);
+  );
+};
 
 
 // Criar hook de debounce
@@ -55,6 +107,7 @@ const useDebounce = (value: string, delay: number) => {
 
 
 export default function BoundaryAccessAnalytics() {
+  const { darkMode } = useTheme();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d');
   const [chartLoadingStates, setChartLoadingStates] = useState<Record<string, boolean>>({});
@@ -146,7 +199,7 @@ export default function BoundaryAccessAnalytics() {
       newLoadingStates.boundaryMap = boundaryMapData.length === 0;
       newLoadingStates.boundaryTransitions = boundaryTransitionsByDuration.length === 0; // ✅ ADICIONAR
       newLoadingStates.weekdayWeekendData = weekdayWeekendData.length === 0;
-      newLoadingStates.boundaryTrends = boundaryTrends.length === 0; 
+      newLoadingStates.boundaryTrends = boundaryTrends.length === 0;
 
     } else if (activeTab === 'temporal') {
       newLoadingStates.timeseries = timeSeries.length === 0;
@@ -157,6 +210,7 @@ export default function BoundaryAccessAnalytics() {
     } else if (activeTab === 'anomalies') {
       newLoadingStates.anomalies = anomalies.length === 0;
       newLoadingStates.topAnomalies = topAnomalies.length === 0;
+      newLoadingStates.boundaryAnomalies = boundaryAnomalies.length === 0;
     } else if (activeTab === 'flow') {
       newLoadingStates.sankey = sankeyData.length === 0;
       newLoadingStates.topTransitions = topTransitions.length === 0;
@@ -216,6 +270,7 @@ export default function BoundaryAccessAnalytics() {
     };
   }, [
     activeTab,
+    darkMode,
     topBoundaries,
     shiftDistribution,
     timeSeries,
@@ -325,69 +380,208 @@ export default function BoundaryAccessAnalytics() {
 
 
   // ✅ CHART INIT FUNCTIONS COM DADOS REAIS
+  // const initTopBoundariesChart = () => {
+  //   if (!chartRefs.topBoundaries.current || !topBoundaries.length) return;
+  //   const chart = echarts.init(chartRefs.topBoundaries.current);
+  //   const colors = getChartColors(darkMode);
+
+  //   const sortedData = [...topBoundaries].reverse();
+
+  //   const option = {
+  //     tooltip: { 
+  //       trigger: 'axis', 
+  //       axisPointer: { type: 'shadow' },
+  //       backgroundColor: darkMode ? '#374151' : '#FFFFFF',
+  //       borderColor: colors.gridColor,
+  //       textStyle: {
+  //         color: colors.textColor
+  //       } 
+  //     },
+  //     grid: { left: 120, right: 50, top: 20, bottom: 50 },
+  //     xAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.topBoundaries.xAxis') },
+  //     yAxis: {
+  //       type: 'category',
+  //       data: sortedData.map(d => d.boundary_name)
+  //     },
+  //     series: [{
+  //       type: 'bar',
+  //       data: sortedData.map(d => d.duration_hours),
+  //       itemStyle: {
+  //         color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+  //           { offset: 0, color: '#0F4C81' },
+  //           { offset: 1, color: '#FF6B35' }
+  //         ])
+  //       },
+  //       label: {
+  //         show: true,
+  //         position: 'right',
+  //         formatter: '{c}' + t('boundaryAccessAnalytics.labels.hours')
+  //       }
+  //     }]
+  //   };
+  //   chart.setOption(option);
+  // };
+
+  // ✅ ATUALIZAR função initTopBoundariesChart
   const initTopBoundariesChart = () => {
     if (!chartRefs.topBoundaries.current || !topBoundaries.length) return;
     const chart = echarts.init(chartRefs.topBoundaries.current);
-
+    const colors = getChartColors(darkMode);
     const sortedData = [...topBoundaries].reverse();
 
     const option = {
-      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      backgroundColor: colors.backgroundColor,
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        backgroundColor: darkMode ? '#374151' : '#FFFFFF',
+        borderColor: colors.gridColor,
+        textStyle: {
+          color: colors.textColor
+        }
+      },
       grid: { left: 120, right: 50, top: 20, bottom: 50 },
-      xAxis: { type: 'value', name: t('boundaryAccessAnalytics.charts.topBoundaries.xAxis') },
+      xAxis: {
+        type: 'value',
+        name: t('boundaryAccessAnalytics.charts.topBoundaries.xAxis'),
+        nameTextStyle: {
+          color: colors.textColorSecondary
+        },
+        axisLabel: {
+          color: colors.textColorSecondary
+        },
+        axisLine: {
+          lineStyle: {
+            color: colors.gridColor
+          }
+        },
+        splitLine: {
+          lineStyle: {
+            color: colors.gridColor
+          }
+        }
+      },
       yAxis: {
         type: 'category',
-        data: sortedData.map(d => d.boundary_name)
+        data: sortedData.map(d => d.boundary_name),
+        axisLabel: {
+          color: colors.textColor
+        },
+        axisLine: {
+          lineStyle: {
+            color: colors.gridColor
+          }
+        }
       },
       series: [{
         type: 'bar',
         data: sortedData.map(d => d.duration_hours),
         itemStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-            { offset: 0, color: '#0F4C81' },
-            { offset: 1, color: '#FF6B35' }
+            { offset: 0, color: colors.gradients.primary[0] },
+            { offset: 1, color: colors.gradients.primary[1] }
           ])
         },
         label: {
           show: true,
           position: 'right',
-          formatter: '{c}' + t('boundaryAccessAnalytics.labels.hours')
+          formatter: '{c}' + t('boundaryAccessAnalytics.labels.hours'),
+          color: colors.textColor
         }
       }]
     };
     chart.setOption(option);
   };
 
+  // const initShiftDistributionChart = () => {
+  //   if (!chartRefs.shiftDistribution.current || !shiftDistribution) return;
+  //   const chart = echarts.init(chartRefs.shiftDistribution.current);
+  //   //@ts-ignore
+  //   const total = shiftDistribution.morning + shiftDistribution.afternoon + shiftDistribution.night;
+
+  //   const option = {
+  //     tooltip: { trigger: 'item' },
+  //     legend: { bottom: 10 },
+  //     series: [{
+  //       type: 'pie',
+  //       radius: ['40%', '70%'],
+  //       avoidLabelOverlap: false,
+  //       itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+  //       label: { show: true, formatter: '{b}: {d}%' },
+  //       data: [
+  //         {
+  //           value: shiftDistribution.morning,
+  //           name: t('boundaryAccessAnalytics.charts.shiftDistribution.morning'),
+  //           itemStyle: { color: '#0F4C81' }
+  //         },
+  //         {
+  //           value: shiftDistribution.afternoon,
+  //           name: t('boundaryAccessAnalytics.charts.shiftDistribution.afternoon'),
+  //           itemStyle: { color: '#FF6B35' }
+  //         },
+  //         {
+  //           value: shiftDistribution.night,
+  //           name: t('boundaryAccessAnalytics.charts.shiftDistribution.night'),
+  //           itemStyle: { color: '#64748B' }
+  //         }
+  //       ]
+  //     }]
+  //   };
+  //   chart.setOption(option);
+  // };
+
+
+  // ✅ ATUALIZAR função initShiftDistributionChart
   const initShiftDistributionChart = () => {
     if (!chartRefs.shiftDistribution.current || !shiftDistribution) return;
     const chart = echarts.init(chartRefs.shiftDistribution.current);
-    //@ts-ignore
-    const total = shiftDistribution.morning + shiftDistribution.afternoon + shiftDistribution.night;
+    const colors = getChartColors(darkMode);
 
     const option = {
-      tooltip: { trigger: 'item' },
-      legend: { bottom: 10 },
+      backgroundColor: colors.backgroundColor,
+      tooltip: {
+        trigger: 'item',
+        backgroundColor: darkMode ? '#374151' : '#FFFFFF',
+        borderColor: colors.gridColor,
+        textStyle: {
+          color: colors.textColor
+        }
+      },
+      legend: {
+        bottom: 10,
+        textStyle: {
+          color: colors.textColor
+        }
+      },
       series: [{
         type: 'pie',
         radius: ['40%', '70%'],
         avoidLabelOverlap: false,
-        itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
-        label: { show: true, formatter: '{b}: {d}%' },
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: colors.backgroundColor,
+          borderWidth: 2
+        },
+        label: {
+          show: true,
+          formatter: '{b}: {d}%',
+          color: colors.textColor
+        },
         data: [
           {
             value: shiftDistribution.morning,
             name: t('boundaryAccessAnalytics.charts.shiftDistribution.morning'),
-            itemStyle: { color: '#0F4C81' }
+            itemStyle: { color: colors.series.blue }
           },
           {
             value: shiftDistribution.afternoon,
             name: t('boundaryAccessAnalytics.charts.shiftDistribution.afternoon'),
-            itemStyle: { color: '#FF6B35' }
+            itemStyle: { color: colors.series.orange }
           },
           {
             value: shiftDistribution.night,
             name: t('boundaryAccessAnalytics.charts.shiftDistribution.night'),
-            itemStyle: { color: '#64748B' }
+            itemStyle: { color: colors.series.gray }
           }
         ]
       }]
@@ -395,9 +589,84 @@ export default function BoundaryAccessAnalytics() {
     chart.setOption(option);
   };
 
+
+  // const initTimeSeriesChart = () => {
+  //   if (!chartRefs.timeseries.current || !timeSeries.length) return;
+  //   const chart = echarts.init(chartRefs.timeseries.current);
+
+  //   const dates = timeSeries.map(d => d.date_display);
+  //   const currentData = timeSeries.map(d => d.daily_duration_hours);
+  //   const ma7Data = timeSeries.map(d => d.ma_7d_duration_hours);
+  //   const ma30Data = timeSeries.map(d => d.ma_30d_duration_hours);
+
+  //   const option = {
+  //     tooltip: { trigger: 'axis' },
+  //     legend: {
+  //       bottom: 20,
+  //       data: [
+  //         t('boundaryAccessAnalytics.charts.timeSeries.current'),
+  //         t('boundaryAccessAnalytics.charts.timeSeries.ma7d'),
+  //         t('boundaryAccessAnalytics.charts.timeSeries.ma30d')
+  //       ]
+  //     },
+  //     grid: { left: 60, right: 60, top: 40, bottom: 70 },
+  //     xAxis: {
+  //       type: 'category',
+  //       data: dates,
+  //       boundaryGap: false,
+  //       axisLabel: { margin: 10 }
+  //     },
+  //     yAxis: {
+  //       type: 'value',
+  //       name: 'Horas',
+  //       splitLine: { show: true, lineStyle: { color: '#E2E8F0' } }
+  //     },
+  //     series: [
+  //       {
+  //         name: t('boundaryAccessAnalytics.charts.timeSeries.current'),
+  //         type: 'line',
+  //         data: currentData,
+  //         smooth: true,
+  //         itemStyle: { color: '#0F4C81' },
+  //         lineStyle: { width: 2.5 },
+  //         areaStyle: {
+  //           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+  //             { offset: 0, color: 'rgba(15, 76, 129, 0.3)' },
+  //             { offset: 1, color: 'rgba(15, 76, 129, 0.05)' }
+  //           ])
+  //         },
+  //         symbol: 'circle',
+  //         symbolSize: 4
+  //       },
+  //       {
+  //         name: t('boundaryAccessAnalytics.charts.timeSeries.ma7d'),
+  //         type: 'line',
+  //         data: ma7Data,
+  //         smooth: true,
+  //         lineStyle: { type: 'dashed', width: 2 },
+  //         itemStyle: { color: '#FF6B35' },
+  //         symbol: 'none'
+  //       },
+  //       {
+  //         name: t('boundaryAccessAnalytics.charts.timeSeries.ma30d'),
+  //         type: 'line',
+  //         data: ma30Data,
+  //         smooth: true,
+  //         lineStyle: { type: 'dotted', width: 2 },
+  //         itemStyle: { color: '#10B981' },
+  //         symbol: 'none'
+  //       }
+  //     ]
+  //   };
+
+  //   chart.setOption(option);
+  // };
+
+
   const initTimeSeriesChart = () => {
     if (!chartRefs.timeseries.current || !timeSeries.length) return;
     const chart = echarts.init(chartRefs.timeseries.current);
+    const colors = getChartColors(darkMode);
 
     const dates = timeSeries.map(d => d.date_display);
     const currentData = timeSeries.map(d => d.daily_duration_hours);
@@ -405,26 +674,54 @@ export default function BoundaryAccessAnalytics() {
     const ma30Data = timeSeries.map(d => d.ma_30d_duration_hours);
 
     const option = {
-      tooltip: { trigger: 'axis' },
+      backgroundColor: colors.backgroundColor,
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: darkMode ? '#374151' : '#FFFFFF',
+        borderColor: colors.gridColor,
+        textStyle: {
+          color: colors.textColor
+        }
+      },
       legend: {
         bottom: 20,
         data: [
           t('boundaryAccessAnalytics.charts.timeSeries.current'),
           t('boundaryAccessAnalytics.charts.timeSeries.ma7d'),
           t('boundaryAccessAnalytics.charts.timeSeries.ma30d')
-        ]
+        ],
+        textStyle: {
+          color: colors.textColor
+        }
       },
       grid: { left: 60, right: 60, top: 40, bottom: 70 },
       xAxis: {
         type: 'category',
         data: dates,
         boundaryGap: false,
-        axisLabel: { margin: 10 }
+        axisLabel: {
+          margin: 10,
+          color: colors.textColorSecondary
+        },
+        axisLine: {
+          lineStyle: {
+            color: colors.gridColor
+          }
+        }
       },
       yAxis: {
         type: 'value',
         name: 'Horas',
-        splitLine: { show: true, lineStyle: { color: '#E2E8F0' } }
+        nameTextStyle: {
+          color: colors.textColorSecondary
+        },
+        axisLabel: {
+          color: colors.textColorSecondary
+        },
+        splitLine: {
+          show: true,
+          lineStyle: { color: colors.gridColor }
+        }
       },
       series: [
         {
@@ -432,12 +729,12 @@ export default function BoundaryAccessAnalytics() {
           type: 'line',
           data: currentData,
           smooth: true,
-          itemStyle: { color: '#0F4C81' },
+          itemStyle: { color: colors.series.blue },
           lineStyle: { width: 2.5 },
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(15, 76, 129, 0.3)' },
-              { offset: 1, color: 'rgba(15, 76, 129, 0.05)' }
+              { offset: 0, color: darkMode ? 'rgba(96, 165, 250, 0.3)' : 'rgba(15, 76, 129, 0.3)' },
+              { offset: 1, color: darkMode ? 'rgba(96, 165, 250, 0.05)' : 'rgba(15, 76, 129, 0.05)' }
             ])
           },
           symbol: 'circle',
@@ -449,7 +746,7 @@ export default function BoundaryAccessAnalytics() {
           data: ma7Data,
           smooth: true,
           lineStyle: { type: 'dashed', width: 2 },
-          itemStyle: { color: '#FF6B35' },
+          itemStyle: { color: colors.series.orange },
           symbol: 'none'
         },
         {
@@ -458,7 +755,7 @@ export default function BoundaryAccessAnalytics() {
           data: ma30Data,
           smooth: true,
           lineStyle: { type: 'dotted', width: 2 },
-          itemStyle: { color: '#10B981' },
+          itemStyle: { color: colors.series.green },
           symbol: 'none'
         }
       ]
@@ -466,6 +763,8 @@ export default function BoundaryAccessAnalytics() {
 
     chart.setOption(option);
   };
+
+
 
   const initWeeklyTrendsChart = () => {
     if (!chartRefs.weeklyTrends.current || !weeklyTrends.length) return;
@@ -1050,10 +1349,11 @@ export default function BoundaryAccessAnalytics() {
       </div>
     );
   }
-//bg-[#F5F7FA]
+  //bg-[#F5F7FA]
   return (
 
-    <div className="min-h-screen">
+    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-900' : 'bg-[#F5F7FA]'
+      }`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800&display=swap');
         
@@ -1079,9 +1379,20 @@ export default function BoundaryAccessAnalytics() {
             transform: translateY(0);
           }
         }
+
+        /* ✅ Glass effect for dark mode */
+        .glass-card-dark {
+          background: rgba(31, 41, 55, 0.7);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(75, 85, 99, 0.3);
+        }
       `}</style>
 
-      <nav className="border-b-2 border-[#E2E8F0] px-8 shadow-sm">
+      <nav className={`border-b-2 px-8 shadow-sm transition-colors duration-300 ${darkMode
+          ? 'bg-gray-800 border-gray-700'
+          : 'bg-white border-[#E2E8F0]'
+        }`}>
         <div className="max-w-[1400px] mx-auto">
           <div className="flex gap-2 overflow-x-auto">
             {tabs.map((tab) => {
@@ -1094,8 +1405,12 @@ export default function BoundaryAccessAnalytics() {
                     flex items-center gap-2 px-6 py-4 font-semibold text-[15px] whitespace-nowrap
                     border-b-3 transition-all duration-300 cursor-pointer
                     ${activeTab === tab.id
-                      ? 'text-[#0F4C81] border-b-[3px] border-[#FF6B35] bg-[#0F4C81]/5'
-                      : 'text-[#64748B] border-b-[3px] border-transparent hover:text-[#0F4C81] hover:bg-[#0F4C81]/5'
+                      ? darkMode
+                        ? 'text-blue-400 border-b-[3px] border-blue-500 bg-blue-500/10'
+                        : 'text-[#0F4C81] border-b-[3px] border-[#FF6B35] bg-[#0F4C81]/5'
+                      : darkMode
+                        ? 'text-gray-400 border-b-[3px] border-transparent hover:text-blue-400 hover:bg-blue-500/5'
+                        : 'text-[#64748B] border-b-[3px] border-transparent hover:text-[#0F4C81] hover:bg-[#0F4C81]/5'
                     }
                   `}
                 >
@@ -1112,20 +1427,32 @@ export default function BoundaryAccessAnalytics() {
         {/* SECTION 1: Overview */}
         {activeTab === 'overview' && kpis && (
           <div className="animate-fade-in">
-          
+
             {/* KPIs Grid Principal */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
               {/* KPI 1: Pessoas Ativas Agora */}
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+              <div className={`rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group ${
+                darkMode 
+                  ? 'glass-card-dark' 
+                  : 'bg-white border border-[#E2E8F0]'
+              }`}>
+                <div className={`absolute top-0 left-0 w-1 h-full transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 ${
+                  darkMode ? 'bg-orange-500' : 'bg-[#FF6B35]'
+                }`}></div>
+                <div className={`text-sm uppercase tracking-wider font-semibold mb-2 ${
+                  darkMode ? 'text-gray-400' : 'text-[#64748B]'
+                }`}>
                   {t('boundaryAccessAnalytics.kpis.activeNow')}
                 </div>
-                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-1">
+                <div className={`text-4xl font-bold font-mono mb-1 ${
+                  darkMode ? 'text-blue-400' : 'text-[#0F4C81]'
+                }`}>
                   {kpis.active_now}
                 </div>
-                <div className="text-xs text-[#64748B]">
+                <div className={`text-xs ${
+                  darkMode ? 'text-gray-500' : 'text-[#64748B]'
+                }`}>
                   {t('boundaryAccessAnalytics.kpis.ofTotal', {
                     total: kpis.active_people_today
                   })} {t('boundaryAccessAnalytics.kpis.peopleToday')}
@@ -1133,12 +1460,20 @@ export default function BoundaryAccessAnalytics() {
               </div>
 
               {/* KPI 2: Visitas Hoje */}
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+              <div className={`rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group ${
+                darkMode 
+                  ? 'glass-card-dark' 
+                  : 'bg-white border border-[#E2E8F0]'
+              }`}>
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#4ECDC4] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
+                <div className={`text-sm uppercase tracking-wider font-semibold mb-2 ${
+                  darkMode ? 'text-gray-400' : 'text-[#64748B]'
+                }`}>
                   {t('boundaryAccessAnalytics.kpis.visitsToday')}
                 </div>
-                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
+                <div className={`text-4xl font-bold font-mono mb-1 ${
+                  darkMode ? 'text-blue-400' : 'text-[#0F4C81]'
+                }`}>
                   {kpis.visits_today.toLocaleString()}
                 </div>
                 {kpis.visits_yesterday > 0 && (
@@ -1157,12 +1492,18 @@ export default function BoundaryAccessAnalytics() {
               </div>
 
               {/* KPI 3: Tempo Médio por Visita */}
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+              <div className={`rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group ${
+                darkMode 
+                  ? 'glass-card-dark' 
+                  : 'bg-white border border-[#E2E8F0]'
+              }`}>
                 <div className="absolute top-0 left-0 w-1 h-full bg-[#95E1D3] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
                 <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
                   {t('boundaryAccessAnalytics.kpis.avgDuration')}
                 </div>
-                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-1">
+                <div className={`text-4xl font-bold font-mono mb-1 ${
+                  darkMode ? 'text-blue-400' : 'text-[#0F4C81]'
+                }`}>
                   {kpis.avg_duration_today.toFixed(1)}h
                 </div>
                 <div className="text-xs text-[#64748B]">
@@ -1171,7 +1512,11 @@ export default function BoundaryAccessAnalytics() {
               </div>
 
               {/* KPI 4: Taxa de Visitas Atípicas (substitui Alert Rate) */}
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
+              <div className={`rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group ${
+                darkMode 
+                  ? 'glass-card-dark' 
+                  : 'bg-white border border-[#E2E8F0]'
+              }`}>
                 <div className={`absolute top-0 left-0 w-1 h-full transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300 ${kpis.problematic_rate_today > 50 ? 'bg-red-500' :
                   kpis.problematic_rate_today > 30 ? 'bg-orange-500' :
                     'bg-yellow-500'
@@ -1214,7 +1559,7 @@ export default function BoundaryAccessAnalytics() {
                 </div>
               </div>
 
-              
+
 
               {/* Variação Semanal */}
               <div className={`bg-gradient-to-br rounded-lg p-4 border ${kpis.weekly_trend >= 0
@@ -1414,46 +1759,6 @@ export default function BoundaryAccessAnalytics() {
                 </div>
               </div>
             </div>
-
-            {/* Logo após os KPIs Secundários - Estilo Visual com Gráficos */}
-            <div className="mb-8">
-              {chartLoadingStates.boundaryDuration !== false && topBoundaries.length === 0 ? (
-                <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden p-6">
-                  <div className="w-full h-[450px] flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="relative w-20 h-20 mx-auto mb-4">
-                        <div className="absolute inset-0 border-4 border-[#E2E8F0] rounded-full"></div>
-                        <div className="absolute inset-0 border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
-                        <div className="absolute inset-2 border-4 border-[#0F4C81]/30 border-b-transparent rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
-                      </div>
-                      <p className="text-sm text-[#1A2332] font-semibold mb-1">Carregando análise de duração...</p>
-                      <p className="text-xs text-[#64748B]">Por favor, aguarde</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                
-                  <BoundaryTransitionSankey
-                    data={boundaryTransitionsByDuration}
-                    loading={loading}
-                    title={t('boundaryAccessAnalytics.boundaryTransitionSankey.title')}
-                  />
-              )}
-            </div>
-            
-            <WeekdayWeekendComparison
-              data={weekdayWeekendData}
-              loading={loading}
-              title="Análise: Dia Útil vs Final de Semana"
-            />
-
-            <BoundaryTrendsChart
-              data={boundaryTrends}
-              loading={loading}
-            />
-
-            <BoundaryAnomaliesChart data={boundaryAnomalies} loading={loading} />
-
 
             {/* Charts Grid com Ações */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 mt-6">
@@ -1693,7 +1998,7 @@ export default function BoundaryAccessAnalytics() {
                         <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></div>
                         <div className="absolute inset-0 w-2.5 h-2.5 bg-green-400 rounded-full animate-ping"></div>
                       </div>
-                      <span className="text-sm font-semibold text-white">AO VIVO</span>
+                      <span className="text-sm font-semibold text-white">{t('boundaryAccessAnalytics.tables.realTimeStatus.headers.live')}</span>
                     </div>
                   </div>
                 </div>
@@ -1949,7 +2254,7 @@ export default function BoundaryAccessAnalytics() {
                       {/* Items por Página */}
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-[#64748B] uppercase tracking-wider">
-                          Mostrar:
+                          {t('boundaryAccessAnalytics.tables.realTimeStatus.headers.show')}:
                         </span>
                         <select
                           value={realTimeFilters.limit}
@@ -2345,6 +2650,18 @@ export default function BoundaryAccessAnalytics() {
         {/* SECTION 2: Temporal */}
         {activeTab === 'temporal' && (
           <div className="animate-fade-in">
+
+            <WeekdayWeekendComparison
+              data={weekdayWeekendData}
+              loading={loading}
+              title="Análise: Dia Útil vs Final de Semana"
+            />
+
+            <BoundaryTrendsChart
+              data={boundaryTrends}
+              loading={loading}
+            />
+
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
               <div className="flex justify-between items-start pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>
@@ -2454,9 +2771,11 @@ export default function BoundaryAccessAnalytics() {
         {/* SECTION 4: Anomalies */}
         {activeTab === 'anomalies' && (
           <div className="animate-fade-in">
+
             {/* KPIs de Anomalias */}
             {anomalyKpis && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+
                 <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
                   <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
@@ -2512,6 +2831,8 @@ export default function BoundaryAccessAnalytics() {
                 </div>
               </div>
             )}
+
+            <BoundaryAnomaliesChart data={boundaryAnomalies} loading={loading} />
 
             {/* Gráfico de Anomalias - Largura Total */}
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
@@ -2613,6 +2934,33 @@ export default function BoundaryAccessAnalytics() {
         {/* SECTION 5: Flow */}
         {activeTab === 'flow' && (
           <div className="animate-fade-in">
+
+            {/* Logo após os KPIs Secundários - Estilo Visual com Gráficos */}
+            <div className="mb-8">
+              {chartLoadingStates.boundaryDuration !== false && topBoundaries.length === 0 ? (
+                <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden p-6">
+                  <div className="w-full h-[450px] flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="relative w-20 h-20 mx-auto mb-4">
+                        <div className="absolute inset-0 border-4 border-[#E2E8F0] rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-[#0F4C81] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="absolute inset-2 border-4 border-[#0F4C81]/30 border-b-transparent rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
+                      </div>
+                      <p className="text-sm text-[#1A2332] font-semibold mb-1">Carregando análise de duração...</p>
+                      <p className="text-xs text-[#64748B]">Por favor, aguarde</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+
+                <BoundaryTransitionSankey
+                  data={boundaryTransitionsByDuration}
+                  loading={loading}
+                  title={t('boundaryAccessAnalytics.boundaryTransitionSankey.title')}
+                />
+              )}
+            </div>
+
             <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
               <div className="flex justify-between items-center pb-4 mb-4 border-b border-[#E2E8F0]">
                 <div>

@@ -1709,7 +1709,9 @@
           "boundary": "Boundary",
           "entry": "Entrada",
           "duration": "Duração",
-          "status": "Status"
+          "status": "Status",
+          "live": "AO VIVO",
+          "show": "MOSTRAR"
         },
         "statuses": {
           "normal": "Normal",

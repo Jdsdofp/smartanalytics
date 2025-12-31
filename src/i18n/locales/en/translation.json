@@ -1675,7 +1675,9 @@
           "boundary": "Boundary",
           "entry": "Entry",
           "duration": "Duration",
-          "status": "Status"
+          "status": "Status",
+          "live": "LIVE",
+          "show": "SHOW"
         },
         "statuses": {
           "normal": "Normal",

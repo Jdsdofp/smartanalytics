@@ -445,3 +445,68 @@
 
 
 
+/* src/darkmode-charts.css */
+
+/* Estilos para gráficos em dark mode */
+.dark .echarts-container {
+  background-color: #1F2937 !important;
+}
+
+/* Cards com efeito glass em dark mode */
+.dark .glass-card {
+  background: rgba(31, 41, 55, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.dark .glass-card:hover {
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid rgba(75, 85, 99, 0.5);
+}
+
+/* Headers com gradiente em dark mode */
+.dark .header-gradient {
+  background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+}
+
+/* Tabelas em dark mode */
+.dark table thead {
+  background: rgba(55, 65, 81, 0.5);
+}
+
+.dark table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.dark table td,
+.dark table th {
+  border-color: #374151;
+}
+
+/* Filtros em dark mode */
+.dark select,
+.dark input[type="number"] {
+  background-color: #374151;
+  border-color: #4B5563;
+  color: #E5E7EB;
+}
+
+.dark select:focus,
+.dark input[type="number"]:focus {
+  border-color: #60A5FA;
+  ring-color: rgba(96, 165, 250, 0.3);
+}
+
+/* Badges em dark mode */
+.dark .badge {
+  background: rgba(55, 65, 81, 0.8);
+  border-color: #4B5563;
+}
+
+/* Loading spinner em dark mode */
+.dark .spinner {
+  border-color: #374151;
+  border-top-color: #60A5FA;
+}

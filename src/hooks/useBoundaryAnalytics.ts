@@ -320,11 +320,7 @@ export const  useBoundaryAnalytics = (
               fetchRealTimeStatus(),
               fetchBoundaryMapData(),
               fetchActiveZones(),
-              fetchBoundaryTransitionsByDuration(),
-              fetchWeekdayWeekendData(),
-              fetchBoundaryTrends(),
-              fetchWeekdayWeekendAnalysis(),
-              fetchBoundaryAnomalies()
+              fetchWeekdayWeekendAnalysis()
             ]);
             break;
 
@@ -334,6 +330,7 @@ export const  useBoundaryAnalytics = (
               fetchWeeklyTrends(),
               fetchWeeklyPattern(),
               fetchWeekdayWeekendData(),
+              fetchBoundaryTrends(),
             ]);
             break;
 
@@ -345,10 +342,11 @@ export const  useBoundaryAnalytics = (
             await fetchAnomalies();
             await fetchAnomalyKpis();
             await fetchTopAnomalies();
+            await fetchBoundaryAnomalies();
             break;
 
           case "flow":
-            await Promise.all([fetchSankeyData(), fetchTopTransitions()]);
+            await Promise.all([fetchSankeyData(), fetchTopTransitions(), fetchBoundaryTransitionsByDuration()]);
             break;
 
           case "compliance":
