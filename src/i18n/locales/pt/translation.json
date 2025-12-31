@@ -2147,6 +2147,27 @@
         "description": "Não foram encontradas anomalias nos dados analisados"
       }
     }
+    },
+    "boundaryTransitionSankey": {
+      "title": "Fluxo de Transições entre Áreas",
+      "subtitle": "Movimentação entre áreas com tempo de permanência",
+      "totalTransitions": "Total de Transições",
+      "loading": "Carregando fluxo de transições...",
+      "noDataTitle": "Nenhuma transição registrada",
+      "noDataDescription": "Não há dados de movimentação entre áreas hoje",
+      "durationLegend": "Legenda de Tempo de Permanência:",
+      "durationLabels": ["< 30min", "30min - 1h", "1 - 2h", "2 - 4h", "4 - 8h", "> 8h"],
+      "tooltipInfo": "A espessura das linhas representa o volume de transições",
+      "datePrefix": "Dados de hoje:",
+      "tooltipLabels": {
+        "transitions": "Transições:",
+        "duration": "Duração:",
+        "average": "Média:",
+        "userExamples": "Exemplos de Usuários:",
+        "andMore": "e mais",
+        "departures": "Saídas:",
+        "arrivals": "Entradas:"
+      }
     }
   }
 }

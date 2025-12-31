@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { ArrowPathIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { t } from 'i18next';
 
 interface BoundaryTransitionByDuration {
   from_boundary: string;
@@ -21,7 +22,7 @@ interface Props {
 const BoundaryTransitionSankey: React.FC<Props> = ({
   data,
   loading,
-  title = 'Fluxo de Transições entre Áreas'
+  title
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstanceRef = useRef<echarts.ECharts | null>(null);
@@ -62,7 +63,7 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
     const option = getChartOption();
     chart.setOption(option);
   };
-  //teste de nova função
+
   const getChartOption = (): echarts.EChartsOption => {
     if (!data || data.length === 0) return {};
 
@@ -141,17 +142,17 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
 
             let tooltip = `<div style="font-weight: bold; margin-bottom: 8px; color: #111827;">`;
             tooltip += `${params.data.source} → ${params.data.target}</div>`;
-            tooltip += `<div style="margin-bottom: 4px;">Transições: <strong>${params.value}</strong></div>`;
-            tooltip += `<div style="margin-bottom: 4px;">Duração: <strong>${params.data.duration_range}</strong></div>`;
-            tooltip += `<div style="margin-bottom: 8px;">Média: <strong>${params.data.avg_duration.toFixed(2)}h</strong></div>`;
+            tooltip += `<div style="margin-bottom: 4px;">${t('boundaryAccessAnalytics.boundaryTransitionSankey.tooltipLabels.transitions')} <strong>${params.value}</strong></div>`;
+            tooltip += `<div style="margin-bottom: 4px;">${t('boundaryAccessAnalytics.boundaryTransitionSankey.tooltipLabels.duration')} <strong>${params.data.duration_range}</strong></div>`;
+            tooltip += `<div style="margin-bottom: 8px;">${t('boundaryAccessAnalytics.boundaryTransitionSankey.tooltipLabels.average')} <strong>${params.data.avg_duration.toFixed(2)}h</strong></div>`;
 
-            tooltip += '<div style="font-weight: 600; margin-bottom: 4px; border-top: 1px solid #e5e7eb; padding-top: 4px;">Exemplos de Usuários:</div>';
+            tooltip += `<div style="font-weight: 600; margin-bottom: 4px; border-top: 1px solid #e5e7eb; padding-top: 4px;">${t('boundaryAccessAnalytics.boundaryTransitionSankey.tooltipLabels.userExamples')}</div>`;
             users.forEach((user: string) => {
               tooltip += `<div style="font-size: 11px; color: #4b5563;">• ${user}</div>`;
             });
 
             if (params.data.sample_users.split('|||').length > 5) {
-              tooltip += `<div style="font-size: 11px; color: #6b7280; font-style: italic; margin-top: 4px;">... e mais ${params.data.sample_users.split('|||').length - 5}</div>`;
+              tooltip += `<div style="font-size: 11px; color: #6b7280; font-style: italic; margin-top: 4px;">... ${t('boundaryAccessAnalytics.boundaryTransitionSankey.tooltipLabels.andMore')} ${params.data.sample_users.split('|||').length - 5}</div>`;
             }
 
             return tooltip;
@@ -170,8 +171,8 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
             .reduce((sum, d) => sum + d.transition_count, 0);
 
           return `<div style="font-weight: bold; margin-bottom: 8px; color: #111827;">${params.name}</div>
-                <div style="margin-bottom: 4px;">Saídas: <strong>${totalFrom}</strong></div>
-                <div>Entradas: <strong>${totalTo}</strong></div>`;
+                <div style="margin-bottom: 4px;">${t('boundaryAccessAnalytics.boundaryTransitionSankey.tooltipLabels.departures')} <strong>${totalFrom}</strong></div>
+                <div>${t('boundaryAccessAnalytics.boundaryTransitionSankey.tooltipLabels.arrivals')} <strong>${totalTo}</strong></div>`;
         }
       },
       series: [
@@ -221,74 +222,74 @@ const BoundaryTransitionSankey: React.FC<Props> = ({
     };
   };
 
-// ✅ FUNÇÃO MELHORADA: Detecta e remove TODOS os ciclos
-const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionByDuration[] => {
-  const cleanLinks: BoundaryTransitionByDuration[] = [];
-  
-  // Função para verificar se adicionar este link criaria um ciclo
-  const wouldCreateCycle = (
-    newLink: BoundaryTransitionByDuration,
-    existingLinks: BoundaryTransitionByDuration[]
-  ): boolean => {
-    // Construir grafo com os links existentes + novo link
-    const graph = new Map<string, string[]>();
+  // ✅ FUNÇÃO MELHORADA: Detecta e remove TODOS os ciclos
+  const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionByDuration[] => {
+    const cleanLinks: BoundaryTransitionByDuration[] = [];
     
-    [...existingLinks, newLink].forEach(link => {
-      if (!graph.has(link.from_boundary)) {
-        graph.set(link.from_boundary, []);
-      }
-      graph.get(link.from_boundary)!.push(link.to_boundary);
-    });
+    // Função para verificar se adicionar este link criaria um ciclo
+    const wouldCreateCycle = (
+      newLink: BoundaryTransitionByDuration,
+      existingLinks: BoundaryTransitionByDuration[]
+    ): boolean => {
+      // Construir grafo com os links existentes + novo link
+      const graph = new Map<string, string[]>();
+      
+      [...existingLinks, newLink].forEach(link => {
+        if (!graph.has(link.from_boundary)) {
+          graph.set(link.from_boundary, []);
+        }
+        graph.get(link.from_boundary)!.push(link.to_boundary);
+      });
 
-    // DFS para detectar ciclo
-    const visited = new Set<string>();
-    const recursionStack = new Set<string>();
+      // DFS para detectar ciclo
+      const visited = new Set<string>();
+      const recursionStack = new Set<string>();
 
-    const hasCycleDFS = (node: string): boolean => {
-      visited.add(node);
-      recursionStack.add(node);
+      const hasCycleDFS = (node: string): boolean => {
+        visited.add(node);
+        recursionStack.add(node);
 
-      const neighbors = graph.get(node) || [];
-      for (const neighbor of neighbors) {
-        if (!visited.has(neighbor)) {
-          if (hasCycleDFS(neighbor)) return true;
-        } else if (recursionStack.has(neighbor)) {
-          return true; // Ciclo detectado!
+        const neighbors = graph.get(node) || [];
+        for (const neighbor of neighbors) {
+          if (!visited.has(neighbor)) {
+            if (hasCycleDFS(neighbor)) return true;
+          } else if (recursionStack.has(neighbor)) {
+            return true; // Ciclo detectado!
+          }
+        }
+
+        recursionStack.delete(node);
+        return false;
+      };
+
+      // Verificar todos os nós
+      for (const [node] of graph) {
+        if (!visited.has(node)) {
+          if (hasCycleDFS(node)) return true;
         }
       }
 
-      recursionStack.delete(node);
       return false;
     };
 
-    // Verificar todos os nós
-    for (const [node] of graph) {
-      if (!visited.has(node)) {
-        if (hasCycleDFS(node)) return true;
+    // Ordenar por volume (maior primeiro) para priorizar transições mais importantes
+    const sortedData = [...data].sort((a, b) => b.transition_count - a.transition_count);
+
+    // Adicionar links um por um, pulando os que causam ciclos
+    for (const link of sortedData) {
+      if (!wouldCreateCycle(link, cleanLinks)) {
+        cleanLinks.push(link);
+      } else {
+        console.warn(
+          `⚠️ Link removido (criaria ciclo): ${link.from_boundary} → ${link.to_boundary} (${link.transition_count} transições)`
+        );
       }
     }
 
-    return false;
+    console.log(`✅ Links processados: ${data.length} → ${cleanLinks.length} (${data.length - cleanLinks.length} removidos)`);
+    
+    return cleanLinks;
   };
-
-  // Ordenar por volume (maior primeiro) para priorizar transições mais importantes
-  const sortedData = [...data].sort((a, b) => b.transition_count - a.transition_count);
-
-  // Adicionar links um por um, pulando os que causam ciclos
-  for (const link of sortedData) {
-    if (!wouldCreateCycle(link, cleanLinks)) {
-      cleanLinks.push(link);
-    } else {
-      console.warn(
-        `⚠️ Link removido (criaria ciclo): ${link.from_boundary} → ${link.to_boundary} (${link.transition_count} transições)`
-      );
-    }
-  }
-
-  console.log(`✅ Links processados: ${data.length} → ${cleanLinks.length} (${data.length - cleanLinks.length} removidos)`);
-  
-  return cleanLinks;
-};
 
   const getColorForBoundary = (boundary: string): string => {
     const colors = [
@@ -334,6 +335,9 @@ const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionB
   const showEmpty = !loading && (!data || data.length === 0);
   const showChart = !loading && data && data.length > 0;
 
+  // Labels de duração traduzidos
+  const durationLabels = t('boundaryAccessAnalytics.boundaryTransitionSankey.durationLabels', { returnObjects: true }) as string[];
+
   return (
     <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden">
       <div className="bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] p-6">
@@ -345,9 +349,11 @@ const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionB
               </svg>
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-white mb-1">{title}</h3>
+              <h3 className="text-2xl font-bold text-white mb-1">
+                {title || t('boundaryAccessAnalytics.boundaryTransitionSankey.title')}
+              </h3>
               <p className="text-white/80 text-sm">
-                Movimentação entre áreas com tempo de permanência
+                {t('boundaryAccessAnalytics.boundaryTransitionSankey.subtitle')}
               </p>
             </div>
           </div>
@@ -358,7 +364,9 @@ const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionB
                 <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
               </svg>
               <div>
-                <p className="text-xs text-white/80 font-medium">Total Transições</p>
+                <p className="text-xs text-white/80 font-medium">
+                  {t('boundaryAccessAnalytics.boundaryTransitionSankey.totalTransitions')}
+                </p>
                 <p className="text-xl font-bold text-white">
                   {data.reduce((sum, d) => sum + d.transition_count, 0)}
                 </p>
@@ -374,7 +382,9 @@ const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionB
           <div className="flex items-center justify-center h-[700px]">
             <div className="flex flex-col items-center gap-3">
               <ArrowPathIcon className="w-8 h-8 text-blue-500 animate-spin" />
-              <p className="text-gray-600 text-sm">Carregando fluxo de transições...</p>
+              <p className="text-gray-600 text-sm">
+                {t('boundaryAccessAnalytics.boundaryTransitionSankey.loading')}
+              </p>
             </div>
           </div>
         )}
@@ -384,9 +394,11 @@ const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionB
           <div className="flex items-center justify-center h-[700px]">
             <div className="text-center">
               <MapPinIcon className="w-16 h-16 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhuma transição registrada</p>
+              <p className="text-gray-500 font-medium">
+                {t('boundaryAccessAnalytics.boundaryTransitionSankey.noDataTitle')}
+              </p>
               <p className="text-gray-400 text-sm mt-1">
-                Não há dados de movimentação entre áreas hoje
+                {t('boundaryAccessAnalytics.boundaryTransitionSankey.noDataDescription')}
               </p>
             </div>
           </div>
@@ -403,22 +415,26 @@ const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionB
           </div>
 
           <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border-2 border-purple-200">
-            <p className="text-sm font-bold text-purple-900 mb-3">Legenda de Tempo de Permanência:</p>
+            <p className="text-sm font-bold text-purple-900 mb-3">
+              {t('boundaryAccessAnalytics.boundaryTransitionSankey.durationLegend')}
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
               {[
-                { range: '0-30min', color: '#10b981', label: '< 30min' },
-                { range: '30min-1h', color: '#3b82f6', label: '30min - 1h' },
-                { range: '1-2h', color: '#8b5cf6', label: '1 - 2h' },
-                { range: '2-4h', color: '#f59e0b', label: '2 - 4h' },
-                { range: '4-8h', color: '#ef4444', label: '4 - 8h' },
-                { range: '8h+', color: '#dc2626', label: '> 8h' }
-              ].map(({ range, color, label }) => (
+                { range: '0-30min', color: '#10b981', labelIndex: 0 },
+                { range: '30min-1h', color: '#3b82f6', labelIndex: 1 },
+                { range: '1-2h', color: '#8b5cf6', labelIndex: 2 },
+                { range: '2-4h', color: '#f59e0b', labelIndex: 3 },
+                { range: '4-8h', color: '#ef4444', labelIndex: 4 },
+                { range: '8h+', color: '#dc2626', labelIndex: 5 }
+              ].map(({ range, color, labelIndex }) => (
                 <div key={range} className="flex items-center gap-2">
                   <div
                     className="w-4 h-4 rounded-full shadow-sm"
                     style={{ backgroundColor: color }}
                   ></div>
-                  <span className="text-xs font-medium text-gray-700">{label}</span>
+                  <span className="text-xs font-medium text-gray-700">
+                    {durationLabels[labelIndex]}
+                  </span>
                 </div>
               ))}
             </div>
@@ -430,12 +446,12 @@ const removeCycles = (data: BoundaryTransitionByDuration[]): BoundaryTransitionB
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
               <span className="text-xs text-purple-700 font-medium">
-                A espessura das linhas representa o volume de transições
+                {t('boundaryAccessAnalytics.boundaryTransitionSankey.tooltipInfo')}
               </span>
             </div>
 
             <div className="text-xs text-gray-500">
-              Dados de hoje: <span className="font-semibold text-gray-700">{new Date().toLocaleDateString('pt-BR')}</span>
+              {t('boundaryAccessAnalytics.boundaryTransitionSankey.datePrefix')} <span className="font-semibold text-gray-700">{new Date().toLocaleDateString('pt-BR')}</span>
             </div>
           </div>
         </div>

@@ -1506,7 +1506,7 @@ export default function BoundaryAccessAnalytics() {
                   <BoundaryTransitionSankey
                     data={boundaryTransitionsByDuration}
                     loading={loading}
-                    title="Fluxo de Movimentação entre Áreas"
+                    title={t('boundaryAccessAnalytics.boundaryTransitionSankey.title')}
                   />
               )}
             </div>

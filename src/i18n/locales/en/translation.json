@@ -2113,6 +2113,27 @@
         "description": "No anomalies were found in the analyzed data"
       }
     }
-  }
+    },
+    "boundaryTransitionSankey": {
+      "title": "Boundary Transition Flow",
+      "subtitle": "Movement between areas with duration time",
+      "totalTransitions": "Total Transitions",
+      "loading": "Loading transition flow...",
+      "noDataTitle": "No transitions recorded",
+      "noDataDescription": "No area movement data available today",
+      "durationLegend": "Duration Legend:",
+      "durationLabels": ["< 30min", "30min - 1h", "1 - 2h", "2 - 4h", "4 - 8h", "> 8h"],
+      "tooltipInfo": "Line thickness represents transition volume",
+      "datePrefix": "Today's data:",
+      "tooltipLabels": {
+        "transitions": "Transitions:",
+        "duration": "Duration:",
+        "average": "Average:",
+        "userExamples": "User Examples:",
+        "andMore": "and more",
+        "departures": "Departures:",
+        "arrivals": "Arrivals:"
+      }
+    }
   }
 }
