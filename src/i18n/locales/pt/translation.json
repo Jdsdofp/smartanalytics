@@ -1628,7 +1628,8 @@
       "topBoundaries": {
         "title": "Top 10 Boundaries",
         "subtitle": "Por duração total (30 dias)",
-        "xAxis": "Horas"
+        "xAxis": "Horas",
+        "clickBarsForDetails": "Clique nas barras para detalhes"
       },
       "shiftDistribution": {
         "title": "Distribuição por Turno",
@@ -2032,6 +2033,120 @@
       },
       "comparison": "Comparação",
       "emptyState": "Nenhum dado disponível para análise"
+    },
+    "boundaryTrendsChart": {
+    "title": "Análise de Tendências por Boundary",
+    "subtitle": "Evolução temporal e taxa de crescimento",
+    "chartTypes": {
+      "line": "Linha",
+      "area": "Área",
+      "bar": "Barras",
+      "change": "Variação %"
+    },
+    "metrics": {
+      "visits": "Visitas",
+      "duration": "Duração",
+      "unique_items": "Itens Únicos"
+    },
+    "labels": {
+      "totalVisits": "Total Visitas",
+      "avgGrowth": "Crescimento Médio",
+      "visits": "Total de Visitas",
+      "duration": "Duração Média (min)",
+      "unique_items": "Itens Únicos",
+      "variation": "Variação (%)"
+    },
+    "buttons": {
+      "all": "Todos",
+      "toggleAll": "Mostrar Todos"
+    },
+    "tooltips": {
+      "chartHelp": "Clique nas legendas para ocultar/exibir boundaries",
+      "variationHelp": "Variação percentual comparada ao período anterior"
+    },
+    "states": {
+      "loading": "Carregando tendências...",
+      "noData": {
+        "title": "Nenhum dado disponível",
+        "description": "Não há dados de tendências para exibir"
+      }
+    },
+    "format": {
+      "dateRange": "Últimos 30 dias",
+      "updated": "Atualizado",
+      "growthPositive": "+{{value}}%",
+      "growthNegative": "{{value}}%",
+      "percentage": "{{value}}%"
+    },
+    "footer": {
+      "dateRange": "Últimos 30 dias",
+      "updated": "Atualizado"
+    }
+    },
+    "boundaryAnomaliesChart": {
+    "title": "Detecção de Anomalias",
+    "statistics": {
+      "totalAnomalies": "Total de Anomalias",
+      "avgZScore": "Z-Score Médio",
+      "criticalAnomalies": "Anomalias Críticas"
+    },
+    "chartTypes": {
+      "scatter": "Scatter Plot",
+      "heatmap": "Heatmap",
+      "table": "Tabela Detalhada"
+    },
+    "filters": {
+      "type": "Tipo",
+      "all": "Todas",
+      "visits": "Visitas",
+      "duration": "Duração",
+      "alerts": "Alertas",
+      "boundaries": "Boundaries",
+      "specific": "Selecionar Específicos",
+      "showAll": "Mostrar Todos"
+    },
+    "anomalyTypes": {
+      "VISITS_ANOMALY": "Visitas",
+      "DURATION_ANOMALY": "Duração",
+      "ALERT_ANOMALY": "Alertas"
+    },
+    "table": {
+      "headers": {
+        "date": "Data",
+        "boundary": "Boundary",
+        "type": "Tipo",
+        "visits": "Visitas",
+        "zScore": "Z-Score",
+        "avgDuration": "Duração Média",
+        "severity": "Severidade"
+      },
+      "expected": "esp",
+      "minutes": "m",
+      "showing": "Mostrando",
+      "to": "a",
+      "of": "de",
+      "anomalies": "anomalias"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Próxima"
+    },
+    "severity": {
+      "critical": "Crítico",
+      "high": "Alto",
+      "moderate": "Moderado"
+    },
+    "tooltips": {
+      "zScoreExplanation": "Z-Score > 2: anomalia significativa | Z-Score > 3: anomalia crítica",
+      "lastUpdated": "Última atualização"
+    },
+    "states": {
+      "loading": "Carregando anomalias...",
+      "noData": {
+        "title": "Nenhuma anomalia detectada",
+        "description": "Não foram encontradas anomalias nos dados analisados"
+      }
+    }
     }
   }
 }

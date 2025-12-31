@@ -1594,7 +1594,8 @@
       "topBoundaries": {
         "title": "Top 10 Boundaries",
         "subtitle": "By total duration (30 days)",
-        "xAxis": "Hours"
+        "xAxis": "Hours",
+        "clickBarsForDetails": "Click bars for boundary details"
       },
       "shiftDistribution": {
         "title": "Shift Distribution",
@@ -1998,6 +1999,120 @@
     },
     "comparison": "Comparison",
     "emptyState": "No data available for analysis"
+    },
+    "boundaryTrendsChart": {
+    "title": "Boundary Trends Analysis",
+    "subtitle": "Temporal evolution and growth rate",
+    "chartTypes": {
+      "line": "Line",
+      "area": "Area",
+      "bar": "Bars",
+      "change": "Variation %"
+    },
+    "metrics": {
+      "visits": "Visits",
+      "duration": "Duration",
+      "unique_items": "Unique Items"
+    },
+    "labels": {
+      "totalVisits": "Total Visits",
+      "avgGrowth": "Average Growth",
+      "visits": "Total Visits",
+      "duration": "Average Duration (min)",
+      "unique_items": "Unique Items",
+      "variation": "Variation (%)"
+    },
+    "buttons": {
+      "all": "All",
+      "toggleAll": "Show All"
+    },
+    "tooltips": {
+      "chartHelp": "Click on legends to show/hide boundaries",
+      "variationHelp": "Percentage variation compared to previous period"
+    },
+    "states": {
+      "loading": "Loading trends...",
+      "noData": {
+        "title": "No data available",
+        "description": "No trend data to display"
+      }
+    },
+    "format": {
+      "dateRange": "Last 30 days",
+      "updated": "Updated",
+      "growthPositive": "+{{value}}%",
+      "growthNegative": "{{value}}%",
+      "percentage": "{{value}}%"
+    },
+    "footer": {
+      "dateRange": "Last 30 days",
+      "updated": "Updated"
+    }
+    },
+      "boundaryAnomaliesChart": {
+    "title": "Anomaly Detection",
+    "statistics": {
+      "totalAnomalies": "Total Anomalies",
+      "avgZScore": "Average Z-Score",
+      "criticalAnomalies": "Critical Anomalies"
+    },
+    "chartTypes": {
+      "scatter": "Scatter Plot",
+      "heatmap": "Heatmap",
+      "table": "Detailed Table"
+    },
+    "filters": {
+      "type": "Type",
+      "all": "All",
+      "visits": "Visits",
+      "duration": "Duration",
+      "alerts": "Alerts",
+      "boundaries": "Boundaries",
+      "specific": "Select Specific",
+      "showAll": "Show All"
+    },
+    "anomalyTypes": {
+      "VISITS_ANOMALY": "Visits",
+      "DURATION_ANOMALY": "Duration",
+      "ALERT_ANOMALY": "Alerts"
+    },
+    "table": {
+      "headers": {
+        "date": "Date",
+        "boundary": "Boundary",
+        "type": "Type",
+        "visits": "Visits",
+        "zScore": "Z-Score",
+        "avgDuration": "Average Duration",
+        "severity": "Severity"
+      },
+      "expected": "exp",
+      "minutes": "m",
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "anomalies": "anomalies"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "severity": {
+      "critical": "Critical",
+      "high": "High",
+      "moderate": "Moderate"
+    },
+    "tooltips": {
+      "zScoreExplanation": "Z-Score > 2: significant anomaly | Z-Score > 3: critical anomaly",
+      "lastUpdated": "Last updated"
+    },
+    "states": {
+      "loading": "Loading anomalies...",
+      "noData": {
+        "title": "No anomalies detected",
+        "description": "No anomalies were found in the analyzed data"
+      }
+    }
   }
   }
 }

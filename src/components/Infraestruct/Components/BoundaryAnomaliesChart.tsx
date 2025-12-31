@@ -7,6 +7,7 @@ import {
   BoltIcon, 
   InformationCircleIcon 
 } from '@heroicons/react/24/outline';
+import { t } from 'i18next';
 
 interface BoundaryAnomalyData {
   entry_date: string;
@@ -41,7 +42,7 @@ type AnomalyFilter = 'all' | 'VISITS_ANOMALY' | 'DURATION_ANOMALY' | 'ALERT_ANOM
 const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
   data = [],
   loading = false,
-  title = 'Detecção de Anomalias'
+  title
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
@@ -122,10 +123,10 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
             return `
               <div style="padding: 8px;">
                 <strong>${data.name}</strong><br/>
-                Data: ${data.date}<br/>
-                Z-Score Visitas: ${data.value[0].toFixed(2)}<br/>
-                Z-Score Duração: ${data.value[1].toFixed(2)}<br/>
-                Total Visitas: ${data.value[2]}
+                ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.date')}: ${data.date}<br/>
+                ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.zScore')} ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.visits')}: ${data.value[0].toFixed(2)}<br/>
+                ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.zScore')} ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.duration')}: ${data.value[1].toFixed(2)}<br/>
+                ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.visits')}: ${data.value[2]}
               </div>
             `;
           }
@@ -138,7 +139,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
         },
         xAxis: {
           type: 'value',
-          name: 'Z-Score Visitas',
+          name: `${t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.zScore')} ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.visits')}`,
           nameLocation: 'middle',
           nameGap: 30,
           axisLine: { lineStyle: { color: '#666' } },
@@ -149,7 +150,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
         },
         yAxis: {
           type: 'value',
-          name: 'Z-Score Duração',
+          name: `${t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.zScore')} ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.duration')}`,
           nameLocation: 'middle',
           nameGap: 40,
           axisLine: { lineStyle: { color: '#666' } },
@@ -218,8 +219,8 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
             return `
               <div style="padding: 8px;">
                 <strong>${boundaries[boundaryIdx]}</strong><br/>
-                Data: ${dates[dateIdx]}<br/>
-                Z-Score Total: ${value.toFixed(2)}
+                ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.date')}: ${dates[dateIdx]}<br/>
+                ${t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.zScore')} Total: ${value.toFixed(2)}
               </div>
             `;
           }
@@ -296,22 +297,23 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
   };
 
   const getAnomalyLabel = (anomalyType: string) => {
-    switch (anomalyType) {
-      case 'VISITS_ANOMALY': return 'Visitas';
-      case 'DURATION_ANOMALY': return 'Duração';
-      case 'ALERT_ANOMALY': return 'Alertas';
-      default: return anomalyType;
-    }
+    return t(`boundaryAccessAnalytics.boundaryAnomaliesChart.anomalyTypes.${anomalyType}`, anomalyType);
   };
 
   const getSeverityBadge = (zscore: number) => {
     const absZScore = Math.abs(zscore);
     if (absZScore > 3) {
-      return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">Crítico</span>;
+      return <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">
+        {t('boundaryAccessAnalytics.boundaryAnomaliesChart.severity.critical')}
+      </span>;
     } else if (absZScore > 2) {
-      return <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-700 font-medium">Alto</span>;
+      return <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-700 font-medium">
+        {t('boundaryAccessAnalytics.boundaryAnomaliesChart.severity.high')}
+      </span>;
     } else {
-      return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium">Moderado</span>;
+      return <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium">
+        {t('boundaryAccessAnalytics.boundaryAnomaliesChart.severity.moderate')}
+      </span>;
     }
   };
 
@@ -352,7 +354,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex flex-col items-center justify-center h-96 text-gray-400">
           <ExclamationTriangleIcon className="w-16 h-16 mb-4" />
-          <p className="text-lg">Nenhuma anomalia detectada</p>
+          <p className="text-lg">{t('boundaryAccessAnalytics.boundaryAnomaliesChart.states.noData.title')}</p>
         </div>
       </div>
     );
@@ -362,14 +364,18 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       {/* Header com gradiente */}
       <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white p-6">
-        <h3 className="text-xl font-bold mb-4">{title}</h3>
+        <h3 className="text-xl font-bold mb-4">
+          {title || t('boundaryAccessAnalytics.boundaryAnomaliesChart.title')}
+        </h3>
         
         {/* Cards de estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-white/80">Total de Anomalias</p>
+                <p className="text-sm text-white/80">
+                  {t('boundaryAccessAnalytics.boundaryAnomaliesChart.statistics.totalAnomalies')}
+                </p>
                 <p className="text-2xl font-bold">{totalAnomalies}</p>
               </div>
               <ExclamationTriangleIcon className="w-8 h-8 text-white/80" />
@@ -379,7 +385,9 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-white/80">Z-Score Médio</p>
+                <p className="text-sm text-white/80">
+                  {t('boundaryAccessAnalytics.boundaryAnomaliesChart.statistics.avgZScore')}
+                </p>
                 <p className="text-2xl font-bold">{avgVisitsZScore}</p>
               </div>
               <BoltIcon className="w-8 h-8 text-white/80" />
@@ -389,7 +397,9 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-white/80">Anomalias Críticas</p>
+                <p className="text-sm text-white/80">
+                  {t('boundaryAccessAnalytics.boundaryAnomaliesChart.statistics.criticalAnomalies')}
+                </p>
                 <p className="text-2xl font-bold">{criticalAnomalies}</p>
               </div>
               <ChartBarIcon className="w-8 h-8 text-white/80" />
@@ -410,7 +420,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Scatter Plot
+            {t('boundaryAccessAnalytics.boundaryAnomaliesChart.chartTypes.scatter')}
           </button>
           <button
             onClick={() => setChartType('heatmap')}
@@ -420,7 +430,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Heatmap
+            {t('boundaryAccessAnalytics.boundaryAnomaliesChart.chartTypes.heatmap')}
           </button>
           <button
             onClick={() => setChartType('table')}
@@ -430,13 +440,15 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Tabela Detalhada
+            {t('boundaryAccessAnalytics.boundaryAnomaliesChart.chartTypes.table')}
           </button>
         </div>
 
         {/* Filtro de tipo de anomalia */}
         <div className="flex flex-wrap gap-2">
-          <span className="text-sm font-medium text-gray-700 self-center mr-2">Tipo:</span>
+          <span className="text-sm font-medium text-gray-700 self-center mr-2">
+            {t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.type')}:
+          </span>
           <button
             onClick={() => setAnomalyFilter('all')}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
@@ -445,7 +457,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Todas
+            {t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.all')}
           </button>
           <button
             onClick={() => setAnomalyFilter('VISITS_ANOMALY')}
@@ -455,7 +467,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                 : 'bg-red-100 text-red-700 hover:bg-red-200'
             }`}
           >
-            Visitas
+            {t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.visits')}
           </button>
           <button
             onClick={() => setAnomalyFilter('DURATION_ANOMALY')}
@@ -465,7 +477,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                 : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
             }`}
           >
-            Duração
+            {t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.duration')}
           </button>
           <button
             onClick={() => setAnomalyFilter('ALERT_ANOMALY')}
@@ -475,19 +487,24 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                 : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
             }`}
           >
-            Alertas
+            {t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.alerts')}
           </button>
         </div>
 
         {/* Filtro de boundaries */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Boundaries:</span>
+            <span className="text-sm font-medium text-gray-700">
+              {t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.boundaries')}:
+            </span>
             <button
               onClick={toggleShowAll}
               className="text-sm text-red-600 hover:text-red-700 font-medium"
             >
-              {showAll ? 'Selecionar Específicos' : 'Mostrar Todos'}
+              {showAll 
+                ? t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.specific')
+                : t('boundaryAccessAnalytics.boundaryAnomaliesChart.filters.showAll')
+              }
             </button>
           </div>
           {!showAll && (
@@ -520,25 +537,25 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Data
+                      {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.date')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Boundary
+                      {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.boundary')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tipo
+                      {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.type')}
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Visitas
+                      {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.visits')}
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Z-Score
+                      {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.zScore')}
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Duração Média
+                      {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.avgDuration')}
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Severidade
+                      {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.headers.severity')}
                     </th>
                   </tr>
                 </thead>
@@ -565,14 +582,14 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-900">
                         {item.total_visits}
                         <span className="text-xs text-gray-500 ml-1">
-                          (esp: {parseFloat(item.expected_visits).toFixed(1)})
+                          ({t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.expected')}: {parseFloat(item.expected_visits).toFixed(1)})
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-mono text-gray-900">
                         {item.visits_zscore.toFixed(2)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-900">
-                        {parseFloat(item.avg_visit_duration_minutes).toFixed(1)}m
+                        {parseFloat(item.avg_visit_duration_minutes).toFixed(1)}{t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.minutes')}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-center">
                         {getSeverityBadge(item.visits_zscore)}
@@ -587,7 +604,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
             {totalPages > 1 && (
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-700">
-                  Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, displayData.length)} de {displayData.length} anomalias
+                  {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.showing')} {((currentPage - 1) * itemsPerPage) + 1} {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.to')} {Math.min(currentPage * itemsPerPage, displayData.length)} {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.of')} {displayData.length} {t('boundaryAccessAnalytics.boundaryAnomaliesChart.table.anomalies')}
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -595,7 +612,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                     disabled={currentPage === 1}
                     className="px-3 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Anterior
+                    {t('boundaryAccessAnalytics.boundaryAnomaliesChart.pagination.previous')}
                   </button>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -629,7 +646,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
                     disabled={currentPage === totalPages}
                     className="px-3 py-1 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Próxima
+                    {t('boundaryAccessAnalytics.boundaryAnomaliesChart.pagination.next')}
                   </button>
                 </div>
               </div>
@@ -644,10 +661,10 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
       <div className="px-6 py-4 bg-gray-50 border-t flex items-center justify-between text-sm text-gray-600">
         <div className="flex items-center gap-2">
           <InformationCircleIcon className="w-4 h-4" />
-          <span>Z-Score &gt; 2: anomalia significativa | Z-Score &gt; 3: anomalia crítica</span>
+          <span>{t('boundaryAccessAnalytics.boundaryAnomaliesChart.tooltips.zScoreExplanation')}</span>
         </div>
         <div>
-          Última atualização: {new Date().toLocaleString('pt-BR')}
+          {t('boundaryAccessAnalytics.boundaryAnomaliesChart.tooltips.lastUpdated')}: {new Date().toLocaleString('pt-BR')}
         </div>
       </div>
     </div>

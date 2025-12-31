@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { ArrowPathIcon, ArrowTrendingDownIcon, ArrowTrendingUpIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { t } from 'i18next';
 
 interface BoundaryTrendData {
   period: string;
@@ -34,7 +35,7 @@ type MetricType = 'visits' | 'duration' | 'unique_items';
 const BoundaryTrendsChart: React.FC<Props> = ({
   data,
   loading,
-  title = 'Análise de Tendências por Boundary'
+  title
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstanceRef = useRef<echarts.ECharts | null>(null);
@@ -408,7 +409,9 @@ const BoundaryTrendsChart: React.FC<Props> = ({
           formatter: (params: any) => {
             const val = params.value;
             if (val === 0) return '';
-            return val > 0 ? `+${val.toFixed(1)}%` : `${val.toFixed(1)}%`;
+            return val > 0 
+              ? t('boundaryAccessAnalytics.boundaryTrendsChart.format.growthPositive', { value: val.toFixed(1) })
+              : t('boundaryAccessAnalytics.boundaryTrendsChart.format.growthNegative', { value: val.toFixed(1) });
           }
         }
       };
@@ -426,8 +429,11 @@ const BoundaryTrendsChart: React.FC<Props> = ({
             const val = item.value;
             const color = val >= 0 ? '#10b981' : '#ef4444';
             const icon = val >= 0 ? '▲' : '▼';
+            const formattedValue = val > 0 
+              ? t('boundaryAccessAnalytics.boundaryTrendsChart.format.growthPositive', { value: val.toFixed(1) })
+              : t('boundaryAccessAnalytics.boundaryTrendsChart.format.growthNegative', { value: val.toFixed(1) });
             tooltip += `<div style="color: ${color}; margin-bottom: 2px;">
-              ${icon} ${item.seriesName}: <strong>${val > 0 ? '+' : ''}${val.toFixed(1)}%</strong>
+              ${icon} ${item.seriesName}: <strong>${formattedValue}</strong>
             </div>`;
           });
           return tooltip;
@@ -457,13 +463,13 @@ const BoundaryTrendsChart: React.FC<Props> = ({
       },
       yAxis: {
         type: 'value',
-        name: 'Variação (%)',
+        name: t('boundaryAccessAnalytics.boundaryTrendsChart.labels.variation'),
         nameTextStyle: {
           fontSize: 12,
           fontWeight: 600
         },
         axisLabel: {
-          formatter: '{value}%'
+          formatter: (value: number) => t('boundaryAccessAnalytics.boundaryTrendsChart.format.percentage', { value })
         },
         splitLine: {
           lineStyle: {
@@ -495,12 +501,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
   };
 
   const getMetricLabel = (metric: MetricType): string => {
-    const labels = {
-      visits: 'Total de Visitas',
-      duration: 'Duração Média (min)',
-      unique_items: 'Itens Únicos'
-    };
-    return labels[metric];
+    return t(`boundaryAccessAnalytics.boundaryTrendsChart.labels.${metric}`);
   };
 
   const getColorForBoundary = (boundary: string, opacity: number = 1): string => {
@@ -565,9 +566,11 @@ const BoundaryTrendsChart: React.FC<Props> = ({
               <ChartBarIcon className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-white mb-1">{title}</h3>
+              <h3 className="text-2xl font-bold text-white mb-1">
+                {title || t('boundaryAccessAnalytics.boundaryTrendsChart.title')}
+              </h3>
               <p className="text-white/80 text-sm">
-                Evolução temporal e taxa de crescimento
+                {t('boundaryAccessAnalytics.boundaryTrendsChart.subtitle')}
               </p>
             </div>
           </div>
@@ -575,11 +578,15 @@ const BoundaryTrendsChart: React.FC<Props> = ({
           {showChart && (
             <div className="hidden lg:flex items-center gap-4">
               <div className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-                <p className="text-xs text-white/80 font-medium">Total Visitas</p>
+                <p className="text-xs text-white/80 font-medium">
+                  {t('boundaryAccessAnalytics.boundaryTrendsChart.labels.totalVisits')}
+                </p>
                 <p className="text-xl font-bold text-white">{totalVisits.toLocaleString()}</p>
               </div>
               <div className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-                <p className="text-xs text-white/80 font-medium">Crescimento Médio</p>
+                <p className="text-xs text-white/80 font-medium">
+                  {t('boundaryAccessAnalytics.boundaryTrendsChart.labels.avgGrowth')}
+                </p>
                 <div className="flex items-center gap-1">
                   {avgGrowth >= 0 ? (
                     <ArrowTrendingUpIcon className="w-5 h-5 text-green-300" />
@@ -587,7 +594,10 @@ const BoundaryTrendsChart: React.FC<Props> = ({
                     <ArrowTrendingDownIcon className="w-5 h-5 text-red-300" />
                   )}
                   <p className="text-xl font-bold text-white">
-                    {avgGrowth > 0 ? '+' : ''}{avgGrowth.toFixed(1)}%
+                    {avgGrowth > 0 
+                      ? t('boundaryAccessAnalytics.boundaryTrendsChart.format.growthPositive', { value: avgGrowth.toFixed(1) })
+                      : t('boundaryAccessAnalytics.boundaryTrendsChart.format.growthNegative', { value: avgGrowth.toFixed(1) })
+                    }
                   </p>
                 </div>
               </div>
@@ -611,7 +621,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Linha
+                  {t('boundaryAccessAnalytics.boundaryTrendsChart.chartTypes.line')}
                 </button>
                 <button
                   onClick={() => setChartType('area')}
@@ -621,7 +631,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Área
+                  {t('boundaryAccessAnalytics.boundaryTrendsChart.chartTypes.area')}
                 </button>
                 <button
                   onClick={() => setChartType('bar')}
@@ -631,7 +641,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Barras
+                  {t('boundaryAccessAnalytics.boundaryTrendsChart.chartTypes.bar')}
                 </button>
                 <button
                   onClick={() => setChartType('change')}
@@ -641,7 +651,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Variação %
+                  {t('boundaryAccessAnalytics.boundaryTrendsChart.chartTypes.change')}
                 </button>
               </div>
 
@@ -656,7 +666,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    Visitas
+                    {t('boundaryAccessAnalytics.boundaryTrendsChart.metrics.visits')}
                   </button>
                   <button
                     onClick={() => setSelectedMetric('duration')}
@@ -666,7 +676,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    Duração
+                    {t('boundaryAccessAnalytics.boundaryTrendsChart.metrics.duration')}
                   </button>
                   <button
                     onClick={() => setSelectedMetric('unique_items')}
@@ -676,7 +686,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    Itens Únicos
+                    {t('boundaryAccessAnalytics.boundaryTrendsChart.metrics.unique_items')}
                   </button>
                 </div>
               )}
@@ -692,7 +702,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
-                Todos
+                {t('boundaryAccessAnalytics.boundaryTrendsChart.buttons.all')}
               </button>
               {boundaries.slice(0, 10).map(boundary => (
                 <button
@@ -719,7 +729,9 @@ const BoundaryTrendsChart: React.FC<Props> = ({
           <div className="flex items-center justify-center h-[500px]">
             <div className="flex flex-col items-center gap-3">
               <ArrowPathIcon className="w-8 h-8 text-purple-500 animate-spin" />
-              <p className="text-gray-600 text-sm">Carregando tendências...</p>
+              <p className="text-gray-600 text-sm">
+                {t('boundaryAccessAnalytics.boundaryTrendsChart.states.loading')}
+              </p>
             </div>
           </div>
         )}
@@ -729,9 +741,11 @@ const BoundaryTrendsChart: React.FC<Props> = ({
           <div className="flex items-center justify-center h-[500px]">
             <div className="text-center">
               <ChartBarIcon className="w-16 h-16 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">Nenhum dado disponível</p>
+              <p className="text-gray-500 font-medium">
+                {t('boundaryAccessAnalytics.boundaryTrendsChart.states.noData.title')}
+              </p>
               <p className="text-gray-400 text-sm mt-1">
-                Não há dados de tendências para exibir
+                {t('boundaryAccessAnalytics.boundaryTrendsChart.states.noData.description')}
               </p>
             </div>
           </div>
@@ -755,14 +769,14 @@ const BoundaryTrendsChart: React.FC<Props> = ({
               </svg>
               <span className="text-xs text-purple-700 font-medium">
                 {chartType === 'change' 
-                  ? 'Variação percentual comparada ao período anterior'
-                  : 'Clique nas legendas para ocultar/exibir boundaries'
+                  ? t('boundaryAccessAnalytics.boundaryTrendsChart.tooltips.variationHelp')
+                  : t('boundaryAccessAnalytics.boundaryTrendsChart.tooltips.chartHelp')
                 }
               </span>
             </div>
 
             <div className="text-xs text-gray-500">
-              Últimos 30 dias • Atualizado: <span className="font-semibold text-gray-700">{new Date().toLocaleDateString('pt-BR')}</span>
+              {t('boundaryAccessAnalytics.boundaryTrendsChart.footer.dateRange')} • {t('boundaryAccessAnalytics.boundaryTrendsChart.footer.updated')}: <span className="font-semibold text-gray-700">{new Date().toLocaleDateString('pt-BR')}</span>
             </div>
           </div>
         </div>

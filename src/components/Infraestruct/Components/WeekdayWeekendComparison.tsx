@@ -121,7 +121,10 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
         }
       },
       legend: {
-        data: ['Dia Útil', 'Final de Semana'],
+        data: [
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.legend.weekday'),
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.legend.weekend')
+        ],
         top: 10,
         textStyle: { fontSize: 12, fontWeight: 600 },
         itemGap: 20
@@ -165,7 +168,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
       },
       series: [
         {
-          name: 'Dia Útil',
+          name: t('boundaryAccessAnalytics.weekdayWeekendComparison.legend.weekday'),
           type: 'bar',
           data: weekdayData,
           itemStyle: {
@@ -194,7 +197,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
           }
         },
         {
-          name: 'Final de Semana',
+          name: t('boundaryAccessAnalytics.weekdayWeekendComparison.legend.weekend'),
           type: 'bar',
           data: weekendData,
           itemStyle: {
@@ -258,7 +261,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
 
     return {
       title: {
-        text: `Padrões: ${firstBoundary}`,
+        text: t('boundaryAccessAnalytics.weekdayWeekendComparison.radarChart.title', { boundary: firstBoundary }),
         left: 'center',
         top: 10,
         textStyle: {
@@ -275,18 +278,21 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
         textStyle: { color: '#1f2937' }
       },
       legend: {
-        data: ['Dia Útil', 'Final de Semana'],
+        data: [
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.legend.weekday'),
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.legend.weekend')
+        ],
         top: 40,
         textStyle: { fontSize: 12, fontWeight: 600 }
       },
       radar: {
         indicator: [
-          { name: 'Manhã (%)', max: 100 },
-          { name: 'Tarde (%)', max: 100 },
-          { name: 'Noite (%)', max: 100 },
-          { name: 'Visitas Curtas (%)', max: 100 },
-          { name: 'Visitas Médias (%)', max: 100 },
-          { name: 'Taxa Alertas (%)', max: 100 }
+          { name: t('boundaryAccessAnalytics.weekdayWeekendComparison.radarChart.indicators.morning'), max: 100 },
+          { name: t('boundaryAccessAnalytics.weekdayWeekendComparison.radarChart.indicators.afternoon'), max: 100 },
+          { name: t('boundaryAccessAnalytics.weekdayWeekendComparison.radarChart.indicators.night'), max: 100 },
+          { name: t('boundaryAccessAnalytics.weekdayWeekendComparison.radarChart.indicators.shortVisits'), max: 100 },
+          { name: t('boundaryAccessAnalytics.weekdayWeekendComparison.radarChart.indicators.mediumVisits'), max: 100 },
+          { name: t('boundaryAccessAnalytics.weekdayWeekendComparison.radarChart.indicators.alertRate'), max: 100 }
         ],
         shape: 'polygon',
         splitNumber: 4,
@@ -312,7 +318,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
       },
       series: [
         {
-          name: 'Comparação',
+          name: t('boundaryAccessAnalytics.weekdayWeekendComparison.comparison'),
           type: 'radar',
           data: [
             {
@@ -324,7 +330,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
                 parseFloat(weekday.medium_pct),
                 parseFloat(weekday.alert_percentage)
               ] : [],
-              name: 'Dia Útil',
+              name: t('boundaryAccessAnalytics.weekdayWeekendComparison.legend.weekday'),
               areaStyle: {
                 color: 'rgba(59, 130, 246, 0.25)',
                 shadowColor: 'rgba(59, 130, 246, 0.3)',
@@ -351,7 +357,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
                 parseFloat(weekend.medium_pct),
                 parseFloat(weekend.alert_percentage)
               ] : [],
-              name: 'Final de Semana',
+              name: t('boundaryAccessAnalytics.weekdayWeekendComparison.legend.weekend'),
               areaStyle: {
                 color: 'rgba(16, 185, 129, 0.25)',
                 shadowColor: 'rgba(16, 185, 129, 0.3)',
@@ -407,8 +413,12 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
         textStyle: { color: '#1f2937' },
         formatter: (params: any) => {
           const periods = [
-            'Manhã (Dia Útil)', 'Tarde (Dia Útil)', 'Noite (Dia Útil)',
-            'Manhã (FDS)', 'Tarde (FDS)', 'Noite (FDS)'
+            t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.morningWeekday').replace('\n', ' '),
+            t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.afternoonWeekday').replace('\n', ' '),
+            t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.nightWeekday').replace('\n', ' '),
+            t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.morningWeekend').replace('\n', ' '),
+            t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.afternoonWeekend').replace('\n', ' '),
+            t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.nightWeekend').replace('\n', ' ')
           ];
           return `<div style="font-weight: bold; margin-bottom: 4px;">${boundaries[params.value[1]]}</div>
                   <div>${periods[params.value[0]]}: <strong>${params.value[2].toFixed(1)}%</strong></div>`;
@@ -422,8 +432,14 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
       },
       xAxis: {
         type: 'category',
-        data: ['Manhã\n(Dia Útil)', 'Tarde\n(Dia Útil)', 'Noite\n(Dia Útil)',
-          'Manhã\n(FDS)', 'Tarde\n(FDS)', 'Noite\n(FDS)'],
+        data: [
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.morningWeekday'),
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.afternoonWeekday'),
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.nightWeekday'),
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.morningWeekend'),
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.afternoonWeekend'),
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.periods.nightWeekend')
+        ],
         splitArea: { show: true },
         axisLabel: {
           fontSize: 10,
@@ -458,12 +474,15 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
         inRange: {
           color: ['#e0f2fe', '#38bdf8', '#0284c7', '#075985']
         },
-        text: ['Alto', 'Baixo'],
+        text: [
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.visualMap.high'),
+          t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.visualMap.low')
+        ],
         textStyle: { fontSize: 11, color: '#374151', fontWeight: 600 }
       },
       series: [
         {
-          name: 'Visitas (%)',
+          name: t('boundaryAccessAnalytics.weekdayWeekendComparison.heatmapChart.seriesName'),
           type: 'heatmap',
           data: heatmapData,
           label: {
@@ -502,13 +521,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
   };
 
   const getMetricLabel = (type: ChartType): string => {
-    const labels = {
-      visits: 'Total de Visitas',
-      duration: 'Duração Média (min)',
-      period: 'Período Tarde (%)',
-      alerts: 'Taxa de Alertas (%)'
-    };
-    return labels[type];
+    return t(`boundaryAccessAnalytics.weekdayWeekendComparison.metrics.${type}`);
   };
 
   const formatMetricValue = (value: number, type: ChartType, short: boolean = false): string => {
@@ -516,12 +529,16 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
     
     switch (type) {
       case 'visits':
-        return short ? `${value}` : `${value} visitas`;
+        return short 
+          ? t('boundaryAccessAnalytics.weekdayWeekendComparison.format.visits.short', { value })
+          : t('boundaryAccessAnalytics.weekdayWeekendComparison.format.visits.long', { value });
       case 'duration':
-        return short ? `${value.toFixed(0)}m` : `${value.toFixed(1)} min`;
+        return short 
+          ? t('boundaryAccessAnalytics.weekdayWeekendComparison.format.duration.short', { value: value.toFixed(0) })
+          : t('boundaryAccessAnalytics.weekdayWeekendComparison.format.duration.long', { value: value.toFixed(1) });
       case 'period':
       case 'alerts':
-        return `${value.toFixed(1)}%`;
+        return t('boundaryAccessAnalytics.weekdayWeekendComparison.format.percentage', { value: value.toFixed(1) });
       default:
         return value.toString();
     }
@@ -733,7 +750,7 @@ const WeekdayWeekendComparison: React.FC<Props> = ({
             </div>
 
             <div className="text-xs text-gray-500">
-             {t('boundaryAccessAnalytics.weekdayWeekendComparison.format.updatedAt', { date: new Date().toLocaleString('pt-BR') })} <span className="font-semibold text-gray-700"></span>
+             {t('boundaryAccessAnalytics.weekdayWeekendComparison.format.updatedAt', { date: new Date().toLocaleString('pt-BR') })}
             </div>
           </div>
         </div>
