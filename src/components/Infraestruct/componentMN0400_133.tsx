@@ -802,14 +802,14 @@ export default function BoundaryAccessAnalytics() {
       grid: { left: 180, right: 80, top: 20, bottom: 50 },
       xAxis: {
         type: 'value',
-        name: t('boundaryAccessAnalytics.charts.topTransitions.xAxis')
+        name: t('boundaryAccessAnalytics.tables.topTransitions.headers.count')
       },
       yAxis: {
         type: 'category',
         data: sortedData.map(d => `${d.from_boundary_name} → ${d.to_boundary_name}`),
         axisLabel: {
           fontSize: 11,
-          overflow: 'truncate',
+          //overflow: '',
           width: 170
         }
       },
@@ -1112,77 +1112,7 @@ export default function BoundaryAccessAnalytics() {
         {/* SECTION 1: Overview */}
         {activeTab === 'overview' && kpis && (
           <div className="animate-fade-in">
-            {/* KPIs */}
-            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
-                  {t('boundaryAccessAnalytics.kpis.visitsToday')}
-                </div>
-                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
-                  {kpis.total_visits_today.toLocaleString()}
-                </div>
-                {kpis.total_visits_yesterday > 0 && (
-                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono ${calculateChange(kpis.total_visits_today, kpis.total_visits_yesterday) >= 0
-                    ? 'bg-green-50 text-green-600'
-                    : 'bg-red-50 text-red-600'
-                    }`}>
-                    {calculateChange(kpis.total_visits_today, kpis.total_visits_yesterday) >= 0 ? (
-                      <ArrowUpIcon className="w-3 h-3" />
-                    ) : (
-                      <ArrowDownIcon className="w-3 h-3" />
-                    )}
-                    {Math.abs(calculateChange(kpis.total_visits_today, kpis.total_visits_yesterday)).toFixed(1)}%
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
-                  {t('boundaryAccessAnalytics.kpis.hoursToday')}
-                </div>
-                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
-                  {kpis.total_hours_today.toLocaleString()}
-                </div>
-                {kpis.total_hours_yesterday > 0 && (
-                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono ${calculateChange(kpis.total_hours_today, kpis.total_hours_yesterday) >= 0
-                    ? 'bg-green-50 text-green-600'
-                    : 'bg-red-50 text-red-600'
-                    }`}>
-                    {calculateChange(kpis.total_hours_today, kpis.total_hours_yesterday) >= 0 ? (
-                      <ArrowUpIcon className="w-3 h-3" />
-                    ) : (
-                      <ArrowDownIcon className="w-3 h-3" />
-                    )}
-                    {Math.abs(calculateChange(kpis.total_hours_today, kpis.total_hours_yesterday)).toFixed(1)}%
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
-                  {t('boundaryAccessAnalytics.kpis.activePeople')}
-                </div>
-                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
-                  {kpis.people_inside}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#FF6B35] transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                <div className="text-sm text-[#64748B] uppercase tracking-wider font-semibold mb-2">
-                  {t('boundaryAccessAnalytics.kpis.alertRate')}
-                </div>
-                <div className="text-4xl font-bold text-[#0F4C81] font-mono mb-2">
-                  {((kpis.alerts_today / kpis.total_visits_today) * 100).toFixed(1)}%
-                </div>
-              </div>
-            </div> */}
-
-
-
+          
             {/* KPIs Grid Principal */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
@@ -1510,8 +1440,7 @@ export default function BoundaryAccessAnalytics() {
                   />
               )}
             </div>
-
-            {/* ✅ Adicionar o componente de comparação */}
+            
             <WeekdayWeekendComparison
               data={weekdayWeekendData}
               loading={loading}
@@ -1527,7 +1456,7 @@ export default function BoundaryAccessAnalytics() {
 
 
             {/* Charts Grid com Ações */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 mt-6">
               {/* Top Boundaries Chart */}
               <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
                 {/* Header com Gradiente e Ações */}
@@ -1552,28 +1481,28 @@ export default function BoundaryAccessAnalytics() {
 
                   {/* Ações Rápidas */}
                   <div className="flex items-center gap-2">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
+                    {/* <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
                       <svg className="w-4 h-4 text-white group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                       </svg>
                       <span className="text-white text-xs font-semibold">Exportar</span>
-                    </button>
+                    </button> */}
 
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
+                    {/* <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
                       <svg className="w-4 h-4 text-white group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
                       <span className="text-white text-xs font-semibold">Atualizar</span>
-                    </button>
+                    </button> */}
 
                     <div className="flex-1"></div>
 
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    {/* <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                       <span className="text-white text-xs font-semibold uppercase tracking-wider">
                         Live
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
@@ -1647,30 +1576,30 @@ export default function BoundaryAccessAnalytics() {
 
                   {/* Ações Rápidas */}
                   <div className="flex items-center gap-2">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
+                    {/* <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
                       <svg className="w-4 h-4 text-white group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                       </svg>
                       <span className="text-white text-xs font-semibold">Exportar</span>
-                    </button>
+                    </button> */}
 
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
+                    {/* <button className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-200 group/btn">
                       <svg className="w-4 h-4 text-white group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
                       <span className="text-white text-xs font-semibold">Atualizar</span>
-                    </button>
+                    </button> */}
 
                     <div className="flex-1"></div>
 
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    {/* <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
                       <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                       </svg>
                       <span className="text-white text-xs font-semibold uppercase tracking-wider">
                         Turnos
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
@@ -1704,21 +1633,21 @@ export default function BoundaryAccessAnalytics() {
                         <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border-2 border-blue-200 hover:scale-105 transition-transform cursor-pointer group/legend">
                           <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 shadow-md group-hover/legend:scale-110 transition-transform"></div>
                           <div>
-                            <p className="text-sm font-bold text-blue-700">Manhã</p>
+                            <p className="text-sm font-bold text-blue-700">{t('boundaryAccessAnalytics.weekdayWeekendComparison.timePeriods.morning')}</p>
                             <p className="text-xs text-blue-600">06:00 - 14:00</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl border-2 border-amber-200 hover:scale-105 transition-transform cursor-pointer group/legend">
                           <div className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 shadow-md group-hover/legend:scale-110 transition-transform"></div>
                           <div>
-                            <p className="text-sm font-bold text-amber-700">Tarde</p>
+                            <p className="text-sm font-bold text-amber-700">{t('boundaryAccessAnalytics.weekdayWeekendComparison.timePeriods.afternoon')}</p>
                             <p className="text-xs text-amber-600">14:00 - 22:00</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-xl border-2 border-indigo-200 hover:scale-105 transition-transform cursor-pointer group/legend">
                           <div className="w-4 h-4 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 shadow-md group-hover/legend:scale-110 transition-transform"></div>
                           <div>
-                            <p className="text-sm font-bold text-indigo-700">Noite</p>
+                            <p className="text-sm font-bold text-indigo-700">{t('boundaryAccessAnalytics.weekdayWeekendComparison.timePeriods.night')}</p>
                             <p className="text-xs text-indigo-600">22:00 - 06:00</p>
                           </div>
                         </div>
@@ -2343,7 +2272,7 @@ export default function BoundaryAccessAnalytics() {
             )}
 
             {/* NOVO: Mapa de Calor */}
-            <div className={`bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden mb-6 transition-all duration-300`}>
+            <div className={`bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden mb-6 transition-all duration-300 mt-6`}>
               {/* Header Moderno */}
               <div className="bg-gradient-to-r from-[#0F4C81] to-[#1a5c9e] p-6">
                 <div className="flex items-center justify-between">

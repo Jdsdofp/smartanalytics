@@ -361,7 +361,7 @@ const BoundaryAnomaliesChart: React.FC<BoundaryAnomaliesChartProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden mt-6">
       {/* Header com gradiente */}
       <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white p-6">
         <h3 className="text-xl font-bold mb-4">

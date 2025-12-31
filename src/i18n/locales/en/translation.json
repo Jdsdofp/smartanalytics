@@ -1876,6 +1876,8 @@
         "title": "Heatmap – Access Density",
         "subtitle": "Geographical visualization of access intensity by boundary",
         "legend": "Intensity",
+        "legendModal": "Visit Intensity",
+        "subLegendModal": "Access density by boundary",
         "density": {
           "low": "Low",
           "medium": "Medium",
@@ -1887,6 +1889,30 @@
           "zoneActive": "Active Zones",
           "heatmap": "Access Heat Map",
           "legendModal": "The colored areas represent geographic fences (geofences) configured in the system."
+        },
+        "visitIntensityLegend": {
+          "items": {
+            "low": {
+              "label": "Low",
+              "range": "≤ 10 visits"
+            },
+            "medium": {
+              "label": "Medium",
+              "range": "11 - 20 visits"
+            },
+            "high": {
+              "label": "High",
+              "range": "21 - 50 visits"
+            },
+            "veryHigh": {
+              "label": "Very High",
+              "range": "51 - 100 visits"
+            },
+            "critical": {
+              "label": "Critical",
+              "range": "> 100 visits"
+            }
+          }
         }
       }
     },
@@ -2049,7 +2075,7 @@
       "updated": "Updated"
     }
     },
-      "boundaryAnomaliesChart": {
+    "boundaryAnomaliesChart": {
     "title": "Anomaly Detection",
     "statistics": {
       "totalAnomalies": "Total Anomalies",

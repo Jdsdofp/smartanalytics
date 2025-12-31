@@ -557,7 +557,7 @@ const BoundaryTrendsChart: React.FC<Props> = ({
   const showChart = !loading && data && data.length > 0;
 
   return (
-    <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden">
+    <div className="bg-white rounded-2xl border-2 border-[#E2E8F0] shadow-lg overflow-hidden mt-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] p-6">
         <div className="flex items-center justify-between">

@@ -127,13 +127,13 @@ const decodeColor = (encodedColor: string): string => {
 };
 
 // Componente do conteúdo do mapa (reutilizável em ambos os modos)
-const MapContent = ({ 
-  mapType, 
-  validBoundaries, 
-  validZones, 
-  center, 
-  zoom, 
-  getColor 
+const MapContent = ({
+  mapType,
+  validBoundaries,
+  validZones,
+  center,
+  zoom,
+  getColor
 }: {
   mapType: keyof typeof MAP_TYPES;
   validBoundaries: BoundaryHeatmapProps['boundaries'];
@@ -472,7 +472,7 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
         </button>
       </div>
 
-      <MapContent 
+      <MapContent
         mapType={mapType}
         validBoundaries={validBoundaries}
         validZones={validZones}
@@ -485,21 +485,19 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
 
   // Modal Fullscreen
   const fullscreenModal = createPortal(
-    <div 
-      className={`fixed inset-0 z-[99999] flex items-center justify-center transition-all duration-300 ${
-        isFullscreen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      }`}
+    <div
+      className={`fixed inset-0 z-[99999] flex items-center justify-center transition-all duration-300 ${isFullscreen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
     >
       {/* Overlay Escuro */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
         onClick={toggleFullscreen}
       />
 
       {/* Container do Modal */}
-      <div className={`relative w-full h-full max-w-[98vw] max-h-[98vh] m-4 bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 ${
-        isFullscreen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-      }`}>
+      <div className={`relative w-full h-full max-w-[98vw] max-h-[98vh] m-4 bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 ${isFullscreen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        }`}>
         {/* Header do Modal */}
         <div className="absolute top-0 left-0 right-0 z-[1001] bg-gradient-to-r from-[#0F4C81] to-[#1a5c9e] p-6 shadow-2xl">
           <div className="flex items-center justify-between">
@@ -583,18 +581,18 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
               </svg>
             </div>
             <div>
-              <p className="text-sm font-bold text-[#1A2332] uppercase tracking-wider">Intensidade de Visitas</p>
-              <p className="text-xs text-[#64748B]">Densidade de acessos por boundary</p>
+              <p className="text-sm font-bold text-[#1A2332] uppercase tracking-wider">{t('boundaryAccessAnalytics.maps.heatmap.legendModal')}</p>
+              <p className="text-xs text-[#64748B]">{t('boundaryAccessAnalytics.maps.heatmap.subLegendModal')}</p>
             </div>
           </div>
-          
+
           <div className="space-y-2.5">
             {[
-              { color: '#0F4C81', label: 'Baixa', range: '≤ 10 visitas' },
-              { color: '#10B981', label: 'Média', range: '11 - 20 visitas' },
-              { color: '#F59E0B', label: 'Alta', range: '21 - 50 visitas' },
-              { color: '#FF6B35', label: 'Muito Alta', range: '51 - 100 visitas' },
-              { color: '#EF4444', label: 'Crítica', range: '> 100 visitas' },
+              { color: '#0F4C81', label: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.low.label'), range: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.low.range') },
+              { color: '#10B981', label: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.medium.label'), range: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.medium.range') },
+              { color: '#F59E0B', label: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.high.label'), range: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.high.range') },
+              { color: '#FF6B35', label: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.veryHigh.label'), range: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.veryHigh.range') },
+              { color: '#EF4444', label: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.critical.label'), range: t('boundaryAccessAnalytics.maps.heatmap.visitIntensityLegend.items.critical.range') },
             ].map((item, idx) => (
               <div key={idx} className="flex items-center gap-3 group hover:bg-gray-50 p-2.5 rounded-xl transition-colors cursor-pointer">
                 <div className="w-7 h-7 rounded-xl shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all" style={{ backgroundColor: item.color }}></div>
@@ -622,7 +620,7 @@ export default function BoundaryHeatmap({ boundaries, zones = [], center, zoom =
 
         {/* Mapa */}
         <div className="w-full h-full" style={{ paddingTop: '96px' }}>
-          <MapContent 
+          <MapContent
             mapType={mapType}
             validBoundaries={validBoundaries}
             validZones={validZones}

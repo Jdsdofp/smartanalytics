@@ -1910,6 +1910,8 @@
         "title": "Mapa de Calor - Densidade de Acessos",
         "subtitle": "Visualização geográfica da intensidade de acessos por boundary",
         "legend": "Intensidade",
+        "legendModal": "Intensidade de visitas",
+        "subLegendModal": "Densidade de acessos por boundary",
         "density": {
           "low": "Baixo",
           "medium": "Médio",
@@ -1921,6 +1923,30 @@
           "zoneActive": "Zonas Ativas",
           "heatmap": "Mapa de Calor de Acessos",
           "legendModal": "As áreas coloridas representam cercas geográficas (geofences) configuradas no sistema"
+        },
+        "visitIntensityLegend": {
+          "items": {
+            "low": {
+              "label": "Baixa",
+              "range": "≤ 10 visitas"
+            },
+            "medium": {
+              "label": "Média",
+              "range": "11 - 20 visitas"
+            },
+            "high": {
+              "label": "Alta",
+              "range": "21 - 50 visitas"
+            },
+            "veryHigh": {
+              "label": "Muito Alta",
+              "range": "51 - 100 visitas"
+            },
+            "critical": {
+              "label": "Crítica",
+              "range": "> 100 visitas"
+            }
+          }
         }
       }
     },
