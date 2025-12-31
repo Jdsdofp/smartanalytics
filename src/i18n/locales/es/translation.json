@@ -1938,6 +1938,8 @@
     "weekdayWeekendComparison": {
     "title": "Análisis: Día Laborable vs Fin de Semana",
     "subtitle": "Comparativo de patrones de visitación y comportamiento",
+    "distributionBasedOn": "Distribución basada en",
+    "records": "registros",
     "dayTypes": {
       "weekday": "Día Laborable",
       "weekend": "Fin de Semana"
@@ -2130,7 +2132,8 @@
     },
     "tooltips": {
       "zScoreExplanation": "Z-Score > 2: anomalía significativa | Z-Score > 3: anomalía crítica",
-      "lastUpdated": "Última actualización"
+      "lastUpdated": "Última actualización",
+      "now": "Ahora"
     },
     "states": {
       "loading": "Cargando anomalías...",

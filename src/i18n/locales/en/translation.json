@@ -1938,6 +1938,8 @@
     "weekdayWeekendComparison": {
     "title": "Analysis: Weekday vs Weekend",
     "subtitle": "Comparison of visitation patterns and behavior",
+    "distributionBasedOn": "Distribution based on",
+    "records": "records",
     "dayTypes": {
       "weekday": "Weekday",
       "weekend": "Weekend"
@@ -2130,7 +2132,8 @@
     },
     "tooltips": {
       "zScoreExplanation": "Z-Score > 2: significant anomaly | Z-Score > 3: critical anomaly",
-      "lastUpdated": "Last updated"
+      "lastUpdated": "Last updated",
+      "now": "Now"
     },
     "states": {
       "loading": "Loading anomalies...",

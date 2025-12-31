@@ -1972,6 +1972,8 @@
     "weekdayWeekendComparison": {
       "title": "Análise: Dia Útil vs Final de Semana",
       "subtitle": "Comparativo de padrões de visitação e comportamento",
+      "distributionBasedOn": "Distribuição baseada em",
+      "records": "registros",
       "dayTypes": {
         "weekday": "Dia Útil",
         "weekend": "Final de Semana"
@@ -2164,7 +2166,8 @@
     },
     "tooltips": {
       "zScoreExplanation": "Z-Score > 2: anomalia significativa | Z-Score > 3: anomalia crítica",
-      "lastUpdated": "Última atualização"
+      "lastUpdated": "Última atualização",
+      "now": "Agora"
     },
     "states": {
       "loading": "Carregando anomalias...",

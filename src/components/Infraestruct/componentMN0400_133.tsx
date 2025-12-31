@@ -1322,7 +1322,7 @@ export default function BoundaryAccessAnalytics() {
                         {kpis.active_boundaries_today}
                       </div>
                       <div className="text-xs text-[#64748B]">
-                        de {kpis.total_boundaries}
+                        {t('boundaryAccessAnalytics.tables.realTimeStatus.results.of')} {kpis.total_boundaries}
                       </div>
                     </div>
                   </div>
@@ -1543,7 +1543,7 @@ export default function BoundaryAccessAnalytics() {
                         </div>
 
                         <div className="text-xs text-[#64748B]">
-                          {t('boundaryAccessAnalytics.boundaryAnomaliesChart.tooltips.lastUpdated')} <span className="font-semibold text-[#1A2332]">Agora</span>
+                          {t('boundaryAccessAnalytics.boundaryAnomaliesChart.tooltips.lastUpdated')} <span className="font-semibold text-[#1A2332]">{t('boundaryAccessAnalytics.boundaryAnomaliesChart.tooltips.now')}</span>
                         </div>
                       </div>
                     </div>
@@ -1655,7 +1655,7 @@ export default function BoundaryAccessAnalytics() {
 
                       {/* Info Footer */}
                       <div className="mt-4 text-center text-xs text-[#64748B]">
-                        Distribuição baseada em <span className="font-semibold text-[#1A2332]">{/* total de registros aqui */} registros</span>
+                        {t('boundaryAccessAnalytics.weekdayWeekendComparison.distributionBasedOn')} <span className="font-semibold text-[#1A2332]">{/* total de registros aqui */} {t('boundaryAccessAnalytics.weekdayWeekendComparison.records')}</span>
                       </div>
                     </div>
                   )}
