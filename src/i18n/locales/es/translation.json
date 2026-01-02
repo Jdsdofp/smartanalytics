@@ -2166,5 +2166,43 @@
         "arrivals": "Entradas:"
       }
     }
+  },
+    "personSensorPopup": {
+    "worker": "Trabajador",
+    "loading": "Cargando...",
+    "battery": "Batería",
+    "critical": "CRÍTICA",
+    "charging": "Cargando",
+    "movement": "Movimiento",
+    "moving": "En Movimiento",
+    "stopped": "Detenido",
+    "ago": "hace",
+    "minutes": "min",
+    "hours": "h",
+    "temperature": "Temperatura",
+    "health": "Salud",
+    "excellent": "Excelente",
+    "good": "Bueno",
+    "regular": "Regular",
+    "critical_status": "Crítico",
+    "at_risk": "En Riesgo",
+    "active_alert": "Alerta Activa",
+    "priority": "Prioridad",
+    "organizational_info": "Información Organizacional",
+    "category": "Categoría",
+    "role": "Función",
+    "department": "Departamento",
+    "group": "Grupo",
+    "status_location": "Estado y Ubicación",
+    "status": "Estado",
+    "zone": "Zona",
+    "area": "Área",
+    "site": "Sitio",
+    "sensor_metrics": "Métricas del Sensor",
+    "last_update": "Última Actualización",
+    "no_data": "Sin datos",
+    "model": "Modelo",
+    "tracking": "Seguimiento",
+    "details": "Detalles"
   }
 }

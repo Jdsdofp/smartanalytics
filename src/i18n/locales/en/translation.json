@@ -2166,5 +2166,43 @@
         "arrivals": "Arrivals:"
       }
     }
+  },
+    "personSensorPopup": {
+    "worker": "Worker",
+    "loading": "Loading...",
+    "battery": "Battery",
+    "critical": "CRITICAL",
+    "charging": "Charging",
+    "movement": "Movement",
+    "moving": "Moving",
+    "stopped": "Stopped",
+    "ago": "ago",
+    "minutes": "min",
+    "hours": "h",
+    "temperature": "Temperature",
+    "health": "Health",
+    "excellent": "Excellent",
+    "good": "Good",
+    "regular": "Regular",
+    "critical_status": "Critical",
+    "at_risk": "At Risk",
+    "active_alert": "Active Alert",
+    "priority": "Priority",
+    "organizational_info": "Organizational Information",
+    "category": "Category",
+    "role": "Role",
+    "department": "Department",
+    "group": "Group",
+    "status_location": "Status and Location",
+    "status": "Status",
+    "zone": "Zone",
+    "area": "Area",
+    "site": "Site",
+    "sensor_metrics": "Sensor Metrics",
+    "last_update": "Last Update",
+    "no_data": "No data",
+    "model": "Model",
+    "tracking": "Tracking",
+    "details": "Details"
   }
 }
