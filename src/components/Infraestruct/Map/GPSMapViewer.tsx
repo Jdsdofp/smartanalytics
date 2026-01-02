@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { t } from 'i18next';
 import { useCompany } from '../../../hooks/useCompany';
 import PersonSensorMapPopup from '../Components/PersonSensorPopup';
+import MapTrackingModal from './MapTrackingModal';
 
 // =====================================
 // 👷 ÍCONES PERSONALIZADOS PARA TRABALHADORES
@@ -458,6 +459,29 @@ const GPSMapViewer = () => {
   const [sensorDataCache, setSensorDataCache] = useState<Record<string, any>>({});
   //@ts-ignore
   const [loadingSensorData, setLoadingSensorData] = useState(false);
+
+    // 🆕 ESTADOS PARA O MODAL DE TRACKING
+  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
+  const [trackingDevice, setTrackingDevice] = useState<{
+    code: string;
+    name?: string;
+    photoUrl?: string;
+  } | null>(null);
+
+
+    // 🆕 FUNÇÃO PARA ABRIR O MODAL DE TRACKING
+  const handleOpenTracking = useCallback((point: GPSPoint) => {
+    console.log('🗺️ Abrindo modal de tracking para:', point.dev_eui);
+    
+    setTrackingDevice({
+      code: point.dev_eui,
+      name: point.Item_Name || 'Trabalhador',
+      photoUrl: point.Image_hash 
+        ? `https://smartmachine.smartxhub.cloud/imagem/${point.Image_hash}` 
+        : undefined
+    });
+    setTrackingModalOpen(true);
+  }, []);
 
 
 
@@ -1661,17 +1685,10 @@ const GPSMapViewer = () => {
                             setSelectedPoint(point); // ⚠️ Importante: usar 'point' e não 'sensor'
                             setIsModalOpen(true);
                           }}
-                          onTracking={(sensor) => {
-                            // 🎯 IMPLEMENTAR FUNÇÃO DE TRACKING AQUI
-                            console.log('🗺️ Tracking ativado para:', sensor.person_name);
-                            // TODO: Implementar lógica de tracking
-                            // Exemplo: filtrar apenas este dispositivo e ativar o player
-                            setFilters(prev => ({
-                              ...prev,
-                              dev_eui: [point.dev_eui]
-                            }));
-                            fetchGPSData(1);
-                          }}
+                          onTracking={() => {
+                      // 🆕 CHAMAR A FUNÇÃO DE TRACKING
+                      handleOpenTracking(point);
+                    }}
                         />
                       </Marker>
                     );
@@ -2337,6 +2354,17 @@ const GPSMapViewer = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 🆕 MODAL DE TRACKING */}
+      {trackingModalOpen && trackingDevice && (
+        <MapTrackingModal
+          isOpen={trackingModalOpen}
+          onClose={() => setTrackingModalOpen(false)}
+          deviceCode={trackingDevice.code}
+          deviceName={trackingDevice.name}
+          photoUrl={trackingDevice.photoUrl}
+        />
       )}
     </>
   );

@@ -342,6 +342,8 @@ const AlertBadge: React.FC<{ has_alert?: boolean; priority?: number; status?: st
   status 
 }) => {
   const { t } = useTranslation();
+
+
   
   if (!has_alert) return null;
 
@@ -379,6 +381,8 @@ export const ImprovedPersonSensorPopup: React.FC<PersonSensorMapPopupProps> = ({
   const photoUrl = data.Image_hash
     ? `https://smartmachine.smartxhub.cloud/imagem/${data.Image_hash}`
     : undefined;
+
+
 
   return (
     <Popup maxWidth={400} minWidth={350} className="custom-sensor-popup">
@@ -639,6 +643,7 @@ export const ImprovedPersonSensorPopup: React.FC<PersonSensorMapPopupProps> = ({
             <span>{t('personSensorPopup.details')}</span>
           </button>
         </div>
+
       </div>
     </Popup>
   );
