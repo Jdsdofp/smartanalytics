@@ -2204,5 +2204,129 @@
     "model": "Model",
     "tracking": "Tracking",
     "details": "Details"
+  },
+    "mapTrackingModal": {
+    "header": {
+      "close": "Close",
+      "refresh": "Refresh",
+      "period": "Period",
+      "apply": "Apply",
+      "custom": "Custom",
+      "last12h": "Last 12h",
+      "last24h": "Last 24h",
+      "last7d": "Last 7 days",
+      "dateRange": "Date Range",
+      "from": "From",
+      "to": "To"
+    },
+    "controls": {
+      "previous": "Previous",
+      "play": "Play",
+      "pause": "Pause",
+      "stop": "Stop",
+      "next": "Next",
+      "playbackSpeed": "Speed",
+      "turtle": "🐢 0.5x",
+      "walk": "🚶 1x",
+      "run": "🏃 2x",
+      "rocket": "🚀 5x",
+      "lightning": "⚡ 10x",
+      "currentPosition": "Current Position",
+      "points": "Points",
+      "accuracy": "Accuracy",
+      "events": "Events"
+    },
+    "legend": {
+      "emergency": "🚨 Emergency",
+      "alert": "⚠️ Alert",
+      "geofence": "🚧 Geofence",
+      "movement": "🏃 Movement",
+      "stopped": "⏸️ Stopped"
+    },
+    "loading": {
+      "loadingRoute": "Loading GPS route...",
+      "preparingMap": "Preparing map...",
+      "noRouteFound": "No route found",
+      "noValidGPSData": "No valid GPS data for the selected period",
+      "errorLoadingRoute": "Error loading route",
+      "tryAgain": "Try Again",
+      "checkAnotherPeriod": "Try selecting another period or check if the device sent GPS data"
+    },
+    "popups": {
+      "currentPosition": {
+        "title": "📍 Current Position",
+        "timestamp": "Date/Time",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "gpsAccuracy": "GPS Accuracy",
+        "progress": "Progress",
+        "elapsedTime": "Elapsed Time",
+        "points": "points",
+        "minutes": "minutes",
+        "dragToNavigate": "Drag to navigate"
+      },
+      "routePoint": {
+        "start": "🟢 Route Start",
+        "end": "🔴 Route End",
+        "point": "📍 Point",
+        "location": "Location",
+        "movement": "Movement",
+        "meters": "m",
+        "alertStatus": "Alert Status:",
+        "fallDetected": "🚨 Fall Detected",
+        "panicButton": "🔴 Panic Button Activated",
+        "tamperDetected": "⚠️ Tampering Detected",
+        "alarm1Active": "🔔 Alarm 1 Active",
+        "alarm2Active": "🔔 Alarm 2 Active",
+        "geofenceCrossed": "🚧 Geofence Crossed"
+      }
+    },
+    "compass": {
+      "title": "🧭 Compass",
+      "clickToNorth": "Click to orient to North",
+      "north": "N",
+      "south": "S",
+      "east": "E",
+      "west": "W"
+    },
+    "zoomControls": {
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "autoZoomOn": "Enable Auto Zoom",
+      "autoZoomOff": "Disable Auto Zoom",
+      "mapType": "Map Type",
+      "mapTypes": {
+        "streets": "Streets",
+        "satellite": "Satellite",
+        "terrain": "Terrain",
+        "dark": "Dark"
+      }
+    },
+    "mapTypes": {
+      "streets": "Streets",
+      "satellite": "Satellite",
+      "terrain": "Terrain",
+      "dark": "Dark"
+    },
+    "autoZoom": {
+      "enabled": "A",
+      "disabled": "Auto Zoom disabled"
+    },
+    "general": {
+      "worker": "Worker",
+      "points": "Points",
+      "meters": "meters",
+      "events": "Events",
+      "start": "Start",
+      "end": "End",
+      "progress": "Progress",
+      "time": "Time",
+      "date": "Date",
+      "loading": "Loading...",
+      "error": "Error",
+      "success": "Success",
+      "warning": "Warning",
+      "info": "Info"
+    }
   }
 }

@@ -2204,5 +2204,129 @@
     "model": "Modelo",
     "tracking": "Seguimiento",
     "details": "Detalles"
+  },
+    "mapTrackingModal": {
+    "header": {
+      "close": "Cerrar",
+      "refresh": "Actualizar",
+      "period": "Período",
+      "apply": "Aplicar",
+      "custom": "Personalizado",
+      "last12h": "Últimas 12h",
+      "last24h": "Últimas 24h",
+      "last7d": "Últimos 7 días",
+      "dateRange": "Rango de Fechas",
+      "from": "De",
+      "to": "Hasta"
+    },
+    "controls": {
+      "previous": "Anterior",
+      "play": "Reproducir",
+      "pause": "Pausar",
+      "stop": "Detener",
+      "next": "Siguiente",
+      "playbackSpeed": "Velocidad",
+      "turtle": "🐢 0.5x",
+      "walk": "🚶 1x",
+      "run": "🏃 2x",
+      "rocket": "🚀 5x",
+      "lightning": "⚡ 10x",
+      "currentPosition": "Posición Actual",
+      "points": "Puntos",
+      "accuracy": "Precisión",
+      "events": "Eventos"
+    },
+    "legend": {
+      "emergency": "🚨 Emergencia",
+      "alert": "⚠️ Alerta",
+      "geofence": "🚧 Geofence",
+      "movement": "🏃 Movimiento",
+      "stopped": "⏸️ Detenido"
+    },
+    "loading": {
+      "loadingRoute": "Cargando ruta GPS...",
+      "preparingMap": "Preparando mapa...",
+      "noRouteFound": "No se encontró ruta",
+      "noValidGPSData": "No hay datos GPS válidos para el período seleccionado",
+      "errorLoadingRoute": "Error al cargar la ruta",
+      "tryAgain": "Intentar Nuevamente",
+      "checkAnotherPeriod": "Intente seleccionar otro período o verifique si el dispositivo envió datos GPS"
+    },
+    "popups": {
+      "currentPosition": {
+        "title": "📍 Posición Actual",
+        "timestamp": "Fecha/Hora",
+        "latitude": "Latitud",
+        "longitude": "Longitud",
+        "gpsAccuracy": "Precisión GPS",
+        "progress": "Progreso",
+        "elapsedTime": "Tiempo Transcurrido",
+        "points": "puntos",
+        "minutes": "minutos",
+        "dragToNavigate": "Arrastrar para navegar"
+      },
+      "routePoint": {
+        "start": "🟢 Inicio de Ruta",
+        "end": "🔴 Fin de Ruta",
+        "point": "📍 Punto",
+        "location": "Ubicación",
+        "movement": "Movimiento",
+        "meters": "m",
+        "alertStatus": "Estado de Alertas:",
+        "fallDetected": "🚨 Caída Detectada",
+        "panicButton": "🔴 Botón de Pánico Activado",
+        "tamperDetected": "⚠️ Manipulación Detectada",
+        "alarm1Active": "🔔 Alarma 1 Activa",
+        "alarm2Active": "🔔 Alarma 2 Activa",
+        "geofenceCrossed": "🚧 Geofence Cruzado"
+      }
+    },
+    "compass": {
+      "title": "🧭 Brújula",
+      "clickToNorth": "Haz clic para orientar al Norte",
+      "north": "N",
+      "south": "S",
+      "east": "E",
+      "west": "O"
+    },
+    "zoomControls": {
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "autoZoomOn": "Activar Zoom Automático",
+      "autoZoomOff": "Desactivar Zoom Automático",
+      "mapType": "Tipo de Mapa",
+      "mapTypes": {
+        "streets": "Calles",
+        "satellite": "Satélite",
+        "terrain": "Terreno",
+        "dark": "Oscuro"
+      }
+    },
+    "mapTypes": {
+      "streets": "Calles",
+      "satellite": "Satélite",
+      "terrain": "Terreno",
+      "dark": "Oscuro"
+    },
+    "autoZoom": {
+      "enabled": "A",
+      "disabled": "Zoom automático desactivado"
+    },
+    "general": {
+      "worker": "Trabajador",
+      "points": "Puntos",
+      "meters": "metros",
+      "events": "Eventos",
+      "start": "Inicio",
+      "end": "Fin",
+      "progress": "Progreso",
+      "time": "Tiempo",
+      "date": "Fecha",
+      "loading": "Cargando...",
+      "error": "Error",
+      "success": "Éxito",
+      "warning": "Advertencia",
+      "info": "Información"
+    }
   }
 }
