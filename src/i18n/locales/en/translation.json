@@ -2167,7 +2167,61 @@
         "departures": "Departures:",
         "arrivals": "Arrivals:"
       }
+    },
+    "enhancedHeatmap": {
+  "title": "Enhanced Activity Heatmap",
+  "subtitle": "Visual analysis of access patterns",
+  "loading": "Loading heatmap...",
+  "purpose": {
+    "title": "📌 Purpose of this Analysis",
+    "description": "This heatmap visualizes access patterns across days and hours, helping identify peak times, usage trends, and potential anomalies. The color intensity represents activity levels, enabling data-driven decisions for resource optimization and security monitoring.",
+    "goals": {
+      "patterns": "Identify patterns",
+      "peaks": "Find peak times",
+      "optimize": "Optimize resources",
+      "anomalies": "Detect anomalies"
     }
+  },
+  "daysFullName": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+  "titles": {
+    "duration": "Average Duration per Access (minutes)",
+    "frequency": "Access Frequency",
+    "intensity": "Activity Intensity (Duration × Frequency)"
+  },
+  "filters": {
+    "viewMode": "View Mode",
+    "duration": "Duration",
+    "frequency": "Frequency",
+    "intensity": "Intensity",
+    "timePeriod": "Time Period",
+    "all": "All",
+    "business": "Business Hours",
+    "afterHours": "After Hours",
+    "weekend": "Weekend",
+    "clearAll": "Clear All Filters"
+  },
+  "stats": {
+    "totalEntries": "Total Entries",
+    "avgDuration": "Avg Duration",
+    "peakTime": "Peak Time",
+    "distribution": "Distribution"
+  },
+  "tooltip": {
+    "entries": "Total Entries",
+    "avgDuration": "Avg Duration",
+    "intensity": "Intensity"
+  },
+  "legend": {
+    "high": "High",
+    "low": "Low",
+    "durationMode": "Duration Mode",
+    "durationDesc": "Shows average time spent per access",
+    "frequencyMode": "Frequency Mode",
+    "frequencyDesc": "Shows number of accesses",
+    "intensityMode": "Intensity Mode",
+    "intensityDesc": "Combines duration and frequency"
+  }
+}
   },
     "personSensorPopup": {
     "worker": "Worker",

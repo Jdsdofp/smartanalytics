@@ -1940,212 +1940,212 @@
       }
     },
     "weekdayWeekendComparison": {
-    "title": "Análisis: Día Laborable vs Fin de Semana",
-    "subtitle": "Comparativo de patrones de visitación y comportamiento",
-    "distributionBasedOn": "Distribución basada en",
-    "records": "registros",
-    "dayTypes": {
-      "weekday": "Día Laborable",
-      "weekend": "Fin de Semana"
-    },
-    "chartTypes": {
-      "visits": "Visitas",
-      "duration": "Duración",
-      "alerts": "Alertas",
-      "period": "Período"
-    },
-    "viewModes": {
-      "bar": "Barras",
-      "radar": "Radar",
-      "heatmap": "Mapa de Calor"
-    },
-    "metrics": {
-      "visits": "Total de Visitas",
-      "duration": "Duración Promedio (min)",
-      "period": "Período Tarde (%)",
-      "alerts": "Tasa de Alertas (%)"
-    },
-    "timePeriods": {
-      "morning": "Mañana",
-      "afternoon": "Tarde",
-      "night": "Noche"
-    },
-    "statsCards": {
-      "weekdayVisits": "DÍA LABORABLE - VISITAS",
-      "weekendVisits": "FIN DE SEMANA - VISITAS",
-      "weekdayAvgDuration": "DÍA LABORABLE - DURACIÓN PROMEDIO",
-      "weekendAvgDuration": "FIN DE SEMANA - DURACIÓN PROMEDIO",
-      "visitsLabel": "visitas"
-    },
-    "radarChart": {
-      "title": "Patrones: {{boundary}}",
-      "indicators": {
-        "morning": "Mañana (%)",
-        "afternoon": "Tarde (%)",
-        "night": "Noche (%)",
-        "shortVisits": "Visitas Cortas (%)",
-        "mediumVisits": "Visitas Medias (%)",
-        "alertRate": "Tasa Alertas (%)"
-      }
-    },
-    "heatmapChart": {
-      "periods": {
-        "morningWeekday": "Mañana\n(Laborable)",
-        "afternoonWeekday": "Tarde\n(Laborable)",
-        "nightWeekday": "Noche\n(Laborable)",
-        "morningWeekend": "Mañana\n(Fin Semana)",
-        "afternoonWeekend": "Tarde\n(Fin Semana)",
-        "nightWeekend": "Noche\n(Fin Semana)"
+      "title": "Análisis: Día Laborable vs Fin de Semana",
+      "subtitle": "Comparativo de patrones de visitación y comportamiento",
+      "distributionBasedOn": "Distribución basada en",
+      "records": "registros",
+      "dayTypes": {
+        "weekday": "Día Laborable",
+        "weekend": "Fin de Semana"
       },
-      "seriesName": "Visitas (%)",
-      "visualMap": {
-        "high": "Alto",
-        "low": "Bajo"
-      }
-    },
-    "tooltips": {
-      "hoverForDetails": "Pase el mouse sobre los elementos para más detalles"
-    },
-    "states": {
-      "loading": "Cargando análisis comparativo...",
-      "noData": {
-        "title": "Sin datos disponibles",
-        "description": "No hay datos suficientes para análisis comparativo"
-      }
-    },
-    "format": {
-      "visits": {
-        "short": "{{value}}",
-        "long": "{{value}} visitas"
+      "chartTypes": {
+        "visits": "Visitas",
+        "duration": "Duración",
+        "alerts": "Alertas",
+        "period": "Período"
       },
-      "duration": {
-        "short": "{{value}}m",
-        "long": "{{value}} min"
+      "viewModes": {
+        "bar": "Barras",
+        "radar": "Radar",
+        "heatmap": "Mapa de Calor"
       },
-      "percentage": "{{value}}%",
-      "updatedAt": "Actualizado: {{date}}"
-    },
-    "legend": {
-      "weekday": "Día Laborable",
-      "weekend": "Fin de Semana"
-    },
-    "comparison": "Comparación",
-    "emptyState": "Sin datos disponibles para análisis"
+      "metrics": {
+        "visits": "Total de Visitas",
+        "duration": "Duración Promedio (min)",
+        "period": "Período Tarde (%)",
+        "alerts": "Tasa de Alertas (%)"
+      },
+      "timePeriods": {
+        "morning": "Mañana",
+        "afternoon": "Tarde",
+        "night": "Noche"
+      },
+      "statsCards": {
+        "weekdayVisits": "DÍA LABORABLE - VISITAS",
+        "weekendVisits": "FIN DE SEMANA - VISITAS",
+        "weekdayAvgDuration": "DÍA LABORABLE - DURACIÓN PROMEDIO",
+        "weekendAvgDuration": "FIN DE SEMANA - DURACIÓN PROMEDIO",
+        "visitsLabel": "visitas"
+      },
+      "radarChart": {
+        "title": "Patrones: {{boundary}}",
+        "indicators": {
+          "morning": "Mañana (%)",
+          "afternoon": "Tarde (%)",
+          "night": "Noche (%)",
+          "shortVisits": "Visitas Cortas (%)",
+          "mediumVisits": "Visitas Medias (%)",
+          "alertRate": "Tasa Alertas (%)"
+        }
+      },
+      "heatmapChart": {
+        "periods": {
+          "morningWeekday": "Mañana\n(Laborable)",
+          "afternoonWeekday": "Tarde\n(Laborable)",
+          "nightWeekday": "Noche\n(Laborable)",
+          "morningWeekend": "Mañana\n(Fin Semana)",
+          "afternoonWeekend": "Tarde\n(Fin Semana)",
+          "nightWeekend": "Noche\n(Fin Semana)"
+        },
+        "seriesName": "Visitas (%)",
+        "visualMap": {
+          "high": "Alto",
+          "low": "Bajo"
+        }
+      },
+      "tooltips": {
+        "hoverForDetails": "Pase el mouse sobre los elementos para más detalles"
+      },
+      "states": {
+        "loading": "Cargando análisis comparativo...",
+        "noData": {
+          "title": "Sin datos disponibles",
+          "description": "No hay datos suficientes para análisis comparativo"
+        }
+      },
+      "format": {
+        "visits": {
+          "short": "{{value}}",
+          "long": "{{value}} visitas"
+        },
+        "duration": {
+          "short": "{{value}}m",
+          "long": "{{value}} min"
+        },
+        "percentage": "{{value}}%",
+        "updatedAt": "Actualizado: {{date}}"
+      },
+      "legend": {
+        "weekday": "Día Laborable",
+        "weekend": "Fin de Semana"
+      },
+      "comparison": "Comparación",
+      "emptyState": "Sin datos disponibles para análisis"
     },
     "boundaryTrendsChart": {
-    "title": "Análisis de Tendencias por Perímetro",
-    "subtitle": "Evolución temporal y tasa de crecimiento",
-    "chartTypes": {
-      "line": "Línea",
-      "area": "Área",
-      "bar": "Barras",
-      "change": "Variación %"
-    },
-    "metrics": {
-      "visits": "Visitas",
-      "duration": "Duración",
-      "unique_items": "Elementos Únicos"
-    },
-    "labels": {
-      "totalVisits": "Total Visitas",
-      "avgGrowth": "Crecimiento Promedio",
-      "visits": "Total de Visitas",
-      "duration": "Duración Promedio (min)",
-      "unique_items": "Elementos Únicos",
-      "variation": "Variación (%)"
-    },
-    "buttons": {
-      "all": "Todos",
-      "toggleAll": "Mostrar Todos"
-    },
-    "tooltips": {
-      "chartHelp": "Haga clic en las leyendas para mostrar/ocultar perímetros",
-      "variationHelp": "Variación porcentual comparada con el período anterior"
-    },
-    "states": {
-      "loading": "Cargando tendencias...",
-      "noData": {
-        "title": "Sin datos disponibles",
-        "description": "No hay datos de tendencias para mostrar"
+      "title": "Análisis de Tendencias por Perímetro",
+      "subtitle": "Evolución temporal y tasa de crecimiento",
+      "chartTypes": {
+        "line": "Línea",
+        "area": "Área",
+        "bar": "Barras",
+        "change": "Variación %"
+      },
+      "metrics": {
+        "visits": "Visitas",
+        "duration": "Duración",
+        "unique_items": "Elementos Únicos"
+      },
+      "labels": {
+        "totalVisits": "Total Visitas",
+        "avgGrowth": "Crecimiento Promedio",
+        "visits": "Total de Visitas",
+        "duration": "Duración Promedio (min)",
+        "unique_items": "Elementos Únicos",
+        "variation": "Variación (%)"
+      },
+      "buttons": {
+        "all": "Todos",
+        "toggleAll": "Mostrar Todos"
+      },
+      "tooltips": {
+        "chartHelp": "Haga clic en las leyendas para mostrar/ocultar perímetros",
+        "variationHelp": "Variación porcentual comparada con el período anterior"
+      },
+      "states": {
+        "loading": "Cargando tendencias...",
+        "noData": {
+          "title": "Sin datos disponibles",
+          "description": "No hay datos de tendencias para mostrar"
+        }
+      },
+      "format": {
+        "dateRange": "Últimos 30 días",
+        "updated": "Actualizado",
+        "growthPositive": "+{{value}}%",
+        "growthNegative": "{{value}}%",
+        "percentage": "{{value}}%"
+      },
+      "footer": {
+        "dateRange": "Últimos 30 días",
+        "updated": "Actualizado"
       }
-    },
-    "format": {
-      "dateRange": "Últimos 30 días",
-      "updated": "Actualizado",
-      "growthPositive": "+{{value}}%",
-      "growthNegative": "{{value}}%",
-      "percentage": "{{value}}%"
-    },
-    "footer": {
-      "dateRange": "Últimos 30 días",
-      "updated": "Actualizado"
-    }
     },
     "boundaryAnomaliesChart": {
-    "title": "Detección de Anomalías",
-    "statistics": {
-      "totalAnomalies": "Total de Anomalías",
-      "avgZScore": "Z-Score Promedio",
-      "criticalAnomalies": "Anomalías Críticas"
-    },
-    "chartTypes": {
-      "scatter": "Scatter Plot",
-      "heatmap": "Mapa de Calor",
-      "table": "Tabla Detallada"
-    },
-    "filters": {
-      "type": "Tipo",
-      "all": "Todas",
-      "visits": "Visitas",
-      "duration": "Duración",
-      "alerts": "Alertas",
-      "boundaries": "Perímetros",
-      "specific": "Seleccionar Específicos",
-      "showAll": "Mostrar Todos"
-    },
-    "anomalyTypes": {
-      "VISITS_ANOMALY": "Visitas",
-      "DURATION_ANOMALY": "Duración",
-      "ALERT_ANOMALY": "Alertas"
-    },
-    "table": {
-      "headers": {
-        "date": "Fecha",
-        "boundary": "Perímetro",
-        "type": "Tipo",
-        "visits": "Visitas",
-        "zScore": "Z-Score",
-        "avgDuration": "Duración Promedio",
-        "severity": "Severidad"
+      "title": "Detección de Anomalías",
+      "statistics": {
+        "totalAnomalies": "Total de Anomalías",
+        "avgZScore": "Z-Score Promedio",
+        "criticalAnomalies": "Anomalías Críticas"
       },
-      "expected": "esp",
-      "minutes": "m",
-      "showing": "Mostrando",
-      "to": "a",
-      "of": "de",
-      "anomalies": "anomalías"
-    },
-    "pagination": {
-      "previous": "Anterior",
-      "next": "Siguiente"
-    },
-    "severity": {
-      "critical": "Crítico",
-      "high": "Alto",
-      "moderate": "Moderado"
-    },
-    "tooltips": {
-      "zScoreExplanation": "Z-Score > 2: anomalía significativa | Z-Score > 3: anomalía crítica",
-      "lastUpdated": "Última actualización",
-      "now": "Ahora"
-    },
-    "states": {
-      "loading": "Cargando anomalías...",
-      "noData": {
-        "title": "No se detectaron anomalías",
-        "description": "No se encontraron anomalías en los datos analizados"
+      "chartTypes": {
+        "scatter": "Scatter Plot",
+        "heatmap": "Mapa de Calor",
+        "table": "Tabla Detallada"
+      },
+      "filters": {
+        "type": "Tipo",
+        "all": "Todas",
+        "visits": "Visitas",
+        "duration": "Duración",
+        "alerts": "Alertas",
+        "boundaries": "Perímetros",
+        "specific": "Seleccionar Específicos",
+        "showAll": "Mostrar Todos"
+      },
+      "anomalyTypes": {
+        "VISITS_ANOMALY": "Visitas",
+        "DURATION_ANOMALY": "Duración",
+        "ALERT_ANOMALY": "Alertas"
+      },
+      "table": {
+        "headers": {
+          "date": "Fecha",
+          "boundary": "Perímetro",
+          "type": "Tipo",
+          "visits": "Visitas",
+          "zScore": "Z-Score",
+          "avgDuration": "Duración Promedio",
+          "severity": "Severidad"
+        },
+        "expected": "esp",
+        "minutes": "m",
+        "showing": "Mostrando",
+        "to": "a",
+        "of": "de",
+        "anomalies": "anomalías"
+      },
+      "pagination": {
+        "previous": "Anterior",
+        "next": "Siguiente"
+      },
+      "severity": {
+        "critical": "Crítico",
+        "high": "Alto",
+        "moderate": "Moderado"
+      },
+      "tooltips": {
+        "zScoreExplanation": "Z-Score > 2: anomalía significativa | Z-Score > 3: anomalía crítica",
+        "lastUpdated": "Última actualización",
+        "now": "Ahora"
+      },
+      "states": {
+        "loading": "Cargando anomalías...",
+        "noData": {
+          "title": "No se detectaron anomalías",
+          "description": "No se encontraron anomalías en los datos analizados"
+        }
       }
-    }
     },
     "boundaryTransitionSankey": {
       "title": "Flujo de Transiciones entre Áreas",
@@ -2155,7 +2155,14 @@
       "noDataTitle": "No hay transiciones registradas",
       "noDataDescription": "No hay datos de movimiento entre áreas hoy",
       "durationLegend": "Leyenda de Tiempo:",
-      "durationLabels": ["< 30min", "30min - 1h", "1 - 2h", "2 - 4h", "4 - 8h", "> 8h"],
+      "durationLabels": [
+        "< 30min",
+        "30min - 1h",
+        "1 - 2h",
+        "2 - 4h",
+        "4 - 8h",
+        "> 8h"
+      ],
       "tooltipInfo": "El grosor de la línea representa el volumen de transiciones",
       "datePrefix": "Datos de hoy:",
       "tooltipLabels": {
@@ -2167,9 +2174,71 @@
         "departures": "Salidas:",
         "arrivals": "Entradas:"
       }
+    },
+    "enhancedHeatmap": {
+      "title": "Mapa de Calor Avanzado de Actividad",
+      "subtitle": "Análisis visual de patrones de acceso",
+      "loading": "Cargando mapa de calor...",
+        "purpose": {
+    "title": "📌 Objetivo de este Análisis",
+    "description": "Este mapa de calor visualiza los patrones de acceso a lo largo de los días y horarios, ayudando a identificar momentos pico, tendencias de uso y posibles anomalías. La intensidad de los colores representa los niveles de actividad, permitiendo decisiones basadas en datos para optimización de recursos y monitoreo de seguridad.",
+    "goals": {
+      "patterns": "Identificar patrones",
+      "peaks": "Encontrar horarios pico",
+      "optimize": "Optimizar recursos",
+      "anomalies": "Detectar anomalías"
     }
   },
-    "personSensorPopup": {
+      "daysFullName": [
+        "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado"
+      ],
+      "titles": {
+        "duration": "Duración Promedio por Acceso (minutos)",
+        "frequency": "Frecuencia de Accesos",
+        "intensity": "Intensidad de Actividad (Duración × Frecuencia)"
+      },
+      "filters": {
+        "viewMode": "Modo de Visualización",
+        "duration": "Duración",
+        "frequency": "Frecuencia",
+        "intensity": "Intensidad",
+        "timePeriod": "Período",
+        "all": "Todos",
+        "business": "Horario Laboral",
+        "afterHours": "Fuera de Horario",
+        "weekend": "Fin de Semana",
+        "clearAll": "Limpiar Filtros"
+      },
+      "stats": {
+        "totalEntries": "Total de Entradas",
+        "avgDuration": "Duración Promedio",
+        "peakTime": "Horario Pico",
+        "distribution": "Distribución"
+      },
+      "tooltip": {
+        "entries": "Total de Entradas",
+        "avgDuration": "Duración Promedio",
+        "intensity": "Intensidad"
+      },
+      "legend": {
+        "high": "Alto",
+        "low": "Bajo",
+        "durationMode": "Modo Duración",
+        "durationDesc": "Muestra el tiempo promedio de permanencia",
+        "frequencyMode": "Modo Frecuencia",
+        "frequencyDesc": "Muestra el número de accesos",
+        "intensityMode": "Modo Intensidad",
+        "intensityDesc": "Combina duración y frecuencia"
+      }
+    }
+  },
+  "personSensorPopup": {
     "worker": "Trabajador",
     "loading": "Cargando...",
     "battery": "Batería",
@@ -2207,7 +2276,7 @@
     "tracking": "Seguimiento",
     "details": "Detalles"
   },
-    "mapTrackingModal": {
+  "mapTrackingModal": {
     "header": {
       "close": "Cerrar",
       "refresh": "Actualizar",

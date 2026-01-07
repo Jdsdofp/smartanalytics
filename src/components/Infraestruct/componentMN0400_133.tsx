@@ -21,6 +21,7 @@ import WeekdayWeekendComparison from './Components/WeekdayWeekendComparison';
 import BoundaryTrendsChart from './Components/BoundaryTrendsChart';
 import BoundaryAnomaliesChart from './Components/BoundaryAnomaliesChart';
 import { useTheme } from '../../context/ThemeContext';
+import EnhancedHeatmap from './Components/EnhancedHeatmap';
 
 
 
@@ -917,54 +918,255 @@ export default function BoundaryAccessAnalytics() {
     chart.setOption(option);
   };
 
+  // const initHeatmapChart = () => {
+  //   if (!chartRefs.heatmap.current || !heatmap.length) return;
+  //   const chart = echarts.init(chartRefs.heatmap.current);
+
+  //   const heatmapData = heatmap.map(d => [
+  //     d.entry_hour,
+  //     d.entry_day_of_week - 1,
+  //     d.total_entries
+  //   ]);
+
+  //   const days = t('boundaryAccessAnalytics.charts.weeklyPattern.days', { returnObjects: true }) as string[];
+
+  //   const option = {
+  //     tooltip: { position: 'top' },
+  //     grid: { height: '70%', top: '10%' },
+  //     xAxis: {
+  //       type: 'category',
+  //       data: Array.from({ length: 24 }, (_, i) => i + 'h'),
+  //       splitArea: { show: true }
+  //     },
+  //     yAxis: {
+  //       type: 'category',
+  //       data: days,
+  //       splitArea: { show: true }
+  //     },
+  //     visualMap: {
+  //       min: 0,
+  //       max: Math.max(...heatmap.map(d => d.total_entries)),
+  //       calculable: true,
+  //       orient: 'horizontal',
+  //       left: 'center',
+  //       bottom: '5%',
+  //       inRange: { color: ['#E2E8F0', '#0F4C81', '#FF6B35'] }
+  //     },
+  //     series: [{
+  //       type: 'heatmap',
+  //       data: heatmapData,
+  //       label: { show: false },
+  //       emphasis: {
+  //         itemStyle: {
+  //           shadowBlur: 10,
+  //           shadowColor: 'rgba(0, 0, 0, 0.5)'
+  //         }
+  //       }
+  //     }]
+  //   };
+  //   chart.setOption(option);
+  // };
+
+
+
   const initHeatmapChart = () => {
-    if (!chartRefs.heatmap.current || !heatmap.length) return;
-    const chart = echarts.init(chartRefs.heatmap.current);
+  if (!chartRefs.heatmap.current || !heatmap.length) return;
+  const chart = echarts.init(chartRefs.heatmap.current);
+  const colors = getChartColors(darkMode);
 
-    const heatmapData = heatmap.map(d => [
-      d.entry_hour,
-      d.entry_day_of_week - 1,
-      d.total_entries
-    ]);
+  // ✅ Preparar dados com duração média (mais significativo que apenas contagem)
+  const heatmapData = heatmap.map(d => [
+    d.entry_hour,
+    d.entry_day_of_week - 1,
+    parseFloat(d.avg_duration_minutes), // Duração média em minutos
+    parseInt(d.total_entries) // Total de entradas (para o tooltip)
+  ]);
 
-    const days = t('boundaryAccessAnalytics.charts.weeklyPattern.days', { returnObjects: true }) as string[];
+  const days = t('boundaryAccessAnalytics.charts.weeklyPattern.days', { returnObjects: true }) as string[];
+  
+  // ✅ Calcular max para a escala de cores
+  const maxDuration = Math.max(...heatmap.map(d => parseFloat(d.avg_duration_minutes)));
+  //@ts-ignore
+  const maxEntries = Math.max(...heatmap.map(d => parseInt(d.total_entries)));
 
-    const option = {
-      tooltip: { position: 'top' },
-      grid: { height: '70%', top: '10%' },
-      xAxis: {
-        type: 'category',
-        data: Array.from({ length: 24 }, (_, i) => i + 'h'),
-        splitArea: { show: true }
+  const option = {
+    backgroundColor: colors.backgroundColor,
+    title: {
+      text: t('boundaryAccessAnalytics.charts.heatmap.intensityTitle'),
+      left: 'center',
+      top: 10,
+      textStyle: {
+        color: colors.textColor,
+        fontSize: 16,
+        fontWeight: 'bold'
+      }
+    },
+    tooltip: {
+      position: 'top',
+      backgroundColor: darkMode ? '#374151' : '#FFFFFF',
+      borderColor: colors.gridColor,
+      textStyle: {
+        color: colors.textColor
       },
-      yAxis: {
-        type: 'category',
-        data: days,
-        splitArea: { show: true }
-      },
-      visualMap: {
-        min: 0,
-        max: Math.max(...heatmap.map(d => d.total_entries)),
-        calculable: true,
-        orient: 'horizontal',
-        left: 'center',
-        bottom: '5%',
-        inRange: { color: ['#E2E8F0', '#0F4C81', '#FF6B35'] }
-      },
-      series: [{
-        type: 'heatmap',
-        data: heatmapData,
-        label: { show: false },
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
+      formatter: (params: any) => {
+        const hour = params.value[0];
+        const dayIndex = params.value[1];
+        const avgDuration = params.value[2];
+        const totalEntries = params.value[3];
+        
+        return `
+          <div style="padding: 8px;">
+            <div style="font-weight: bold; margin-bottom: 8px; color: ${colors.textColor};">
+              ${days[dayIndex]} - ${hour}:00
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; justify-content: space-between; gap: 16px;">
+                <span style="color: ${colors.textColorSecondary};">${t('boundaryAccessAnalytics.charts.heatmap.tooltip.entries')}:</span>
+                <span style="font-weight: bold; color: ${colors.series.blue};">${totalEntries}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; gap: 16px;">
+                <span style="color: ${colors.textColorSecondary};">${t('boundaryAccessAnalytics.charts.heatmap.tooltip.avgDuration')}:</span>
+                <span style="font-weight: bold; color: ${colors.series.orange};">${avgDuration.toFixed(0)} min</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; gap: 16px;">
+                <span style="color: ${colors.textColorSecondary};">${t('boundaryAccessAnalytics.charts.heatmap.tooltip.intensity')}:</span>
+                <span style="font-weight: bold; color: ${colors.primary};">${((avgDuration / maxDuration) * 100).toFixed(0)}%</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    grid: { 
+      height: '65%', 
+      top: '15%',
+      left: '80px',
+      right: '80px',
+      bottom: '15%'
+    },
+    xAxis: {
+      type: 'category',
+      data: Array.from({ length: 24 }, (_, i) => {
+        // ✅ Melhorar labels das horas
+        if (i === 0) return '00h';
+        if (i === 6) return '06h';
+        if (i === 12) return '12h';
+        if (i === 18) return '18h';
+        if (i === 23) return '23h';
+        return i + 'h';
+      }),
+      splitArea: { 
+        show: true,
+        areaStyle: {
+          color: darkMode 
+            ? ['rgba(55, 65, 81, 0.1)', 'rgba(55, 65, 81, 0.05)']
+            : ['rgba(250, 250, 250, 0.3)', 'rgba(245, 245, 245, 0.3)']
         }
-      }]
-    };
-    chart.setOption(option);
+      },
+      axisLabel: {
+        color: colors.textColorSecondary,
+        fontSize: 11,
+        fontWeight: 'bold'
+      },
+      axisLine: {
+        lineStyle: {
+          color: colors.gridColor
+        }
+      }
+    },
+    yAxis: {
+      type: 'category',
+      data: days,
+      splitArea: { 
+        show: true,
+        areaStyle: {
+          color: darkMode 
+            ? ['rgba(55, 65, 81, 0.1)', 'rgba(55, 65, 81, 0.05)']
+            : ['rgba(250, 250, 250, 0.3)', 'rgba(245, 245, 245, 0.3)']
+        }
+      },
+      axisLabel: {
+        color: colors.textColor,
+        fontSize: 12,
+        fontWeight: 'bold'
+      },
+      axisLine: {
+        lineStyle: {
+          color: colors.gridColor
+        }
+      }
+    },
+    visualMap: {
+      min: 0,
+      max: maxDuration,
+      calculable: true,
+      orient: 'horizontal',
+      left: 'center',
+      bottom: '2%',
+      text: [
+        t('boundaryAccessAnalytics.charts.heatmap.legend.high'),
+        t('boundaryAccessAnalytics.charts.heatmap.legend.low')
+      ],
+      textStyle: {
+        color: colors.textColor,
+        fontSize: 11
+      },
+      inRange: {
+        // ✅ Gradiente mais sofisticado e informativo
+        color: darkMode 
+          ? [
+              '#1e3a5f', // Azul escuro (baixa atividade)
+              '#2563eb', // Azul médio
+              '#3b82f6', // Azul claro
+              '#fb923c', // Laranja
+              '#f97316', // Laranja forte
+              '#dc2626'  // Vermelho (alta atividade)
+            ]
+          : [
+              '#dbeafe', // Azul muito claro (baixa atividade)
+              '#93c5fd', // Azul claro
+              '#3b82f6', // Azul médio
+              '#fb923c', // Laranja
+              '#f97316', // Laranja forte
+              '#dc2626'  // Vermelho (alta atividade)
+            ]
+      }
+    },
+    series: [{
+      type: 'heatmap',
+      data: heatmapData,
+      label: { 
+        show: false // Ocultar labels por padrão para não poluir
+      },
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 15,
+          shadowColor: darkMode ? 'rgba(96, 165, 250, 0.5)' : 'rgba(15, 76, 129, 0.5)',
+          borderWidth: 2,
+          borderColor: colors.primary
+        },
+        label: {
+          show: true,
+          formatter: (params: any) => {
+            const entries = params.value[3];
+            const avgDuration = params.value[2];
+            return `${entries}\n${avgDuration.toFixed(0)}min`;
+          },
+          color: darkMode ? '#ffffff' : '#000000',
+          fontSize: 10,
+          fontWeight: 'bold'
+        }
+      },
+      itemStyle: {
+        borderWidth: 1,
+        borderColor: colors.backgroundColor
+      }
+    }]
   };
+  
+  chart.setOption(option);
+};
+
 
   const initAnomaliesChart = () => {
     if (!chartRefs.anomalies.current || !anomalies.length) return;
@@ -2818,7 +3020,13 @@ export default function BoundaryAccessAnalytics() {
               {chartLoadingStates.heatmap ? (
                 <ChartLoader />
               ) : (
-                <div ref={chartRefs.heatmap} className="w-full h-[500px]"></div>
+                // <div ref={chartRefs.heatmap} className="w-full h-[500px]"></div>
+                  <div className="animate-fade-in">
+                  <EnhancedHeatmap 
+                    data={heatmap}
+                    loading={loading}
+                  />
+                </div>
               )}
             </div>
           </div>
