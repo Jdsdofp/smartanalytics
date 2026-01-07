@@ -1623,6 +1623,8 @@
         "title": "Patrón Semanal",
         "subtitle": "Por día de la semana",
         "yAxis": "Visitas",
+        "hours": "Horas",
+        "avgDuration": "Duración Promedio",
         "days": ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
       },
       "heatmap": {

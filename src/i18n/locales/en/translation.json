@@ -1623,6 +1623,8 @@
         "title": "Weekly Pattern",
         "subtitle": "By day of week",
         "yAxis": "Visits",
+        "hours": "Hours",
+        "avgDuration": "Avg Duration",
         "days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
       },
       "heatmap": {

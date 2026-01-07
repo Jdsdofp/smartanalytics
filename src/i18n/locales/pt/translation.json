@@ -1657,6 +1657,8 @@
         "title": "Padrão Semanal",
         "subtitle": "Por dia da semana",
         "yAxis": "Visitas",
+        "hours": "Horas",
+        "avgDuration": "Duração Média",
         "days": ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
       },
       "heatmap": {

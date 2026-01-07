@@ -820,39 +820,95 @@ export default function BoundaryAccessAnalytics() {
     chart.setOption(option);
   };
 
+
   const initWeeklyPatternChart = () => {
     if (!chartRefs.weeklyPattern.current || !weeklyPattern.length) return;
     const chart = echarts.init(chartRefs.weeklyPattern.current);
+    const colors = getChartColors(darkMode);
+
+    // ✅ CORRIGIR: Agrupar por dia da semana e somar as médias
+    const dayMap = new Map<number, { name: string; total: number; count: number }>();
+
+    weeklyPattern.forEach(d => {
+      const dayNum = d.entry_day_of_week;
+      const dayName = d.entry_day_name;
+      const avgHours = parseFloat(d.avg_duration_hours);
+
+      if (!dayMap.has(dayNum)) {
+        dayMap.set(dayNum, { name: dayName, total: 0, count: 0 });
+      }
+
+      const day = dayMap.get(dayNum)!;
+      day.total += avgHours;
+      day.count += 1;
+    });
+
+    // Ordenar por dia da semana (1=Domingo, 2=Segunda, etc)
+    const sortedDays = Array.from(dayMap.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([_, data]) => ({
+        name: data.name,
+        avg: data.total / data.count
+      }));
 
     const option = {
+      backgroundColor: colors.backgroundColor,
       tooltip: {
         trigger: 'axis',
-        axisPointer: { type: 'cross' }
+        axisPointer: { type: 'cross' },
+        backgroundColor: darkMode ? '#374151' : '#FFFFFF',
+        borderColor: colors.gridColor,
+        textStyle: {
+          color: colors.textColor
+        },
+        formatter: (params: any) => {
+          const data = params[0];
+          return `${data.axisValue}<br/>
+                ${t('boundaryAccessAnalytics.charts.weeklyPattern.avgDuration')}: <strong>${data.value.toFixed(2)}h</strong>`;
+        }
       },
       grid: { left: 50, right: 50, top: 30, bottom: 60 },
       xAxis: {
         type: 'category',
-        data: weeklyPattern.map(d => d.day_name),
+        data: sortedDays.map(d => d.name),
         boundaryGap: false,
-        axisLabel: { margin: 10, fontSize: 12 }
+        axisLabel: {
+          margin: 10,
+          fontSize: 12,
+          color: colors.textColorSecondary
+        },
+        axisLine: {
+          lineStyle: {
+            color: colors.gridColor
+          }
+        }
       },
       yAxis: {
         type: 'value',
-        name: 'Horas',
-        splitLine: { show: true, lineStyle: { color: '#E2E8F0' } }
+        name: t('boundaryAccessAnalytics.charts.weeklyPattern.hours'),
+        nameTextStyle: {
+          color: colors.textColorSecondary
+        },
+        axisLabel: {
+          color: colors.textColorSecondary
+        },
+        splitLine: {
+          show: true,
+          lineStyle: { color: colors.gridColor }
+        }
       },
       series: [{
         type: 'line',
-        data: weeklyPattern.map(d => d.avg_duration_hours),
+        data: sortedDays.map(d => d.avg),
         smooth: true,
-        itemStyle: { color: '#FF6B35' },
+        itemStyle: { color: colors.series.orange },
         lineStyle: { width: 2.5 },
         symbol: 'circle',
         symbolSize: 5,
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(255, 107, 53, 0.25)' },
-            { offset: 1, color: 'rgba(255, 107, 53, 0.02)' }
+            { offset: 0, color: darkMode ? 'rgba(251, 146, 60, 0.25)' : 'rgba(255, 107, 53, 0.25)' },
+            { offset: 1, color: darkMode ? 'rgba(251, 146, 60, 0.02)' : 'rgba(255, 107, 53, 0.02)' }
           ])
         }
       }]

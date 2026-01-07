@@ -1839,6 +1839,16 @@ const GPSMapViewer = () => {
                   </>
                 )}
               </MapContainer>
+              {/* Modal de Tracking */}
+  {trackingModalOpen && trackingDevice && (
+    <MapTrackingModal
+      isOpen={trackingModalOpen}
+      onClose={() => setTrackingModalOpen(false)}
+      deviceCode={trackingDevice.code}
+      deviceName={trackingDevice.name}
+      photoUrl={trackingDevice.photoUrl}
+    />
+  )}
             </div>
           )}
         </div>
