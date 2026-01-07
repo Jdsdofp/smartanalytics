@@ -5183,7 +5183,7 @@ export default function CertificateReportGrid() {
 
 
 
-            <div className="bg-white rounded-lg shadow overflow-hidden mx-4">
+            <div className="bg-green-50 rounded-lg shadow overflow-hidden">
 
               <div className="overflow-x-auto">
                 <div className="max-h-[550px] overflow-y-auto">

@@ -1319,7 +1319,7 @@ export default function PredictiveCertificateAnalysis() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-2">
       {/* HEADER */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
@@ -1996,7 +1996,7 @@ export default function PredictiveCertificateAnalysis() {
 
       {/* TAB CONTENT - REPORT */}
       {activeTab === 'report' && (
-        <div className="mb-1">
+        <div className="border-red-400 p-1 rounded-lg">
           <CertificateReportGrid />
         </div>
       )}
