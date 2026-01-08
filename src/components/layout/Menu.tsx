@@ -422,6 +422,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
             { icon: ChartBarIcon, label: 'Incident Rate Trends', path: '/MN0400_132', permissionCode: 'MN0400_132', hidden: true },
             { icon: DocumentChartBarIcon, label: 'Boundary Access Analytics', path: '/MN0400_133', permissionCode: 'MN0400_133' },
             { icon: DocumentTextIcon, label: 'Safety Compliance Score', path: '/MN0400_134', permissionCode: 'MN0400_134', hidden: true },
+            { icon: DocumentTextIcon, label: 'Risks Management', path: '/MN0400_135', permissionCode: 'MN0400_135' },
           ]
         },
         {
