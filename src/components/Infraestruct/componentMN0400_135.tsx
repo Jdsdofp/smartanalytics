@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { ShieldCheckIcon } from '@heroicons/react/24/solid';
 import { useRiskManagement } from '../../hooks/useRiskManagement';
-import { ArrowTrendingUpIcon, BoltIcon, ChartBarIcon, CogIcon, DocumentTextIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { ArrowDownCircleIcon, ArrowsRightLeftIcon, ArrowTrendingUpIcon, ArrowUpCircleIcon, Battery100Icon, BellAlertIcon, BoltIcon, ChartBarIcon, Cog6ToothIcon, CogIcon, DocumentTextIcon, ExclamationTriangleIcon, MapPinIcon, PauseCircleIcon, RocketLaunchIcon, SignalIcon } from '@heroicons/react/24/outline';
 
 export default function RisksManagement() {
     const [activeTab, setActiveTab] = useState<string>('overview');
     const [lastUpdate, setLastUpdate] = useState<string>('');
-    
+
     // Company ID - você pode pegar do contexto/auth ou props
 
     // 🎣 Usar o hook customizado
@@ -294,8 +294,8 @@ export default function RisksManagement() {
                 value: item.badge_count,
                 itemStyle: {
                     color: item.range_label.includes('Critical') ? '#dc2626' :
-                           item.range_label.includes('Low') ? '#f59e0b' :
-                           item.range_label.includes('Medium') ? '#3b82f6' : '#10b981'
+                        item.range_label.includes('Low') ? '#f59e0b' :
+                            item.range_label.includes('Medium') ? '#3b82f6' : '#10b981'
                 }
             }));
 
@@ -598,16 +598,16 @@ export default function RisksManagement() {
             });
 
             // Calcular porcentagens
-            const criticalPct = timeline.map(t => 
+            const criticalPct = timeline.map(t =>
                 t.total_active_badges > 0 ? (t.badges_critical_state / t.total_active_badges * 100) : 0
             );
-            const highPct = timeline.map(t => 
+            const highPct = timeline.map(t =>
                 t.total_active_badges > 0 ? (t.badges_high_risk_state / t.total_active_badges * 100) : 0
             );
-            const mediumPct = timeline.map(t => 
+            const mediumPct = timeline.map(t =>
                 t.total_active_badges > 0 ? (t.badges_medium_risk_state / t.total_active_badges * 100) : 0
             );
-            const lowPct = timeline.map(t => 
+            const lowPct = timeline.map(t =>
                 t.total_active_badges > 0 ? (t.badges_low_risk_state / t.total_active_badges * 100) : 0
             );
 
@@ -767,8 +767,8 @@ export default function RisksManagement() {
                 loc.risk_level,
                 loc.risk_score,
                 loc.risk_level === 'CRITICAL' ? '#dc2626' :
-                loc.risk_level === 'HIGH' ? '#f59e0b' :
-                loc.risk_level === 'MEDIUM' ? '#3b82f6' : '#10b981'
+                    loc.risk_level === 'HIGH' ? '#f59e0b' :
+                        loc.risk_level === 'MEDIUM' ? '#3b82f6' : '#10b981'
             ]);
 
             chart.setOption({
@@ -921,7 +921,7 @@ export default function RisksManagement() {
         }, 100);
     }, [activeTab]);
 
-        // ✅ COMPONENTE DE LOADING PARA GRÁFICOS
+    // ✅ COMPONENTE DE LOADING PARA GRÁFICOS
     const ChartLoader = () => (
         <div className="w-full h-full flex flex-col items-center justify-center">
             <div className="relative">
@@ -931,7 +931,7 @@ export default function RisksManagement() {
         </div>
     );
 
-        // ✅ COMPONENTE DE LOADING PARA TABELAS
+    // ✅ COMPONENTE DE LOADING PARA TABELAS
     const TableLoader = () => (
         <div className="w-full h-64 flex flex-col items-center justify-center">
             <div className="relative">
@@ -944,7 +944,7 @@ export default function RisksManagement() {
     // Loading state
     if (loading && !kpis) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-[#0a0f1e] to-[#1a1f2e] flex items-center justify-center">
+            <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="text-center">
                     <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500 mb-4"></div>
                     <p className="text-slate-300 text-lg">Loading dashboard...</p>
@@ -965,7 +965,7 @@ export default function RisksManagement() {
         );
     }
 
-        // Error state
+    // Error state
     if (error) {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center">
@@ -1002,113 +1002,126 @@ export default function RisksManagement() {
             {/* KPI Grid */}
             {kpis && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-emerald-500 cursor-pointer overflow-hidden">
+                    <div className="group relative bg-emerald-50/40 backdrop-blur-md border-2 border-emerald-200/50 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-emerald-500 cursor-pointer overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-emerald-500 transition-all duration-300 group-hover:h-[5px]"></div>
-                        <div className="text-gray-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
-                            🎯 ACTIVE BADGES
+                        <div className="text-emerald-700 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
+                            <RocketLaunchIcon className="w-4 h-4" />
+
+                            ACTIVE BADGES
                         </div>
-                        <div className="text-5xl font-black leading-none mb-2 text-emerald-500 tabular-nums drop-shadow-sm">
+                        <div className="text-5xl font-black leading-none mb-2 text-emerald-600 tabular-nums drop-shadow-sm">
                             {kpis.total_active_badges}
                         </div>
-                        <div className="text-[11px] text-gray-400 flex items-center gap-1.5 font-medium">
-                            📡 Online monitoring
+                        <div className="text-[11px] text-emerald-500 flex items-center gap-1.5 font-medium">
+                            <SignalIcon className="w-3 h-3" />
+                            Online monitoring
                         </div>
                     </div>
 
-                    <div className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-red-600 cursor-pointer overflow-hidden">
+                    <div className="group relative bg-red-50/40 backdrop-blur-md border-2 border-red-200/50 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-red-600 cursor-pointer overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-red-600 transition-all duration-300 group-hover:h-[5px]"></div>
-                        <div className="text-gray-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
-                            🆘 CRITICAL ALERTS
+                        <div className="text-red-700 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
+                            <ExclamationTriangleIcon className="w-4 h-4" />
+                            CRITICAL ALERTS
                         </div>
                         <div className="text-5xl font-black leading-none mb-2 text-red-600 tabular-nums drop-shadow-sm">
                             {kpis.critical_badges}
                         </div>
                         <div className="text-[11px] text-red-500 flex items-center gap-1.5 font-medium">
-                            ↑ Man Down + SOS ({kpis.mandown_count + kpis.sos_count})
+                            <ArrowUpCircleIcon className="w-3 h-3" />
+                            Man Down + SOS ({kpis.mandown_count + kpis.sos_count})
                         </div>
                     </div>
 
-                    <div className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-amber-500 cursor-pointer overflow-hidden">
+                    <div className="group relative bg-amber-50/40 backdrop-blur-md border-2 border-amber-200/50 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-amber-500 cursor-pointer overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-amber-500 transition-all duration-300 group-hover:h-[5px]"></div>
-                        <div className="text-gray-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
-                            ⚠️ ACTIVE ALARMS
+                        <div className="text-amber-700 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
+                            <BellAlertIcon className="w-4 h-4" />
+                            ACTIVE ALARMS
                         </div>
-                        <div className="text-5xl font-black leading-none mb-2 text-amber-500 tabular-nums drop-shadow-sm">
+                        <div className="text-5xl font-black leading-none mb-2 text-amber-600 tabular-nums drop-shadow-sm">
                             {kpis.alarm_count}
                         </div>
-                        <div className="text-[11px] text-gray-400 flex items-center gap-1.5 font-medium">
+                        <div className="text-[11px] text-amber-500 flex items-center gap-1.5 font-medium">
                             Alarm 1 & 2
                         </div>
                     </div>
 
-                    <div className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-violet-500 cursor-pointer overflow-hidden">
+                    <div className="group relative bg-violet-50/40 backdrop-blur-md border-2 border-violet-200/50 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-violet-500 cursor-pointer overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-violet-500 transition-all duration-300 group-hover:h-[5px]"></div>
-                        <div className="text-gray-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
-                            🔄 MOTION EVENTS
+                        <div className="text-violet-700 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
+                            <ArrowsRightLeftIcon className="w-4 h-4" />
+                            MOTION EVENTS
                         </div>
-                        <div className="text-5xl font-black leading-none mb-2 text-violet-500 tabular-nums drop-shadow-sm">
+                        <div className="text-5xl font-black leading-none mb-2 text-violet-600 tabular-nums drop-shadow-sm">
                             {kpis.high_impact_count}
                         </div>
-                        <div className="text-[11px] text-gray-400 flex items-center gap-1.5 font-medium">
+                        <div className="text-[11px] text-violet-500 flex items-center gap-1.5 font-medium">
                             High impact detected
                         </div>
                     </div>
 
-                    <div className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-amber-500 cursor-pointer overflow-hidden">
+                    <div className="group relative bg-amber-50/40 backdrop-blur-md border-2 border-amber-200/50 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-amber-500 cursor-pointer overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-amber-500 transition-all duration-300 group-hover:h-[5px]"></div>
-                        <div className="text-gray-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
-                            ⏸️ IMMOBILE BADGES
+                        <div className="text-amber-700 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
+                            <PauseCircleIcon className="w-4 h-4" />
+                            IMMOBILE BADGES
                         </div>
-                        <div className="text-5xl font-black leading-none mb-2 text-amber-500 tabular-nums drop-shadow-sm">
+                        <div className="text-5xl font-black leading-none mb-2 text-amber-600 tabular-nums drop-shadow-sm">
                             {kpis.immobile_badge_count}
                         </div>
-                        <div className="text-[11px] text-gray-400 flex items-center gap-1.5 font-medium">
+                        <div className="text-[11px] text-amber-500 flex items-center gap-1.5 font-medium">
                             &gt; 10 min no motion
                         </div>
                     </div>
 
-                    <div className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-pink-500 cursor-pointer overflow-hidden">
+                    <div className="group relative bg-pink-50/40 backdrop-blur-md border-2 border-pink-200/50 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-pink-500 cursor-pointer overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-pink-500 transition-all duration-300 group-hover:h-[5px]"></div>
-                        <div className="text-gray-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
-                            ⚙️ CRITICAL STATES
+                        <div className="text-pink-700 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
+                            <Cog6ToothIcon className="w-4 h-4" />
+                            CRITICAL STATES
                         </div>
-                        <div className="text-5xl font-black leading-none mb-2 text-pink-500 tabular-nums drop-shadow-sm">
+                        <div className="text-5xl font-black leading-none mb-2 text-pink-600 tabular-nums drop-shadow-sm">
                             {kpis.critical_state_count}
                         </div>
-                        <div className="text-[11px] text-red-500 flex items-center gap-1.5 font-medium">
-                            ↑ Damage/Failure
+                        <div className="text-[11px] text-pink-500 flex items-center gap-1.5 font-medium">
+                            <ArrowUpCircleIcon className="w-3 h-3" />
+                            Damage/Failure
                         </div>
                     </div>
 
-                    <div className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-blue-500 cursor-pointer overflow-hidden">
+                    <div className="group relative bg-blue-50/40 backdrop-blur-md border-2 border-blue-200/50 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-blue-500 cursor-pointer overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-blue-500 transition-all duration-300 group-hover:h-[5px]"></div>
-                        <div className="text-gray-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
-                            📊 AVG RISK SCORE
+                        <div className="text-blue-700 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
+                            <ChartBarIcon className="w-4 h-4" />
+                            AVG RISK SCORE
                         </div>
-                        <div className="text-5xl font-black leading-none mb-2 text-blue-500 tabular-nums drop-shadow-sm">
+                        <div className="text-5xl font-black leading-none mb-2 text-blue-600 tabular-nums drop-shadow-sm">
                             {kpis.avg_risk_score}
                         </div>
-                        <div className="text-[11px] text-gray-400 flex items-center gap-1.5 font-medium">
+                        <div className="text-[11px] text-blue-500 flex items-center gap-1.5 font-medium">
                             Out of 100
                         </div>
                     </div>
 
-                    <div className="group relative bg-white border-2 border-gray-200 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-blue-500 cursor-pointer overflow-hidden">
+                    <div className="group relative bg-blue-50/40 backdrop-blur-md border-2 border-blue-200/50 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-blue-500 cursor-pointer overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-blue-500 transition-all duration-300 group-hover:h-[5px]"></div>
-                        <div className="text-gray-500 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
-                            🔋 AVG BATTERY
+                        <div className="text-blue-700 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
+                            <Battery100Icon className="w-4 h-4" />
+                            AVG BATTERY
                         </div>
-                        <div className="text-5xl font-black leading-none mb-2 text-blue-500 tabular-nums drop-shadow-sm">
+                        <div className="text-5xl font-black leading-none mb-2 text-blue-600 tabular-nums drop-shadow-sm">
                             {kpis.avg_battery_percent}%
                         </div>
-                        <div className="text-[11px] text-emerald-500 flex items-center gap-1.5 font-medium">
-                            ↓ Fleet average
+                        <div className="text-[11px] text-blue-500 flex items-center gap-1.5 font-medium">
+                            <ArrowDownCircleIcon className="w-3 h-3" />
+                            Fleet average
                         </div>
                     </div>
                 </div>
             )}
 
- {/* Tabs */}
+            {/* Tabs */}
             <div className="flex gap-2 mb-6 bg-white border-2 border-gray-200 p-2 rounded-xl flex-wrap">
                 <button
                     onClick={() => setActiveTab('overview')}
@@ -1517,7 +1530,7 @@ export default function RisksManagement() {
                 </div>
             )} */}
 
-              {/* Trends Tab */}
+            {/* Trends Tab */}
             {activeTab === 'trends' && (
                 <div className="grid grid-cols-12 gap-5">
                     <div className="col-span-12 lg:col-span-8 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
@@ -1632,19 +1645,42 @@ export default function RisksManagement() {
                                     //@ts-ignore
                                     const timeAgo = new Date(event.degradation_time).toLocaleString();
                                     const severity = event.event_severity.toLowerCase() as 'critical' | 'high' | 'medium' | 'low';
-                                    
+
                                     return (
                                         <div
-                                            key={idx}
-                                            className={`bg-white border-2 rounded-lg p-4 mb-3 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-md ${
-                                                severity === 'critical' ? 'border-l-4 border-l-red-600 border-gray-200' :
-                                                severity === 'high' ? 'border-l-4 border-l-amber-500 border-gray-200' :
-                                                severity === 'medium' ? 'border-l-4 border-l-blue-500 border-gray-200' :
-                                                'border-l-4 border-l-emerald-500 border-gray-200'
-                                            }`}
-                                        >
-                                            {/* ... (manter estrutura do evento) ... */}
+                                        key={idx}
+                                        className={`bg-white border-2 rounded-lg p-4 mb-3 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-md ${
+                                            severity === 'critical' ? 'border-l-4 border-l-red-600 border-gray-200' :
+                                            severity === 'high' ? 'border-l-4 border-l-amber-500 border-gray-200' :
+                                            severity === 'medium' ? 'border-l-4 border-l-blue-500 border-gray-200' :
+                                            'border-l-4 border-l-emerald-500 border-gray-200'
+                                        }`}
+                                    >
+                                        <div className="flex justify-between items-center mb-2.5">
+                                            <span className="font-bold text-[15px] text-gray-900">
+                                                ⚙️ {event.degradation_type} Degradation
+                                            </span>
+                                            <span className="text-xs text-gray-500 font-semibold">{timeAgo}</span>
                                         </div>
+                                        <div className="text-[13px] text-gray-600 flex flex-wrap gap-2.5 items-center">
+                                            <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">
+                                                {event.badge_number}
+                                            </span>
+                                            <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
+                                                severity === 'critical' ? 'bg-red-100 text-red-700 border border-red-300' :
+                                                severity === 'high' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
+                                                severity === 'medium' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
+                                                'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                                            }`}>
+                                                {event.event_severity}
+                                            </span>
+                                            <span>
+                                                {event.previous_state} → {event.current_state} • 
+                                                Score: {event.degradation_severity_score} • 
+                                                {event.hours_in_previous_state}h in previous state
+                                            </span>
+                                        </div>
+                                    </div>
                                     );
                                 })}
                             </div>
