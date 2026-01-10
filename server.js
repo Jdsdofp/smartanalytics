@@ -9,6 +9,21 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 🔓 LIBERAR PARA SER USADO EM IFRAME
+app.use((req, res, next) => {
+  // Remove bloqueio antigo se existir
+  res.removeHeader("X-Frame-Options");
+
+  // Permite ser embedado
+  res.setHeader(
+    "Content-Security-Policy",
+    "frame-ancestors *"
+  );
+
+  next();
+});
+
+
 // pasta com o build do Vite
 const distPath = path.join(__dirname, "dist");
 
