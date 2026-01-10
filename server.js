@@ -17,7 +17,8 @@ app.use((req, res, next) => {
   // Permite ser embedado
   res.setHeader(
     "Content-Security-Policy",
-    "frame-ancestors *"
+    "frame-ancestors *",
+    "default-src 'self'; frame-src 'self' https://analyticsapp.smartxhub.cloud"
   );
 
   next();
