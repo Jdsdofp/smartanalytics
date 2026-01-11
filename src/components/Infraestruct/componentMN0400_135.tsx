@@ -1006,7 +1006,6 @@ export default function RisksManagement() {
                         <div className="absolute top-0 left-0 w-full h-[3px] bg-emerald-500 transition-all duration-300 group-hover:h-[5px]"></div>
                         <div className="text-emerald-700 text-[11px] uppercase tracking-widest mb-2.5 font-bold flex items-center gap-1.5">
                             <RocketLaunchIcon className="w-4 h-4" />
-
                             ACTIVE BADGES
                         </div>
                         <div className="text-5xl font-black leading-none mb-2 text-emerald-600 tabular-nums drop-shadow-sm">
@@ -1128,7 +1127,7 @@ export default function RisksManagement() {
                     className={`px-6 py-3 rounded-lg text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${activeTab === 'overview'
                         ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:-translate-y-0.5'
-                        }`}
+                        } cursor-pointer`}
                 >
                     <ChartBarIcon className="w-5 h-5" />
                     Overview
@@ -1138,7 +1137,7 @@ export default function RisksManagement() {
                     className={`px-6 py-3 rounded-lg text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${activeTab === 'motion'
                         ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:-translate-y-0.5'
-                        }`}
+                        } cursor-pointer`}
                 >
                     <BoltIcon className="w-5 h-5" />
                     Motion & Impact
@@ -1148,7 +1147,7 @@ export default function RisksManagement() {
                     className={`px-6 py-3 rounded-lg text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${activeTab === 'state'
                         ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:-translate-y-0.5'
-                        }`}
+                        } cursor-pointer`}
                 >
                     <CogIcon className="w-5 h-5" />
                     State Monitoring
@@ -1158,7 +1157,7 @@ export default function RisksManagement() {
                     className={`px-6 py-3 rounded-lg text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${activeTab === 'trends'
                         ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:-translate-y-0.5'
-                        }`}
+                        } cursor-pointer`}
                 >
                     <ArrowTrendingUpIcon className="w-5 h-5" />
                     Risk Trends
@@ -1168,7 +1167,7 @@ export default function RisksManagement() {
                     className={`px-6 py-3 rounded-lg text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${activeTab === 'events'
                         ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:-translate-y-0.5'
-                        }`}
+                        } cursor-pointer`}
                 >
                     <DocumentTextIcon className="w-5 h-5" />
                     Event Log
@@ -1178,7 +1177,7 @@ export default function RisksManagement() {
                     className={`px-6 py-3 rounded-lg text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${activeTab === 'map'
                         ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white shadow-lg'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:-translate-y-0.5'
-                        }`}
+                        } cursor-pointer`}
                 >
                     <MapPinIcon className="w-5 h-5" />
                     GPS Map
@@ -1448,11 +1447,48 @@ export default function RisksManagement() {
                         {immobilityAlerts.length === 0 ? (
                             <TableLoader />
                         ) : (
-                            <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-                                <table className="w-full border-separate border-spacing-0">
-                                    {/* ... (manter estrutura da tabela) ... */}
-                                </table>
-                            </div>
+                           <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                            <table className="w-full border-separate border-spacing-0">
+                                <thead className="sticky top-0 bg-gray-50 z-10">
+                                    <tr>
+                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Badge</th>
+                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Duration</th>
+                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Severity</th>
+                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Last Location</th>
+                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Last G-Force</th>
+                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {immobilityAlerts.map((item, idx) => (
+                                        <tr key={idx} className="transition-all duration-200 hover:bg-gray-50">
+                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">{item.badge_number}</span>
+                                            </td>
+                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                <strong>{item.duration_minutes} min</strong>
+                                            </td>
+                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
+                                                    item.severity === 'CRITICAL' ? 'bg-red-100 text-red-700 border border-red-300' :
+                                                    item.severity === 'HIGH' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
+                                                    'bg-blue-100 text-blue-700 border border-blue-300'
+                                                }`}>
+                                                    {item.severity}
+                                                </span>
+                                            </td>
+                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                📍 {item.latitude}, {item.longitude}
+                                            </td>
+                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">💥 {item.last_gforce}g</td>
+                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase bg-amber-100 text-amber-700 border border-amber-300">IMMOBILE</span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                         )}
                     </div>
                 </div>
