@@ -32,15 +32,35 @@ const ExportModal = ({
     onClose();
   };
 
+
+
+    const glassColor = exportType === "excel"
+    ? "bg-gradient-to-br from-green-100/70 to-white/40 border-green-300/40 shadow-green-500/20"
+    : exportType === "pdf"
+    ? "bg-gradient-to-br from-red-100/70 to-white/40 border-red-300/40 shadow-red-500/20"
+    : "bg-white/80 border-white/30";
+
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+       className="fixed inset-0 bg-black/30 backdrop-blur-md transition-opacity"
         onClick={onClose}
       />
 
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+        {/* <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full"> */}
+       <div
+  className={`relative rounded-xl shadow-2xl max-w-md w-full transition-all duration-300
+    ${exportType ? "backdrop-blur-2xl" : "backdrop-blur-lg"}
+    ${glassColor}
+  `}
+>
+
+
+
+
+
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
