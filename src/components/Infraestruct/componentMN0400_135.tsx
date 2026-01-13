@@ -183,15 +183,25 @@ export default function RisksManagement() {
 
                 tooltip: {
                     trigger: "item",
-                    backgroundColor: "rgba(15, 23, 42, 0.95)",
-                    borderColor: "#475569",
-                    textStyle: { color: "#e2e8f0", fontSize: 12 },
+                    textStyle: { color: "#000000", fontSize: 12 },
                     padding: [8, 12],
                     formatter: "{b}<br/><strong>{c}</strong> badges ({d}%)"
                 },
 
                 legend: {
-                    show: false // 🔥 some com a legenda lateral
+                    show: true,
+                    bottom: 0,
+                    left: "center",
+                    orient: "horizontal",
+                    icon: "circle",
+                    itemWidth: 10,
+                    itemHeight: 10,
+                    itemGap: 16,
+                    textStyle: {
+                        color: "#334155",
+                        fontSize: 12,
+                        fontWeight: 500
+                    }
                 },
 
 
@@ -215,7 +225,9 @@ export default function RisksManagement() {
                             formatter: "{b}\n{d}%",
                             fontSize: 12,
                             fontWeight: 600,
-                            color: "#334155"
+                            color: "#334155",
+                            overflow: "break",     // 🔥 NUNCA truncar
+                            width: 120,            // 🔥 espaço máximo pro texto
                         },
 
                         labelLine: {
@@ -246,64 +258,154 @@ export default function RisksManagement() {
             const chart = echarts.init(tempRiskRef.current);
             chartsRef.current.tempRisk = chart;
 
+            // chart.setOption({
+            //     backgroundColor: 'transparent',
+            //     series: [{
+            //         type: 'gauge',
+            //         startAngle: 180,
+            //         endAngle: 0,
+            //         center: ['50%', '75%'],
+            //         radius: '90%',
+            //         min: -20,
+            //         max: 60,
+            //         splitNumber: 8,
+            //         axisLine: {
+            //             lineStyle: {
+            //                 width: 30,
+            //                 color: [
+            //                     [0.125, '#0ea5e9'],
+            //                     [0.375, '#3b82f6'],
+            //                     [0.625, '#10b981'],
+            //                     [0.875, '#f59e0b'],
+            //                     [1, '#dc2626']
+            //                 ]
+            //             }
+            //         },
+            //         pointer: {
+            //             itemStyle: {
+            //                 color: '#f97316',
+            //                 shadowColor: 'rgba(249, 115, 22, 0.5)',
+            //                 shadowBlur: 10
+            //             },
+            //             width: 8
+            //         },
+            //         axisTick: { show: false },
+            //         splitLine: {
+            //             length: 18,
+            //             lineStyle: { width: 2, color: '#999' }
+            //         },
+            //         axisLabel: {
+            //             color: '#94a3b8',
+            //             fontSize: 12,
+            //             distance: -60,
+            //             formatter: '{value}°C'
+            //         },
+            //         detail: {
+            //             fontSize: 42,
+            //             offsetCenter: [0, '70%'],
+            //             valueAnimation: true,
+            //             formatter: '{value}°C',
+            //             color: '#e2e8f0',
+            //             fontWeight: 'bold'
+            //         },
+            //         title: {
+            //             offsetCenter: [0, '90%'],
+            //             fontSize: 14,
+            //             color: '#94a3b8'
+            //         },
+            //         data: [{ value: kpis.avg_temperature, name: 'Avg Temperature' }]
+            //     }]
+            // });
+
             chart.setOption({
-                backgroundColor: 'transparent',
-                series: [{
-                    type: 'gauge',
-                    startAngle: 180,
-                    endAngle: 0,
-                    center: ['50%', '75%'],
-                    radius: '90%',
-                    min: -20,
-                    max: 60,
-                    splitNumber: 8,
-                    axisLine: {
-                        lineStyle: {
-                            width: 30,
-                            color: [
-                                [0.125, '#0ea5e9'],
-                                [0.375, '#3b82f6'],
-                                [0.625, '#10b981'],
-                                [0.875, '#f59e0b'],
-                                [1, '#dc2626']
-                            ]
-                        }
-                    },
-                    pointer: {
-                        itemStyle: {
-                            color: '#f97316',
-                            shadowColor: 'rgba(249, 115, 22, 0.5)',
-                            shadowBlur: 10
+                backgroundColor: "transparent",
+
+                textStyle: {
+                    fontFamily: "Inter, system-ui, sans-serif"
+                },
+
+                series: [
+                    {
+                        type: "gauge",
+                        startAngle: 180,
+                        endAngle: 0,
+                        center: ["50%", "78%"],
+                        radius: "95%",
+
+                        min: -20,
+                        max: 60,
+
+                        splitNumber: 8,
+
+                        axisLine: {
+                            lineStyle: {
+                                width: 18, // 🔥 mais fino e elegante
+                                color: [
+                                    [0.2, "#38bdf8"],  // frio
+                                    [0.4, "#3b82f6"],  // fresco
+                                    [0.6, "#22c55e"],  // ok
+                                    [0.8, "#f59e0b"],  // quente
+                                    [1, "#ef4444"]     // crítico
+                                ]
+                            }
                         },
-                        width: 8
-                    },
-                    axisTick: { show: false },
-                    splitLine: {
-                        length: 18,
-                        lineStyle: { width: 2, color: '#999' }
-                    },
-                    axisLabel: {
-                        color: '#94a3b8',
-                        fontSize: 12,
-                        distance: -60,
-                        formatter: '{value}°C'
-                    },
-                    detail: {
-                        fontSize: 42,
-                        offsetCenter: [0, '70%'],
-                        valueAnimation: true,
-                        formatter: '{value}°C',
-                        color: '#e2e8f0',
-                        fontWeight: 'bold'
-                    },
-                    title: {
-                        offsetCenter: [0, '90%'],
-                        fontSize: 14,
-                        color: '#94a3b8'
-                    },
-                    data: [{ value: kpis.avg_temperature, name: 'Avg Temperature' }]
-                }]
+
+                        pointer: {
+                            width: 5,
+                            length: "70%",
+                            itemStyle: {
+                                color: "#0f172a",
+                                shadowColor: "rgba(0,0,0,0.35)",
+                                shadowBlur: 10
+                            }
+                        },
+
+                        axisTick: { show: false },
+
+                        splitLine: {
+                            length: 12,
+                            lineStyle: {
+                                width: 2,
+                                color: "#cbd5f5"
+                            }
+                        },
+
+                        axisLabel: {
+                            color: "#64748b",
+                            fontSize: 11,
+                            distance: -45,
+                            formatter: (v: number) => `${v}°`
+                        },
+
+                        detail: {
+                            show: true,
+                            valueAnimation: true,
+                            fontSize: 42,
+                            fontWeight: 800,
+                            color: "#0f172a",
+                            offsetCenter: [0, "18%"],
+                            formatter: (v: number) => `${v.toFixed(1)}°C`
+                        },
+
+                        title: {
+                            show: true,
+                            offsetCenter: [0, "42%"],
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: "#64748b"
+                        },
+
+                        data: [
+                            {
+                                value: kpis.avg_temperature,
+                                name: "Average Temperature"
+                            }
+                        ]
+                    }
+                ]
             });
+
+
         }
 
         // Battery Status Bar Chart
@@ -1574,8 +1676,8 @@ export default function RisksManagement() {
                                                 </td>
                                                 <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
                                                     <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${item.severity === 'CRITICAL' ? 'bg-red-100 text-red-700 border border-red-300' :
-                                                            item.severity === 'HIGH' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
-                                                                'bg-blue-100 text-blue-700 border border-blue-300'
+                                                        item.severity === 'HIGH' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
+                                                            'bg-blue-100 text-blue-700 border border-blue-300'
                                                         }`}>
                                                         {item.severity}
                                                     </span>
@@ -1789,9 +1891,9 @@ export default function RisksManagement() {
                                         <div
                                             key={idx}
                                             className={`bg-white border-2 rounded-lg p-4 mb-3 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-md ${severity === 'critical' ? 'border-l-4 border-l-red-600 border-gray-200' :
-                                                    severity === 'high' ? 'border-l-4 border-l-amber-500 border-gray-200' :
-                                                        severity === 'medium' ? 'border-l-4 border-l-blue-500 border-gray-200' :
-                                                            'border-l-4 border-l-emerald-500 border-gray-200'
+                                                severity === 'high' ? 'border-l-4 border-l-amber-500 border-gray-200' :
+                                                    severity === 'medium' ? 'border-l-4 border-l-blue-500 border-gray-200' :
+                                                        'border-l-4 border-l-emerald-500 border-gray-200'
                                                 }`}
                                         >
                                             <div className="flex justify-between items-center mb-2.5">
@@ -1805,9 +1907,9 @@ export default function RisksManagement() {
                                                     {event.badge_number}
                                                 </span>
                                                 <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${severity === 'critical' ? 'bg-red-100 text-red-700 border border-red-300' :
-                                                        severity === 'high' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
-                                                            severity === 'medium' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
-                                                                'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                                                    severity === 'high' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
+                                                        severity === 'medium' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
+                                                            'bg-emerald-100 text-emerald-700 border border-emerald-300'
                                                     }`}>
                                                     {event.event_severity}
                                                 </span>
