@@ -34,28 +34,28 @@ const ExportModal = ({
 
 
 
-    const glassColor = exportType === "excel"
+  const glassColor = exportType === "excel"
     ? "bg-gradient-to-br from-green-100/70 to-white/40 border-green-300/40 shadow-green-500/20"
     : exportType === "pdf"
-    ? "bg-gradient-to-br from-red-100/70 to-white/40 border-red-300/40 shadow-red-500/20"
-    : "bg-white/80 border-white/30";
+      ? "bg-gradient-to-br from-red-100/70 to-white/40 border-red-300/40 shadow-red-500/20"
+      : "bg-white/80 border-white/30";
 
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div
-       className="fixed inset-0 bg-black/30 backdrop-blur-md transition-opacity"
+        className="fixed inset-0 bg-black/30 backdrop-blur-md transition-opacity"
         onClick={onClose}
       />
 
       <div className="flex min-h-full items-center justify-center p-4">
         {/* <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full"> */}
-       <div
-  className={`relative rounded-xl shadow-2xl max-w-md w-full transition-all duration-300
+        <div
+          className={`relative rounded-xl shadow-2xl max-w-md w-full transition-all duration-300
     ${exportType ? "backdrop-blur-2xl" : "backdrop-blur-lg"}
     ${glassColor}
   `}
->
+        >
 
 
 
@@ -85,22 +85,20 @@ const ExportModal = ({
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setExportType('excel')}
-                  className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all ${
-                    exportType === 'excel'
+                  className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all ${exportType === 'excel'
                       ? 'border-green-500 bg-green-50 text-green-700'
                       : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <TableCellsIcon className="h-6 w-6" />
                   <span className="font-medium">Excel</span>
                 </button>
                 <button
                   onClick={() => setExportType('pdf')}
-                  className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all ${
-                    exportType === 'pdf'
+                  className={`flex items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all ${exportType === 'pdf'
                       ? 'border-red-500 bg-red-50 text-red-700'
                       : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <DocumentTextIcon className="h-6 w-6" />
                   <span className="font-medium">PDF</span>
@@ -117,19 +115,17 @@ const ExportModal = ({
                 {/* Dados filtrados */}
                 <button
                   onClick={() => setExportScope('filtered')}
-                  className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all ${
-                    exportScope === 'filtered'
+                  className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all ${exportScope === 'filtered'
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-300 bg-white hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <div className="flex-shrink-0 mt-0.5">
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        exportScope === 'filtered'
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${exportScope === 'filtered'
                           ? 'border-blue-500 bg-blue-500'
                           : 'border-gray-300'
-                      }`}
+                        }`}
                     >
                       {exportScope === 'filtered' && (
                         <div className="w-2 h-2 bg-white rounded-full" />
@@ -137,9 +133,8 @@ const ExportModal = ({
                     </div>
                   </div>
                   <div className="flex-1 text-left">
-                    <p className={`font-medium ${
-                      exportScope === 'filtered' ? 'text-blue-900' : 'text-gray-900'
-                    }`}>
+                    <p className={`font-medium ${exportScope === 'filtered' ? 'text-blue-900' : 'text-gray-900'
+                      }`}>
                       {t('lowBatteryTable.modal.filteredData')}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
@@ -159,19 +154,17 @@ const ExportModal = ({
                 {/* Todos os dados */}
                 <button
                   onClick={() => setExportScope('all')}
-                  className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all ${
-                    exportScope === 'all'
+                  className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all ${exportScope === 'all'
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-300 bg-white hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <div className="flex-shrink-0 mt-0.5">
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        exportScope === 'all'
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${exportScope === 'all'
                           ? 'border-blue-500 bg-blue-500'
                           : 'border-gray-300'
-                      }`}
+                        }`}
                     >
                       {exportScope === 'all' && (
                         <div className="w-2 h-2 bg-white rounded-full" />
@@ -179,9 +172,8 @@ const ExportModal = ({
                     </div>
                   </div>
                   <div className="flex-1 text-left">
-                    <p className={`font-medium ${
-                      exportScope === 'all' ? 'text-blue-900' : 'text-gray-900'
-                    }`}>
+                    <p className={`font-medium ${exportScope === 'all' ? 'text-blue-900' : 'text-gray-900'
+                      }`}>
                       {t('lowBatteryTable.modal.allData')}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
@@ -204,14 +196,14 @@ const ExportModal = ({
                 <span className="font-medium">{t('lowBatteryTable.modal.willExport')}:</span>
                 <br />
                 {exportScope === 'filtered'
-                  ? t('lowBatteryTable.modal.willExportFiltered', { 
-                      count: filteredCount,
-                      format: exportType.toUpperCase() 
-                    })
-                  : t('lowBatteryTable.modal.willExportAll', { 
-                      count: totalCount,
-                      format: exportType.toUpperCase() 
-                    })}
+                  ? t('lowBatteryTable.modal.willExportFiltered', {
+                    count: filteredCount,
+                    format: exportType.toUpperCase()
+                  })
+                  : t('lowBatteryTable.modal.willExportAll', {
+                    count: totalCount,
+                    format: exportType.toUpperCase()
+                  })}
               </p>
             </div>
           </div>
@@ -226,11 +218,10 @@ const ExportModal = ({
             </button>
             <button
               onClick={handleExport}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${
-                exportType === 'excel'
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-md transition-colors ${exportType === 'excel'
                   ? 'bg-green-600 hover:bg-green-700'
                   : 'bg-red-600 hover:bg-red-700'
-              }`}
+                }`}
             >
               {exportType === 'excel' ? (
                 <TableCellsIcon className="h-4 w-4" />

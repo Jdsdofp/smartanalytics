@@ -175,48 +175,70 @@ export default function RisksManagement() {
             }));
 
             chart.setOption({
-                backgroundColor: 'transparent',
+                backgroundColor: "transparent",
+
+                textStyle: {
+                    fontFamily: "Inter, system-ui, sans-serif"
+                },
+
                 tooltip: {
-                    trigger: 'item',
-                    backgroundColor: 'rgba(15, 23, 42, 0.98)',
-                    borderColor: '#475569',
-                    textStyle: { color: '#e2e8f0' },
-                    formatter: '{b}: {c} ({d}%)'
+                    trigger: "item",
+                    backgroundColor: "rgba(15, 23, 42, 0.95)",
+                    borderColor: "#475569",
+                    textStyle: { color: "#e2e8f0", fontSize: 12 },
+                    padding: [8, 12],
+                    formatter: "{b}<br/><strong>{c}</strong> badges ({d}%)"
                 },
+
                 legend: {
-                    orient: 'vertical',
-                    right: '5%',
-                    top: 'center',
-                    textStyle: { color: '#94a3b8', fontSize: 12 },
-                    itemGap: 12
+                    show: false // 🔥 some com a legenda lateral
                 },
-                series: [{
-                    type: 'pie',
-                    radius: ['40%', '70%'],
-                    center: ['35%', '50%'],
-                    avoidLabelOverlap: true,
-                    itemStyle: {
-                        borderRadius: 10,
-                        borderColor: '#0f172a',
-                        borderWidth: 2
-                    },
-                    label: {
-                        show: true,
-                        position: 'outside',
-                        formatter: '{b}\n{c}',
-                        color: '#e2e8f0',
-                        fontSize: 11
-                    },
-                    data: pieData,
-                    emphasis: {
+
+
+                series: [
+                    {
+                        name: "States",
+                        type: "pie",
+                        radius: ["55%", "75%"], // donut mais elegante
+                        center: ["50%", "50%"],
+                        avoidLabelOverlap: true,
+
                         itemStyle: {
-                            shadowBlur: 15,
-                            shadowOffsetX: 0,
-                            shadowColor: 'rgba(0, 0, 0, 0.7)'
-                        }
+                            borderRadius: 6,
+                            borderColor: "#ffffff",
+                            borderWidth: 2
+                        },
+
+                        label: {
+                            show: true,
+                            position: "outside",
+                            formatter: "{b}\n{d}%",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: "#334155"
+                        },
+
+                        labelLine: {
+                            length: 10,
+                            length2: 10,
+                            smooth: true
+                        },
+
+                        emphasis: {
+                            scale: true,
+                            scaleSize: 8,
+                            itemStyle: {
+                                shadowBlur: 20,
+                                shadowColor: "rgba(0,0,0,0.15)"
+                            }
+                        },
+
+
+                        data: pieData
                     }
-                }]
+                ]
             });
+
         }
 
         // Temperature Risk Gauge
@@ -469,42 +491,124 @@ export default function RisksManagement() {
                 itemStyle: { color: item.color }
             }));
 
+            // chart.setOption({
+            //     backgroundColor: 'transparent',
+            //     tooltip: {
+            //         trigger: 'axis',
+            //         axisPointer: { type: 'shadow' },
+            //         backgroundColor: 'rgba(15, 23, 42, 0.98)',
+            //         borderColor: '#475569',
+            //         textStyle: { color: '#e2e8f0' }
+            //     },
+            //     grid: { left: '5%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
+            //     xAxis: {
+            //         type: 'value',
+            //         name: 'Badges',
+            //         nameTextStyle: { color: '#94a3b8' },
+            //         axisLabel: { color: '#94a3b8' },
+            //         splitLine: { lineStyle: { color: '#334155' } }
+            //     },
+            //     yAxis: {
+            //         type: 'category',
+            //         data: stateNames,
+            //         axisLabel: { color: '#94a3b8', fontSize: 11 },
+            //         axisLine: { lineStyle: { color: '#475569' } }
+            //     },
+            //     series: [{
+            //         type: 'bar',
+            //         data: stateCounts,
+            //         barWidth: '60%',
+            //         label: {
+            //             show: true,
+            //             position: 'right',
+            //             color: '#e2e8f0',
+            //             fontWeight: 'bold'
+            //         },
+            //         itemStyle: { borderRadius: [0, 4, 4, 0] }
+            //     }]
+            // });
+
             chart.setOption({
-                backgroundColor: 'transparent',
+                backgroundColor: "transparent",
+
+                textStyle: {
+                    fontFamily: "Inter, system-ui, sans-serif"
+                },
+
                 tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' },
-                    backgroundColor: 'rgba(15, 23, 42, 0.98)',
-                    borderColor: '#475569',
-                    textStyle: { color: '#e2e8f0' }
+                    trigger: "axis",
+                    axisPointer: { type: "shadow" },
+                    backgroundColor: "rgba(15, 23, 42, 0.98)",
+                    borderColor: "#475569",
+                    textStyle: { color: "#e2e8f0", fontSize: 12 },
+                    padding: [8, 12]
                 },
-                grid: { left: '5%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
+
+                grid: {
+                    left: 20,
+                    right: 30,
+                    top: 20,
+                    bottom: 20,
+                    containLabel: true
+                },
+
                 xAxis: {
-                    type: 'value',
-                    name: 'Badges',
-                    nameTextStyle: { color: '#94a3b8' },
-                    axisLabel: { color: '#94a3b8' },
-                    splitLine: { lineStyle: { color: '#334155' } }
-                },
-                yAxis: {
-                    type: 'category',
-                    data: stateNames,
-                    axisLabel: { color: '#94a3b8', fontSize: 11 },
-                    axisLine: { lineStyle: { color: '#475569' } }
-                },
-                series: [{
-                    type: 'bar',
-                    data: stateCounts,
-                    barWidth: '60%',
-                    label: {
-                        show: true,
-                        position: 'right',
-                        color: '#e2e8f0',
-                        fontWeight: 'bold'
+                    type: "value",
+                    name: "Badges",
+                    nameGap: 10,
+                    nameTextStyle: {
+                        color: "#64748b",
+                        fontSize: 12,
+                        fontWeight: 600
                     },
-                    itemStyle: { borderRadius: [0, 4, 4, 0] }
-                }]
+                    axisLabel: {
+                        color: "#94a3b8",
+                        fontSize: 11
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: "#e5e7eb"
+                        }
+                    }
+                },
+
+                yAxis: {
+                    type: "category",
+                    data: stateNames,
+                    axisLabel: {
+                        color: "#334155",
+                        fontSize: 12,
+                        fontWeight: 600
+                    },
+                    axisTick: { show: false },
+                    axisLine: { show: false }
+                },
+
+                series: [
+                    {
+                        type: "bar",
+                        data: stateCounts,
+                        barWidth: "55%",
+                        showBackground: true,
+                        backgroundStyle: {
+                            color: "#f1f5f9",
+                            borderRadius: 6
+                        },
+                        label: {
+                            show: true,
+                            position: "right",
+                            color: "#0f172a",
+                            fontWeight: 700,
+                            fontSize: 12,
+                            formatter: "{c}"
+                        },
+                        itemStyle: {
+                            borderRadius: [0, 6, 6, 0]
+                        }
+                    }
+                ]
             });
+
         }
 
         // State Changes Timeline (State Tab)
@@ -1447,48 +1551,47 @@ export default function RisksManagement() {
                         {immobilityAlerts.length === 0 ? (
                             <TableLoader />
                         ) : (
-                           <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-                            <table className="w-full border-separate border-spacing-0">
-                                <thead className="sticky top-0 bg-gray-50 z-10">
-                                    <tr>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Badge</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Duration</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Severity</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Last Location</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Last G-Force</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {immobilityAlerts.map((item, idx) => (
-                                        <tr key={idx} className="transition-all duration-200 hover:bg-gray-50">
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">{item.badge_number}</span>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <strong>{item.duration_minutes} min</strong>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
-                                                    item.severity === 'CRITICAL' ? 'bg-red-100 text-red-700 border border-red-300' :
-                                                    item.severity === 'HIGH' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
-                                                    'bg-blue-100 text-blue-700 border border-blue-300'
-                                                }`}>
-                                                    {item.severity}
-                                                </span>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                📍 {item.latitude}, {item.longitude}
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">💥 {item.last_gforce}g</td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase bg-amber-100 text-amber-700 border border-amber-300">IMMOBILE</span>
-                                            </td>
+                            <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                                <table className="w-full border-separate border-spacing-0">
+                                    <thead className="sticky top-0 bg-gray-50 z-10">
+                                        <tr>
+                                            <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Badge</th>
+                                            <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Duration</th>
+                                            <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Severity</th>
+                                            <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Last Location</th>
+                                            <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Last G-Force</th>
+                                            <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Status</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                        {immobilityAlerts.map((item, idx) => (
+                                            <tr key={idx} className="transition-all duration-200 hover:bg-gray-50">
+                                                <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                    <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">{item.badge_number}</span>
+                                                </td>
+                                                <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                    <strong>{item.duration_minutes} min</strong>
+                                                </td>
+                                                <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                    <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${item.severity === 'CRITICAL' ? 'bg-red-100 text-red-700 border border-red-300' :
+                                                            item.severity === 'HIGH' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
+                                                                'bg-blue-100 text-blue-700 border border-blue-300'
+                                                        }`}>
+                                                        {item.severity}
+                                                    </span>
+                                                </td>
+                                                <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                    📍 {item.latitude}, {item.longitude}
+                                                </td>
+                                                <td className="p-3 text-sm text-gray-700 border-b border-gray-200">💥 {item.last_gforce}g</td>
+                                                <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
+                                                    <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase bg-amber-100 text-amber-700 border border-amber-300">IMMOBILE</span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -1684,39 +1787,37 @@ export default function RisksManagement() {
 
                                     return (
                                         <div
-                                        key={idx}
-                                        className={`bg-white border-2 rounded-lg p-4 mb-3 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-md ${
-                                            severity === 'critical' ? 'border-l-4 border-l-red-600 border-gray-200' :
-                                            severity === 'high' ? 'border-l-4 border-l-amber-500 border-gray-200' :
-                                            severity === 'medium' ? 'border-l-4 border-l-blue-500 border-gray-200' :
-                                            'border-l-4 border-l-emerald-500 border-gray-200'
-                                        }`}
-                                    >
-                                        <div className="flex justify-between items-center mb-2.5">
-                                            <span className="font-bold text-[15px] text-gray-900">
-                                                ⚙️ {event.degradation_type} Degradation
-                                            </span>
-                                            <span className="text-xs text-gray-500 font-semibold">{timeAgo}</span>
+                                            key={idx}
+                                            className={`bg-white border-2 rounded-lg p-4 mb-3 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-md ${severity === 'critical' ? 'border-l-4 border-l-red-600 border-gray-200' :
+                                                    severity === 'high' ? 'border-l-4 border-l-amber-500 border-gray-200' :
+                                                        severity === 'medium' ? 'border-l-4 border-l-blue-500 border-gray-200' :
+                                                            'border-l-4 border-l-emerald-500 border-gray-200'
+                                                }`}
+                                        >
+                                            <div className="flex justify-between items-center mb-2.5">
+                                                <span className="font-bold text-[15px] text-gray-900">
+                                                    ⚙️ {event.degradation_type} Degradation
+                                                </span>
+                                                <span className="text-xs text-gray-500 font-semibold">{timeAgo}</span>
+                                            </div>
+                                            <div className="text-[13px] text-gray-600 flex flex-wrap gap-2.5 items-center">
+                                                <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">
+                                                    {event.badge_number}
+                                                </span>
+                                                <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${severity === 'critical' ? 'bg-red-100 text-red-700 border border-red-300' :
+                                                        severity === 'high' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
+                                                            severity === 'medium' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
+                                                                'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                                                    }`}>
+                                                    {event.event_severity}
+                                                </span>
+                                                <span>
+                                                    {event.previous_state} → {event.current_state} •
+                                                    Score: {event.degradation_severity_score} •
+                                                    {event.hours_in_previous_state}h in previous state
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="text-[13px] text-gray-600 flex flex-wrap gap-2.5 items-center">
-                                            <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">
-                                                {event.badge_number}
-                                            </span>
-                                            <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
-                                                severity === 'critical' ? 'bg-red-100 text-red-700 border border-red-300' :
-                                                severity === 'high' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
-                                                severity === 'medium' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
-                                                'bg-emerald-100 text-emerald-700 border border-emerald-300'
-                                            }`}>
-                                                {event.event_severity}
-                                            </span>
-                                            <span>
-                                                {event.previous_state} → {event.current_state} • 
-                                                Score: {event.degradation_severity_score} • 
-                                                {event.hours_in_previous_state}h in previous state
-                                            </span>
-                                        </div>
-                                    </div>
                                     );
                                 })}
                             </div>
