@@ -1594,6 +1594,7 @@ const GPSMapViewer = () => {
                 zoom={13}
                 maxZoom={22}
                 zoomControl={false}
+                attributionControl={false}
                 style={{ 
                   height: isFullscreen ? '100vh' : '100vh', 
                   width: '100%' 

@@ -1405,6 +1405,7 @@ const GPSRouteMapLeaflet = () => {
             zoom={13}
             maxZoom={22}
             zoomControl={false}
+            attributionControl={false}
             style={{ height: '700px', width: '100%' }}
             className="rounded-lg shadow-md"
           >
