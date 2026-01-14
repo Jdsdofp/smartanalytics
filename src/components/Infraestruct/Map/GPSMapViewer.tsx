@@ -1595,7 +1595,7 @@ const GPSMapViewer = () => {
                 maxZoom={22}
                 zoomControl={false}
                 style={{ 
-                  height: isFullscreen ? '100vh' : '700px', 
+                  height: isFullscreen ? '100vh' : '100vh', 
                   width: '100%' 
                 }}
                 className="rounded-lg"
