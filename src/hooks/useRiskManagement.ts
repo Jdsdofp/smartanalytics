@@ -62,6 +62,9 @@ export interface StateDistributionData {
 export interface DegradationEvent {
     degradation_time: string;
     badge_number: string;
+    image_hash: string;
+    name: string;
+    code_category: string;
     degradation_type: string;
     current_state: string;
     previous_state: string;
@@ -129,6 +132,14 @@ export interface BatteryDistribution {
     percentage: number;
 }
 
+export interface EventFilters {
+    severities: string[];
+    degradationTypes: string[];
+    startDate?: string;
+    endDate?: string;
+    searchTerm?: string;
+}
+
 // =====================================
 // 🎣 HOOK
 // =====================================
@@ -156,6 +167,11 @@ export const useRiskManagement = (
     const [impactDistribution, setImpactDistribution] = useState<ImpactDistributionData[]>([]);
     const [immobilityAlerts, setImmobilityAlerts] = useState<ImmobilityAlert[]>([]);
     const [batteryDistribution, setBatteryDistribution] = useState<BatteryDistribution[]>([]);
+    // Adicionar ao hook
+    const [eventFilters, setEventFilters] = useState<EventFilters>({
+        severities: ['CRITICAL', 'HIGH'],
+        degradationTypes: [],
+    });
 
     // =====================================
     // 🔧 FUNÇÕES DE FETCH INDIVIDUAIS
@@ -189,12 +205,43 @@ export const useRiskManagement = (
         setStateDistribution(data.data || []);
     };
 
-    const fetchDegradationEvents = async () => {
-        const { data } = await axios.get(
-            `${API_BASE_URL}/dashboard/risk/${companyId}/degradation-events?limit=100`
-        );
-        setEvents(data.data || []);
-    };
+    // const fetchDegradationEvents = async () => {
+    //     const { data } = await axios.get(
+    //         `${API_BASE_URL}/dashboard/risk/${companyId}/degradation-events?limit=100`
+    //     );
+    //     setEvents(data.data || []);
+    // };
+
+    const fetchDegradationEvents = async (filters?: EventFilters) => {
+    const params = new URLSearchParams();
+    params.append('limit', '100');
+    
+    if (filters?.severities && filters.severities.length > 0) {
+        params.append('severities', filters.severities.join(','));
+    }
+    
+    if (filters?.degradationTypes && filters.degradationTypes.length > 0) {
+        params.append('degradationTypes', filters.degradationTypes.join(','));
+    }
+    
+    if (filters?.startDate) {
+        params.append('startDate', filters.startDate);
+    }
+    
+    if (filters?.endDate) {
+        params.append('endDate', filters.endDate);
+    }
+    
+    if (filters?.searchTerm) {
+        params.append('searchTerm', filters.searchTerm);
+    }
+
+    const { data } = await axios.get(
+        `${API_BASE_URL}/dashboard/risk/${companyId}/degradation-events?${params.toString()}`
+    );
+    setEvents(data.data || []);
+};
+
 
     const fetchPredictiveRanking = async () => {
         const { data } = await axios.get(
@@ -349,6 +396,18 @@ export const useRiskManagement = (
         }
     }, [kpis]);
 
+    // ✨ FUNÇÃO PARA APLICAR FILTROS
+    const applyEventFilters = async () => {
+        setLoading(true);
+        try {
+            await fetchDegradationEvents(eventFilters);
+        } catch (err) {
+            console.error("Error applying filters:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // =====================================
     // 📤 RETORNO DO HOOK
     // =====================================
@@ -371,6 +430,11 @@ export const useRiskManagement = (
         loading,
         error,
 
+        // ✨ NOVOS RETORNOS PARA FILTROS
+        eventFilters,
+        setEventFilters,
+        applyEventFilters,
+
         // Funções para refresh manual
         refreshKPIs: fetchKPIs,
         refreshStateKPIs: fetchStateKPIs,
@@ -381,6 +445,6 @@ export const useRiskManagement = (
         refreshLocations: fetchGPSLocations,
         refreshMotionTimeline: fetchMotionTimeline,
         refreshImpactDistribution: fetchImpactDistribution,
-        refreshImmobilityAlerts: fetchImmobilityAlerts,
+        refreshImmobilityAlerts: fetchImmobilityAlerts
     };
 };

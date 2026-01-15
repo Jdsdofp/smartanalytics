@@ -9,6 +9,11 @@ import { ArrowDownCircleIcon, ArrowsRightLeftIcon, ArrowTrendingUpIcon, ArrowUpC
 export default function RisksManagement() {
     const [activeTab, setActiveTab] = useState<string>('overview');
     const [lastUpdate, setLastUpdate] = useState<string>('');
+    const [eventFilters, setEventFiltersState] = useState({
+        severities: ['CRITICAL', 'HIGH'],
+        degradationTypes: [] as string[],
+        searchTerm: ''
+    });
 
     // Company ID - você pode pegar do contexto/auth ou props
 
@@ -27,7 +32,16 @@ export default function RisksManagement() {
         batteryDistribution,
         loading,
         error,
+        setEventFilters: setHookEventFilters,
+        applyEventFilters,
+        refreshEvents,
     } = useRiskManagement(activeTab, true);
+
+    // Wrapper function to update both local state and hook
+    const setEventFilters = (filters: any) => {
+        setEventFiltersState(filters);
+        setHookEventFilters(filters);
+    };
 
     // Chart refs
     const riskTimelineRef = useRef<HTMLDivElement>(null);
@@ -986,10 +1000,10 @@ export default function RisksManagement() {
                     textStyle: { color: '#e2e8f0' },
                     formatter: (params: any) => {
                         return `<strong>${params.data[2]}</strong><br/>
-                                Risk: ${params.data[3]}<br/>
-                                Score: ${params.data[4]}<br/>
-                                Lat: ${params.data[1].toFixed(4)}<br/>
-                                Lon: ${params.data[0].toFixed(4)}`;
+                                    Risk: ${params.data[3]}<br/>
+                                    Score: ${params.data[4]}<br/>
+                                    Lat: ${params.data[1].toFixed(4)}<br/>
+                                    Lon: ${params.data[0].toFixed(4)}`;
                     }
                 },
                 grid: { left: '5%', right: '5%', bottom: '5%', top: '5%', containLabel: true },
@@ -1391,38 +1405,6 @@ export default function RisksManagement() {
             </div>
 
             {/* Overview Tab */}
-            {/* {activeTab === 'overview' && (
-                <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-12 lg:col-span-8 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            📈 48-Hour Risk Timeline
-                        </h2>
-                        <div ref={riskTimelineRef} className="w-full h-[450px]"></div>
-                    </div>
-
-                    <div className="col-span-12 lg:col-span-4 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            🎯 State Distribution
-                        </h2>
-                        <div ref={eventTypePieRef} className="w-full h-[450px]"></div>
-                    </div>
-
-                    <div className="col-span-12 lg:col-span-6 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            🌡️ Temperature Risk Gauge
-                        </h2>
-                        <div ref={tempRiskRef} className="w-full h-[380px]"></div>
-                    </div>
-
-                    <div className="col-span-12 lg:col-span-6 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            🔋 Battery Status Distribution
-                        </h2>
-                        <div ref={batteryStatusRef} className="w-full h-[380px]"></div>
-                    </div>
-                </div>
-            )} */}
-
             {activeTab === 'overview' && (
                 <div className="grid grid-cols-12 gap-5">
                     <div className="col-span-12 lg:col-span-8 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
@@ -1480,33 +1462,6 @@ export default function RisksManagement() {
             )}
 
             {/* Motion Tab */}
-            {/* {activeTab === 'motion' && (
-                <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-12 lg:col-span-8 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            💥 G-Force Impact Timeline (24h)
-                        </h2>
-                        <div ref={gforceTimelineRef} className="w-full h-[450px]"></div>
-                    </div>
-
-                    <div className="col-span-12 lg:col-span-4 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            📊 Impact Severity Distribution
-                        </h2>
-                        <div ref={impactDistRef} className="w-full h-[450px]"></div>
-                    </div>
-
-                    <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            🔥 G-Force Heatmap (Badge × Hour)
-                        </h2>
-                        <div ref={gforceHeatmapRef} className="w-full h-[380px]"></div>
-                    </div>
-                </div>
-            )} */}
-
-
-            {/* Motion Tab */}
             {activeTab === 'motion' && (
                 <div className="grid grid-cols-12 gap-5">
                     <div className="col-span-12 lg:col-span-8 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
@@ -1549,73 +1504,6 @@ export default function RisksManagement() {
                     </div>
                 </div>
             )}
-
-            {/* State Tab */}
-            {/* {activeTab === 'state' && (
-                <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-12 lg:col-span-6 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            ⚙️ Sensor State Distribution
-                        </h2>
-                        <div ref={stateDistributionRef} className="w-full h-[380px]"></div>
-                    </div>
-
-                    <div className="col-span-12 lg:col-span-6 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            🔄 State Changes Timeline (48h)
-                        </h2>
-                        <div ref={stateChangesRef} className="w-full h-[380px]"></div>
-                    </div>
-
-                    <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            ⏱️ Immobility Alerts (&gt;10 minutes)
-                        </h2>
-                        <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-                            <table className="w-full border-separate border-spacing-0">
-                                <thead className="sticky top-0 bg-gray-50 z-10">
-                                    <tr>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Badge</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Duration</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Severity</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Last Location</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Last G-Force</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {immobilityAlerts.map((item, idx) => (
-                                        <tr key={idx} className="transition-all duration-200 hover:bg-gray-50">
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">{item.badge_number}</span>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <strong>{item.duration_minutes} min</strong>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
-                                                    item.severity === 'CRITICAL' ? 'bg-red-100 text-red-700 border border-red-300' :
-                                                    item.severity === 'HIGH' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
-                                                    'bg-blue-100 text-blue-700 border border-blue-300'
-                                                }`}>
-                                                    {item.severity}
-                                                </span>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                📍 {item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">💥 {item.last_gforce}g</td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <span className="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase bg-amber-100 text-amber-700 border border-amber-300">IMMOBILE</span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            )} */}
 
             {/* State Tab */}
             {activeTab === 'state' && (
@@ -1699,78 +1587,6 @@ export default function RisksManagement() {
                 </div>
             )}
 
-
-            {/* Trends Tab */}
-            {/* {activeTab === 'trends' && (
-                <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-12 lg:col-span-8 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            📊 State Risk Distribution Trends
-                        </h2>
-                        <div ref={stateTrendsAreaRef} className="w-full h-[450px]"></div>
-                    </div>
-
-                    <div className="col-span-12 lg:col-span-4 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            🎯 Current State Risk Levels
-                        </h2>
-                        <div ref={stateRiskPieRef} className="w-full h-[450px]"></div>
-                    </div>
-
-                    <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            📈 Predictive Risk Score Rankings (Top 20)
-                        </h2>
-                        <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-                            <table className="w-full border-separate border-spacing-0">
-                                <thead className="sticky top-0 bg-gray-50 z-10">
-                                    <tr>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Rank</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Badge</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">State</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Risk Score</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">24h Critical Events</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">7d History</th>
-                                        <th className="text-left p-3 text-[11px] font-bold uppercase tracking-wide text-gray-600 border-b-2 border-gray-200">Recommendation</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {ranking.map((item, idx) => (
-                                        <tr key={idx} className="transition-all duration-200 hover:bg-gray-50">
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <strong>#{idx + 1}</strong>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">{item.badge_number}</span>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <span className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase ${
-                                                    ['DAMAGE', 'NO_POWER', 'FAILURE'].includes(item.current_state_name) ? 'bg-red-100 text-red-700 border border-red-300' :
-                                                    item.current_state_name === 'ABNORMAL' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
-                                                    'bg-emerald-100 text-emerald-700 border border-emerald-300'
-                                                }`}>
-                                                    {item.current_state_name}
-                                                </span>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">
-                                                <strong style={{ color: item.predictive_risk_score >= 70 ? '#dc2626' : item.predictive_risk_score >= 50 ? '#f59e0b' : '#3b82f6' }}>
-                                                    {item.predictive_risk_score}
-                                                </strong>
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-700 border-b border-gray-200">{item.critical_state_count_24h}</td>
-                                            <td className="p-3 text-[11px] text-gray-700 border-b border-gray-200">
-                                                MAN_DOWN×{item.emergency_history_7d}, ALARM×{item.alarm_history_7d}
-                                            </td>
-                                            <td className="p-3 text-[11px] text-gray-700 border-b border-gray-200">{item.risk_recommendation}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            )} */}
-
             {/* Trends Tab */}
             {activeTab === 'trends' && (
                 <div className="grid grid-cols-12 gap-5">
@@ -1818,145 +1634,304 @@ export default function RisksManagement() {
             )}
 
             {/* Events Tab */}
-            {/* {activeTab === 'events' && (
-                <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            📋 Comprehensive Event Log (Last 100 Events)
-                        </h2>
-                        <div className="max-h-[500px] overflow-y-auto pr-2">
-                            {events.map((event, idx) => {
-                                const timeAgo = new Date(event.degradation_time).toLocaleString();
-                                const severity = event.event_severity.toLowerCase() as 'critical' | 'high' | 'medium' | 'low';
-                                
-                                return (
-                                    <div
-                                        key={idx}
-                                        className={`bg-white border-2 rounded-lg p-4 mb-3 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-md ${
-                                            severity === 'critical' ? 'border-l-4 border-l-red-600 border-gray-200' :
-                                            severity === 'high' ? 'border-l-4 border-l-amber-500 border-gray-200' :
-                                            severity === 'medium' ? 'border-l-4 border-l-blue-500 border-gray-200' :
-                                            'border-l-4 border-l-emerald-500 border-gray-200'
-                                        }`}
-                                    >
-                                        <div className="flex justify-between items-center mb-2.5">
-                                            <span className="font-bold text-[15px] text-gray-900">
-                                                ⚙️ {event.degradation_type} Degradation
-                                            </span>
-                                            <span className="text-xs text-gray-500 font-semibold">{timeAgo}</span>
-                                        </div>
-                                        <div className="text-[13px] text-gray-600 flex flex-wrap gap-2.5 items-center">
-                                            <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">
-                                                {event.badge_number}
-                                            </span>
-                                            <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${
-                                                severity === 'critical' ? 'bg-red-100 text-red-700 border border-red-300' :
-                                                severity === 'high' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
-                                                severity === 'medium' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
-                                                'bg-emerald-100 text-emerald-700 border border-emerald-300'
-                                            }`}>
-                                                {event.event_severity}
-                                            </span>
-                                            <span>
-                                                {event.previous_state} → {event.current_state} • 
-                                                Score: {event.degradation_severity_score} • 
-                                                {event.hours_in_previous_state}h in previous state
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+{activeTab === 'events' && (
+    <div className="grid grid-cols-12 gap-5">
+        {/* Painel de Filtros */}
+        <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-5 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-gray-900 text-base font-bold flex items-center gap-2">
+                    🔍 Event Filters
+                </h3>
+                <button
+                    onClick={() => {
+                        setEventFilters({
+                            severities: ['CRITICAL', 'HIGH'],
+                            degradationTypes: [],
+                            searchTerm: ''
+                        });
+                        refreshEvents();
+                    }}
+                    className="px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-gray-900 
+                             bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200"
+                >
+                    Clear Filters
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Search Input */}
+                <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-2">
+                        Search Badge/Name
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        value={eventFilters.searchTerm || ''}
+                        onChange={(e) => setEventFilters({ ...eventFilters, searchTerm: e.target.value })}
+                        onKeyPress={(e) => e.key === 'Enter' && applyEventFilters()}
+                        className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-lg 
+                                 focus:border-orange-500 focus:outline-none transition-colors"
+                    />
+                </div>
+
+                {/* Severity Filter */}
+                <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-2">
+                        Severity Level
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                        {['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map(severity => (
+                            <button
+                                key={severity}
+                                onClick={() => {
+                                    const newSeverities = eventFilters.severities.includes(severity)
+                                        ? eventFilters.severities.filter(s => s !== severity)
+                                        : [...eventFilters.severities, severity];
+                                    setEventFilters({ ...eventFilters, severities: newSeverities });
+                                }}
+                                className={`px-3 py-1 text-xs font-bold uppercase rounded-md transition-all duration-200
+                                    ${eventFilters.severities.includes(severity)
+                                        ? severity === 'CRITICAL' ? 'bg-red-500 text-white' :
+                                          severity === 'HIGH' ? 'bg-amber-500 text-white' :
+                                          severity === 'MEDIUM' ? 'bg-blue-500 text-white' :
+                                          'bg-emerald-500 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                {severity}
+                            </button>
+                        ))}
                     </div>
                 </div>
-            )} */}
 
-            {/* Events Tab */}
-            {activeTab === 'events' && (
-                <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            📋 Comprehensive Event Log (Last 100 Events)
-                        </h2>
-                        {events.length === 0 ? (
-                            <TableLoader />
-                        ) : (
-                            <div className="max-h-[500px] overflow-y-auto pr-2">
-                                {events.map((event, idx) => {
-                                    //@ts-ignore
-                                    const timeAgo = new Date(event.degradation_time).toLocaleString();
-                                    const severity = event.event_severity.toLowerCase() as 'critical' | 'high' | 'medium' | 'low';
+                {/* Degradation Type Filter */}
+                <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-2">
+                        Degradation Type
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                        {['SUDDEN_FAILURE', 'GRADUAL_DECLINE', 'RAPID_DEGRADATION'].map(type => (
+                            <button
+                                key={type}
+                                onClick={() => {
+                                    const newTypes = eventFilters.degradationTypes.includes(type)
+                                        ? eventFilters.degradationTypes.filter(t => t !== type)
+                                        : [...eventFilters.degradationTypes, type];
+                                    setEventFilters({ ...eventFilters, degradationTypes: newTypes });
+                                }}
+                                className={`px-3 py-1 text-xs font-semibold rounded-md transition-all duration-200
+                                    ${eventFilters.degradationTypes.includes(type)
+                                        ? 'bg-violet-500 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                {type.replace(/_/g, ' ')}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-                                    return (
-                                        <div
-                                            key={idx}
-                                            className={`bg-white border-2 rounded-lg p-4 mb-3 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:shadow-md ${severity === 'critical' ? 'border-l-4 border-l-red-600 border-gray-200' :
-                                                severity === 'high' ? 'border-l-4 border-l-amber-500 border-gray-200' :
-                                                    severity === 'medium' ? 'border-l-4 border-l-blue-500 border-gray-200' :
-                                                        'border-l-4 border-l-emerald-500 border-gray-200'
-                                                }`}
-                                        >
-                                            <div className="flex justify-between items-center mb-2.5">
-                                                <span className="font-bold text-[15px] text-gray-900">
-                                                    ⚙️ {event.degradation_type} Degradation
-                                                </span>
-                                                <span className="text-xs text-gray-500 font-semibold">{timeAgo}</span>
-                                            </div>
-                                            <div className="text-[13px] text-gray-600 flex flex-wrap gap-2.5 items-center">
-                                                <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide">
-                                                    {event.badge_number}
-                                                </span>
-                                                <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${severity === 'critical' ? 'bg-red-100 text-red-700 border border-red-300' :
-                                                    severity === 'high' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
-                                                        severity === 'medium' ? 'bg-blue-100 text-blue-700 border border-blue-300' :
-                                                            'bg-emerald-100 text-emerald-700 border border-emerald-300'
-                                                    }`}>
-                                                    {event.event_severity}
-                                                </span>
-                                                <span>
-                                                    {event.previous_state} → {event.current_state} •
-                                                    Score: {event.degradation_severity_score} •
-                                                    {event.hours_in_previous_state}h in previous state
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                {/* Apply Button */}
+                <div className="flex items-end">
+                    <button
+                        onClick={applyEventFilters}
+                        className="w-full px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-500 
+                                 text-white font-bold rounded-lg shadow-lg hover:shadow-xl 
+                                 transition-all duration-200 hover:-translate-y-0.5"
+                    >
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+
+            {/* Active Filters Display */}
+            {(eventFilters.severities.length > 0 || eventFilters.degradationTypes.length > 0 || eventFilters.searchTerm) && (
+                <div className="mt-4 pt-4 border-t-2 border-gray-100">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-gray-500">Active:</span>
+                        {eventFilters.searchTerm && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">
+                                Search: "{eventFilters.searchTerm}"
+                            </span>
+                        )}
+                        {eventFilters.severities.length > 0 && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">
+                                Severities: {eventFilters.severities.join(', ')}
+                            </span>
+                        )}
+                        {eventFilters.degradationTypes.length > 0 && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">
+                                Types: {eventFilters.degradationTypes.length}
+                            </span>
                         )}
                     </div>
                 </div>
             )}
+        </div>
 
-            {/* Map Tab */}
-            {/* {activeTab === 'map' && (
-                <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            📍 Real-Time GPS Badge Locations
-                        </h2>
-                        <div ref={gpsMapRef} className="w-full h-[600px]"></div>
-                    </div>
-                </div>
-            )} */}
+        {/* Event Log */}
+        <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
+            <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
+                📋 Comprehensive Event Log (Last 100 Events)
+            </h2>
+            {events.length === 0 ? (
+                <TableLoader />
+            ) : (
+                <div className="max-h-[500px] overflow-y-auto pr-2">
+                    {events.map((event, idx) => {
+                        //@ts-ignore
+                        const timeAgo = new Date(event.degradation_time).toLocaleString();
+                        const severity = event.event_severity.toLowerCase() as 'critical' | 'high' | 'medium' | 'low';
 
-            {/* Map Tab */}
-            {activeTab === 'map' && (
-                <div className="grid grid-cols-12 gap-5">
-                    <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
-                        <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
-                            📍 Real-Time GPS Badge Locations
-                        </h2>
-                        <div className="w-full h-[600px]">
-                            {locations.length === 0 ? (
-                                <ChartLoader />
-                            ) : (
-                                <div ref={gpsMapRef} className="w-full h-full"></div>
-                            )}
-                        </div>
-                    </div>
+                        return (
+                            <div
+                                key={idx}
+                                className={`
+                                    group relative bg-white border-2 rounded-lg p-4 mb-3 
+                                    transition-all duration-300 cursor-pointer 
+                                    hover:-translate-y-1 hover:shadow-xl
+                                    ${severity === 'critical' ? 'border-l-4 border-l-red-600 border-gray-200 hover:border-red-400 hover:shadow-red-100' :
+                                      severity === 'high' ? 'border-l-4 border-l-amber-500 border-gray-200 hover:border-amber-400 hover:shadow-amber-100' :
+                                      severity === 'medium' ? 'border-l-4 border-l-blue-500 border-gray-200 hover:border-blue-400 hover:shadow-blue-100' :
+                                      'border-l-4 border-l-emerald-500 border-gray-200 hover:border-emerald-400 hover:shadow-emerald-100'}
+                                `}
+                            >
+                                {/* Brilho sutil no hover */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300 rounded-lg pointer-events-none"></div>
+
+                                {/* Header com imagem e título */}
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex items-center gap-3">
+                                        {/* Imagem do usuário com efeito */}
+                                        <div className="relative">
+                                            {event.image_hash ? (
+                                                <img
+                                                    src={`https://smartmachine.smartxhub.cloud/imagem/${event.image_hash}`}
+                                                    alt={event.name || 'User'}
+                                                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-300 shadow-sm 
+                                                             transition-all duration-300 group-hover:border-gray-400 group-hover:shadow-md 
+                                                             group-hover:scale-110"
+                                                    onError={(e) => {
+                                                        e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyNCIgZmlsbD0iI0U1RTdFQiIvPjxwYXRoIGQ9Ik0yNCAyNkMyNy4zMTM3IDI2IDMwIDIzLjMxMzcgMzAgMjBDMzAgMTYuNjg2MyAyNy4zMTM3IDE0IDI0IDE0QzIwLjY4NjMgMTQgMTggMTYuNjg2MyAxOCAyMEMxOCAyMy4zMTM3IDIwLjY4NjMgMjYgMjQgMjZaIiBmaWxsPSIjOUM5Q0EzIi8+PHBhdGggZD0iTTEyIDM4QzEyIDMyLjQ3NzIgMTYuNDc3MiAyOCAyMiAyOEgyNkMzMS41MjI4IDI4IDM2IDMyLjQ3NzIgMzYgMzhWNDBIMTJWMzhaIiBmaWxsPSIjOUM5Q0EzIi8+PC9zdmc+';
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 
+                                                              transition-all duration-300 group-hover:border-gray-400 group-hover:bg-gray-300 
+                                                              group-hover:scale-110">
+                                                    <span className="text-gray-500 text-lg font-bold">
+                                                        {event.name ? event.name.charAt(0).toUpperCase() : '?'}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Badge de severidade pequeno no canto da imagem */}
+                                            <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white 
+                                                           transition-all duration-300 group-hover:scale-125
+                                                           ${severity === 'critical' ? 'bg-red-500' :
+                                                             severity === 'high' ? 'bg-amber-500' :
+                                                             severity === 'medium' ? 'bg-blue-500' :
+                                                             'bg-emerald-500'}`}>
+                                            </div>
+                                        </div>
+
+                                        {/* Informações do evento */}
+                                        <div className="transition-transform duration-300 group-hover:translate-x-1">
+                                            <div className="font-bold text-[15px] text-gray-900 flex items-center gap-2 
+                                                          transition-colors duration-300 group-hover:text-gray-700">
+                                                ⚙️ {event.degradation_type} Degradation
+                                            </div>
+                                            {event.name && (
+                                                <div className="text-xs text-gray-600 font-semibold mt-0.5 
+                                                              transition-colors duration-300 group-hover:text-gray-800">
+                                                    {event.name}
+                                                </div>
+                                            )}
+                                            {event.code_category && (
+                                                <div className="text-[10px] text-gray-500 mt-0.5 
+                                                              transition-colors duration-300 group-hover:text-gray-600">
+                                                    {event.code_category}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Timestamp com animação */}
+                                    <span className="text-xs text-gray-500 font-semibold whitespace-nowrap 
+                                                   transition-all duration-300 group-hover:text-gray-700 group-hover:scale-105">
+                                        {timeAgo}
+                                    </span>
+                                </div>
+
+                                {/* Badges e informações */}
+                                <div className="text-[13px] text-gray-600 flex flex-wrap gap-2.5 items-center">
+                                    <span className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1 rounded-md text-xs font-black font-mono tracking-wide
+                                                   transition-all duration-300 group-hover:bg-gray-200 group-hover:shadow-sm">
+                                        {event.badge_number}
+                                    </span>
+                                    <span className={`px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest 
+                                                    transition-all duration-300 group-hover:shadow-md group-hover:scale-105
+                                                    ${severity === 'critical' ? 'bg-red-100 text-red-700 border border-red-300 group-hover:bg-red-200' :
+                                                      severity === 'high' ? 'bg-amber-100 text-amber-700 border border-amber-300 group-hover:bg-amber-200' :
+                                                      severity === 'medium' ? 'bg-blue-100 text-blue-700 border border-blue-300 group-hover:bg-blue-200' :
+                                                      'bg-emerald-100 text-emerald-700 border border-emerald-300 group-hover:bg-emerald-200'}`}>
+                                        {event.event_severity}
+                                    </span>
+                                    <span className="flex items-center gap-1 transition-colors duration-300 group-hover:text-gray-800">
+                                        <span className="text-gray-500">State:</span>
+                                        <span className="font-semibold">{event.previous_state}</span>
+                                        <span className="text-gray-400">→</span>
+                                        <span className="font-semibold text-red-600">{event.current_state}</span>
+                                    </span>
+                                    <span className="text-gray-500">•</span>
+                                    <span className="transition-colors duration-300 group-hover:text-gray-800">
+                                        Score: <span className="font-bold">{event.degradation_severity_score}</span>
+                                    </span>
+                                    <span className="text-gray-500">•</span>
+                                    <span className="transition-colors duration-300 group-hover:text-gray-800">
+                                        {event.hours_in_previous_state}h in previous state
+                                    </span>
+                                    {event.trend_direction && (
+                                        <>
+                                            <span className="text-gray-500">•</span>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold 
+                                                           transition-all duration-300 group-hover:shadow-sm group-hover:scale-105
+                                                           ${event.trend_direction === 'WORSENING' ? 'bg-red-50 text-red-600 group-hover:bg-red-100' :
+                                                             event.trend_direction === 'IMPROVING' ? 'bg-green-50 text-green-600 group-hover:bg-green-100' :
+                                                             'bg-gray-50 text-gray-600 group-hover:bg-gray-100'}`}>
+                                                {event.trend_direction}
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>
+    </div>
+)}
+            
+            {/* Map Tab */}
+            {activeTab === 'map' && (
+                            <div className="grid grid-cols-12 gap-5">
+                                <div className="col-span-12 bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg transition-all duration-300 hover:border-gray-300 hover:shadow-xl">
+                                    <h2 className="text-gray-900 text-lg font-bold mb-5 pb-3 border-b-2 border-gray-200 flex items-center gap-2.5">
+                                        📍 Real-Time GPS Badge Locations
+                                    </h2>
+                                    <div className="w-full h-[600px]">
+                                        {locations.length === 0 ? (
+                                            <ChartLoader />
+                                        ) : (
+                                            <div ref={gpsMapRef} className="w-full h-full"></div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+            )}
+
+            </div>
     );
-}
+};
