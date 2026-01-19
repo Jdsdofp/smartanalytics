@@ -26,6 +26,7 @@ import {
   ArchiveBoxIcon,
   HomeModernIcon,
   ServerIcon,
+  ChartBarSquareIcon,
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../context/AuthContext'
 import { useCompany } from '../../hooks/useCompany'
@@ -421,7 +422,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
             { icon: ChartBarIcon, label: ' Real-time People Visibility', path: '/MN0400_131', permissionCode: 'MN0400_131' },
             { icon: ChartBarIcon, label: 'Incident Rate Trends', path: '/MN0400_132', permissionCode: 'MN0400_132', hidden: true },
             { icon: DocumentChartBarIcon, label: 'Boundary Access Analytics', path: '/MN0400_133', permissionCode: 'MN0400_133' },
-            { icon: DocumentTextIcon, label: 'Safety Compliance Score', path: '/MN0400_134', permissionCode: 'MN0400_134', hidden: true },
+            { icon: ChartBarSquareIcon, label: 'Temperature Compliance', path: '/MN0400_134', permissionCode: 'MN0400_134' },
             { icon: DocumentTextIcon, label: 'Risks Management', path: '/MN0400_135', permissionCode: 'MN0400_135' },
           ]
         },
