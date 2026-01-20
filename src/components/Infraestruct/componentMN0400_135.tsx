@@ -1213,8 +1213,6 @@ export default function RisksManagement() {
                     </span>
                     <span>Motion & State Detection Enabled</span>
                     <span>•</span>
-                    <span>SmartX HUB v2.0</span>
-                    <span>•</span>
                     <span>Last update: <span className="font-mono">{lastUpdate}</span></span>
                 </div>
             </div>
