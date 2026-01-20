@@ -511,3 +511,12 @@
   border-top-color: #60A5FA;
 }
 
+/* Adicione no seu CSS */
+.chart-container {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  border-radius: 8px;
+}
