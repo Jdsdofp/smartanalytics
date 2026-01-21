@@ -19,6 +19,7 @@ import MN0400_133 from './pages/Analytics/Infraestrict/MN0400_133';
 import Perfil from './pages/Perfil';
 import MN0400_135 from './pages/Analytics/Infraestrict/MN0400_135';
 import MN0400_134 from './pages/Analytics/Infraestrict/MN0400_134';
+import MN0400_132 from './pages/Analytics/Infraestrict/MN0400_132';
 
 function App() {
 
@@ -139,6 +140,11 @@ function App() {
       <Route path='/MN0400_133' element={
         <PrivateRoute>
           <MN0400_133 />
+        </PrivateRoute>
+      } />
+      <Route path='/MN0400_132' element={ 
+        <PrivateRoute>
+          <MN0400_132 />
         </PrivateRoute>
       } />
 
