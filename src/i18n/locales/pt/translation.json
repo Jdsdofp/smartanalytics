@@ -2433,5 +2433,154 @@
       "warning": "Aviso",
       "info": "Informação"
     }
+  },
+    "temperatureAnalytics": {
+    "title": "Análise de Temperatura",
+    "subtitle": "Monitoramento em tempo real",
+    
+    "tabs": {
+      "overview": "Visão Geral",
+      "trends": "Tendências",
+      "distance": "Distância"
+    },
+    
+    "filters": {
+      "period": "Período",
+      "to": "até",
+      "groupBy": "Agrupar por",
+      "hour": "Hora",
+      "day": "Dia",
+      "week": "Semana",
+      "visualization": "Visualização",
+      "bars": "Barras",
+      "line": "Linha",
+      "area": "Área"
+    },
+    
+    "kpis": {
+      "totalEvents": "Total de Eventos",
+      "criticalEvents": "Eventos Críticos",
+      "affectedPersons": "Pessoas Afetadas",
+      "avgTemperature": "Temp. Média",
+      "totalPersons": "Total de Pessoas",
+      "criticals": "Críticos",
+      "heatStress": "Estresse Térmico",
+      "comfortable": "Confortáveis",
+      "periodsAnalyzed": "Períodos Analisados",
+      "comfortRate": "Taxa de Conforto",
+      "monitoredZones": "Zonas Monitoradas",
+      "thermalStatus": "Status Térmico",
+      "seeGauges": "Ver Gauges ↓",
+      "totalDistance": "Distância Total",
+      "avgDistance": "Distância Média",
+      "activePersons": "Pessoas Ativas"
+    },
+    
+    "charts": {
+      "eventsBySeverity": "Eventos por Severidade",
+      "eventsAndTempByHour": "Eventos e Temperatura por Hora",
+      "currentRiskDistribution": "Distribuição de Risco Atual",
+      "eventsTimeline": "Timeline de Eventos",
+      "temperatureTrends": "Tendência de Temperatura ao Longo do Tempo",
+      "thermalComfortDistribution": "Distribuição de Conforto Térmico",
+      "comfortRateOverTime": "Taxa de Conforto ao Longo do Tempo",
+      "topZonesByEvents": "Top 10 Zonas por Eventos",
+      "temperatureVariationByHour": "Variação de Temperatura por Hora do Dia",
+      "distanceByCategory": "Distribuição por Categoria de Distância",
+      "distanceTempCorrelation": "Correlação Distância vs Temperatura",
+      "distancePatternOverTime": "Padrão de Distância ao Longo do Tempo",
+      "topCategoriesComparison": "Top 10 Categorias - Comparação Detalhada"
+    },
+    
+    "chartLabels": {
+      "events": "Eventos",
+      "avgTemperature": "Temperatura Média",
+      "severity": "Severidade",
+      "riskLevel": "Nível de Risco",
+      "totalEvents": "Total Eventos",
+      "criticalEvents": "Eventos Críticos",
+      "avgTemp": "Temp. Média",
+      "maxTemp": "Temp. Máx",
+      "minTemp": "Temp. Mín",
+      "comfort": "Conforto",
+      "comfortRate": "Taxa de Conforto (%)",
+      "zones": "Zonas",
+      "mean": "Média",
+      "amplitude": "Amplitude",
+      "totalDistance": "Distância Total (km)",
+      "avgDistance": "Distância Média (m)",
+      "eventTotal": "Eventos Totais",
+      "criticals": "Críticos"
+    },
+    
+    "tooltips": {
+      "events": "eventos",
+      "temperature": "Temperatura",
+      "avgTemp": "Temp. Média",
+      "criticalEvents": "Eventos Críticos",
+      "category": "Categoria",
+      "distance": "Distância",
+      "comfortRate": "Taxa de Conforto"
+    },
+    
+    "heatmap": {
+      "title": "Mapa de Calor de Atividades",
+      "subtitle": "Visualize padrões de temperatura e eventos ao longo da semana",
+      "metric": "Métrica",
+      "temperature": "Temperatura",
+      "events": "Eventos",
+      "infoText": "Cores mais intensas = Maior atividade",
+      "lowActivity": "Baixa atividade",
+      "mediumActivity": "Média atividade",
+      "highActivity": "Alta atividade",
+      "avgTempByHourAndDay": "Temperatura Média por Hora e Dia da Semana",
+      "eventsDistributionByHourAndDay": "Distribuição de Eventos por Hora e Dia da Semana"
+    },
+    
+    "criticalTable": {
+      "title": "Pessoa(s) Crítica(s)",
+      "person": "Pessoa",
+      "temperature": "Temperatura",
+      "condition": "Condição",
+      "location": "Localização",
+      "lastReading": "Última Leitura",
+      "minutesAgo": "min atrás"
+    },
+    
+    "gauges": {
+      "title": "Indicadores de Temperatura em Tempo Real",
+      "subtitle": "Monitoramento contínuo das condições térmicas do ambiente",
+      "avgTemperature": "Temperatura Média",
+      "stdDeviation": "Desvio Padrão",
+      "rangeTemp": "Faixa: 0°C - 50°C",
+      "rangeStdDev": "Faixa: 0°C - 10°C"
+    },
+    
+    "topPersonsTable": {
+      "title": "Top 20 Pessoas - Movimento",
+      "rank": "#",
+      "person": "Pessoa",
+      "movements": "Movimentos",
+      "events": "Eventos",
+      "avgTemp": "Temp. Média",
+      "maxTemp": "Temp. Máx",
+      "zones": "Zonas",
+      "legend": {
+        "critical": "Crítica ≥45°",
+        "high": "Alta 40-45°",
+        "normal": "Normal <40°"
+      },
+      "updatedRealtime": "Atualizado em tempo real"
+    },
+    
+    "series": {
+      "avgTemp": "Temp. Média",
+      "maxTemp": "Temp. Máx",
+      "minTemp": "Temp. Mín",
+      "criticalEvents": "Eventos Críticos"
+    },
+    
+    "loading": "Carregando...",
+    "error": "Erro"
   }
 }

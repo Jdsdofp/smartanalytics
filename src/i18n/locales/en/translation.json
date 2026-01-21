@@ -2384,5 +2384,154 @@
       "warning": "Warning",
       "info": "Info"
     }
+  },
+    "temperatureAnalytics": {
+    "title": "Temperature Analytics",
+    "subtitle": "Real-time monitoring",
+    
+    "tabs": {
+      "overview": "Overview",
+      "trends": "Trends",
+      "distance": "Distance"
+    },
+    
+    "filters": {
+      "period": "Period",
+      "to": "to",
+      "groupBy": "Group by",
+      "hour": "Hour",
+      "day": "Day",
+      "week": "Week",
+      "visualization": "Visualization",
+      "bars": "Bars",
+      "line": "Line",
+      "area": "Area"
+    },
+    
+    "kpis": {
+      "totalEvents": "Total Events",
+      "criticalEvents": "Critical Events",
+      "affectedPersons": "Affected Persons",
+      "avgTemperature": "Avg. Temperature",
+      "totalPersons": "Total Persons",
+      "criticals": "Criticals",
+      "heatStress": "Heat Stress",
+      "comfortable": "Comfortable",
+      "periodsAnalyzed": "Periods Analyzed",
+      "comfortRate": "Comfort Rate",
+      "monitoredZones": "Monitored Zones",
+      "thermalStatus": "Thermal Status",
+      "seeGauges": "See Gauges ↓",
+      "totalDistance": "Total Distance",
+      "avgDistance": "Avg. Distance",
+      "activePersons": "Active Persons"
+    },
+    
+    "charts": {
+      "eventsBySeverity": "Events by Severity",
+      "eventsAndTempByHour": "Events and Temperature by Hour",
+      "currentRiskDistribution": "Current Risk Distribution",
+      "eventsTimeline": "Events Timeline",
+      "temperatureTrends": "Temperature Trends Over Time",
+      "thermalComfortDistribution": "Thermal Comfort Distribution",
+      "comfortRateOverTime": "Comfort Rate Over Time",
+      "topZonesByEvents": "Top 10 Zones by Events",
+      "temperatureVariationByHour": "Temperature Variation by Hour of Day",
+      "distanceByCategory": "Distribution by Distance Category",
+      "distanceTempCorrelation": "Distance vs Temperature Correlation",
+      "distancePatternOverTime": "Distance Pattern Over Time",
+      "topCategoriesComparison": "Top 10 Categories - Detailed Comparison"
+    },
+    
+    "chartLabels": {
+      "events": "Events",
+      "avgTemperature": "Average Temperature",
+      "severity": "Severity",
+      "riskLevel": "Risk Level",
+      "totalEvents": "Total Events",
+      "criticalEvents": "Critical Events",
+      "avgTemp": "Avg. Temp",
+      "maxTemp": "Max. Temp",
+      "minTemp": "Min. Temp",
+      "comfort": "Comfort",
+      "comfortRate": "Comfort Rate (%)",
+      "zones": "Zones",
+      "mean": "Mean",
+      "amplitude": "Amplitude",
+      "totalDistance": "Total Distance (km)",
+      "avgDistance": "Avg. Distance (m)",
+      "eventTotal": "Total Events",
+      "criticals": "Criticals"
+    },
+    
+    "tooltips": {
+      "events": "events",
+      "temperature": "Temperature",
+      "avgTemp": "Avg. Temp",
+      "criticalEvents": "Critical Events",
+      "category": "Category",
+      "distance": "Distance",
+      "comfortRate": "Comfort Rate"
+    },
+    
+    "heatmap": {
+      "title": "Activity Heatmap",
+      "subtitle": "Visualize temperature and event patterns throughout the week",
+      "metric": "Metric",
+      "temperature": "Temperature",
+      "events": "Events",
+      "infoText": "More intense colors = Higher activity",
+      "lowActivity": "Low activity",
+      "mediumActivity": "Medium activity",
+      "highActivity": "High activity",
+      "avgTempByHourAndDay": "Average Temperature by Hour and Day of Week",
+      "eventsDistributionByHourAndDay": "Events Distribution by Hour and Day of Week"
+    },
+    
+    "criticalTable": {
+      "title": "Critical Person(s)",
+      "person": "Person",
+      "temperature": "Temperature",
+      "condition": "Condition",
+      "location": "Location",
+      "lastReading": "Last Reading",
+      "minutesAgo": "min ago"
+    },
+    
+    "gauges": {
+      "title": "Real-Time Temperature Indicators",
+      "subtitle": "Continuous monitoring of environmental thermal conditions",
+      "avgTemperature": "Average Temperature",
+      "stdDeviation": "Standard Deviation",
+      "rangeTemp": "Range: 0°C - 50°C",
+      "rangeStdDev": "Range: 0°C - 10°C"
+    },
+    
+    "topPersonsTable": {
+      "title": "Top 20 People - Movement",
+      "rank": "#",
+      "person": "Person",
+      "movements": "Movements",
+      "events": "Events",
+      "avgTemp": "Avg. Temp",
+      "maxTemp": "Max. Temp",
+      "zones": "Zones",
+      "legend": {
+        "critical": "Critical ≥45°",
+        "high": "High 40-45°",
+        "normal": "Normal <40°"
+      },
+      "updatedRealtime": "Updated in real-time"
+    },
+    
+    "series": {
+      "avgTemp": "Avg. Temp",
+      "maxTemp": "Max. Temp",
+      "minTemp": "Min. Temp",
+      "criticalEvents": "Critical Events"
+    },
+    
+    "loading": "Loading...",
+    "error": "Error"
   }
 }

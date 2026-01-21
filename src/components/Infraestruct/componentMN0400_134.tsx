@@ -4,8 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { useTemperatureAnalytics } from '../../hooks/useTemperatureAnalytics';
 import TemperatureHeatmapCalendar from './Components/TemperatureHeatmapCalendar';
+import { useTranslation } from 'react-i18next';
+import { ChartBarIcon, CheckCircleIcon, FireIcon, MapPinIcon } from '@heroicons/react/24/solid';
 
 export default function TemperatureAnalytics() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'distance' | 'temperature'>('overview');
   const [heatmapMetric, setHeatmapMetric] = useState<'temperature' | 'events'>('temperature');
 
@@ -511,7 +514,7 @@ export default function TemperatureAnalytics() {
 
     const option: echarts.EChartsOption = {
       title: {
-        text: 'Timeline de Eventos',
+        text: t('temperatureAnalytics.charts.eventsTimeline'),
         left: 'center',
         top: 10,
         textStyle: {
@@ -2388,7 +2391,6 @@ export default function TemperatureAnalytics() {
     };
   }, [variationAnalysis, chartsInitialized, activeTab]);
 
-
   // ============================================
   // RENDER
   // ============================================
@@ -2419,8 +2421,8 @@ export default function TemperatureAnalytics() {
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">📊 Análise de Temperatura</h1>
-        <p className="text-gray-600">Monitoramento em tempo real</p>
+        <h1 className="text-3xl font-bold text-gray-800">📊 {t('temperatureAnalytics.title')}</h1>
+        <p className="text-gray-600">{t('temperatureAnalytics.subtitle')}</p>
       </div>
 
       {/* Tabs */}
@@ -2442,7 +2444,7 @@ export default function TemperatureAnalytics() {
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            <span>Visão Geral</span>
+            <span>{t('temperatureAnalytics.tabs.overview')}</span>
             {exposureStats?.critical_events > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                 {exposureStats.critical_events}
@@ -2466,7 +2468,7 @@ export default function TemperatureAnalytics() {
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
-            <span>Tendências</span>
+            <span>{t('temperatureAnalytics.tabs.trends')}</span>
           </button>
 
           {/* Tab 3 */}
@@ -2486,7 +2488,7 @@ export default function TemperatureAnalytics() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span>Distância</span>
+            <span>{t('temperatureAnalytics.tabs.distance')}</span>
           </button>
         </div>
       </div>
@@ -2494,14 +2496,14 @@ export default function TemperatureAnalytics() {
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <div className="flex gap-3 items-center flex-wrap">
-          <label className="font-semibold">📅 Período:</label>
+          <label className="font-semibold">📅 {t('temperatureAnalytics.filters.period')}:</label>
           <input
             type="date"
             value={filters.start_date || ''}
             onChange={(e) => setFilters({ ...filters, start_date: e.target.value })}
             className="px-3 py-2 border rounded"
           />
-          <span>até</span>
+          <span>{t('temperatureAnalytics.filters.to')}</span>
           <input
             type="date"
             value={filters.end_date || ''}
@@ -2511,15 +2513,15 @@ export default function TemperatureAnalytics() {
 
           {(activeTab === 'trends' || activeTab === 'distance') && (
             <>
-              <label className="font-semibold ml-4">Agrupar por:</label>
+              <label className="font-semibold ml-4">{t('temperatureAnalytics.filters.groupBy')}:</label>
               <select
                 value={filters.groupBy || 'day'}
                 onChange={(e) => setFilters({ ...filters, groupBy: e.target.value as any })}
                 className="px-3 py-2 border rounded"
               >
-                <option value="hour">Hora</option>
-                <option value="day">Dia</option>
-                {activeTab === 'trends' && <option value="week">Semana</option>}
+                <option value="hour">{t('temperatureAnalytics.filters.hour')}</option>
+                <option value="day">{t('temperatureAnalytics.filters.day')}</option>
+                {activeTab === 'trends' && <option value="week">{t('temperatureAnalytics.filters.week')}</option>}
               </select>
             </>
           )}
@@ -2542,7 +2544,7 @@ export default function TemperatureAnalytics() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-xs font-medium">Total de Eventos</p>
+                  <p className="text-gray-500 text-xs font-medium">{t('temperatureAnalytics.kpis.totalEvents')}</p>
                   <p className="text-2xl font-bold text-blue-600">
                     {exposureStats?.total_events?.toLocaleString() || 0}
                   </p>
@@ -2559,7 +2561,7 @@ export default function TemperatureAnalytics() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-xs font-medium">Eventos Críticos</p>
+                  <p className="text-gray-500 text-xs font-medium">{t('temperatureAnalytics.kpis.criticalEvents')}</p>
                   <p className="text-2xl font-bold text-red-600">
                     {exposureStats?.critical_events?.toLocaleString() || 0}
                   </p>
@@ -2576,7 +2578,7 @@ export default function TemperatureAnalytics() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-xs font-medium">Pessoas Afetadas</p>
+                  <p className="text-gray-500 text-xs font-medium">{t('temperatureAnalytics.kpis.affectedPersons')}</p>
                   <p className="text-2xl font-bold text-purple-600">
                     {exposureStats?.unique_persons?.toLocaleString() || 0}
                   </p>
@@ -2593,7 +2595,7 @@ export default function TemperatureAnalytics() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-xs font-medium">Temp. Média</p>
+                  <p className="text-gray-500 text-xs font-medium">{t('temperatureAnalytics.kpis.avgTemperature')}</p>
                   <p className="text-2xl font-bold text-orange-600">
                     {Number(exposureStats?.avg_temp || 0).toFixed(2)}°C
                   </p>
@@ -2614,7 +2616,7 @@ export default function TemperatureAnalytics() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-gray-500 text-xs font-medium">Total de Pessoas</p>
+                    <p className="text-gray-500 text-xs font-medium">{t('temperatureAnalytics.kpis.totalPersons')}</p>
                     <p className="text-2xl font-bold text-indigo-600">{currentStats.total_persons || 0}</p>
                   </div>
                 </div>
@@ -2629,7 +2631,7 @@ export default function TemperatureAnalytics() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-gray-500 text-xs font-medium">Críticos</p>
+                    <p className="text-gray-500 text-xs font-medium">{t('temperatureAnalytics.kpis.criticals')}</p>
                     <p className="text-2xl font-bold text-red-600">{currentStats.critical_count || 0}</p>
                   </div>
                 </div>
@@ -2644,7 +2646,7 @@ export default function TemperatureAnalytics() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-gray-500 text-xs font-medium">Estresse Térmico</p>
+                    <p className="text-gray-500 text-xs font-medium">{t('temperatureAnalytics.kpis.heatStress')}</p>
                     <p className="text-2xl font-bold text-orange-600">{currentStats.heat_stress_count || 0}</p>
                   </div>
                 </div>
@@ -2659,7 +2661,7 @@ export default function TemperatureAnalytics() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-gray-500 text-xs font-medium">Confortáveis</p>
+                    <p className="text-gray-500 text-xs font-medium">{t('temperatureAnalytics.kpis.comfortable')}</p>
                     <p className="text-2xl font-bold text-green-600">{currentStats.comfortable_count || 0}</p>
                   </div>
                 </div>
@@ -2690,12 +2692,12 @@ export default function TemperatureAnalytics() {
               {/* Controles do Timeline */}
               <div className="bg-white p-6 rounded-lg shadow mb-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gray-800">Timeline de Eventos</h3>
+                  <h3 className="text-lg font-bold text-gray-800">{t('temperatureAnalytics.charts.eventsTimeline')}</h3>
 
                   <div className="flex gap-4">
                     {/* Agrupamento */}
                     <div className="flex items-center gap-2">
-                      <label className="text-sm font-semibold text-gray-700">Agrupar por:</label>
+                      <label className="text-sm font-semibold text-gray-700">{t('temperatureAnalytics.filters.groupBy')}:</label>
                       <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
                         <button
                           onClick={() => setTimelineGroupBy('hour')}
@@ -2704,7 +2706,7 @@ export default function TemperatureAnalytics() {
                             : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
-                          Hora
+                          {t('temperatureAnalytics.filters.hour')}
                         </button>
                         <button
                           onClick={() => setTimelineGroupBy('day')}
@@ -2713,7 +2715,7 @@ export default function TemperatureAnalytics() {
                             : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
-                          Dia
+                          {t('temperatureAnalytics.filters.day')}
                         </button>
                         <button
                           onClick={() => setTimelineGroupBy('week')}
@@ -2722,14 +2724,14 @@ export default function TemperatureAnalytics() {
                             : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
-                          Semana
+                          {t('temperatureAnalytics.filters.week')}
                         </button>
                       </div>
                     </div>
 
                     {/* Tipo de Gráfico */}
                     <div className="flex items-center gap-2">
-                      <label className="text-sm font-semibold text-gray-700">Visualização:</label>
+                      <label className="text-sm font-semibold text-gray-700">{t('temperatureAnalytics.filters.visualization')}:</label>
                       <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
                         <button
                           onClick={() => setTimelineChartType('bar')}
@@ -2738,7 +2740,7 @@ export default function TemperatureAnalytics() {
                             : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
-                          📊 Barras
+                          📊 {t('temperatureAnalytics.filters.bars')}
                         </button>
                         <button
                           onClick={() => setTimelineChartType('line')}
@@ -2747,7 +2749,7 @@ export default function TemperatureAnalytics() {
                             : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
-                          📈 Linha
+                          📈 {t('temperatureAnalytics.filters.line')}
                         </button>
                         <button
                           onClick={() => setTimelineChartType('line-area')}
@@ -2756,7 +2758,7 @@ export default function TemperatureAnalytics() {
                             : 'text-gray-600 hover:text-gray-900'
                             }`}
                         >
-                          📉 Área
+                          📉 {t('temperatureAnalytics.filters.area')}
                         </button>
                       </div>
                     </div>
@@ -2776,10 +2778,10 @@ export default function TemperatureAnalytics() {
                 <div>
                   <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
                     <span className="text-3xl">🔥</span>
-                    Mapa de Calor de Atividades
+                    {t('temperatureAnalytics.heatmap.title')}
                   </h2>
                   <p className="text-blue-100 text-sm">
-                    Visualize padrões de temperatura e eventos ao longo da semana
+                    {t('temperatureAnalytics.heatmap.subtitle')}
                   </p>
                 </div>
               </div>
@@ -2793,7 +2795,7 @@ export default function TemperatureAnalytics() {
                   <div className="flex items-center gap-3">
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                       <span className="text-xl">📊</span>
-                      Métrica:
+                      {t('temperatureAnalytics.heatmap.metric')}:
                     </label>
                     <div className="flex gap-2 bg-gray-100 p-1.5 rounded-xl">
                       <button
@@ -2803,7 +2805,7 @@ export default function TemperatureAnalytics() {
                           : 'bg-transparent text-gray-600 hover:text-gray-900'
                           }`}
                       >
-                        🌡️ Temperatura
+                        🌡️ {t('temperatureAnalytics.heatmap.temperature')}
                       </button>
                       <button
                         onClick={() => setHeatmapMetric('events')}
@@ -2812,7 +2814,7 @@ export default function TemperatureAnalytics() {
                           : 'bg-transparent text-gray-600 hover:text-gray-900'
                           }`}
                       >
-                        📈 Eventos
+                        📈 {t('temperatureAnalytics.heatmap.events')}
                       </button>
                     </div>
                   </div>
@@ -2919,61 +2921,119 @@ export default function TemperatureAnalytics() {
       {/* ======================= */}
       {activeTab === 'trends' && chartsInitialized && (
         <>
-          {/* KPIs for Trends - LAYOUT REORGANIZADO */}
-          {temperatureTrends?.data && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-              {/* Card 1 */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-lg border border-blue-200">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-blue-600 text-2xl">📊</span>
-                  <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full">Análise</span>
-                </div>
-                <p className="text-blue-700 text-sm font-semibold mb-1">Períodos Analisados</p>
-                <p className="text-4xl font-bold text-blue-900">{temperatureTrends.data.length}</p>
-              </div>
+       {/* KPIs for Trends - GLASSMORPHISM OFFSET STYLE */}
+{temperatureTrends?.data && (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    {/* Card 1 - Azul */}
+    <div className="relative group">
+      {/* Base com cor sólida (background fixo) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl translate-y-2 translate-x-2"></div>
+      
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl blur-xl opacity-30"></div>
+      
+      {/* Card content FLUTUANTE - sempre deslocado */}
+      <div className="relative bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/40 shadow-2xl hover:translate-y-[-2px] hover:translate-x-[-2px] transition-transform duration-300">
+        <div className="flex items-center justify-between mb-3">
+          <ChartBarIcon className="w-10 h-10 text-white drop-shadow-lg" />
+          <span className="bg-white/30 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/50">
+            Análise
+          </span>
+        </div>
+        <p className="text-white text-sm font-semibold mb-2">
+          {t('temperatureAnalytics.kpis.periodsAnalyzed')}
+        </p>
+        <p className="text-5xl font-bold text-white drop-shadow-lg">
+          {temperatureTrends.data.length}
+        </p>
+      </div>
+    </div>
 
-              {/* Card 2 */}
-              <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-lg border border-green-200">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-green-600 text-2xl">✅</span>
-                  <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">Conforto</span>
-                </div>
-                <p className="text-green-700 text-sm font-semibold mb-1">Taxa de Conforto</p>
-                <p className="text-4xl font-bold text-green-900">
-                  {comfortAnalysis?.timeline?.[comfortAnalysis.timeline.length - 1]?.comfort_rate || 0}%
-                </p>
-              </div>
+    {/* Card 2 - Verde */}
+    <div className="relative group">
+      {/* Base com cor sólida */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl translate-y-2 translate-x-2"></div>
+      
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl blur-xl opacity-30"></div>
+      
+      {/* Card content FLUTUANTE */}
+      <div className="relative bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/40 shadow-2xl hover:translate-y-[-2px] hover:translate-x-[-2px] transition-transform duration-300">
+        <div className="flex items-center justify-between mb-3">
+          <CheckCircleIcon className="w-10 h-10 text-white drop-shadow-lg" />
+          <span className="bg-white/30 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/50">
+            {t('temperatureAnalytics.chartLabels.comfort')}
+          </span>
+        </div>
+        <p className="text-white text-sm font-semibold mb-2">
+          {t('temperatureAnalytics.kpis.comfortRate')}
+        </p>
+        <p className="text-5xl font-bold text-white drop-shadow-lg">
+          {comfortAnalysis?.timeline?.[comfortAnalysis.timeline.length - 1]?.comfort_rate || 0}%
+        </p>
+      </div>
+    </div>
 
-              {/* Card 3 */}
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-lg border border-purple-200">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-purple-600 text-2xl">📍</span>
-                  <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full">Zonas</span>
-                </div>
-                <p className="text-purple-700 text-sm font-semibold mb-1">Zonas Monitoradas</p>
-                <p className="text-4xl font-bold text-purple-900">{zonePatterns?.zone_stats?.length || 0}</p>
-              </div>
+    {/* Card 3 - Roxo */}
+    <div className="relative group">
+      {/* Base com cor sólida */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl translate-y-2 translate-x-2"></div>
+      
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl blur-xl opacity-30"></div>
+      
+      {/* Card content FLUTUANTE */}
+      <div className="relative bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/40 shadow-2xl hover:translate-y-[-2px] hover:translate-x-[-2px] transition-transform duration-300">
+        <div className="flex items-center justify-between mb-3">
+          <MapPinIcon className="w-10 h-10 text-white drop-shadow-lg" />
+          <span className="bg-white/30 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/50">
+            {t('temperatureAnalytics.chartLabels.zones')}
+          </span>
+        </div>
+        <p className="text-white text-sm font-semibold mb-2">
+          {t('temperatureAnalytics.kpis.monitoredZones')}
+        </p>
+        <p className="text-5xl font-bold text-white drop-shadow-lg">
+          {zonePatterns?.zone_stats?.length || 0}
+        </p>
+      </div>
+    </div>
 
-              {/* Card 4 - Destaque */}
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl shadow-lg border border-orange-200">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-orange-600 text-2xl">🌡️</span>
-                  <span className="bg-orange-600 text-white text-xs px-2 py-1 rounded-full">Live</span>
-                </div>
-                <p className="text-orange-700 text-sm font-semibold mb-1">Status Térmico</p>
-                <p className="text-lg font-bold text-orange-900">Ver Gauges ↓</p>
-              </div>
-            </div>
-          )}
+    {/* Card 4 - Laranja */}
+    <div className="relative group">
+      {/* Base com cor sólida */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl translate-y-2 translate-x-2"></div>
+      
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl blur-xl opacity-30"></div>
+      
+      {/* Card content FLUTUANTE */}
+      <div className="relative bg-white/5 backdrop-blur-md p-6 rounded-2xl border border-white/40 shadow-2xl hover:translate-y-[-2px] hover:translate-x-[-2px] transition-transform duration-300">
+        <div className="flex items-center justify-between mb-3">
+          <FireIcon className="w-10 h-10 text-white drop-shadow-lg" />
+          <span className="bg-white/30 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/50">
+            Live
+          </span>
+        </div>
+        <p className="text-white text-sm font-semibold mb-2">
+          {t('temperatureAnalytics.kpis.thermalStatus')}
+        </p>
+        <p className="text-xl font-bold text-white drop-shadow-lg">
+          {t('temperatureAnalytics.kpis.seeGauges')}
+        </p>
+      </div>
+    </div>
+  </div>
+)}
 
           {/* Gauges em Destaque */}
           <div className="bg-gradient-to-br from-slate-50 to-slate-100 p-8 rounded-2xl shadow-xl mb-6 border border-slate-200">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                🌡️ Indicadores de Temperatura em Tempo Real
+                🌡️ {t('temperatureAnalytics.gauges.title')}
               </h3>
               <p className="text-gray-600">
-                Monitoramento contínuo das condições térmicas do ambiente
+                {t('temperatureAnalytics.gauges.subtitle')}
               </p>
             </div>
             <div ref={tempGaugeChartRef} style={{ height: '320px' }}></div>
@@ -2983,16 +3043,16 @@ export default function TemperatureAnalytics() {
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 via-blue-400 via-yellow-400 to-red-400"></div>
-                  <span className="text-sm font-semibold text-gray-700">Temperatura Média</span>
+                  <span className="text-sm font-semibold text-gray-700">{t('temperatureAnalytics.gauges.avgTemperature')}</span>
                 </div>
-                <p className="text-xs text-gray-600">Faixa: 0°C - 50°C</p>
+                <p className="text-xs text-gray-600">{t('temperatureAnalytics.gauges.rangeTemp')}</p>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 via-blue-400 via-yellow-400 to-red-400"></div>
-                  <span className="text-sm font-semibold text-gray-700">Desvio Padrão</span>
+                  <span className="text-sm font-semibold text-gray-700">{t('temperatureAnalytics.gauges.stdDeviation')}</span>
                 </div>
-                <p className="text-xs text-gray-600">Faixa: 0°C - 10°C</p>
+                <p className="text-xs text-gray-600">{t('temperatureAnalytics.gauges.rangeStdDev')}</p>
               </div>
             </div>
           </div>
