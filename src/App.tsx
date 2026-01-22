@@ -21,6 +21,9 @@ import MN0400_135 from './pages/Analytics/Infraestrict/MN0400_135';
 import MN0400_134 from './pages/Analytics/Infraestrict/MN0400_134';
 import MN0400_132 from './pages/Analytics/Infraestrict/MN0400_132';
 import MN0400_344 from './pages/Analytics/Logistics/MN0400_344';
+import DashboardHub from './components/DashboardHub';
+import DashboardHubCompact from './components/Dashboardhubcompact';
+import DashboardHubHierarchical from './components/Dashboardhubhierarchica';
 
 function App() {
 
@@ -45,6 +48,32 @@ function App() {
         element={
           <PrivateRoute>
             <Perfil />
+          </PrivateRoute>
+        }
+      />
+
+            {/* Dashboard Hub Routes */}
+      <Route
+        path="/dashboard-hub"
+        element={
+          <PrivateRoute>
+            <DashboardHub />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/dashboard-hub/compact"
+        element={
+          <PrivateRoute>
+            <DashboardHubCompact />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/dashboard-hub/hierarchical"
+        element={
+          <PrivateRoute>
+            <DashboardHubHierarchical />
           </PrivateRoute>
         }
       />
