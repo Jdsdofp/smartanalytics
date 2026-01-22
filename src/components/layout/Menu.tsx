@@ -34,6 +34,7 @@ import { useCompany } from '../../hooks/useCompany'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { filterMenuByPermissions } from '../../utils/menuPermissions'
 import { usePermissions } from '../../hooks/usePermissions'
+import { useMenu } from '../../context/MenuContext'
 
 
 export interface MenuItemProps {
@@ -340,11 +341,12 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
   const { company } = useCompany()
   const { user } = useAuth()
   const { userPermissions } = usePermissions()
+  const { collapsed, setCollapsed } = useMenu()
 
-  const [collapsed, setCollapsed] = useState(() => {
-    const saved = localStorage.getItem('menuCollapsed')
-    return saved ? JSON.parse(saved) : false
-  })
+  // const [collapsed, setCollapsed] = useState(() => {
+  //   const saved = localStorage.getItem('menuCollapsed')
+  //   return saved ? JSON.parse(saved) : false
+  // })
 
   const [openItems, setOpenItems] = useState<Set<string>>(() => {
     const saved = localStorage.getItem('menuOpenItems')
@@ -449,7 +451,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
       ]
     },
     {
-      icon: TruckIcon, label: 'Logistics Analytics', path: '/MN0400_005', hidden: true,
+      icon: TruckIcon, label: 'Logistics Analytics', path: '/MN0400_005',
       children: [
         {
           icon: ArchiveBoxIcon, label: 'Inventory Management', path: '/MN0400_310', children: [
@@ -479,11 +481,11 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
           ]
         },
         {
-          icon: HomeModernIcon, label: 'Warehouse Operations', path: '/MN0400_340', hidden: true, children: [
+          icon: HomeModernIcon, label: 'Warehouse Operations', path: '/MN0400_340', children: [
             { icon: ChartBarIcon, label: 'Warehouse Space Utilization', path: '/MN0400_341', permissionCode: 'MN0400_341' },
             { icon: ChartBarIcon, label: 'Picking & Packing Efficiency', path: '/MN0400_342', permissionCode: 'MN0400_342' },
             { icon: ChartBarIcon, label: 'Dock Door Utilization', path: '/MN0400_343', permissionCode: 'MN0400_343' },
-            { icon: DocumentTextIcon, label: 'Warehouse Productivity Metrics', path: '/MN0400_344', permissionCode: 'MN0400_344' }
+            { icon: DocumentTextIcon, label: 'Warehouse Orders Overview', path: '/MN0400_344', permissionCode: 'MN0400_344' }
           ]
         },
         {

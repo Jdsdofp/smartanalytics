@@ -37,7 +37,8 @@
     "technicalInfo": "Informações Técnicas",
     "companyId": "ID da Empresa",
     "webKey": "Chave Web",
-    "address": "Endereço"
+    "address": "Endereço",
+    "favorites": "Favoritos"
   },
   "login": {
     "logoAlt": "Logo Smart Analytics",
@@ -50,6 +51,12 @@
     "loggingIn": "Entrando...",
     "error": "Erro ao fazer login",
     "copyright": "© 2025 Smart Analytics. Todos os direitos reservados."
+  },
+    "favorites": {
+    "add": "Adicionar aos favoritos",
+    "remove": "Remover dos favoritos",
+    "favorite": "Favoritar",
+    "favorited": "Favoritado"
   },
   "assets": {
     "title": "Painel de Gestão de Ativos",

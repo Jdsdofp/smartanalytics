@@ -37,8 +37,10 @@
     "technicalInfo": "Información Técnica",
     "companyId": "ID de Empresa",
     "webKey": "Clave Web",
-    "address": "Dirección"
+    "address": "Dirección",
+    "favorites": "Favoritos"
   },
+  
   "login": {
     "logoAlt": "Logo de Smart Analytics",
     "subtitle": "Inicia sesión para acceder a tu cuenta",
@@ -50,6 +52,12 @@
     "loggingIn": "Iniciando sesión...",
     "error": "Error al iniciar sesión",
     "copyright": "© 2025 Smart Analytics. Todos los derechos reservados."
+  },
+  "favorites": {
+    "add": "Agregar a favoritos",
+    "remove": "Quitar de favoritos",
+    "favorite": "Favorito",
+    "favorited": "Favoritado"
   },
   "assets": {
     "title": "Panel de Gestión de Activos",

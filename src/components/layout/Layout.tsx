@@ -5,17 +5,31 @@ import Menu from './Menu'
 import { useSearchParams, useLocation } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { useTranslation } from 'react-i18next'
+import { useFavorites } from '../../context/FavoritesContext'
+import { getMenuItemInfo, menuItemsRaw } from '../../utils/menuUtils'
 
 interface LayoutProps {
   children: React.ReactNode
   showEmbedButton?: boolean
+  showFavoriteButton?: boolean
+  favoriteConfig?: {
+    title?: string
+    category?: string
+    icon?: string
+  }
 }
 
-export default function Layout({ children, showEmbedButton = true }: LayoutProps) {
+export default function Layout({ 
+  children, 
+  showEmbedButton = true,
+  showFavoriteButton = true,
+  favoriteConfig
+}: LayoutProps) {
   const { t } = useTranslation()
+  const location = useLocation()
+  const { isFavorite, addFavorite, removeFavorite, favorites } = useFavorites()
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchParams] = useSearchParams()
-  const location = useLocation()
 
   const isEmbedded = searchParams.get('embedded') === 'true' || searchParams.get('e') === 'true'
 
@@ -25,7 +39,44 @@ export default function Layout({ children, showEmbedButton = true }: LayoutProps
   const [copySuccess, setCopySuccess] = useState(false)
   const [generatingQR, setGeneratingQR] = useState(false)
 
-  // Detectar e normalizar token
+  const currentPath = location.pathname
+  const isCurrentFavorite = isFavorite(currentPath)
+
+  // Obtém informações do menu com fallback
+  const getMenuInfo = () => {
+    // Se tem configuração manual completa, usa ela
+    if (favoriteConfig?.title && favoriteConfig?.category) {
+      return {
+        title: favoriteConfig.title,
+        category: favoriteConfig.category,
+        icon: favoriteConfig.icon || '📄'
+      }
+    }
+
+    // Tenta buscar do menu
+    const menuInfo = getMenuItemInfo(menuItemsRaw, currentPath)
+    
+    if (menuInfo) {
+      return {
+        title: favoriteConfig?.title || menuInfo.title,
+        category: favoriteConfig?.category || menuInfo.category,
+        icon: favoriteConfig?.icon || menuInfo.icon
+      }
+    }
+
+    // Fallback para geração automática
+    const pathSegments = currentPath.split('/').filter(Boolean)
+    const lastSegment = pathSegments[pathSegments.length - 1] || 'Home'
+    
+    return {
+      title: favoriteConfig?.title || lastSegment.replace(/_/g, ' ').toUpperCase(),
+      category: favoriteConfig?.category || (pathSegments.length > 1 
+        ? pathSegments[0].charAt(0).toUpperCase() + pathSegments[0].slice(1) 
+        : 'Dashboard'),
+      icon: favoriteConfig?.icon || '📄'
+    }
+  }
+
   useEffect(() => {
     const urlToken = searchParams.get('token')
     const shortToken = searchParams.get('t')
@@ -63,7 +114,6 @@ export default function Layout({ children, showEmbedButton = true }: LayoutProps
     setGeneratingQR(true)
     const token = sessionStorage.getItem('token')
     const baseUrl = window.location.origin
-    const currentPath = location.pathname
     const embedUrlWithParams = `${baseUrl}${currentPath}?embedded=true&token=${token}`
 
     setEmbedUrl(embedUrlWithParams)
@@ -120,6 +170,24 @@ export default function Layout({ children, showEmbedButton = true }: LayoutProps
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
   }
 
+  const handleToggleFavorite = () => {
+    const menuInfo = getMenuInfo()
+
+    if (isCurrentFavorite) {
+      const favToRemove = favorites.find(f => f.path === currentPath)
+      if (favToRemove) {
+        removeFavorite(favToRemove.id)
+      }
+    } else {
+      addFavorite({
+        path: currentPath,
+        title: menuInfo.title,
+        category: menuInfo.category,
+        icon: menuInfo.icon
+      })
+    }
+  }
+
   return (
     <>
       {isEmbedded ? (
@@ -134,31 +202,62 @@ export default function Layout({ children, showEmbedButton = true }: LayoutProps
             <main className="flex-1 w-full min-w-0 relative">
               <div className="w-full sm:px-2 lg:px-1 sm:py-1">
                 <div className="relative">
-                  {showEmbedButton && (
-                    <div className="absolute top-2 right-2 z-30">
-                      <button
-                        onClick={generateEmbedUrl}
-                        disabled={generatingQR}
-                        className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-full hover:from-green-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 group disabled:opacity-50 disabled:cursor-not-allowed"
-                        title={t('embed.button.title')}
-                      >
-                        {generatingQR ? (
-                          <>
-                            <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span className="font-medium text-sm hidden sm:inline">{t('embed.button.generating')}</span>
-                          </>
-                        ) : (
-                          <>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
-                            </svg>
-                            <span className="font-medium text-sm hidden sm:inline">{t('embed.button.label')}</span>
-                          </>
-                        )}
-                      </button>
+                  {(showEmbedButton || showFavoriteButton) && (
+                    <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
+                      {showFavoriteButton && (
+                        <button
+                          onClick={handleToggleFavorite}
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-full transition-all shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                            isCurrentFavorite
+                              ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:from-yellow-600 hover:to-orange-600'
+                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
+                          }`}
+                          title={isCurrentFavorite ? t('favorites.remove') : t('favorites.add')}
+                        >
+                          <svg 
+                            className="w-5 h-5" 
+                            fill={isCurrentFavorite ? 'currentColor' : 'none'}
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={2} 
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" 
+                            />
+                          </svg>
+                          <span className="font-medium text-sm hidden sm:inline">
+                            {isCurrentFavorite ? t('favorites.favorited') : t('favorites.favorite')}
+                          </span>
+                        </button>
+                      )}
+
+                      {showEmbedButton && (
+                        <button
+                          onClick={generateEmbedUrl}
+                          disabled={generatingQR}
+                          className="cursor-pointer flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-full hover:from-green-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 group disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={t('embed.button.title')}
+                        >
+                          {generatingQR ? (
+                            <>
+                              <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              <span className="font-medium text-sm hidden sm:inline">{t('embed.button.generating')}</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+                              </svg>
+                              <span className="font-medium text-sm hidden sm:inline">{t('embed.button.label')}</span>
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   )}
                   {children}
@@ -322,6 +421,7 @@ export default function Layout({ children, showEmbedButton = true }: LayoutProps
                     </div>
                   </div>
                 </div>
+                
               </div>
 
               {/* Informações de Segurança */}

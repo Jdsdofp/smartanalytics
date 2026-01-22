@@ -7,6 +7,8 @@ import './index.css'
 import { ThemeProvider } from './context/ThemeContext.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import { LanguageSync } from './components/LanguageSync.tsx'
+import { FavoritesProvider } from './context/FavoritesContext.tsx'
+import { MenuProvider } from './context/MenuContext.tsx'
 
 
 
@@ -15,8 +17,12 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <LanguageSync/>
-          <App />
+          <MenuProvider>
+            <LanguageSync/>
+            <FavoritesProvider>
+              <App />
+            </FavoritesProvider>
+          </MenuProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

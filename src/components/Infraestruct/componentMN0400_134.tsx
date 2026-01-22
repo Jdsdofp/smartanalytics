@@ -2952,9 +2952,9 @@ export default function TemperatureAnalytics() {
                           {/* Ranking */}
                           <td className="px-3 py-2 text-center">
                             <div className={`inline-flex items-center justify-center w-6 h-6 rounded-md font-semibold text-[10px] ${index === 0 ? 'bg-red-500 text-white' :
-                                index === 1 ? 'bg-orange-500 text-white' :
-                                  index === 2 ? 'bg-yellow-500 text-white' :
-                                    'bg-gray-200 text-gray-700'
+                              index === 1 ? 'bg-orange-500 text-white' :
+                                index === 2 ? 'bg-yellow-500 text-white' :
+                                  'bg-gray-200 text-gray-700'
                               }`}>
                               {index + 1}
                             </div>

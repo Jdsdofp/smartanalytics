@@ -37,7 +37,8 @@
     "technicalInfo": "Technical Information",
     "companyId": "Company ID",
     "webKey": "WebKey",
-    "address": "Address"
+    "address": "Address",
+    "favorites": "Favorites"
   },
   "login": {
     "logoAlt": "Smart Analytics Logo",
@@ -50,6 +51,12 @@
     "loggingIn": "Signing in...",
     "error": "Error signing in",
     "copyright": "© 2025 Smart Analytics. All rights reserved."
+  },
+   "favorites": {
+    "add": "Add to favorites",
+    "remove": "Remove from favorites",
+    "favorite": "Favorite",
+    "favorited": "Favorited"
   },
   "assets": {
     "title": "Asset Management Dashboard",
