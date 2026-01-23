@@ -542,11 +542,11 @@ export default function OrderDashboard() {
       )}
 
       {/* Filters */}
-<FilterPanel
-  initialFilters={initialFilters}  // ← Certifique que está passando aqui
-  onApplyFilters={fetchOrders}
-  onResetFilters={() => fetchOrders()}
-/>
+      <FilterPanel
+        initialFilters={initialFilters}  // ← Certifique que está passando aqui
+        onApplyFilters={fetchOrders}
+        onResetFilters={() => fetchOrders()}
+      />
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

@@ -123,7 +123,7 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
             {activeCount > 0 && (
               <button
                 onClick={handleReset}
-                className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1"
+                className="cursor-pointer text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1"
               >
                 <XMarkIcon className="w-4 h-4" />
                 Clear All
@@ -131,7 +131,7 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
             )}
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
+              className="cursor-pointer text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
             >
               {isExpanded ? 'Hide' : 'Show'} Filters
             </button>
@@ -147,14 +147,14 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
             {/* Start Date */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4 text-gray-500" />
+                <CalendarIcon className="cursor-pointer w-4 h-4 text-gray-500" />
                 Start Date
               </label>
               <input
                 type="date"
                 value={formatDateForInput(filters.startDate)}
                 onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="cursor-pointer w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
               {/* {filters.startDate && (
                 <p className="mt-1.5 text-xs text-gray-600 flex items-center gap-1">
@@ -167,14 +167,14 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
             {/* End Date */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4 text-gray-500" />
+                <CalendarIcon className="cursor-pointer w-4 h-4 text-gray-500" />
                 End Date
               </label>
               <input
                 type="date"
                 value={formatDateForInput(filters.endDate)}
                 onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="cursor-pointer w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
               {/* {filters.endDate && (
                 <p className="mt-1.5 text-xs text-gray-600 flex items-center gap-1">
@@ -248,7 +248,7 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
                       });
                     }}
                     className={`
-                      px-4 py-2.5 rounded-xl border-2 font-medium text-sm
+                     cursor-pointer px-4 py-2.5 rounded-xl border-2 font-medium text-sm
                       transition-all duration-200
                       flex items-center gap-2
                       ${colorClasses[color]}

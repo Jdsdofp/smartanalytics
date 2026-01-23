@@ -73,7 +73,7 @@ function Header({ onMenuClick }: HeaderProps) {
             onClick={toggleCollapsed}
             className={`
               hidden lg:flex items-center justify-center
-              w-10 h-10 rounded-xl
+              w-10 h-10 rounded-full
               bg-gradient-to-br from-primary-500 to-primary-700
               text-white
               hover:shadow-lg hover:scale-105
@@ -131,7 +131,7 @@ function Header({ onMenuClick }: HeaderProps) {
           <div className="relative group">
             <button
               className="
-                flex items-center gap-3 p-1.5 pr-3 rounded-2xl
+                cursor-pointer flex items-center gap-3 p-1.5 pr-3 rounded-2xl
                 hover:bg-gray-100 dark:hover:bg-gray-800
                 transition-all active:scale-95
               "
@@ -139,7 +139,7 @@ function Header({ onMenuClick }: HeaderProps) {
               {/* Avatar */}
               <div
                 className="
-                  w-9 h-9 rounded-xl
+                  cursor-pointer w-9 h-9 rounded-full
                   flex items-center justify-center
                   bg-gradient-to-br from-primary-500 to-primary-700
                   text-white font-bold text-sm

@@ -26,7 +26,12 @@ export const exportToPDF = <T extends Record<string, any>>(
   fileName: string,
   title?: string
 ): void => {
-  const doc = new jsPDF();
+  
+    const doc = new jsPDF({
+    orientation: 'landscape', // 'portrait' (padrão) ou 'landscape'
+    unit: 'mm',
+    format: 'a4'
+  });
   
   // Add title
   if (title) {
