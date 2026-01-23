@@ -1,5 +1,5 @@
 // src/components/Logistics/Orders/FilterPanel.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   FunnelIcon, 
   MagnifyingGlassIcon,
@@ -16,8 +16,19 @@ interface FilterPanelProps {
 }
 
 export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: FilterPanelProps) {
-  const [filters, setFilters] = useState<OrderFilters>(initialFilters || {});
+  const [filters, setFilters] = useState<OrderFilters>({});
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // =====================================
+  // 🔄 SYNC WITH INITIAL FILTERS
+  // =====================================
+  useEffect(() => {
+    console.log('FilterPanel - initialFilters received:', initialFilters);
+    if (initialFilters && Object.keys(initialFilters).length > 0) {
+      setFilters(initialFilters);
+      console.log('FilterPanel - filters updated to:', initialFilters);
+    }
+  }, [initialFilters]);
 
   const statusOptions = [
     { value: 'complete', label: 'Complete', color: 'green' },
@@ -28,10 +39,12 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
   ];
 
   const handleApply = () => {
+    console.log('Applying filters:', filters);
     onApplyFilters(filters);
   };
 
   const handleReset = () => {
+    console.log('Resetting filters');
     setFilters({});
     onResetFilters();
   };
@@ -46,7 +59,48 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
     return count;
   };
 
+  // Helper para formatar data para input type="date" (YYYY-MM-DD)
+  const formatDateForInput = (dateString: string | undefined): string => {
+    if (!dateString) return '';
+    
+    console.log('formatDateForInput input:', dateString);
+    
+    // Se já está no formato YYYY-MM-DD, retorna direto
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      return dateString;
+    }
+    
+    // Se tem hora junto (YYYY-MM-DD HH:mm:ss), extrai só a data
+    if (dateString.includes(' ')) {
+      return dateString.split(' ')[0];
+    }
+    
+    return dateString;
+  };
+
+  // Helper para formatar data para exibição (DD/MM/YYYY)
+  const formatDateForDisplay = (dateString: string | undefined): string => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
   const activeCount = getActiveFiltersCount();
+
+  // Debug: log do estado atual
+  useEffect(() => {
+    console.log('FilterPanel - current filters state:', filters);
+    console.log('FilterPanel - active count:', activeCount);
+  }, [filters, activeCount]);
 
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
@@ -98,10 +152,16 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
               </label>
               <input
                 type="date"
-                value={filters.startDate || ''}
+                value={formatDateForInput(filters.startDate)}
                 onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
                 className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
+              {/* {filters.startDate && (
+                <p className="mt-1.5 text-xs text-gray-600 flex items-center gap-1">
+                  <CalendarIcon className="w-3 h-3" />
+                  Selected: {formatDateForDisplay(filters.startDate)}
+                </p>
+              )} */}
             </div>
 
             {/* End Date */}
@@ -112,10 +172,16 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
               </label>
               <input
                 type="date"
-                value={filters.endDate || ''}
+                value={formatDateForInput(filters.endDate)}
                 onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                 className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
+              {/* {filters.endDate && (
+                <p className="mt-1.5 text-xs text-gray-600 flex items-center gap-1">
+                  <CalendarIcon className="w-3 h-3" />
+                  Selected: {formatDateForDisplay(filters.endDate)}
+                </p>
+              )} */}
             </div>
 
             {/* Search */}
@@ -134,6 +200,11 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
                 />
                 <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
+              {filters.searchTerm && (
+                <p className="mt-1.5 text-xs text-gray-600">
+                  Searching for: <span className="font-semibold">"{filters.searchTerm}"</span>
+                </p>
+              )}
             </div>
           </div>
 
@@ -228,13 +299,13 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
             {filters.startDate && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium">
                 <CalendarIcon className="w-3 h-3" />
-                From: {new Date(filters.startDate).toLocaleDateString()}
+                From: {formatDateForDisplay(filters.startDate)}
               </span>
             )}
             {filters.endDate && (
               <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium">
                 <CalendarIcon className="w-3 h-3" />
-                To: {new Date(filters.endDate).toLocaleDateString()}
+                To: {formatDateForDisplay(filters.endDate)}
               </span>
             )}
             {filters.searchTerm && (

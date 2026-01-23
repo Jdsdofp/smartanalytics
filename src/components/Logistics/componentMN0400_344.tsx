@@ -1,7 +1,7 @@
 // src/components/Logistics/componentMN0400_344_IMPROVED.tsx
 import { useEffect, useRef, useState } from 'react';
 import { useCompany } from '../../hooks/useCompany';
-import { useOrders } from '../../hooks/useOrders';
+import { useOrders, type OrderFilters } from '../../hooks/useOrders';
 import * as echarts from 'echarts';
 import { LoadingSpinner } from './components/Logistics/Orders/LoadingSpinner';
 import { ErrorDisplay } from './components/Logistics/Orders/ErrorDisplay';
@@ -35,6 +35,9 @@ export default function OrderDashboard() {
   const orderStatusChartInstance = useRef<echarts.ECharts | null>(null);
   const jobPerformanceChartInstance = useRef<echarts.ECharts | null>(null);
   const timelineChartInstance = useRef<echarts.ECharts | null>(null);
+
+    // State para filtros iniciais (últimos 7 dias)
+  const [initialFilters, setInitialFilters] = useState<OrderFilters>({});
 
   // State para controlar quando os gráficos devem ser renderizados
   const [chartsReady, setChartsReady] = useState(false);
@@ -426,20 +429,30 @@ export default function OrderDashboard() {
     };
   }, [chartsReady, timeline]);
 
-  // No componente OrderDashboard
+  // =====================================
+  // 🎯 INITIAL DATA LOAD
+  // =====================================
+
   useEffect(() => {
     // Calcular últimos 7 dias
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 7);
 
-    const defaultFilters = {
+    const defaultFilters: OrderFilters = {
       startDate: startDate.toISOString().split('T')[0], // formato YYYY-MM-DD
       endDate: endDate.toISOString().split('T')[0]
     };
 
+    // Setar filtros iniciais para o FilterPanel
+    setInitialFilters(defaultFilters);
+
+    // Fazer busca inicial
     fetchOrders(defaultFilters);
+    
+    console.log('Initial filters applied:', defaultFilters);
   }, [fetchOrders]);
+
 
   // =====================================
   // 📄 LOADING & ERROR STATES
@@ -529,10 +542,11 @@ export default function OrderDashboard() {
       )}
 
       {/* Filters */}
-      <FilterPanel
-        onApplyFilters={fetchOrders}
-        onResetFilters={() => fetchOrders()}
-      />
+<FilterPanel
+  initialFilters={initialFilters}  // ← Certifique que está passando aqui
+  onApplyFilters={fetchOrders}
+  onResetFilters={() => fetchOrders()}
+/>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
