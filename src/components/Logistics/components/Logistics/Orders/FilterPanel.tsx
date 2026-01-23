@@ -1,14 +1,31 @@
 // src/components/Logistics/Orders/FilterPanel.tsx
 import { useState } from 'react';
+import { 
+  FunnelIcon, 
+  MagnifyingGlassIcon,
+  CalendarIcon,
+  XMarkIcon,
+  CheckIcon
+} from '@heroicons/react/24/outline';
 import type { OrderFilters } from '../../../../../hooks/useOrders';
 
 interface FilterPanelProps {
   onApplyFilters: (filters: OrderFilters) => void;
   onResetFilters: () => void;
+  initialFilters?: OrderFilters;
 }
 
-export function FilterPanel({ onApplyFilters, onResetFilters }: FilterPanelProps) {
-  const [filters, setFilters] = useState<OrderFilters>({});
+export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: FilterPanelProps) {
+  const [filters, setFilters] = useState<OrderFilters>(initialFilters || {});
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const statusOptions = [
+    { value: 'complete', label: 'Complete', color: 'green' },
+    { value: 'in_progress', label: 'In Progress', color: 'orange' },
+    { value: 'info_received', label: 'Info Received', color: 'blue' },
+    { value: 'out_for_delivery', label: 'Out for Delivery', color: 'purple' },
+    { value: 'delivered', label: 'Delivered', color: 'teal' }
+  ];
 
   const handleApply = () => {
     onApplyFilters(filters);
@@ -19,90 +36,221 @@ export function FilterPanel({ onApplyFilters, onResetFilters }: FilterPanelProps
     onResetFilters();
   };
 
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (filters.startDate) count++;
+    if (filters.endDate) count++;
+    if (filters.searchTerm) count++;
+    if (filters.status && filters.status.length > 0) count += filters.status.length;
+    if (filters.jobTypes && filters.jobTypes.length > 0) count += filters.jobTypes.length;
+    return count;
+  };
+
+  const activeCount = getActiveFiltersCount();
+
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <span>🔍</span>
-          Filters
-        </h3>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Date Range */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-          <input
-            type="date"
-            value={filters.startDate || ''}
-            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-          <input
-            type="date"
-            value={filters.endDate || ''}
-            onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Search */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-          <input
-            type="text"
-            placeholder="Order code or name..."
-            value={filters.searchTerm || ''}
-            onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Buttons */}
-        <div className="flex items-end gap-2">
-          <button
-            onClick={handleApply}
-            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium"
-          >
-            Apply
-          </button>
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Reset
-          </button>
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+      {/* Header - Always Visible */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-500 rounded-xl p-2.5 shadow-lg">
+              <FunnelIcon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Filters</h3>
+              <p className="text-xs text-gray-600">
+                {activeCount > 0 ? `${activeCount} active filter${activeCount > 1 ? 's' : ''}` : 'No filters applied'}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {activeCount > 0 && (
+              <button
+                onClick={handleReset}
+                className="text-sm text-red-600 hover:text-red-700 font-medium px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1"
+              >
+                <XMarkIcon className="w-4 h-4" />
+                Clear All
+              </button>
+            )}
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
+            >
+              {isExpanded ? 'Hide' : 'Show'} Filters
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Status Filters */}
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-        <div className="flex flex-wrap gap-2">
-          {['complete', 'in_progress', 'info_received', 'out_for_delivery', 'delivered'].map(status => (
-            <label key={status} className="inline-flex items-center">
+      {/* Filter Content - Collapsible */}
+      {isExpanded && (
+        <div className="p-6 space-y-6">
+          {/* Date Range & Search */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Start Date */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-gray-500" />
+                Start Date
+              </label>
               <input
-                type="checkbox"
-                checked={filters.status?.includes(status) || false}
-                onChange={(e) => {
-                  const newStatus = e.target.checked
-                    ? [...(filters.status || []), status]
-                    : (filters.status || []).filter(s => s !== status);
-                  setFilters({ ...filters, status: newStatus.length > 0 ? newStatus : undefined });
-                }}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                type="date"
+                value={filters.startDate || ''}
+                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
-              <span className="ml-2 text-sm text-gray-700 capitalize">
-                {status.replace(/_/g, ' ')}
-              </span>
+            </div>
+
+            {/* End Date */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-gray-500" />
+                End Date
+              </label>
+              <input
+                type="date"
+                value={filters.endDate || ''}
+                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            {/* Search */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <MagnifyingGlassIcon className="w-4 h-4 text-gray-500" />
+                Search
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Order code, job type..."
+                  value={filters.searchTerm || ''}
+                  onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
+                  className="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+                <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+            </div>
+          </div>
+
+          {/* Status Filters */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Order Status
             </label>
-          ))}
+            <div className="flex flex-wrap gap-3">
+              {statusOptions.map(({ value, label, color }) => {
+                const isSelected = filters.status?.includes(value) || false;
+                
+                const colorClasses: Record<string, string> = {
+                  green: isSelected 
+                    ? 'bg-green-500 text-white border-green-500' 
+                    : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
+                  orange: isSelected 
+                    ? 'bg-orange-500 text-white border-orange-500' 
+                    : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
+                  blue: isSelected 
+                    ? 'bg-blue-500 text-white border-blue-500' 
+                    : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+                  purple: isSelected 
+                    ? 'bg-purple-500 text-white border-purple-500' 
+                    : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100',
+                  teal: isSelected 
+                    ? 'bg-teal-500 text-white border-teal-500' 
+                    : 'bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100'
+                };
+
+                return (
+                  <button
+                    key={value}
+                    onClick={() => {
+                      const newStatus = isSelected
+                        ? (filters.status || []).filter(s => s !== value)
+                        : [...(filters.status || []), value];
+                      setFilters({ 
+                        ...filters, 
+                        status: newStatus.length > 0 ? newStatus : undefined 
+                      });
+                    }}
+                    className={`
+                      px-4 py-2.5 rounded-xl border-2 font-medium text-sm
+                      transition-all duration-200
+                      flex items-center gap-2
+                      ${colorClasses[color]}
+                    `}
+                  >
+                    {isSelected && <CheckIcon className="w-4 h-4" />}
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+            <div className="text-sm text-gray-600">
+              {activeCount > 0 && (
+                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
+                  {activeCount} filter{activeCount > 1 ? 's' : ''} active
+                </span>
+              )}
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleReset}
+                className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium flex items-center gap-2"
+              >
+                <XMarkIcon className="w-4 h-4" />
+                Reset
+              </button>
+              <button
+                onClick={handleApply}
+                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-lg shadow-blue-500/30 flex items-center gap-2"
+              >
+                <CheckIcon className="w-4 h-4" />
+                Apply Filters
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Active Filters Summary (quando collapsed) */}
+      {!isExpanded && activeCount > 0 && (
+        <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+          <div className="flex flex-wrap gap-2">
+            {filters.startDate && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium">
+                <CalendarIcon className="w-3 h-3" />
+                From: {new Date(filters.startDate).toLocaleDateString()}
+              </span>
+            )}
+            {filters.endDate && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium">
+                <CalendarIcon className="w-3 h-3" />
+                To: {new Date(filters.endDate).toLocaleDateString()}
+              </span>
+            )}
+            {filters.searchTerm && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium">
+                <MagnifyingGlassIcon className="w-3 h-3" />
+                Search: {filters.searchTerm}
+              </span>
+            )}
+            {filters.status?.map(status => (
+              <span key={status} className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-medium">
+                Status: {status.replace(/_/g, ' ')}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,8 +10,10 @@ import { FilterPanel } from './components/Logistics/Orders/FilterPanel';
 import { ChartCard } from './components/Logistics/Orders/ChartCard';
 import { ExportButton } from './components/Logistics/Orders/ExportButton';
 import { OrdersTable } from './components/Logistics/Orders/OrdersTable';
+import { ChartBarIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, RectangleStackIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
 
 export default function OrderDashboard() {
+  //@ts-ignore
   const { companyId } = useCompany();
   const {
     loading,
@@ -28,7 +30,7 @@ export default function OrderDashboard() {
   const orderStatusChartRef = useRef<HTMLDivElement>(null);
   const jobPerformanceChartRef = useRef<HTMLDivElement>(null);
   const timelineChartRef = useRef<HTMLDivElement>(null);
-  
+
   // Instâncias dos gráficos
   const orderStatusChartInstance = useRef<echarts.ECharts | null>(null);
   const jobPerformanceChartInstance = useRef<echarts.ECharts | null>(null);
@@ -218,9 +220,9 @@ export default function OrderDashboard() {
         boundaryGap: false,
         data: data.map(d => {
           try {
-            return new Date(d.date_bucket).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric' 
+            return new Date(d.date_bucket).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric'
             });
           } catch {
             return d.date_bucket || 'N/A';
@@ -355,7 +357,7 @@ export default function OrderDashboard() {
 
     // Inicializar nova instância
     orderStatusChartInstance.current = echarts.init(orderStatusChartRef.current);
-    
+
     // Aplicar opções
     const options = getOrderStatusChartOption(kpiSummary?.orders_by_status || []);
     orderStatusChartInstance.current.setOption(options);
@@ -424,6 +426,21 @@ export default function OrderDashboard() {
     };
   }, [chartsReady, timeline]);
 
+  // No componente OrderDashboard
+  useEffect(() => {
+    // Calcular últimos 7 dias
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 7);
+
+    const defaultFilters = {
+      startDate: startDate.toISOString().split('T')[0], // formato YYYY-MM-DD
+      endDate: endDate.toISOString().split('T')[0]
+    };
+
+    fetchOrders(defaultFilters);
+  }, [fetchOrders]);
+
   // =====================================
   // 📄 LOADING & ERROR STATES
   // =====================================
@@ -451,7 +468,7 @@ export default function OrderDashboard() {
               Orders Dashboard
             </h1>
             <p className="text-gray-600 mt-2">
-              Real-time monitoring and analytics • Company ID: {companyId}
+              Real-time monitoring and analytics
             </p>
           </div>
           <div className="text-right">
@@ -470,43 +487,43 @@ export default function OrderDashboard() {
             title="Total Orders"
             value={kpiSummary.total_orders || 0}
             subtitle={`${Number(kpiSummary.total_items) || 0} items total`}
-            icon="📦"
+            icon={<ShoppingBagIcon className="w-7 h-7" />}
             color="blue"
           />
           <KPICard
             title="Completed"
             value={kpiSummary.orders_complete || 0}
             subtitle={`${kpiSummary.total_orders ? ((kpiSummary.orders_complete / kpiSummary.total_orders) * 100).toFixed(1) : '0'}% of total`}
-            icon="✅"
+            icon={<CheckCircleIcon className="w-7 h-7" />}
             color="green"
           />
           <KPICard
             title="In Progress"
             value={kpiSummary.orders_in_progress || 0}
             subtitle="Currently being processed"
-            icon="🔄"
-            color="yellow"
+            icon={<ClockIcon className="w-7 h-7" />}
+            color="orange"
           />
           <KPICard
             title="Pending"
             value={kpiSummary.orders_pending || 0}
             subtitle="Awaiting processing"
-            icon="⏳"
-            color="orange"
+            icon={<ExclamationTriangleIcon className="w-7 h-7" />}
+            color="yellow"
           />
           <KPICard
             title="Completion Rate"
             value={`${Number(kpiSummary.avg_completion_rate || 0).toFixed(2)}%`}
             subtitle="Average across all orders"
-            icon="📊"
+            icon={<ChartBarIcon className="w-7 h-7" />}
             color="purple"
           />
           <KPICard
             title="Items per Order"
             value={Number(kpiSummary.avg_items_per_order || 0).toFixed(2)}
             subtitle="Average"
-            icon="📋"
-            color="blue"
+            icon={<RectangleStackIcon className="w-7 h-7" />}
+            color="teal"
           />
         </div>
       )}
