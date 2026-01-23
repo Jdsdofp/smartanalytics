@@ -4,7 +4,7 @@ interface KPICardProps {
   value: number | string;
   subtitle?: string;
   icon?: string;
-  color?: 'blue' | 'green' | 'yellow' | 'purple' | 'indigo' | 'red';
+  color?: 'blue' | 'green' | 'yellow' | 'purple' | 'indigo' | 'red' | 'orange';
   trend?: {
     value: number;
     direction: 'up' | 'down' | 'neutral';
@@ -18,7 +18,8 @@ export function KPICard({ title, value, subtitle, icon, color = 'blue', trend }:
     yellow: 'border-yellow-500 text-yellow-500',
     purple: 'border-purple-500 text-purple-500',
     indigo: 'border-indigo-500 text-indigo-500',
-    red: 'border-red-500 text-red-500'
+    red: 'border-red-500 text-red-500',
+    orange: 'border-orange-500 text-orange-500'
   };
 
   const trendClasses = {

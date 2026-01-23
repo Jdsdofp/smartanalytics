@@ -111,7 +111,7 @@ export function OrdersTable({ orders, loading }: OrdersTableProps) {
                         />
                       </div>
                       <span className="text-sm font-medium text-gray-700 w-12 text-right">
-                        {order.completion_percentage.toFixed(0)}%
+                        {Number(order.completion_percentage).toFixed(0)}%
                       </span>
                     </div>
                   </td>

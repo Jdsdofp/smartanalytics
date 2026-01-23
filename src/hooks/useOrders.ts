@@ -14,6 +14,7 @@ export interface OrdersKPISummary {
   orders_info_received: number;
   avg_completion_rate: number;
   avg_items_per_order: number;
+  orders_pending: number;
   orders_by_status: {
     status: string;
     count: number;
@@ -171,7 +172,7 @@ export interface PaginationInfo {
 // 🎯 API BASE URL
 // =====================================
 
-const API_BASE_URL = 'http://localhost:4000/api/dashboard/orders';
+const API_BASE_URL = 'https://apinode.smartxhub.cloud/api/dashboard/orders';
 
 // =====================================
 // 🔧 HELPER FUNCTIONS

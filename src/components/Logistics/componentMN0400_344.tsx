@@ -1,5 +1,5 @@
 // src/components/Logistics/componentMN0400_344_IMPROVED.tsx
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useCompany } from '../../hooks/useCompany';
 import { useOrders } from '../../hooks/useOrders';
 import * as echarts from 'echarts';
@@ -11,7 +11,6 @@ import { ChartCard } from './components/Logistics/Orders/ChartCard';
 import { ExportButton } from './components/Logistics/Orders/ExportButton';
 import { OrdersTable } from './components/Logistics/Orders/OrdersTable';
 
-
 export default function OrderDashboard() {
   const { companyId } = useCompany();
   const {
@@ -20,255 +19,274 @@ export default function OrderDashboard() {
     kpiSummary,
     jobTypePerformance,
     timeline,
-    itemStatusDistribution,
     orders,
     fetchOrders,
     fetchDashboardData
   } = useOrders();
 
-  // Refs para charts
-  const chartsRef = useRef<{
-    orderStatus?: echarts.ECharts;
-    jobPerformance?: echarts.ECharts;
-    timeline?: echarts.ECharts;
-    itemStatus?: echarts.ECharts;
-  }>({});
+  // Refs para os elementos DOM dos gráficos
+  const orderStatusChartRef = useRef<HTMLDivElement>(null);
+  const jobPerformanceChartRef = useRef<HTMLDivElement>(null);
+  const timelineChartRef = useRef<HTMLDivElement>(null);
+  
+  // Instâncias dos gráficos
+  const orderStatusChartInstance = useRef<echarts.ECharts | null>(null);
+  const jobPerformanceChartInstance = useRef<echarts.ECharts | null>(null);
+  const timelineChartInstance = useRef<echarts.ECharts | null>(null);
+
+  // State para controlar quando os gráficos devem ser renderizados
+  const [chartsReady, setChartsReady] = useState(false);
 
   // =====================================
   // 📊 CHART CONFIGURATIONS
   // =====================================
 
-  const getOrderStatusChartOption = (data: any[]) => ({
-    title: {
-      text: 'Order Status Distribution',
-      left: 'center',
-      textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' }
-    },
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} orders ({d}%)'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left',
-      top: 'middle',
-      textStyle: { fontSize: 12 }
-    },
-    series: [{
-      type: 'pie',
-      radius: '65%',
-      center: ['60%', '50%'],
-      data: data.map(item => ({
-        value: item.count,
-        name: formatStatusName(item.status),
-        itemStyle: { color: getStatusColor(item.status) }
-      })),
-      emphasis: {
-        itemStyle: {
-          shadowBlur: 10,
-          shadowOffsetX: 0,
-          shadowColor: 'rgba(0, 0, 0, 0.5)'
+  const getOrderStatusChartOption = (data: any[]) => {
+    if (!data || data.length === 0) {
+      return {
+        title: {
+          text: 'Order Status Distribution',
+          subtext: 'No data available',
+          left: 'center',
+          top: 'center',
+          textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' },
+          subtextStyle: { color: '#6b7280' }
         }
-      },
-      label: {
-        formatter: '{b}\n{d}%',
-        fontSize: 12
-      }
-    }]
-  });
+      };
+    }
 
-  const getJobPerformanceChartOption = (data: any[]) => ({
-    title: {
-      text: 'Job Type Performance',
-      left: 'center',
-      textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' }
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' }
-    },
-    legend: {
-      data: ['Total Orders', 'Completion Rate'],
-      top: 30
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '15%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      data: data.map(d => d.job_type_code),
-      axisLabel: {
-        rotate: 45,
-        interval: 0,
-        fontSize: 11
-      }
-    },
-    yAxis: [
-      {
-        type: 'value',
-        name: 'Orders',
-        position: 'left',
-        axisLine: { lineStyle: { color: '#3b82f6' } }
+    return {
+      title: {
+        text: 'Order Status Distribution',
+        left: 'center',
+        textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' }
       },
-      {
-        type: 'value',
-        name: 'Completion %',
-        position: 'right',
-        max: 100,
-        axisLabel: { formatter: '{value}%' },
-        axisLine: { lineStyle: { color: '#10b981' } }
-      }
-    ],
-    series: [
-      {
-        name: 'Total Orders',
-        type: 'bar',
-        data: data.map(d => d.total_orders),
-        itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#60a5fa' },
-            { offset: 1, color: '#3b82f6' }
-          ])
-        }
+      tooltip: {
+        trigger: 'item',
+        formatter: '{b}: {c} orders ({d}%)'
       },
-      {
-        name: 'Completion Rate',
-        type: 'line',
-        yAxisIndex: 1,
-        data: data.map(d => d.avg_completion_pct),
-        itemStyle: { color: '#10b981' },
-        lineStyle: { width: 3 },
-        smooth: true
-      }
-    ]
-  });
-
-  const getTimelineChartOption = (data: any[]) => ({
-    title: {
-      text: 'Orders Timeline (Last 30 Days)',
-      left: 'center',
-      textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' }
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'cross' }
-    },
-    legend: {
-      data: ['Created', 'Completed', 'Items Processed'],
-      top: 30
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '5%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'category',
-      boundaryGap: false,
-      data: data.map(d => new Date(d.date_bucket).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
-      axisLabel: { fontSize: 11, rotate: 30 }
-    },
-    yAxis: [
-      {
-        type: 'value',
-        name: 'Orders',
-        axisLine: { lineStyle: { color: '#6b7280' } }
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        top: 'middle',
+        textStyle: { fontSize: 12 }
       },
-      {
-        type: 'value',
-        name: 'Items',
-        position: 'right',
-        axisLine: { lineStyle: { color: '#f59e0b' } }
-      }
-    ],
-    series: [
-      {
-        name: 'Created',
-        type: 'line',
-        smooth: true,
-        data: data.map(d => d.orders_created),
-        itemStyle: { color: '#3b82f6' },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(59, 130, 246, 0.3)' },
-            { offset: 1, color: 'rgba(59, 130, 246, 0.05)' }
-          ])
-        }
-      },
-      {
-        name: 'Completed',
-        type: 'line',
-        smooth: true,
-        data: data.map(d => d.orders_completed),
-        itemStyle: { color: '#10b981' },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
-            { offset: 1, color: 'rgba(16, 185, 129, 0.05)' }
-          ])
-        }
-      },
-      {
-        name: 'Items Processed',
-        type: 'line',
-        smooth: true,
-        yAxisIndex: 1,
-        data: data.map(d => d.items_processed),
-        itemStyle: { color: '#f59e0b' },
-        lineStyle: { width: 2 }
-      }
-    ]
-  });
-
-  const getItemStatusChartOption = (data: any[]) => ({
-    title: {
-      text: 'Item Status Distribution',
-      left: 'center',
-      textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' }
-    },
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b}: {c} items ({d}%)'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left',
-      top: 'middle',
-      textStyle: { fontSize: 12 }
-    },
-    series: [{
-      type: 'pie',
-      radius: ['40%', '70%'],
-      center: ['60%', '50%'],
-      data: data.map(item => ({
-        value: item.count,
-        name: formatStatusName(item.status),
-        itemStyle: { color: item.color }
-      })),
-      emphasis: {
+      series: [{
+        type: 'pie',
+        radius: '65%',
+        center: ['60%', '50%'],
+        data: data.map(item => ({
+          value: item.count,
+          name: formatStatusName(item.status),
+          itemStyle: { color: getStatusColor(item.status) }
+        })),
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        },
         label: {
-          show: true,
-          fontSize: 14,
-          fontWeight: 'bold'
+          formatter: '{b}\n{d}%',
+          fontSize: 12
+        }
+      }]
+    };
+  };
+
+  const getJobPerformanceChartOption = (data: any[]) => {
+    if (!data || data.length === 0) {
+      return {
+        title: {
+          text: 'Job Type Performance',
+          subtext: 'No data available',
+          left: 'center',
+          top: 'center',
+          textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' },
+          subtextStyle: { color: '#6b7280' }
+        }
+      };
+    }
+
+    return {
+      title: {
+        text: 'Job Type Performance',
+        left: 'center',
+        textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' }
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' }
+      },
+      legend: {
+        data: ['Total Orders', 'Completion Rate'],
+        top: 30
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '15%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: data.map(d => d.job_type_code || 'N/A'),
+        axisLabel: {
+          rotate: 45,
+          interval: 0,
+          fontSize: 11
         }
       },
-      label: {
-        formatter: '{b}\n{d}%',
-        fontSize: 12
-      }
-    }]
-  });
+      yAxis: [
+        {
+          type: 'value',
+          name: 'Orders',
+          position: 'left',
+          axisLine: { lineStyle: { color: '#3b82f6' } }
+        },
+        {
+          type: 'value',
+          name: 'Completion %',
+          position: 'right',
+          max: 100,
+          axisLabel: { formatter: '{value}%' },
+          axisLine: { lineStyle: { color: '#10b981' } }
+        }
+      ],
+      series: [
+        {
+          name: 'Total Orders',
+          type: 'bar',
+          data: data.map(d => Number(d.total_orders) || 0),
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: '#60a5fa' },
+              { offset: 1, color: '#3b82f6' }
+            ])
+          }
+        },
+        {
+          name: 'Completion Rate',
+          type: 'line',
+          yAxisIndex: 1,
+          data: data.map(d => Number(d.avg_completion_pct) || 0),
+          itemStyle: { color: '#10b981' },
+          lineStyle: { width: 3 },
+          smooth: true
+        }
+      ]
+    };
+  };
+
+  const getTimelineChartOption = (data: any[]) => {
+    if (!data || data.length === 0) {
+      return {
+        title: {
+          text: 'Orders Timeline (Last 30 Days)',
+          subtext: 'No data available',
+          left: 'center',
+          top: 'center',
+          textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' },
+          subtextStyle: { color: '#6b7280' }
+        }
+      };
+    }
+
+    return {
+      title: {
+        text: 'Orders Timeline (Last 30 Days)',
+        left: 'center',
+        textStyle: { fontSize: 16, fontWeight: 600, color: '#1f2937' }
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'cross' }
+      },
+      legend: {
+        data: ['Created', 'Completed', 'Items Processed'],
+        top: 30
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '5%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: data.map(d => {
+          try {
+            return new Date(d.date_bucket).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric' 
+            });
+          } catch {
+            return d.date_bucket || 'N/A';
+          }
+        }),
+        axisLabel: { fontSize: 11, rotate: 30 }
+      },
+      yAxis: [
+        {
+          type: 'value',
+          name: 'Orders',
+          axisLine: { lineStyle: { color: '#6b7280' } }
+        },
+        {
+          type: 'value',
+          name: 'Items',
+          position: 'right',
+          axisLine: { lineStyle: { color: '#f59e0b' } }
+        }
+      ],
+      series: [
+        {
+          name: 'Created',
+          type: 'line',
+          smooth: true,
+          data: data.map(d => Number(d.orders_created) || 0),
+          itemStyle: { color: '#3b82f6' },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(59, 130, 246, 0.3)' },
+              { offset: 1, color: 'rgba(59, 130, 246, 0.05)' }
+            ])
+          }
+        },
+        {
+          name: 'Completed',
+          type: 'line',
+          smooth: true,
+          data: data.map(d => Number(d.orders_completed) || 0),
+          itemStyle: { color: '#10b981' },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(16, 185, 129, 0.3)' },
+              { offset: 1, color: 'rgba(16, 185, 129, 0.05)' }
+            ])
+          }
+        },
+        {
+          name: 'Items Processed',
+          type: 'line',
+          smooth: true,
+          yAxisIndex: 1,
+          data: data.map(d => Number(d.items_processed) || 0),
+          itemStyle: { color: '#f59e0b' },
+          lineStyle: { width: 2 }
+        }
+      ]
+    };
+  };
 
   // =====================================
   // 🎨 UTILITY FUNCTIONS
   // =====================================
 
   const formatStatusName = (status: string) => {
-    return status;
+    return status?.replace(/_/g, ' ').toUpperCase() || 'UNKNOWN';
   };
 
   const getStatusColor = (status: string) => {
@@ -286,48 +304,125 @@ export default function OrderDashboard() {
   // 📤 EXPORT FUNCTIONS
   // =====================================
 
-  const exportChartAsPNG = (chartInstance: echarts.ECharts | undefined, filename: string) => {
-    if (!chartInstance) return;
+  const exportChartAsPNG = (chartInstance: echarts.ECharts | null, filename: string) => {
+    if (!chartInstance) {
+      console.warn('Chart instance not found for export');
+      return;
+    }
 
-    const url = chartInstance.getDataURL({
-      type: 'png',
-      pixelRatio: 2,
-      backgroundColor: '#fff'
-    });
+    try {
+      const url = chartInstance.getDataURL({
+        type: 'png',
+        pixelRatio: 2,
+        backgroundColor: '#fff'
+      });
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${filename}_${new Date().toISOString().slice(0, 10)}.png`;
-    link.click();
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${filename}_${new Date().toISOString().slice(0, 10)}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error exporting chart:', error);
+    }
   };
 
   // =====================================
-  // 🔄 CHART UPDATES
+  // 🔄 CHART INITIALIZATION & UPDATES
   // =====================================
 
+  // Inicializar gráficos quando os dados estiverem prontos
   useEffect(() => {
-    if (kpiSummary?.orders_by_status && chartsRef.current.orderStatus) {
-      chartsRef.current.orderStatus.setOption(getOrderStatusChartOption(kpiSummary.orders_by_status));
-    }
-  }, [kpiSummary]);
+    if (!loading && !error) {
+      // Pequeno delay para garantir que o DOM esteja pronto
+      const timer = setTimeout(() => {
+        setChartsReady(true);
+      }, 100);
 
-  useEffect(() => {
-    if (jobTypePerformance && chartsRef.current.jobPerformance) {
-      chartsRef.current.jobPerformance.setOption(getJobPerformanceChartOption(jobTypePerformance));
+      return () => clearTimeout(timer);
     }
-  }, [jobTypePerformance]);
+  }, [loading, error]);
 
+  // Inicializar e atualizar gráfico de status
   useEffect(() => {
-    if (timeline && chartsRef.current.timeline) {
-      chartsRef.current.timeline.setOption(getTimelineChartOption(timeline));
-    }
-  }, [timeline]);
+    if (!chartsReady || !orderStatusChartRef.current) return;
 
-  useEffect(() => {
-    if (itemStatusDistribution && chartsRef.current.itemStatus) {
-      chartsRef.current.itemStatus.setOption(getItemStatusChartOption(itemStatusDistribution));
+    // Destruir instância anterior se existir
+    if (orderStatusChartInstance.current) {
+      orderStatusChartInstance.current.dispose();
     }
-  }, [itemStatusDistribution]);
+
+    // Inicializar nova instância
+    orderStatusChartInstance.current = echarts.init(orderStatusChartRef.current);
+    
+    // Aplicar opções
+    const options = getOrderStatusChartOption(kpiSummary?.orders_by_status || []);
+    orderStatusChartInstance.current.setOption(options);
+
+    // Adicionar listener para resize
+    const handleResize = () => {
+      orderStatusChartInstance.current?.resize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (orderStatusChartInstance.current) {
+        orderStatusChartInstance.current.dispose();
+      }
+    };
+  }, [chartsReady, kpiSummary?.orders_by_status]);
+
+  // Inicializar e atualizar gráfico de performance
+  useEffect(() => {
+    if (!chartsReady || !jobPerformanceChartRef.current) return;
+
+    if (jobPerformanceChartInstance.current) {
+      jobPerformanceChartInstance.current.dispose();
+    }
+
+    jobPerformanceChartInstance.current = echarts.init(jobPerformanceChartRef.current);
+    const options = getJobPerformanceChartOption(jobTypePerformance || []);
+    jobPerformanceChartInstance.current.setOption(options);
+
+    const handleResize = () => {
+      jobPerformanceChartInstance.current?.resize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (jobPerformanceChartInstance.current) {
+        jobPerformanceChartInstance.current.dispose();
+      }
+    };
+  }, [chartsReady, jobTypePerformance]);
+
+  // Inicializar e atualizar gráfico de timeline
+  useEffect(() => {
+    if (!chartsReady || !timelineChartRef.current) return;
+
+    if (timelineChartInstance.current) {
+      timelineChartInstance.current.dispose();
+    }
+
+    timelineChartInstance.current = echarts.init(timelineChartRef.current);
+    const options = getTimelineChartOption(timeline || []);
+    timelineChartInstance.current.setOption(options);
+
+    const handleResize = () => {
+      timelineChartInstance.current?.resize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (timelineChartInstance.current) {
+        timelineChartInstance.current.dispose();
+      }
+    };
+  }, [chartsReady, timeline]);
 
   // =====================================
   // 📄 LOADING & ERROR STATES
@@ -373,42 +468,42 @@ export default function OrderDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
           <KPICard
             title="Total Orders"
-            value={kpiSummary.total_orders}
-            subtitle={`${kpiSummary.total_items} items total`}
+            value={kpiSummary.total_orders || 0}
+            subtitle={`${Number(kpiSummary.total_items) || 0} items total`}
             icon="📦"
             color="blue"
           />
           <KPICard
             title="Completed"
-            value={kpiSummary.orders_complete}
-            subtitle={`${((kpiSummary.orders_complete / kpiSummary.total_orders) * 100)}% of total`}
+            value={kpiSummary.orders_complete || 0}
+            subtitle={`${kpiSummary.total_orders ? ((kpiSummary.orders_complete / kpiSummary.total_orders) * 100).toFixed(1) : '0'}% of total`}
             icon="✅"
             color="green"
           />
           <KPICard
             title="In Progress"
-            value={kpiSummary.orders_in_progress}
-            subtitle="Currently active"
+            value={kpiSummary.orders_in_progress || 0}
+            subtitle="Currently being processed"
             icon="🔄"
             color="yellow"
           />
           <KPICard
-            title="Info Received"
-            value={kpiSummary.orders_info_received}
-            subtitle="Pending start"
-            icon="📨"
-            color="indigo"
+            title="Pending"
+            value={kpiSummary.orders_pending || 0}
+            subtitle="Awaiting processing"
+            icon="⏳"
+            color="orange"
           />
           <KPICard
             title="Completion Rate"
-            value={`${kpiSummary.avg_completion_rate}%`}
+            value={`${Number(kpiSummary.avg_completion_rate || 0).toFixed(2)}%`}
             subtitle="Average across all orders"
             icon="📊"
             color="purple"
           />
           <KPICard
             title="Items per Order"
-            value={kpiSummary.avg_items_per_order}
+            value={Number(kpiSummary.avg_items_per_order || 0).toFixed(2)}
             subtitle="Average"
             icon="📋"
             color="blue"
@@ -429,81 +524,47 @@ export default function OrderDashboard() {
           title="📊 Order Status Distribution"
           actions={
             <ExportButton
-              onExport={() => exportChartAsPNG(chartsRef.current.orderStatus, 'order_status')}
+              onExport={() => exportChartAsPNG(orderStatusChartInstance.current, 'order_status')}
               label="Export PNG"
             />
           }
         >
           <div
-            ref={(el) => {
-              if (el && !chartsRef.current.orderStatus) {
-                chartsRef.current.orderStatus = echarts.init(el);
-              }
-            }}
+            ref={orderStatusChartRef}
             className="w-full h-96"
           />
         </ChartCard>
 
-        {/* Item Status Chart */}
-        <ChartCard
-          title="🎨 Item Status Distribution"
-          actions={
-            <ExportButton
-              onExport={() => exportChartAsPNG(chartsRef.current.itemStatus, 'item_status')}
-              label="Export PNG"
-            />
-          }
-        >
-          <div
-            ref={(el) => {
-              if (el && !chartsRef.current.itemStatus) {
-                chartsRef.current.itemStatus = echarts.init(el);
-              }
-            }}
-            className="w-full h-96"
-          />
-        </ChartCard>
-      </div>
-
-      {/* Job Performance Chart */}
-      <div className="mb-8">
+        {/* Job Performance Chart */}
         <ChartCard
           title="💼 Job Type Performance Analysis"
           actions={
             <ExportButton
-              onExport={() => exportChartAsPNG(chartsRef.current.jobPerformance, 'job_performance')}
+              onExport={() => exportChartAsPNG(jobPerformanceChartInstance.current, 'job_performance')}
               label="Export PNG"
             />
           }
         >
           <div
-            ref={(el) => {
-              if (el && !chartsRef.current.jobPerformance) {
-                chartsRef.current.jobPerformance = echarts.init(el);
-              }
-            }}
+            ref={jobPerformanceChartRef}
             className="w-full h-96"
           />
         </ChartCard>
       </div>
 
-      {/* Timeline Chart */}
+      {/* Timeline Chart - Full Width */}
       <div className="mb-8">
         <ChartCard
-          title="📅 Orders Timeline"
+          title="📅 Orders Timeline (Last 30 Days)"
           actions={
             <ExportButton
-              onExport={() => exportChartAsPNG(chartsRef.current.timeline, 'orders_timeline')}
+              onExport={() => exportChartAsPNG(timelineChartInstance.current, 'orders_timeline')}
               label="Export PNG"
             />
           }
         >
           <div
-            ref={(el) => {
-              if (el && !chartsRef.current.timeline) {
-                chartsRef.current.timeline = echarts.init(el);
-              }
-            }}
+            ref={timelineChartRef}
             className="w-full h-96"
           />
         </ChartCard>
