@@ -275,14 +275,14 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
             <div className="flex gap-3">
               <button
                 onClick={handleReset}
-                className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium flex items-center gap-2"
+                className="cursor-pointer px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium flex items-center gap-2"
               >
                 <XMarkIcon className="w-4 h-4" />
                 Reset
               </button>
               <button
                 onClick={handleApply}
-                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-lg shadow-blue-500/30 flex items-center gap-2"
+                className="cursor-pointer px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-lg shadow-blue-500/30 flex items-center gap-2"
               >
                 <CheckIcon className="w-4 h-4" />
                 Apply Filters

@@ -14,41 +14,165 @@ interface OrderItemsModalProps {
 }
 
 export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetails }: OrderItemsModalProps) {
-  const { companyId } = useCompany();
+  const { companyId, company } = useCompany();
+  
   const { items, loading, error } = useOrderItems(Number(companyId), flowId);
 
-  const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
-    const columns = [
-      { header: 'Item Code', key: 'code' as keyof OrderItem },
-      { header: 'Item Name', key: 'item_name' as keyof OrderItem },
-      { header: 'Brand', key: 'brand' as keyof OrderItem },
-      { header: 'Model', key: 'model' as keyof OrderItem },
-      { header: 'Serial', key: 'serial' as keyof OrderItem },
-      { header: 'Category', key: 'category' as keyof OrderItem },
-      { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
-      { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
-      { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
-      { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
-    ];
+  // const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
+  //   const columns = [
+  //     { header: 'Item Code', key: 'code' as keyof OrderItem },
+  //     { header: 'Item Name', key: 'item_name' as keyof OrderItem },
+  //     { header: 'Brand', key: 'brand' as keyof OrderItem },
+  //     { header: 'Model', key: 'model' as keyof OrderItem },
+  //     { header: 'Serial', key: 'serial' as keyof OrderItem },
+  //     { header: 'Category', key: 'category' as keyof OrderItem },
+  //     { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
+  //     { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
+  //     { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
+  //     { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
+  //   ];
 
-    const fileName = `order_items_${orderCode}`;
-    const title = `Order Items - ${orderCode}`;
+  //   const fileName = `order_items_${orderCode}`;
+  //   const title = `Order Items - ${orderCode}`;
 
-    switch (format) {
-      case 'pdf':
-        exportToPDF(items, columns, fileName, title);
-        break;
-      case 'excel':
-        exportToExcel(items, columns, fileName, 'Items');
-        break;
-      case 'csv':
-        exportToCSV(items, columns, fileName);
-        break;
-      case 'text':
-        exportToTextTabular(items, columns, fileName);
-        break;
-    }
-  };
+  //   switch (format) {
+  //     case 'pdf':
+  //       exportToPDF(items, columns, fileName, title);
+  //       break;
+  //     case 'excel':
+  //       exportToExcel(items, columns, fileName, 'Items');
+  //       break;
+  //     case 'csv':
+  //       exportToCSV(items, columns, fileName);
+  //       break;
+  //     case 'text':
+  //       exportToTextTabular(items, columns, fileName);
+  //       break;
+  //   }
+  // };
+
+  // const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
+  //   const columns = [
+  //     { header: 'Item Code', key: 'code' as keyof OrderItem },
+  //     { header: 'Item Name', key: 'item_name' as keyof OrderItem },
+  //     { header: 'Brand', key: 'brand' as keyof OrderItem },
+  //     { header: 'Model', key: 'model' as keyof OrderItem },
+  //     { header: 'Serial', key: 'serial' as keyof OrderItem },
+  //     { header: 'Category', key: 'category' as keyof OrderItem },
+  //     { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
+  //     { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
+  //     { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
+  //     { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
+  //   ];
+
+  //   const fileName = `order_items_${orderCode}`;
+
+  //   // Construir título com informações da order
+  //   const title = orderDetails
+  //     ? `Order Items - ${orderCode}\n` +
+  //     `Subject: ${orderDetails.subject || 'N/A'} | ` +
+  //     `Status: ${formatStatusName(orderDetails.status_job)} | ` +
+  //     `Job Type: ${orderDetails.job_type_name} | ` +
+  //     `Progress: ${orderDetails.percentual_concluido.toFixed(1)}%\n` +
+  //     `Custody: ${orderDetails.to_custody_name} | ` +
+  //     `Zone: ${orderDetails.to_zone_name} | ` +
+  //     `Items: ${orderDetails.items_concluidos}/${orderDetails.total_items} completed`
+  //     : `Order Items - ${orderCode}`;
+
+  //   switch (format) {
+  //     case 'pdf':
+  //       exportToPDF(items, columns, fileName, title);
+  //       break;
+  //     case 'excel':
+  //       exportToExcel(items, columns, fileName, 'Items', orderDetails);
+  //       break;
+  //     case 'csv':
+  //       exportToCSV(items, columns, fileName, orderDetails);
+  //       break;
+  //     case 'text':
+  //       exportToTextTabular(items, columns, fileName, orderDetails);
+  //       break;
+  //   }
+  // };
+
+//   const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
+//   const columns = [
+//     { header: 'Item Code', key: 'code' as keyof OrderItem },
+//     { header: 'Item Name', key: 'item_name' as keyof OrderItem },
+//     { header: 'Brand', key: 'brand' as keyof OrderItem },
+//     { header: 'Model', key: 'model' as keyof OrderItem },
+//     { header: 'Serial', key: 'serial' as keyof OrderItem },
+//     { header: 'Category', key: 'category' as keyof OrderItem },
+//     { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
+//     { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
+//     { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
+//     { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
+//   ];
+
+//   const fileName = `order_items_${orderCode}`;
+//   const title = `Order Items - ${orderCode}`;
+
+//   switch (format) {
+//     case 'pdf':
+//       exportToPDF(items, columns, fileName, title, orderDetails);
+//       break;
+//     case 'excel':
+//       exportToExcel(items, columns, fileName, 'Items', orderDetails);
+//       break;
+//     case 'csv':
+//       exportToCSV(items, columns, fileName, orderDetails);
+//       break;
+//     case 'text':
+//       exportToTextTabular(items, columns, fileName, orderDetails);
+//       break;
+//   }
+// };
+
+
+// Certifique-se de que está passando code_user_job no metadata
+const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
+  
+  const columns = [
+    { header: 'Item Code', key: 'code' as keyof OrderItem },
+    { header: 'Item Name', key: 'item_name' as keyof OrderItem },
+    { header: 'Brand', key: 'brand' as keyof OrderItem },
+    { header: 'Model', key: 'model' as keyof OrderItem },
+    { header: 'Serial', key: 'serial' as keyof OrderItem },
+    { header: 'Category', key: 'category' as keyof OrderItem },
+    { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
+    { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
+    { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
+    { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
+  ];
+
+  const fileName = `order_items_${orderCode}`;
+  const title = `Order Items - ${orderCode}`;
+
+   // ⭐ PASSAR O BASE64 ORIGINAL (sem decodificar)
+  const companyLogoBase64 = company?.details?.logo ?? '';
+
+  // Adicionar code_user_job ao metadata
+  const enrichedMetadata = orderDetails ? {
+    ...orderDetails,
+    code_user_job: orderCode
+  } : undefined;
+
+  switch (format) {
+    case 'pdf':
+      exportToPDF(items, columns, fileName, title, enrichedMetadata, companyLogoBase64);
+      break;
+    case 'excel':
+      exportToExcel(items, columns, fileName, 'Items', enrichedMetadata);
+      break;
+    case 'csv':
+      exportToCSV(items, columns, fileName, enrichedMetadata);
+      break;
+    case 'text':
+      exportToTextTabular(items, columns, fileName, enrichedMetadata);
+      break;
+  }
+};
+
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -99,7 +223,7 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-500/30 backdrop-blur-md transition-all duration-300"
         onClick={onClose}
       />
 
@@ -201,7 +325,7 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
                 <ExportButtons onExport={handleExport} disabled={items.length === 0 || loading} />
                 <button
                   onClick={onClose}
-                  className="text-white hover:bg-blue-700 rounded-lg p-2 transition-colors"
+                  className="cursor-pointer text-white hover:bg-blue-700 rounded-lg p-2 transition-colors"
                   aria-label="Close modal"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,7 +485,7 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
             </div>
             <button
               onClick={onClose}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
+              className="cursor-pointer px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
             >
               Close
             </button>
