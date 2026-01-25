@@ -504,7 +504,7 @@ export const exportToPDF = <T extends Record<string, any>>(
         
         // ⭐ POSIÇÃO NO CANTO SUPERIOR ESQUERDO
         const logoWidth = 35;
-        const logoHeight = 20;
+        const logoHeight = 10;
         const logoX = 13; // ⭐ 13mm da margem esquerda
         const logoY = 13; // 13mm do topo
         
