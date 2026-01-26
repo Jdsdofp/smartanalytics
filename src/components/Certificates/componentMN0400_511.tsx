@@ -1552,7 +1552,7 @@ export default function PredictiveCertificateAnalysis() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.key
+                className={`cursor-pointer py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.key
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
                   }`}

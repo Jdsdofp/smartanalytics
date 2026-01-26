@@ -207,7 +207,8 @@ export interface PaginationInfo {
 // =====================================
 // 🎯 API BASE URL
 // =====================================
-//https://apinode.smartxhub.cloud
+//https://apinode.smartxhub.cloud - EUA
+//https://apisaudi.smartxhub.cloud - SAUDI
 const API_BASE_URL = "https://apinode.smartxhub.cloud/api/dashboard/orders";
 
 // =====================================
@@ -259,6 +260,7 @@ const fetchAPI = async <T>(
 
 export const useOrders = () => {
   const { companyId } = useCompany();
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

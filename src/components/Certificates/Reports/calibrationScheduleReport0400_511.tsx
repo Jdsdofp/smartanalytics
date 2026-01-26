@@ -11,6 +11,7 @@ import {
     CheckCircleIcon,
     XCircleIcon
 } from '@heroicons/react/24/outline';
+import { useCompany } from '../../../hooks/useCompany';
 
 interface CertificateReport {
     id: number;
@@ -50,7 +51,8 @@ export default function CalibrationScheduleReport() {
     });
     const [showFilters, setShowFilters] = useState(false);
 
-    const companyId = 610;
+    const {companyId} = useCompany()
+
 
     useEffect(() => {
         fetchData();

@@ -3804,7 +3804,7 @@ export default function CertificateReportGrid() {
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       fetchData(newPage);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -4392,14 +4392,15 @@ export default function CertificateReportGrid() {
 
   if (loading && data.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600">
-        <div className="text-center bg-white p-8 rounded-2xl shadow-2xl">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+        <div className="text-center bg-white/70 backdrop-blur-md p-8 rounded-2xl 
+                      border border-white/80 shadow-xl">
           <div className="relative w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-0 border-4 border-purple-200/50 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-purple-500/70 border-t-transparent rounded-full animate-spin"></div>
           </div>
-          <p className="text-gray-700 font-semibold text-lg">Carregando certificados...</p>
-          <p className="text-gray-500 text-sm mt-2">Processando análise crítica</p>
+          <p className="text-gray-800 font-semibold text-lg">Carregando certificados...</p>
+          <p className="text-gray-600 text-sm mt-2">Processando análise crítica</p>
         </div>
       </div>
     );

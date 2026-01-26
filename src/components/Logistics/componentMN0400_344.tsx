@@ -15,6 +15,7 @@ import { ChartBarIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, Rect
 export default function OrderDashboard() {
   //@ts-ignore
   const { companyId } = useCompany();
+  
   const {
     loading,
     error,
