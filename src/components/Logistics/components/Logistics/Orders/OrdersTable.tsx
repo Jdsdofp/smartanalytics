@@ -4,6 +4,7 @@ import type { OrdersSummary } from '../../../../../hooks/useOrders';
 import { OrderItemsModal } from './OrderItemsModal';
 import { ExportButtons } from './ExportButtons';
 import { exportToPDF, exportToExcel, exportToCSV, exportToTextTabular } from '../../../../../utils/tableExports';
+import { useCompany } from '../../../../../hooks/useCompany';
 
 interface OrdersTableProps {
   orders: OrdersSummary[];
@@ -11,6 +12,7 @@ interface OrdersTableProps {
 }
 
 export function OrdersTable({ orders, loading }: OrdersTableProps) {
+  const { logo } = useCompany()
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -103,6 +105,9 @@ const handleRowClick = (order: OrdersSummary) => {
   // 📤 EXPORT HANDLERS
   // =====================================
 
+
+  
+
   const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
     const columns = [
       { header: 'Order Code', key: 'code_user_job' as keyof OrdersSummary },
@@ -125,7 +130,7 @@ const handleRowClick = (order: OrdersSummary) => {
     // Use sortedOrders para exportar TODOS os dados filtrados, não apenas a página atual
     switch (format) {
       case 'pdf':
-        exportToPDF(sortedOrders, columns, fileName, title);
+        exportToPDF(sortedOrders, columns, fileName, title, undefined, logo);
         break;
       case 'excel':
         exportToExcel(sortedOrders, columns, fileName, 'Orders');
@@ -139,6 +144,7 @@ const handleRowClick = (order: OrdersSummary) => {
     }
   };
 
+  
   // ... (manter utility functions existentes)
 
   const formatStatusName = (status: string) => {

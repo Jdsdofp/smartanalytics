@@ -445,13 +445,42 @@ interface ExportMetadata {
 
 // src/utils/tableExports.ts
 
+
+function normalizeBase64Image(base64: string): string {
+  if (!base64) return '';
+
+  let result = base64.trim();
+
+  // Se vier com prefixo data:image/...
+  if (result.startsWith('data:')) {
+    result = result.split(',')[1];
+  }
+
+  // Se NÃO começa com assinatura PNG, mas quando decodifica vira PNG → decode 1x
+  if (!result.startsWith('iVBORw0KGgo')) {
+    try {
+      const decoded = atob(result);
+
+      if (decoded.startsWith('iVBORw0KGgo')) {
+        result = decoded;
+      }
+    } catch (e) {
+      console.warn('Erro ao tentar decodificar base64 da logo');
+    }
+  }
+
+  return result;
+}
+
+
+
 export const exportToPDF = <T extends Record<string, any>>(
   data: T[],
   columns: ExportColumn<T>[],
   fileName: string,
   title?: string,
   metadata?: ExportMetadata,
-  companyLogoBase64?: string
+  logo?: string | undefined
 ): void => {
   const doc = new jsPDF({
     orientation: 'landscape',
@@ -467,67 +496,37 @@ export const exportToPDF = <T extends Record<string, any>>(
     doc.setFillColor(37, 99, 235); // Blue-600
     doc.roundedRect(10, 10, 277, metadata ? 55 : 25, 3, 3, 'F');
 
-    // ⭐ ADD COMPANY LOGO - CANTO SUPERIOR ESQUERDO
-    if (companyLogoBase64) {
-      try {
-        let finalBase64 = companyLogoBase64;
-        
-        // Função auxiliar para verificar se é base64 válido de imagem PNG
-        const isPngBase64 = (str: string): boolean => {
-          return str.startsWith('iVBORw0KGgo') || str.includes('PNG');
-        };
-        
-        // Tentar decodificar até 2 vezes se necessário
-        let attempts = 0;
-        while (attempts < 2) {
-          try {
-            const decoded = atob(finalBase64);
-            
-            if (isPngBase64(finalBase64)) {
-              break;
-            }
-            
-            if (isPngBase64(decoded)) {
-              finalBase64 = decoded;
-              break;
-            } else if (decoded.length > 100 && !decoded.includes('\x00')) {
-              finalBase64 = decoded;
-              attempts++;
-            } else {
-              finalBase64 = decoded;
-              break;
-            }
-          } catch (e) {
-            break;
-          }
-        }
-        
-        // ⭐ POSIÇÃO NO CANTO SUPERIOR ESQUERDO
-        const logoWidth = 35;
-        const logoHeight = 10;
-        const logoX = 13; // ⭐ 13mm da margem esquerda
-        const logoY = 13; // 13mm do topo
-        
-        // Fundo branco arredondado para a logo
-        doc.setFillColor(255, 255, 255);
-        doc.roundedRect(logoX - 2, logoY - 2, logoWidth + 4, logoHeight + 4, 2, 2, 'F');
-        
-        doc.addImage(
-          `data:image/png;base64,${finalBase64}`,
-          'PNG',
-          logoX,
-          logoY,
-          logoWidth,
-          logoHeight,
-          undefined,
-          'FAST'
-        );
-        
-        console.log('✅ Logo adicionada com sucesso ao PDF');
-      } catch (error) {
-        console.error('❌ Error adding logo to PDF:', error);
-      }
-    }
+
+    if (logo) {
+  try {
+    const finalBase64 = normalizeBase64Image(logo);
+
+    const logoWidth = 35;
+    const logoHeight = 10;
+    const logoX = 13;
+    const logoY = 13;
+
+    // Fundo branco
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(logoX - 2, logoY - 2, logoWidth + 4, logoHeight + 4, 2, 2, 'F');
+
+    doc.addImage(
+      finalBase64,
+      'PNG',
+      logoX,
+      logoY,
+      logoWidth,
+      logoHeight,
+      undefined,
+      'FAST'
+    );
+
+    console.log('✅ Logo adicionada com sucesso ao PDF');
+  } catch (error) {
+    console.error('❌ Error adding logo to PDF:', error);
+  }
+}
+
 
     // Title - ⭐ Ajustado para não sobrepor a logo
     if (title) {
