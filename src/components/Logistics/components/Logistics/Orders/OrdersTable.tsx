@@ -5,6 +5,8 @@ import { OrderItemsModal } from './OrderItemsModal';
 import { ExportButtons } from './ExportButtons';
 import { exportToPDF, exportToExcel, exportToCSV, exportToTextTabular } from '../../../../../utils/tableExports';
 import { useCompany } from '../../../../../hooks/useCompany';
+import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
+
 
 interface OrdersTableProps {
   orders: OrdersSummary[];
@@ -16,7 +18,7 @@ export function OrdersTable({ orders, loading }: OrdersTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortField, setSortField] = useState<keyof OrdersSummary>('due_date');
+  const [sortField, setSortField] = useState<keyof OrdersSummary>('scheduled_Date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
   // Modal state
@@ -47,7 +49,7 @@ export function OrdersTable({ orders, loading }: OrdersTableProps) {
       let aValue = a[sortField];
       let bValue = b[sortField];
 
-      if (sortField === 'due_date') {
+      if (sortField === 'scheduled_Date') {
         aValue = new Date(aValue as string).getTime();
         bValue = new Date(bValue as string).getTime();
       }
@@ -121,7 +123,7 @@ const handleRowClick = (order: OrdersSummary) => {
       { header: 'Progress (%)', key: 'percentual_concluido' as keyof OrdersSummary },
       { header: 'Custody', key: 'to_custody_name' as keyof OrdersSummary },
       { header: 'Zone', key: 'to_zone_name' as keyof OrdersSummary },
-      { header: 'Due Date', key: 'due_date' as keyof OrdersSummary },
+      { header: 'Scheduled Date', key: 'scheduled_Date' as keyof OrdersSummary },
     ];
 
     const fileName = 'orders_list';
@@ -199,7 +201,7 @@ return (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-xl">📋</span>
+              <span className="text-xl"><ClipboardDocumentListIcon className="w-9 h-9 p-1 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-white"/></span>
               Orders List
             </h3>
             <p className="text-xs text-gray-600 mt-1">
@@ -302,11 +304,11 @@ return (
                 </th>
                 <th 
                   className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('due_date')}
+                  onClick={() => handleSort('scheduled_Date')}
                 >
                   <div className="flex items-center gap-1.5">
-                    Due Date
-                    <SortIcon field="due_date" />
+                    Scheduled Date
+                    <SortIcon field="scheduled_Date" />
                   </div>
                 </th>
               </tr>
@@ -385,14 +387,14 @@ return (
                     </td>
                     <td className="px-4 py-2.5 whitespace-nowrap">
                       <div className="text-xs text-gray-900 font-medium">
-                        {new Date(order.due_date).toLocaleDateString('en-US', {
+                        {new Date(order.scheduled_Date).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric'
                         })}
                       </div>
                       <div className="text-[10px] text-gray-500">
-                        {new Date(order.due_date).toLocaleTimeString('en-US', {
+                        {new Date(order.scheduled_Date).toLocaleTimeString('en-US', {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}

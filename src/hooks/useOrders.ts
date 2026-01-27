@@ -846,7 +846,7 @@ export interface OrdersSummary {
   subject: string;
   status_job: string;
   flow_type: string;
-  due_date: string;
+  scheduled_Date: string;
   to_custody_name: string;
   to_custody_code: string;
   to_zone_name: string;
@@ -1334,18 +1334,26 @@ export const useOrders = () => {
   // 🔄 AUTO-REFRESH
   // =====================================
 
+  // useEffect(() => {
+  //   fetchDashboardData();
+
+  //   // Auto-refresh a cada 5 minutos
+  //   const interval = setInterval(
+  //     () => {
+  //       fetchDashboardData();
+  //     },
+  //     5 * 60 * 1000,
+  //   );
+
+  //   return () => clearInterval(interval);
+  // }, [fetchDashboardData]);
+
+  // =====================================
+  // 🔄 INITIAL LOAD (sem auto-refresh)
+  // =====================================
+
   useEffect(() => {
     fetchDashboardData();
-
-    // Auto-refresh a cada 5 minutos
-    const interval = setInterval(
-      () => {
-        fetchDashboardData();
-      },
-      5 * 60 * 1000,
-    );
-
-    return () => clearInterval(interval);
   }, [fetchDashboardData]);
 
   // =====================================

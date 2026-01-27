@@ -23,14 +23,14 @@ function Header({ onMenuClick }: HeaderProps) {
 
   const initials = user?.name
     ? user.name
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase()
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase()
     : 'U'
 
-      // Detecta scroll para mostrar/esconder botão do menu
+  // Detecta scroll para mostrar/esconder botão do menu
   useEffect(() => {
     const handleScroll = () => {
       // Mostra o botão quando rolar mais de 100px
@@ -90,7 +90,6 @@ function Header({ onMenuClick }: HeaderProps) {
           </button>
 
 
-
           {/* Logo */}
           <div className="flex items-center gap-3">
             <img
@@ -98,12 +97,28 @@ function Header({ onMenuClick }: HeaderProps) {
               alt={company?.details?.full_name || t('header.logoAlt')}
               className="h-10 w-auto object-contain"
             />
-
-            <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100 hidden sm:block">
-              SmartxHub <span className="text-primary-500">Analytics</span>
-            </h1>
+            <div className="hidden sm:flex flex-col">
+              <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100 leading-tight">
+                SmartxHub <span className="text-primary-500">Analytics</span>
+              </h1>
+              {company?.details?.full_name && (
+                <p
+                  className={`
+          text-xs text-gray-500 dark:text-gray-400 leading-tight
+          transition-all duration-300
+          ${showMenuButton ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 h-0'}
+        `}
+                >
+                  {company.details.full_name}
+                </p>
+              )}
+            </div>
           </div>
+
+
         </div>
+
+
 
         {/* DIREITA */}
         <div className="flex items-center gap-2">

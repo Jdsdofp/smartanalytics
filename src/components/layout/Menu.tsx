@@ -662,7 +662,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
 
 
 
-            {!collapsed && <h2 className="text-lg font-bold truncate text-company-primary">{company?.details.full_name || 'Menu'}</h2>}
+            {!collapsed && <h2 className="text-lg ml-2 font-bold truncate text-company-primary">{company?.details.full_name || 'Menu'}</h2>}
             <div className="flex items-center gap-2 ml-auto">
               <button onClick={() => setCollapsed(!collapsed)} title={collapsed ? 'Expandir menu' : 'Recolher menu'} className={collapsed ? `ml-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0 bg-company-primary text-white` : `hidden lg:block p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0 text-company-primary`}>
                 {collapsed ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}

@@ -15,7 +15,7 @@ interface OrderItemsModalProps {
 
 export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetails }: OrderItemsModalProps) {
   const { companyId, company } = useCompany();
-  
+
   const { items, loading, error } = useOrderItems(Number(companyId), flowId);
 
   // const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
@@ -95,83 +95,83 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
   //   }
   // };
 
-//   const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
-//   const columns = [
-//     { header: 'Item Code', key: 'code' as keyof OrderItem },
-//     { header: 'Item Name', key: 'item_name' as keyof OrderItem },
-//     { header: 'Brand', key: 'brand' as keyof OrderItem },
-//     { header: 'Model', key: 'model' as keyof OrderItem },
-//     { header: 'Serial', key: 'serial' as keyof OrderItem },
-//     { header: 'Category', key: 'category' as keyof OrderItem },
-//     { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
-//     { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
-//     { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
-//     { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
-//   ];
+  //   const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
+  //   const columns = [
+  //     { header: 'Item Code', key: 'code' as keyof OrderItem },
+  //     { header: 'Item Name', key: 'item_name' as keyof OrderItem },
+  //     { header: 'Brand', key: 'brand' as keyof OrderItem },
+  //     { header: 'Model', key: 'model' as keyof OrderItem },
+  //     { header: 'Serial', key: 'serial' as keyof OrderItem },
+  //     { header: 'Category', key: 'category' as keyof OrderItem },
+  //     { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
+  //     { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
+  //     { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
+  //     { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
+  //   ];
 
-//   const fileName = `order_items_${orderCode}`;
-//   const title = `Order Items - ${orderCode}`;
+  //   const fileName = `order_items_${orderCode}`;
+  //   const title = `Order Items - ${orderCode}`;
 
-//   switch (format) {
-//     case 'pdf':
-//       exportToPDF(items, columns, fileName, title, orderDetails);
-//       break;
-//     case 'excel':
-//       exportToExcel(items, columns, fileName, 'Items', orderDetails);
-//       break;
-//     case 'csv':
-//       exportToCSV(items, columns, fileName, orderDetails);
-//       break;
-//     case 'text':
-//       exportToTextTabular(items, columns, fileName, orderDetails);
-//       break;
-//   }
-// };
+  //   switch (format) {
+  //     case 'pdf':
+  //       exportToPDF(items, columns, fileName, title, orderDetails);
+  //       break;
+  //     case 'excel':
+  //       exportToExcel(items, columns, fileName, 'Items', orderDetails);
+  //       break;
+  //     case 'csv':
+  //       exportToCSV(items, columns, fileName, orderDetails);
+  //       break;
+  //     case 'text':
+  //       exportToTextTabular(items, columns, fileName, orderDetails);
+  //       break;
+  //   }
+  // };
 
 
-// Certifique-se de que está passando code_user_job no metadata
-const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
-  
-  const columns = [
-    { header: 'Item Code', key: 'code' as keyof OrderItem },
-    { header: 'Item Name', key: 'item_name' as keyof OrderItem },
-    { header: 'Brand', key: 'brand' as keyof OrderItem },
-    { header: 'Model', key: 'model' as keyof OrderItem },
-    { header: 'Serial', key: 'serial' as keyof OrderItem },
-    { header: 'Category', key: 'category' as keyof OrderItem },
-    { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
-    { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
-    { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
-    { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
-  ];
+  // Certifique-se de que está passando code_user_job no metadata
+  const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
 
-  const fileName = `order_items_${orderCode}`;
-  const title = `Order Items - ${orderCode}`;
+    const columns = [
+      { header: 'Item Code', key: 'code' as keyof OrderItem },
+      { header: 'Item Name', key: 'item_name' as keyof OrderItem },
+      { header: 'Brand', key: 'brand' as keyof OrderItem },
+      { header: 'Model', key: 'model' as keyof OrderItem },
+      { header: 'Serial', key: 'serial' as keyof OrderItem },
+      { header: 'Category', key: 'category' as keyof OrderItem },
+      { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
+      { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
+      { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
+      { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
+    ];
 
-   // ⭐ PASSAR O BASE64 ORIGINAL (sem decodificar)
-  const companyLogoBase64 = company?.details?.logo ?? '';
+    const fileName = `order_items_${orderCode}`;
+    const title = `Order Items - ${orderCode}`;
 
-  // Adicionar code_user_job ao metadata
-  const enrichedMetadata = orderDetails ? {
-    ...orderDetails,
-    code_user_job: orderCode
-  } : undefined;
+    // ⭐ PASSAR O BASE64 ORIGINAL (sem decodificar)
+    const companyLogoBase64 = company?.details?.logo ?? '';
 
-  switch (format) {
-    case 'pdf':
-      exportToPDF(items, columns, fileName, title, enrichedMetadata, companyLogoBase64);
-      break;
-    case 'excel':
-      exportToExcel(items, columns, fileName, 'Items', enrichedMetadata);
-      break;
-    case 'csv':
-      exportToCSV(items, columns, fileName, enrichedMetadata);
-      break;
-    case 'text':
-      exportToTextTabular(items, columns, fileName, enrichedMetadata);
-      break;
-  }
-};
+    // Adicionar code_user_job ao metadata
+    const enrichedMetadata = orderDetails ? {
+      ...orderDetails,
+      code_user_job: orderCode
+    } : undefined;
+
+    switch (format) {
+      case 'pdf':
+        exportToPDF(items, columns, fileName, title, enrichedMetadata, companyLogoBase64);
+        break;
+      case 'excel':
+        exportToExcel(items, columns, fileName, 'Items', enrichedMetadata);
+        break;
+      case 'csv':
+        exportToCSV(items, columns, fileName, enrichedMetadata);
+        break;
+      case 'text':
+        exportToTextTabular(items, columns, fileName, enrichedMetadata);
+        break;
+    }
+  };
 
 
   useEffect(() => {
@@ -238,7 +238,7 @@ const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
                   <span className="text-3xl">📦</span>
                   Order Items Details
                 </h2>
-                
+
                 {/* Informações básicas */}
                 <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2">
                   <div>
@@ -247,7 +247,7 @@ const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
                       {orderCode}
                     </code>
                   </div>
-                  
+
                   <div>
                     <p className="text-blue-200 text-xs font-medium">Flow ID</p>
                     <span className="text-white font-semibold text-sm">{flowId}</span>
@@ -290,9 +290,9 @@ const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
                       </div>
 
                       <div>
-                        <p className="text-blue-200 text-xs font-medium">Due Date</p>
+                        <p className="text-blue-200 text-xs font-medium">Scheduled Date</p>
                         <span className="text-white font-semibold text-sm">
-                          {new Date(orderDetails.due_date).toLocaleDateString('en-US', {
+                          {new Date(orderDetails.scheduled_Date).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',
@@ -394,9 +394,8 @@ const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
                       {items.map((item, index) => (
                         <tr
                           key={item.obj_id}
-                          className={`hover:bg-blue-50 transition-colors ${
-                            index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
-                          }`}
+                          className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                            }`}
                         >
                           <td className="px-4 py-2.5 whitespace-nowrap">
                             <code className="text-[10px] bg-gradient-to-r from-gray-100 to-gray-200 px-2 py-1 rounded-md font-mono font-semibold text-gray-700 border border-gray-300">
