@@ -10,7 +10,7 @@ import { FilterPanel } from './components/Logistics/Orders/FilterPanel';
 import { ChartCard } from './components/Logistics/Orders/ChartCard';
 import { ExportButton } from './components/Logistics/Orders/ExportButton';
 import { OrdersTable } from './components/Logistics/Orders/OrdersTable';
-import { ChartBarIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, RectangleStackIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, CheckBadgeIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, RectangleStackIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
 
 export default function OrderDashboard() {
   //@ts-ignore
@@ -292,13 +292,22 @@ export default function OrderDashboard() {
   // =====================================
 
   const formatStatusName = (status: string) => {
-    return status?.replace(/_/g, ' ').toUpperCase() || 'UNKNOWN';
+      const names: Record<string, string> = {
+    'complete': 'COMPLETE',
+    'part_completed': 'PART COMPLETED',
+    'in_progress': 'IN PROGRESS',
+    'info_received': 'INFO RECEIVED',
+    'out_for_delivery': 'OUT FOR DELIVERY',
+    'delivered': 'DELIVERED'
+  };
+   return names[status] || status?.replace(/_/g, ' ').toUpperCase() || 'UNKNOWN';
   };
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       'complete': '#10b981',
       'in_progress': '#f59e0b',
+      'part_completed': '#14b84b', 
       'info_received': '#3b82f6',
       'out_for_delivery': '#8b5cf6',
       'delivered': '#14b8a6'
@@ -494,9 +503,10 @@ export default function OrderDashboard() {
         </div>
       </div>
 
-      {/* KPI Cards */}
+{/* KPI Cards - ATUALIZADO */}
       {kpiSummary && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+          {/* Total Orders */}
           <KPICard
             title="Total Orders"
             value={kpiSummary.total_orders || 0}
@@ -504,40 +514,50 @@ export default function OrderDashboard() {
             icon={<ShoppingBagIcon className="w-7 h-7" />}
             color="blue"
           />
+          
+          {/* Completed */}
           <KPICard
             title="Completed"
-            value={kpiSummary.orders_complete || 0}
-            subtitle={`${kpiSummary.total_orders ? ((kpiSummary.orders_complete / kpiSummary.total_orders) * 100).toFixed(1) : '0'}% of total`}
+            value={Number(kpiSummary.orders_complete) || 0}
+            subtitle={`${kpiSummary.total_orders ? ((Number(kpiSummary.orders_complete) / kpiSummary.total_orders) * 100).toFixed(1) : '0'}% of total`}
             icon={<CheckCircleIcon className="w-7 h-7" />}
             color="green"
           />
+          
+          {/* Part Completed - NOVO */}
+          <KPICard
+            title="Part Completed"
+            value={Number(kpiSummary.orders_part_completed) || 0}
+            subtitle={`${kpiSummary.total_orders ? ((Number(kpiSummary.orders_part_completed) / kpiSummary.total_orders) * 100).toFixed(1) : '0'}% of total`}
+            icon={<CheckBadgeIcon className="w-7 h-7" />}
+            color="teal"
+          />
+          
+          {/* In Progress */}
           <KPICard
             title="In Progress"
-            value={kpiSummary.orders_in_progress || 0}
+            value={Number(kpiSummary.orders_in_progress) || 0}
             subtitle="Currently being processed"
             icon={<ClockIcon className="w-7 h-7" />}
             color="orange"
           />
+          
+          {/* Info Received */}
           <KPICard
-            title="Pending"
-            value={kpiSummary.orders_pending || 0}
+            title="Info Received"
+            value={Number(kpiSummary.orders_info_received) || 0}
             subtitle="Awaiting processing"
             icon={<ExclamationTriangleIcon className="w-7 h-7" />}
             color="yellow"
           />
-          <KPICard
-            title="Completion Rate"
-            value={`${Number(kpiSummary.avg_completion_rate || 0).toFixed(2)}%`}
-            subtitle="Average across all orders"
-            icon={<ChartBarIcon className="w-7 h-7" />}
-            color="purple"
-          />
+          
+          {/* Items per Order */}
           <KPICard
             title="Items per Order"
             value={Number(kpiSummary.avg_items_per_order || 0).toFixed(2)}
             subtitle="Average"
             icon={<RectangleStackIcon className="w-7 h-7" />}
-            color="teal"
+            color="purple"
           />
         </div>
       )}

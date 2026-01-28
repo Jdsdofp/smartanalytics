@@ -788,6 +788,7 @@ export interface OrdersKPISummary {
   orders_in_progress: number;
   orders_info_received: number;
   avg_completion_rate: number;
+  orders_part_completed: number;
   avg_items_per_order: number;
   orders_pending: number;
   orders_by_status: {
@@ -842,6 +843,7 @@ export interface ItemStatusDistribution {
 export interface OrdersSummary {
   id: number;
   identifier1: string;
+  identifier2: string;
   code_user_job: string;
   subject: string;
   status_job: string;
@@ -874,7 +876,7 @@ export interface OrderItem {
   flow_modified_by: string;
   tranfer_date: string | null;
   transfer_by: string;
-  tranfer_status: string;
+  Flow_status: string;
   transfer_status_description: string | null;
   transfer_audited_date: string | null;
   transfer_audited_by: string | null;

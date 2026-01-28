@@ -21,15 +21,11 @@ export function OrdersTable({ orders, loading }: OrdersTableProps) {
   const [sortField, setSortField] = useState<keyof OrdersSummary>('scheduled_Date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
-  // Modal state
-  // E atualizar o state:
   const [selectedOrder, setSelectedOrder] = useState<{ 
     flowId: number; 
     orderCode: string;
     orderDetails: OrdersSummary;
   } | null>(null);
-
-  // ... (manter todo o código de filtering, sorting, pagination existente)
 
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
@@ -39,7 +35,8 @@ export function OrdersTable({ orders, loading }: OrdersTableProps) {
         order.job_type_name.toLowerCase().includes(searchLower) ||
         order.status_job.toLowerCase().includes(searchLower) ||
         order.subject?.toLowerCase().includes(searchLower) ||
-        order.identifier1?.toLowerCase().includes(searchLower)
+        order.identifier1?.toLowerCase().includes(searchLower) ||
+        order.identifier2?.toLowerCase().includes(searchLower)
       );
     });
   }, [orders, searchTerm]);
@@ -91,28 +88,22 @@ export function OrdersTable({ orders, loading }: OrdersTableProps) {
     }
   };
 
-const handleRowClick = (order: OrdersSummary) => {
-  setSelectedOrder({
-    flowId: order.id,
-    orderCode: order.code_user_job,
-    orderDetails: order // ⭐ Passar os detalhes completos
-  });
-};
+  const handleRowClick = (order: OrdersSummary) => {
+    setSelectedOrder({
+      flowId: order.id,
+      orderCode: order.code_user_job,
+      orderDetails: order
+    });
+  };
 
   const handleCloseModal = () => {
     setSelectedOrder(null);
   };
 
-  // =====================================
-  // 📤 EXPORT HANDLERS
-  // =====================================
-
-
-  
-
   const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
     const columns = [
-      { header: 'Order Code', key: 'code_user_job' as keyof OrdersSummary },
+      { header: 'Identifier 1', key: 'identifier1' as keyof OrdersSummary },
+      { header: 'Identifier 2', key: 'identifier2' as keyof OrdersSummary },
       { header: 'Subject', key: 'subject' as keyof OrdersSummary },
       { header: 'Job Type', key: 'job_type_name' as keyof OrdersSummary },
       { header: 'Job Class', key: 'job_class_name' as keyof OrdersSummary },
@@ -124,12 +115,12 @@ const handleRowClick = (order: OrdersSummary) => {
       { header: 'Custody', key: 'to_custody_name' as keyof OrdersSummary },
       { header: 'Zone', key: 'to_zone_name' as keyof OrdersSummary },
       { header: 'Scheduled Date', key: 'scheduled_Date' as keyof OrdersSummary },
+      { header: 'Order Code', key: 'code_user_job' as keyof OrdersSummary },
     ];
 
     const fileName = 'orders_list';
     const title = 'Orders List Report';
 
-    // Use sortedOrders para exportar TODOS os dados filtrados, não apenas a página atual
     switch (format) {
       case 'pdf':
         exportToPDF(sortedOrders, columns, fileName, title, undefined, logo);
@@ -145,9 +136,6 @@ const handleRowClick = (order: OrdersSummary) => {
         break;
     }
   };
-
-  
-  // ... (manter utility functions existentes)
 
   const formatStatusName = (status: string) => {
     return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -241,11 +229,20 @@ return (
               <tr>
                 <th 
                   className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('code_user_job')}
+                  onClick={() => handleSort('identifier1')}
                 >
                   <div className="flex items-center gap-1.5">
-                    Order Code
-                    <SortIcon field="code_user_job" />
+                    Identifier 1
+                    <SortIcon field="identifier1" />
+                  </div>
+                </th>
+                <th 
+                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                  onClick={() => handleSort('identifier2')}
+                >
+                  <div className="flex items-center gap-1.5">
+                    Identifier 2
+                    <SortIcon field="identifier2" />
                   </div>
                 </th>
                 <th 
@@ -295,11 +292,11 @@ return (
                 </th>
                 <th 
                   className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('to_custody_name')}
+                  onClick={() => handleSort('to_zone_name')}
                 >
                   <div className="flex items-center gap-1.5">
-                    Custody
-                    <SortIcon field="to_custody_name" />
+                    Zone
+                    <SortIcon field="to_zone_name" />
                   </div>
                 </th>
                 <th 
@@ -316,7 +313,7 @@ return (
             <tbody className="bg-white divide-y divide-gray-100">
               {paginatedOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center">
+                  <td colSpan={9} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <span className="text-6xl">📭</span>
                       <p className="text-gray-500 font-medium">No orders found</p>
@@ -336,8 +333,13 @@ return (
                     }`}
                   >
                     <td className="px-4 py-2.5 whitespace-nowrap">
-                      <code className="text-[10px] bg-gradient-to-r from-gray-100 to-gray-200 px-2 py-1 rounded-md font-mono font-semibold text-gray-700 border border-gray-300">
-                        {order.code_user_job}
+                      <code className="text-xs bg-gradient-to-r from-blue-50 to-blue-100 px-2.5 py-1 rounded-md font-mono font-bold text-blue-900 border border-blue-200">
+                        {order.identifier1 || '-'}
+                      </code>
+                    </td>
+                    <td className="px-4 py-2.5 whitespace-nowrap">
+                      <code className="text-xs bg-gradient-to-r from-indigo-50 to-indigo-100 px-2.5 py-1 rounded-md font-mono font-bold text-indigo-900 border border-indigo-200">
+                        {order.identifier2 || '-'}
                       </code>
                     </td>
                     <td className="px-4 py-2.5">
@@ -345,7 +347,7 @@ return (
                         {order.subject || '-'}
                       </div>
                       <div className="text-[10px] text-gray-500 font-medium mt-0.5">
-                        {order.identifier1}
+                        {order.code_user_job}
                       </div>
                     </td>
                     <td className="px-4 py-2.5">
@@ -380,10 +382,10 @@ return (
                       </div>
                     </td>
                     <td className="px-4 py-2.5">
-                      <div>
-                        <div className="text-xs font-semibold text-gray-900">{order.to_custody_name}</div>
-                        <div className="text-[10px] text-gray-500 font-medium mt-0.5">{order.to_zone_name}</div>
-                      </div>
+                      <div className="text-xs font-semibold text-gray-900">{order.to_zone_name || '-'}</div>
+                      {order.to_custody_name && (
+                        <div className="text-[10px] text-gray-500 font-medium mt-0.5">{order.to_custody_name}</div>
+                      )}
                     </td>
                     <td className="px-4 py-2.5 whitespace-nowrap">
                       <div className="text-xs text-gray-900 font-medium">
@@ -496,14 +498,14 @@ return (
 
     {/* Modal */}
     {selectedOrder && (
-  <OrderItemsModal
-    isOpen={!!selectedOrder}
-    onClose={handleCloseModal}
-    flowId={selectedOrder.flowId}
-    orderCode={selectedOrder.orderCode}
-    orderDetails={selectedOrder.orderDetails} // ⭐ Passar orderDetails
-  />
-)}
+      <OrderItemsModal
+        isOpen={!!selectedOrder}
+        onClose={handleCloseModal}
+        flowId={selectedOrder.flowId}
+        orderCode={selectedOrder.orderCode}
+        orderDetails={selectedOrder.orderDetails}
+      />
+    )}
   </>
 );
 }

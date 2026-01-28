@@ -34,8 +34,8 @@ export function FilterPanel({ onApplyFilters, onResetFilters, initialFilters }: 
     { value: 'complete', label: 'Complete', color: 'green' },
     { value: 'in_progress', label: 'In Progress', color: 'orange' },
     { value: 'info_received', label: 'Info Received', color: 'blue' },
-    { value: 'out_for_delivery', label: 'Out for Delivery', color: 'purple' },
-    { value: 'delivered', label: 'Delivered', color: 'teal' }
+    { value: 'part_completed', label: 'Part Completed', color: 'teal' },
+    // { value: 'delivered', label: 'Delivered', color: 'teal' }
   ];
 
   const handleApply = () => {

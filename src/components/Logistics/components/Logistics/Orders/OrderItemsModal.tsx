@@ -425,8 +425,8 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
                             </span>
                           </td>
                           <td className="px-4 py-2.5 whitespace-nowrap">
-                            <span className={`px-2 py-1 inline-flex text-[10px] leading-4 font-bold rounded-full ${getStatusBadgeClass(item.tranfer_status)}`}>
-                              {formatStatusName(item.tranfer_status)}
+                            <span className={`px-2 py-1 inline-flex text-[10px] leading-4 font-bold rounded-full ${getStatusBadgeClass(item.Flow_status)}`}>
+                              {formatStatusName(item.Flow_status)}
                             </span>
                           </td>
                           <td className="px-4 py-2.5">
