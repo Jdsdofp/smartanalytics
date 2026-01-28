@@ -10,7 +10,7 @@ import { FilterPanel } from './components/Logistics/Orders/FilterPanel';
 import { ChartCard } from './components/Logistics/Orders/ChartCard';
 import { ExportButton } from './components/Logistics/Orders/ExportButton';
 import { OrdersTable } from './components/Logistics/Orders/OrdersTable';
-import { ChartBarIcon, CheckBadgeIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, RectangleStackIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
+import { CheckBadgeIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, RectangleStackIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
 
 export default function OrderDashboard() {
   //@ts-ignore
