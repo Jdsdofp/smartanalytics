@@ -945,6 +945,14 @@ export interface ItemWithContext {
   order_code: string;
 }
 
+export interface GlobalOrderMetrics {
+  completed_items: number;
+  items_pending: number;
+  total_items: number;
+  percentage_complete: number;
+  percentage_incomplete: number;
+}
+
 export interface DashboardData {
   kpiSummary: OrdersKPISummary;
   jobTypePerformance: JobTypePerformance[];
@@ -952,6 +960,7 @@ export interface DashboardData {
   statusDistribution: ItemStatusDistribution[];
   recentOrders: OrdersSummary[];
   timestamp: string;
+  globalMetrics: GlobalOrderMetrics[]
 }
 
 export interface OrderFilters {
@@ -977,6 +986,8 @@ export interface PaginationInfo {
   offset: number;
   hasMore: boolean;
 }
+
+
 
 // =====================================
 // 🎯 API BASE URL - DINÂMICA
@@ -1062,6 +1073,10 @@ export const useOrders = () => {
   const [timeline, setTimeline] = useState<TimelineData[]>([]);
   const [itemStatusDistribution, setItemStatusDistribution] = useState<ItemStatusDistribution[]>([]);
 
+    // ✅ NOVO: Global Metrics
+  const [globalMetrics, setGlobalMetrics] = useState<GlobalOrderMetrics | null>(null);
+
+
   // Orders & Items
   const [orders, setOrders] = useState<OrdersSummary[]>([]);
   const [items, setItems] = useState<ItemWithContext[]>([]);
@@ -1085,6 +1100,8 @@ export const useOrders = () => {
       setJobTypePerformance(data.jobTypePerformance);
       setTimeline(data.timeline);
       setItemStatusDistribution(data.statusDistribution);
+      //@ts-ignore
+      setGlobalMetrics(data.globalMetrics);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch dashboard data";
@@ -1333,6 +1350,28 @@ export const useOrders = () => {
     [companyId],
   );
 
+   // ✅ NOVA FUNÇÃO: Fetch Global Metrics
+  const fetchGlobalMetrics = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await fetchAPI<GlobalOrderMetrics>(
+        `/${companyId}/global-metrics`,
+      );
+      setGlobalMetrics(data);
+      return data;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch global metrics";
+      setError(errorMessage);
+      console.error("Error fetching global metrics:", err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [companyId]);
+
   // =====================================
   // 🔄 AUTO-REFRESH
   // =====================================
@@ -1378,6 +1417,7 @@ export const useOrders = () => {
     items,
     itemsPagination,
     orderItems,
+    globalMetrics,
 
     // Fetch functions
     fetchDashboardData,
@@ -1388,6 +1428,7 @@ export const useOrders = () => {
     fetchOrders,
     fetchOrderItems,
     fetchItems,
+    fetchGlobalMetrics
   };
 };
 

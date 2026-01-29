@@ -10,6 +10,7 @@ import { ChartCard } from './components/Logistics/Orders/ChartCard';
 import { ExportButton } from './components/Logistics/Orders/ExportButton';
 import { OrdersTable } from './components/Logistics/Orders/OrdersTable';
 import { CheckBadgeIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, RectangleStackIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
+import { GlobalMetricsCompact } from './components/Logistics/Orders/GlobalMetricsCard';
 
 export default function OrderDashboard() {
   //@ts-ignore
@@ -22,8 +23,9 @@ export default function OrderDashboard() {
     jobTypePerformance,
     timeline,
     orders,
+    globalMetrics,
     fetchOrders,
-    fetchDashboardData
+    fetchDashboardData,
   } = useOrders();
 
   // Refs para os elementos DOM dos gráficos
@@ -560,6 +562,10 @@ export default function OrderDashboard() {
           />
         </div>
       )}
+
+        <div className="mb-8">
+        <GlobalMetricsCompact metrics={globalMetrics} />
+      </div>
 
 
       {/* Charts Grid */}
