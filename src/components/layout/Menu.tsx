@@ -1,33 +1,10 @@
 // src/components/layout/Menu.tsx
 import { useState, useEffect, useMemo } from 'react'
 import {
-  ChartBarIcon,
-  ChartPieIcon,
   ChevronDownIcon,
   XMarkIcon,
-  DocumentChartBarIcon,
-  TableCellsIcon,
   ChevronLeftIcon,
-  ChevronRightIcon,
-  UserGroupIcon,
-  BuildingOfficeIcon,
-  TruckIcon,
-  CubeIcon,
-  DocumentTextIcon,
-  MapPinIcon,
-  AcademicCapIcon,
-  ShieldCheckIcon,
-  CalendarIcon,
-  BellAlertIcon,
-  CurrencyDollarIcon,
-  ShieldExclamationIcon,
-  DocumentCheckIcon,
-  ClockIcon,
-  ArchiveBoxIcon,
-  HomeModernIcon,
-  ServerIcon,
-  ChartBarSquareIcon,
-  MapIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import { useAuth } from '../../context/AuthContext'
 import { useCompany } from '../../hooks/useCompany'
