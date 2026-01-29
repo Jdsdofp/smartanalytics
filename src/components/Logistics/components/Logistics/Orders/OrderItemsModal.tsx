@@ -240,7 +240,7 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
           </div>
 
           {/* Content - Tabela de Items */}
-          <div className="flex-1 overflow-auto p-6">
+          <div className="flex-1 overflow-auto p-2">
             {loading ? (
               <div className="space-y-3">
                 <div className="animate-pulse space-y-3">
@@ -273,12 +273,12 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Item Name
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Brand / Model
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                        </th> */}
+                        {/* <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Serial
-                        </th>
+                        </th> */}
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Category
                         </th>
@@ -312,15 +312,15 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
                               {item.item_aux_code}
                             </div>
                           </td>
-                          <td className="px-4 py-3">
+                          {/* <td className="px-4 py-3">
                             <div className="text-sm text-gray-900">{item.brand}</div>
                             <div className="text-xs text-gray-500">{item.model}</div>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap">
+                          </td> */}
+                          {/* <td className="px-4 py-3 whitespace-nowrap">
                             <span className="text-xs font-mono text-gray-700 bg-gray-50 px-2 py-1 rounded border border-gray-200">
                               {item.serial || '-'}
                             </span>
-                          </td>
+                          </td> */}
                           <td className="px-4 py-3 whitespace-nowrap">
                             <span className="text-sm text-gray-700">
                               {item.category}

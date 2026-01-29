@@ -4,6 +4,11 @@ import Layout from "../../components/layout/Layout"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { useFavorites } from "../../context/FavoritesContext"
+import { useMemo, useState } from "react"
+import { filterMenuByPermissions } from "../../utils/menuPermissions"
+import { menuItemsRaw } from "../../config/menuItems"
+import { usePermissions } from "../../hooks/usePermissions"
+import type { MenuItemProps } from "../../components/layout/Menu"
 
 export default function Home() {
   const { user } = useAuth()
@@ -11,6 +16,71 @@ export default function Home() {
   const { favorites } = useFavorites()
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { userPermissions } = usePermissions()
+  const [showViewsDropdown, setShowViewsDropdown] = useState(false)
+
+  // Função recursiva para extrair APENAS dashboards finais (sem filhos) e contar por categoria
+  const extractDashboardsByCategory = (
+    items: MenuItemProps[],
+    parentCategory?: string,
+    level: number = 0
+  ): Record<string, number> => {
+    const categoryCount: Record<string, number> = {}
+
+    items.forEach(item => {
+      if (item.disabled || item.hidden) return
+
+      let category: any = parentCategory
+
+      if (level === 0 && item.label.includes('Analytics')) {
+        category = item.label
+      }
+
+      const hasChildren = item.children && item.children.length > 0
+      const isValidDashboard = item.path && item.path !== '/' && category && !hasChildren
+
+      if (isValidDashboard) {
+        categoryCount[category] = (categoryCount[category] || 0) + 1
+      }
+
+      if (item.children && item.children.length > 0) {
+        const enabledChildren = item.children.filter(child => !child.disabled && !child.hidden)
+        if (enabledChildren.length > 0) {
+          const childCounts = extractDashboardsByCategory(enabledChildren, category, level + 1)
+          Object.keys(childCounts).forEach(cat => {
+            categoryCount[cat] = (categoryCount[cat] || 0) + childCounts[cat]
+          })
+        }
+      }
+    })
+
+    return categoryCount
+  }
+
+  const categoryStats = useMemo(() => {
+    const filteredMenu = filterMenuByPermissions(menuItemsRaw, userPermissions)
+    const counts = extractDashboardsByCategory(filteredMenu, undefined, 0)
+
+    const categories = [
+      { id: 'Assets Analytics', name: t('categories.assets'), icon: '📦', color: 'indigo' },
+      { id: 'People Analytics', name: t('categories.people'), icon: '👥', color: 'cyan' },
+      { id: 'Certificates Analytics', name: t('categories.certificates'), icon: '📜', color: 'purple' },
+      { id: 'Infrastructure Analytics', name: t('categories.infrastructure'), icon: '🏗️', color: 'orange' },
+      { id: 'Logistics Analytics', name: t('categories.logistics'), icon: '🚚', color: 'pink' }
+    ]
+
+    return categories
+      .map(cat => ({
+        ...cat,
+        count: counts[cat.id] || 0
+      }))
+      .filter(cat => cat.count > 0)
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }, [userPermissions, t])
+
+  const totalDashboards = useMemo(() => {
+    return categoryStats.reduce((sum, cat) => sum + cat.count, 0)
+  }, [categoryStats])
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
@@ -24,6 +94,38 @@ export default function Home() {
     }
     return colors[category] || 'bg-gray-500'
   }
+
+  // Views disponíveis
+  const dashboardViews = [
+    {
+      id: 'grid',
+      name: t('home.gridView'),
+      icon: '📊',
+      path: '/dashboard-hub',
+      description: t('home.gridViewDescription')
+    },
+    {
+      id: 'compact',
+      name: t('home.compactView'),
+      icon: '📋',
+      path: '/dashboard-hub/compact',
+      description: t('home.compactViewDescription')
+    },
+    {
+      id: 'hierarchical',
+      name: t('home.hierarchicalView'),
+      icon: '🎯',
+      path: '/dashboard-hub/hierarchical',
+      description: t('home.hierarchicalViewDescription')
+    },
+    {
+      id: 'kanban',
+      name: t('home.kanbanView'),
+      icon: '📌',
+      path: '/dashboard-hub/kanban',
+      description: t('home.kanbanViewDescription')
+    }
+  ]
 
   return (
     <Layout showEmbedButton={false} showFavoriteButton={false}>
@@ -41,7 +143,7 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* NOVO: Card de Acesso ao Dashboard Hub */}
+              {/* Card de Acesso ao Dashboard Hub */}
               <div className="mb-6 fade-in">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-xl overflow-hidden">
                   <div className="p-6 md:flex md:items-center md:justify-between">
@@ -54,56 +156,76 @@ export default function Home() {
                         </div>
                         <div>
                           <h3 className="text-2xl font-bold text-white">
-                            📊 Dashboard Hub
+                            📊 {t('home.dashboardHub')}
                           </h3>
                           <p className="text-white/90 text-sm">
-                            Acesse todos os 16 dashboards em um só lugar
+                            {t('home.accessAllDashboards', { 
+                              count: totalDashboards, 
+                              plural: totalDashboards !== 1 ? 's' : '' 
+                            })}
                           </p>
                         </div>
                       </div>
                       <p className="text-white/80 text-sm">
-                        4 visualizações diferentes: Grid, Compacta, Hierárquica e Kanban
+                        {t('home.differentViews')}
                       </p>
                     </div>
-                    
+
                     <div className="flex flex-col sm:flex-row gap-2">
                       <button
                         onClick={() => navigate('/dashboard-hub')}
-                        className="px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl hover:scale-105"
+                        className="cursor-pointer px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl hover:scale-105"
                       >
-                        Abrir Hub
+                        {t('home.openHub')}
                       </button>
-                      <div className="relative group">
-                        <button className="px-4 py-3 bg-white/20 backdrop-blur-sm text-white rounded-lg font-semibold hover:bg-white/30 transition-all">
-                          Visualizações ▾
+
+                      {/* Dropdown de Visualizações */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowViewsDropdown(!showViewsDropdown)}
+                          onBlur={() => setTimeout(() => setShowViewsDropdown(false), 200)}
+                          className="cursor-pointer  w-full sm:w-auto px-4 py-3 bg-white/20 backdrop-blur-sm text-white rounded-lg font-semibold hover:bg-white/30 transition-all flex items-center justify-center gap-2"
+                        >
+                          {t('home.views')}
+                          <svg
+                            className={`w-4 h-4 transition-transform ${showViewsDropdown ? 'rotate-180' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
                         </button>
-                        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                          <button
-                            onClick={() => navigate('/dashboard-hub')}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-t-lg"
-                          >
-                            📊 Grid View
-                          </button>
-                          <button
-                            onClick={() => navigate('/dashboard-hub/compact')}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100"
-                          >
-                            📋 Compact View
-                          </button>
-                          <button
-                            onClick={() => navigate('/dashboard-hub/hierarchical')}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100"
-                          >
-                            🎯 Hierarchical View
-                          </button>
-                          <button
-                            onClick={() => navigate('/dashboard-hub/kanban')}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-b-lg"
-                          >
-                            📌 Kanban View
-                          </button>
-                        </div>
+
                       </div>
+                        {showViewsDropdown && (
+                          <div className="absolute right-0 mt-10 w-72 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-800 z-50 overflow-hidden">
+                            {dashboardViews.map((view, index) => (
+                              <button
+                                key={view.id}
+                                onClick={() => {
+                                  navigate(view.path)
+                                  setShowViewsDropdown(false)
+                                }}
+                                className={`cursor-pointer w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${index === 0 ? 'rounded-t-lg' : ''
+                                  } ${index === dashboardViews.length - 1 ? 'rounded-b-lg' : 'border-b border-gray-100 dark:border-gray-800'
+                                  }`}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <span className="text-2xl">{view.icon}</span>
+                                  <div className="flex-1">
+                                    <div className="font-semibold text-gray-900 dark:text-gray-100">
+                                      {view.name}
+                                    </div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                      {view.description}
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -128,7 +250,7 @@ export default function Home() {
                       onClick={() => navigate('/dashboard-hub')}
                       className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                     >
-                      Ver todos os dashboards →
+                      {t('home.viewAllDashboards')}
                     </button>
                   </div>
 
@@ -153,10 +275,10 @@ export default function Home() {
                               </p>
                             </div>
                           </div>
-                          
-                          <svg 
-                            className="w-5 h-5 text-yellow-500 flex-shrink-0" 
-                            fill="currentColor" 
+
+                          <svg
+                            className="w-5 h-5 text-yellow-500 flex-shrink-0"
+                            fill="currentColor"
                             viewBox="0 0 24 24"
                           >
                             <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -178,42 +300,42 @@ export default function Home() {
               )}
 
               {/* Cards de acesso rápido a categorias */}
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                  Acesso Rápido por Categoria
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {[
-                    { category: 'Assets', icon: '📦', color: 'indigo', count: 3 },
-                    { category: 'People', icon: '👥', color: 'cyan', count: 1 },
-                    { category: 'Certificates', icon: '📜', color: 'purple', count: 3 },
-                    { category: 'Locations', icon: '📍', color: 'green', count: 1 },
-                    { category: 'Infrastructure', icon: '🏗️', color: 'orange', count: 6 },
-                    { category: 'Logistics', icon: '🚚', color: 'pink', count: 1 }
-                  ].map((cat) => (
-                    <button
-                      key={cat.category}
-                      onClick={() => navigate('/dashboard-hub')}
-                      className={`p-4 rounded-lg border-2 ${
-                        cat.color === 'indigo' ? 'border-indigo-200 dark:border-indigo-800 hover:border-indigo-500' :
-                        cat.color === 'cyan' ? 'border-cyan-200 dark:border-cyan-800 hover:border-cyan-500' :
-                        cat.color === 'purple' ? 'border-purple-200 dark:border-purple-800 hover:border-purple-500' :
-                        cat.color === 'green' ? 'border-green-200 dark:border-green-800 hover:border-green-500' :
-                        cat.color === 'orange' ? 'border-orange-200 dark:border-orange-800 hover:border-orange-500' :
-                        'border-pink-200 dark:border-pink-800 hover:border-pink-500'
-                      } bg-white dark:bg-gray-900 hover:shadow-md transition-all text-center group`}
-                    >
-                      <div className="text-3xl mb-2">{cat.icon}</div>
-                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        {cat.category}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {cat.count} dashboard{cat.count > 1 ? 's' : ''}
-                      </div>
-                    </button>
-                  ))}
+              {categoryStats.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                    {t('home.quickAccessByCategory')}
+                  </h3>
+                  <div className={`grid gap-3 ${categoryStats.length === 1 ? 'grid-cols-1 max-w-xs' :
+                      categoryStats.length === 2 ? 'grid-cols-2 md:grid-cols-2' :
+                        categoryStats.length === 3 ? 'grid-cols-2 md:grid-cols-3' :
+                          categoryStats.length === 4 ? 'grid-cols-2 md:grid-cols-4' :
+                            categoryStats.length === 5 ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5' :
+                              'grid-cols-2 md:grid-cols-3 lg:grid-cols-6'
+                    }`}>
+                    {categoryStats.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => navigate('/dashboard-hub')}
+                        className={`p-4 rounded-lg border-2 ${cat.color === 'indigo' ? 'border-indigo-200 dark:border-indigo-800 hover:border-indigo-500' :
+                            cat.color === 'cyan' ? 'border-cyan-200 dark:border-cyan-800 hover:border-cyan-500' :
+                              cat.color === 'purple' ? 'border-purple-200 dark:border-purple-800 hover:border-purple-500' :
+                                cat.color === 'green' ? 'border-green-200 dark:border-green-800 hover:border-green-500' :
+                                  cat.color === 'orange' ? 'border-orange-200 dark:border-orange-800 hover:border-orange-500' :
+                                    'border-pink-200 dark:border-pink-800 hover:border-pink-500'
+                          } bg-white dark:bg-gray-900 hover:shadow-md transition-all text-center group`}
+                      >
+                        <div className="text-3xl mb-2">{cat.icon}</div>
+                        <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                          {cat.name}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {cat.count} {cat.count > 1 ? t('home.dashboards') : t('home.dashboard')}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Cards de informações */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -252,8 +374,8 @@ export default function Home() {
                   </div>
                   <div className="space-y-2 text-sm">
                     <p className="text-gray-600 dark:text-gray-400">
-                      <strong>{t('home.account')}:</strong> 
-                      <span className={user?.active ? 'text-green-500' : 'text-red-500'}>
+                      <strong>{t('home.account')}:</strong>
+                      <span className={user?.active ? 'text-green-500 ml-1' : 'text-red-500 ml-1'}>
                         {user?.active ? t('home.active') : t('home.inactive')}
                       </span>
                     </p>
@@ -266,12 +388,12 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* NOVO: Card Dashboard Hub */}
+                {/* Card Dashboard Hub */}
                 <div className="p-6 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-sm hover:shadow-md transition-shadow fade-in cursor-pointer"
-                     onClick={() => navigate('/dashboard-hub')}>
+                  onClick={() => navigate('/dashboard-hub')}>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold">
-                      Dashboard Hub
+                      {t('home.dashboardHub')}
                     </h3>
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
@@ -279,17 +401,17 @@ export default function Home() {
                   </div>
                   <div className="space-y-2 text-sm">
                     <p className="text-white/90">
-                      <strong>Total:</strong> 16 dashboards
+                      <strong>{t('home.total')}:</strong> {totalDashboards} {totalDashboards !== 1 ? t('home.dashboards') : t('home.dashboard')}
                     </p>
                     <p className="text-white/90">
-                      <strong>Categorias:</strong> 6
+                      <strong>{t('home.categories')}:</strong> {categoryStats.length}
                     </p>
                     <p className="text-white/90">
-                      <strong>Visualizações:</strong> 4 tipos
+                      <strong>{t('home.views')}:</strong> 4 {t('home.viewTypes')}
                     </p>
                   </div>
                   <button className="mt-4 w-full py-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-all font-semibold">
-                    Acessar Hub →
+                    {t('home.accessHub')}
                   </button>
                 </div>
               </div>

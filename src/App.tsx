@@ -24,6 +24,7 @@ import MN0400_344 from './pages/Analytics/Logistics/MN0400_344';
 import DashboardHub from './components/DashboardHub';
 import DashboardHubCompact from './components/Dashboardhubcompact';
 import DashboardHubHierarchical from './components/Dashboardhubhierarchica';
+import DashboardHubKanban from './components/Dashboardhubkanban';
 
 function App() {
 
@@ -74,6 +75,15 @@ function App() {
         element={
           <PrivateRoute>
             <DashboardHubHierarchical />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard-hub/kanban"
+        element={
+          <PrivateRoute>
+            <DashboardHubKanban />
           </PrivateRoute>
         }
       />

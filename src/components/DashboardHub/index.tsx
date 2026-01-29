@@ -2,7 +2,11 @@ import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import Layout from "../../components/layout/Layout"
 import { useFavorites } from "../../context/FavoritesContext"
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { filterMenuByPermissions } from "../../utils/menuPermissions"
+import { menuItemsRaw } from "../../config/menuItems"
+import { usePermissions } from "../../hooks/usePermissions"
+import type { MenuItemProps } from "../../components/layout/Menu"
 
 interface Dashboard {
   id: string
@@ -12,10 +16,52 @@ interface Dashboard {
   category: string
   icon: string
   color: string
-  stats?: {
-    label: string
-    value: string | number
-  }[]
+  permissionCode?: string
+}
+
+// Mapeamento de ícones do menu para emojis
+const iconToEmoji: Record<string, string> = {
+  'ChartBarIcon': '📊',
+  'ChartPieIcon': '🥧',
+  'CubeIcon': '📦',
+  'UserGroupIcon': '👥',
+  'BuildingOfficeIcon': '🏗️',
+  'TruckIcon': '🚚',
+  'ShieldCheckIcon': '📜',
+  'DocumentTextIcon': '📄',
+  'MapPinIcon': '📍',
+  'MapIcon': '🗺️',
+  'DocumentChartBarIcon': '📈',
+  'TableCellsIcon': '📋',
+  'ServerIcon': '🖥️',
+  'ArchiveBoxIcon': '📦',
+  'HomeModernIcon': '🏢',
+  'AcademicCapIcon': '🎓',
+  'CalendarIcon': '📅',
+  'BellAlertIcon': '🔔',
+  'CurrencyDollarIcon': '💰',
+  'ShieldExclamationIcon': '⚠️',
+  'DocumentCheckIcon': '✅',
+  'ClockIcon': '🕐',
+  'ChartBarSquareIcon': '📊',
+}
+
+// Cores por categoria
+const categoryColors: Record<string, string> = {
+  'Assets Analytics': 'bg-indigo-500',
+  'People Analytics': 'bg-cyan-500',
+  'Certificates Analytics': 'bg-purple-500',
+  'Infrastructure Analytics': 'bg-orange-500',
+  'Logistics Analytics': 'bg-pink-500',
+}
+
+// Ícones por categoria
+const categoryIcons: Record<string, string> = {
+  'Assets Analytics': '📦',
+  'People Analytics': '👥',
+  'Certificates Analytics': '📜',
+  'Infrastructure Analytics': '🏗️',
+  'Logistics Analytics': '🚚',
 }
 
 export default function DashboardHub() {
@@ -26,167 +72,102 @@ export default function DashboardHub() {
   const { favorites, toggleFavorite } = useFavorites()
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [searchTerm, setSearchTerm] = useState("")
+  const { userPermissions } = usePermissions()
 
-  const dashboards: Dashboard[] = [
-    // Analytics - Assets
-    {
-      id: "MN0400_011",
-      title: "Assets Overview",
-      description: "Visão geral de todos os ativos",
-      path: "/MN0400_011",
-      category: "Assets",
-      icon: "📦",
-      color: "bg-indigo-500"
-    },
-    {
-      id: "MN0400_012",
-      title: "Assets Management",
-      description: "Gerenciamento detalhado de ativos",
-      path: "/MN0400_012",
-      category: "Assets",
-      icon: "🏷️",
-      color: "bg-indigo-600"
-    },
-    {
-      id: "MN0400_013",
-      title: "Assets Analytics",
-      description: "Análise avançada de ativos",
-      path: "/MN0400_013",
-      category: "Assets",
-      icon: "📊",
-      color: "bg-indigo-700"
-    },
+  // Função recursiva para extrair todos os dashboards da árvore do menu
+  const extractDashboards = (
+    items: MenuItemProps[], 
+    parentCategory?: string,
+    level: number = 0
+  ): Dashboard[] => {
+    const dashboards: Dashboard[] = []
 
-    // Analytics - People
-    {
-      id: "MN0400_111",
-      title: "People Analytics",
-      description: "Análise de pessoas e equipes",
-      path: "/MN0400_111",
-      category: "People",
-      icon: "👥",
-      color: "bg-cyan-500"
-    },
+    items.forEach(item => {
+      // IMPORTANTE: Pula itens disabled ou hidden
+      if (item.disabled || item.hidden) {
+        return
+      }
 
-    // Analytics - Certificates
-    {
-      id: "MN0400_511",
-      title: "Certificate Status Overview",
-      description: "Visão geral do status dos certificados",
-      path: "/MN0400_511",
-      category: "Certificates",
-      icon: "📜",
-      color: "bg-purple-500"
-    },
-    {
-      id: "MN0400_412",
-      title: "Certificate Details",
-      description: "Detalhes e análise de certificados",
-      path: "/MN0400_412",
-      category: "Certificates",
-      icon: "🔍",
-      color: "bg-purple-600"
-    },
-    {
-      id: "MN0400_413",
-      title: "Certificate Reports",
-      description: "Relatórios de certificados",
-      path: "/MN0400_413",
-      category: "Certificates",
-      icon: "📋",
-      color: "bg-purple-700"
-    },
+      let category = parentCategory
 
-    // Analytics - Locations
-    {
-      id: "MN0400_312",
-      title: "Locations Analytics",
-      description: "Análise de localização e GPS",
-      path: "/MN0400_312",
-      category: "Locations",
-      icon: "📍",
-      color: "bg-green-500"
-    },
+      // Se estamos no nível 0 e o item contém "Analytics", ele É a categoria
+      if (level === 0 && item.label.includes('Analytics')) {
+        category = item.label
+      }
 
-    // Analytics - Infrastructure
-    {
-      id: "MN0400_131",
-      title: "Infrastructure Overview",
-      description: "Visão geral da infraestrutura",
-      path: "/MN0400_131",
-      category: "Infrastructure",
-      icon: "🏗️",
-      color: "bg-orange-500"
-    },
-    {
-      id: "MN0400_132",
-      title: "Infrastructure Monitoring",
-      description: "Monitoramento de infraestrutura",
-      path: "/MN0400_132",
-      category: "Infrastructure",
-      icon: "📡",
-      color: "bg-orange-600"
-    },
-    {
-      id: "MN0400_133",
-      title: "Infrastructure Analytics",
-      description: "Análise de infraestrutura",
-      path: "/MN0400_133",
-      category: "Infrastructure",
-      icon: "📈",
-      color: "bg-orange-700"
-    },
-    {
-      id: "MN0400_134",
-      title: "Infrastructure Reports",
-      description: "Relatórios de infraestrutura",
-      path: "/MN0400_134",
-      category: "Infrastructure",
-      icon: "📊",
-      color: "bg-orange-800"
-    },
-    {
-      id: "MN0400_135",
-      title: "Infrastructure Management",
-      description: "Gerenciamento de infraestrutura",
-      path: "/MN0400_135",
-      category: "Infrastructure",
-      icon: "⚙️",
-      color: "bg-orange-900"
-    },
-    {
-      id: "MN0400_211",
-      title: "Device Logs & Monitoring",
-      description: "Logs e monitoramento de dispositivos",
-      path: "/MN0400_211",
-      category: "Infrastructure",
-      icon: "🖥️",
-      color: "bg-orange-400"
-    },
+      // IMPORTANTE: Só adiciona se o item NÃO TEM FILHOS (é um dashboard final)
+      // E tem path válido e uma categoria definida
+      const hasChildren = item.children && item.children.length > 0
+      const isValidDashboard = item.path && item.path !== '/' && category && !hasChildren
 
-    // Analytics - Logistics
-    {
-      id: "MN0400_344",
-      title: "Logistics Analytics",
-      description: "Análise de logística e distribuição",
-      path: "/MN0400_344",
-      category: "Logistics",
-      icon: "🚚",
-      color: "bg-pink-500"
-    }
-  ]
+      if (isValidDashboard) {
+        const iconName = item.icon.name || 'ChartBarIcon'
+        const emoji = iconToEmoji[iconName] || '📊'
+        
+        dashboards.push({
+          //@ts-ignore
+          id: item.path.replace('/', ''),
+          title: item.label,
+          description: `Análise de ${item.label.toLowerCase()}`,
+          //@ts-ignore
+          path: item.path,
+          //@ts-ignore
+          category: category,
+          icon: emoji,
+          //@ts-ignore
+          color: categoryColors[category] || 'bg-gray-500',
+          permissionCode: item.permissionCode
+        })
+      }
 
-  const categories = [
-    { id: "all", name: "Todos", icon: "🌐" },
-    { id: "Assets", name: "Assets", icon: "📦" },
-    { id: "People", name: "People", icon: "👥" },
-    { id: "Certificates", name: "Certificates", icon: "📜" },
-    { id: "Locations", name: "Locations", icon: "📍" },
-    { id: "Infrastructure", name: "Infrastructure", icon: "🏗️" },
-    { id: "Logistics", name: "Logistics", icon: "🚚" }
-  ]
+      // Processa recursivamente os filhos
+      if (item.children && item.children.length > 0) {
+        //@ts-ignore
+        const enabledChildren = item.children.filter(child => !child.disabled && !child.hidden)
+        if (enabledChildren.length > 0) {
+          dashboards.push(...extractDashboards(enabledChildren, category, level + 1))
+        }
+      }
+    })
 
-  const filteredDashboards = dashboards.filter(dashboard => {
+    return dashboards
+  }
+
+  // Filtra o menu com base nas permissões e extrai os dashboards
+  const allDashboards = useMemo(() => {
+    const filteredMenu = filterMenuByPermissions(menuItemsRaw, userPermissions)
+    const dashboards = extractDashboards(filteredMenu, undefined, 0)
+    
+    console.log('📊 Total de dashboards (apenas finais):', dashboards.length)
+    console.log('📊 Dashboards:', dashboards.map(d => `${d.title} (${d.path})`))
+    
+    return dashboards
+  }, [userPermissions])
+
+  // Extrai categorias únicas APENAS dos dashboards que foram extraídos
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set(allDashboards.map(d => d.category))
+    
+    const categoryList = Array.from(uniqueCategories)
+      .map(cat => {
+        const count = allDashboards.filter(d => d.category === cat).length
+        return {
+          id: cat,
+          name: cat.replace(' Analytics', ''),
+          icon: categoryIcons[cat] || '📊',
+          count: count
+        }
+      })
+      .filter(cat => cat.count > 0)
+      .sort((a, b) => a.name.localeCompare(b.name))
+
+    return [
+      { id: "all", name: "Todos", icon: "🌐", count: allDashboards.length },
+      ...categoryList
+    ]
+  }, [allDashboards])
+
+  const filteredDashboards = allDashboards.filter(dashboard => {
     const matchesCategory = selectedCategory === "all" || dashboard.category === selectedCategory
     const matchesSearch = dashboard.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          dashboard.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -200,17 +181,13 @@ export default function DashboardHub() {
   const handleToggleFavorite = (dashboard: Dashboard, e: React.MouseEvent) => {
     e.stopPropagation()
     toggleFavorite({
+      //@ts-ignore
       id: dashboard.id,
       title: dashboard.title,
       path: dashboard.path,
       category: dashboard.category,
       icon: dashboard.icon
     })
-  }
-
-  const getCategoryStats = (category: string) => {
-    if (category === "all") return dashboards.length
-    return dashboards.filter(d => d.category === category).length
   }
 
   return (
@@ -232,7 +209,7 @@ export default function DashboardHub() {
                 <div className="px-4 py-2 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Total:</span>
                   <span className="ml-2 text-xl font-bold text-gray-900 dark:text-gray-100">
-                    {dashboards.length}
+                    {allDashboards.length}
                   </span>
                 </div>
               </div>
@@ -277,7 +254,7 @@ export default function DashboardHub() {
                   <span className="mr-2">{category.icon}</span>
                   {category.name}
                   <span className="ml-2 text-xs opacity-75">
-                    ({getCategoryStats(category.id)})
+                    ({category.count})
                   </span>
                 </button>
               ))}
@@ -321,7 +298,7 @@ export default function DashboardHub() {
                   <div className={`${dashboard.color} p-6 rounded-t-xl`}>
                     <div className="text-5xl mb-2">{dashboard.icon}</div>
                     <div className="text-xs text-white/80 uppercase tracking-wider">
-                      {dashboard.category}
+                      {dashboard.category.replace(' Analytics', '')}
                     </div>
                   </div>
 
@@ -370,22 +347,32 @@ export default function DashboardHub() {
           )}
 
           {/* Quick Stats */}
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            {categories.slice(1).map((category) => (
-              <div
-                key={category.id}
-                className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4 text-center"
-              >
-                <div className="text-2xl mb-2">{category.icon}</div>
-                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {getCategoryStats(category.id)}
+          {categories.length > 1 && (
+            <div className={`mt-8 grid gap-4 ${
+              categories.length === 2 ? 'grid-cols-1' :
+              categories.length === 3 ? 'grid-cols-2' :
+              categories.length === 4 ? 'grid-cols-2 md:grid-cols-3' :
+              categories.length === 5 ? 'grid-cols-2 md:grid-cols-4' :
+              categories.length === 6 ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5' :
+              'grid-cols-2 md:grid-cols-3 lg:grid-cols-6'
+            }`}>
+              {categories.slice(1).map((category) => (
+                <div
+                  key={category.id}
+                  className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4 text-center cursor-pointer hover:shadow-lg transition-all hover:scale-105"
+                  onClick={() => setSelectedCategory(category.id)}
+                >
+                  <div className="text-3xl mb-2">{category.icon}</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    {category.count}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                    {category.name}
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {category.name}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Layout>
