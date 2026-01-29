@@ -4,13 +4,14 @@ import { useOrderItems, type OrderItem, type OrdersSummary } from '../../../../.
 import { useCompany } from '../../../../../hooks/useCompany';
 import { ExportButtons } from './ExportButtons';
 import { exportToPDF, exportToExcel, exportToCSV, exportToTextTabular } from '../../../../../utils/tableExports';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface OrderItemsModalProps {
   isOpen: boolean;
   onClose: () => void;
   flowId: number;
   orderCode: string;
-  orderDetails?: OrdersSummary; // ⭐ Adicionar detalhes da ordem
+  orderDetails?: OrdersSummary;
 }
 
 export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetails }: OrderItemsModalProps) {
@@ -18,120 +19,7 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
 
   const { items, loading, error } = useOrderItems(Number(companyId), flowId);
 
-  // const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
-  //   const columns = [
-  //     { header: 'Item Code', key: 'code' as keyof OrderItem },
-  //     { header: 'Item Name', key: 'item_name' as keyof OrderItem },
-  //     { header: 'Brand', key: 'brand' as keyof OrderItem },
-  //     { header: 'Model', key: 'model' as keyof OrderItem },
-  //     { header: 'Serial', key: 'serial' as keyof OrderItem },
-  //     { header: 'Category', key: 'category' as keyof OrderItem },
-  //     { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
-  //     { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
-  //     { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
-  //     { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
-  //   ];
-
-  //   const fileName = `order_items_${orderCode}`;
-  //   const title = `Order Items - ${orderCode}`;
-
-  //   switch (format) {
-  //     case 'pdf':
-  //       exportToPDF(items, columns, fileName, title);
-  //       break;
-  //     case 'excel':
-  //       exportToExcel(items, columns, fileName, 'Items');
-  //       break;
-  //     case 'csv':
-  //       exportToCSV(items, columns, fileName);
-  //       break;
-  //     case 'text':
-  //       exportToTextTabular(items, columns, fileName);
-  //       break;
-  //   }
-  // };
-
-  // const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
-  //   const columns = [
-  //     { header: 'Item Code', key: 'code' as keyof OrderItem },
-  //     { header: 'Item Name', key: 'item_name' as keyof OrderItem },
-  //     { header: 'Brand', key: 'brand' as keyof OrderItem },
-  //     { header: 'Model', key: 'model' as keyof OrderItem },
-  //     { header: 'Serial', key: 'serial' as keyof OrderItem },
-  //     { header: 'Category', key: 'category' as keyof OrderItem },
-  //     { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
-  //     { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
-  //     { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
-  //     { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
-  //   ];
-
-  //   const fileName = `order_items_${orderCode}`;
-
-  //   // Construir título com informações da order
-  //   const title = orderDetails
-  //     ? `Order Items - ${orderCode}\n` +
-  //     `Subject: ${orderDetails.subject || 'N/A'} | ` +
-  //     `Status: ${formatStatusName(orderDetails.status_job)} | ` +
-  //     `Job Type: ${orderDetails.job_type_name} | ` +
-  //     `Progress: ${orderDetails.percentual_concluido.toFixed(1)}%\n` +
-  //     `Custody: ${orderDetails.to_custody_name} | ` +
-  //     `Zone: ${orderDetails.to_zone_name} | ` +
-  //     `Items: ${orderDetails.items_concluidos}/${orderDetails.total_items} completed`
-  //     : `Order Items - ${orderCode}`;
-
-  //   switch (format) {
-  //     case 'pdf':
-  //       exportToPDF(items, columns, fileName, title);
-  //       break;
-  //     case 'excel':
-  //       exportToExcel(items, columns, fileName, 'Items', orderDetails);
-  //       break;
-  //     case 'csv':
-  //       exportToCSV(items, columns, fileName, orderDetails);
-  //       break;
-  //     case 'text':
-  //       exportToTextTabular(items, columns, fileName, orderDetails);
-  //       break;
-  //   }
-  // };
-
-  //   const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
-  //   const columns = [
-  //     { header: 'Item Code', key: 'code' as keyof OrderItem },
-  //     { header: 'Item Name', key: 'item_name' as keyof OrderItem },
-  //     { header: 'Brand', key: 'brand' as keyof OrderItem },
-  //     { header: 'Model', key: 'model' as keyof OrderItem },
-  //     { header: 'Serial', key: 'serial' as keyof OrderItem },
-  //     { header: 'Category', key: 'category' as keyof OrderItem },
-  //     { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
-  //     { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
-  //     { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
-  //     { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
-  //   ];
-
-  //   const fileName = `order_items_${orderCode}`;
-  //   const title = `Order Items - ${orderCode}`;
-
-  //   switch (format) {
-  //     case 'pdf':
-  //       exportToPDF(items, columns, fileName, title, orderDetails);
-  //       break;
-  //     case 'excel':
-  //       exportToExcel(items, columns, fileName, 'Items', orderDetails);
-  //       break;
-  //     case 'csv':
-  //       exportToCSV(items, columns, fileName, orderDetails);
-  //       break;
-  //     case 'text':
-  //       exportToTextTabular(items, columns, fileName, orderDetails);
-  //       break;
-  //   }
-  // };
-
-
-  // Certifique-se de que está passando code_user_job no metadata
   const handleExport = (format: 'pdf' | 'excel' | 'csv' | 'text') => {
-
     const columns = [
       { header: 'Item Code', key: 'code' as keyof OrderItem },
       { header: 'Item Name', key: 'item_name' as keyof OrderItem },
@@ -139,19 +27,16 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
       { header: 'Model', key: 'model' as keyof OrderItem },
       { header: 'Serial', key: 'serial' as keyof OrderItem },
       { header: 'Category', key: 'category' as keyof OrderItem },
-      { header: 'Status', key: 'tranfer_status' as keyof OrderItem },
+      { header: 'Status', key: 'Flow_status' as keyof OrderItem },
       { header: 'Custody', key: 'custody_assigned' as keyof OrderItem },
       { header: 'Custody Code', key: 'custody_code' as keyof OrderItem },
-      { header: 'Transfer Date', key: 'tranfer_date' as keyof OrderItem },
+      { header: 'Last Update Item', key: 'Item_Flow_Modified_Date' as keyof OrderItem }
     ];
 
     const fileName = `order_items_${orderCode}`;
     const title = `Order Items - ${orderCode}`;
-
-    // ⭐ PASSAR O BASE64 ORIGINAL (sem decodificar)
     const companyLogoBase64 = company?.details?.logo ?? '';
 
-    // Adicionar code_user_job ao metadata
     const enrichedMetadata = orderDetails ? {
       ...orderDetails,
       code_user_job: orderCode
@@ -173,7 +58,6 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
     }
   };
 
-
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -192,20 +76,19 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
 
   const getStatusBadgeClass = (status: string) => {
     const classes: Record<string, string> = {
-      'transfered': 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300',
-      'found': 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-300',
-      'shipped': 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300',
-      'validated': 'bg-gradient-to-r from-teal-100 to-teal-200 text-teal-800 border border-teal-300',
-      'in-use': 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border border-yellow-300',
-      'not-found': 'bg-gradient-to-r from-red-100 to-red-200 text-red-800 border border-red-300',
-      'not-validated': 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 border border-orange-300',
-      'complete': 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300',
-      'in_progress': 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border border-yellow-300',
-      'info_received': 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300',
-      'out_for_delivery': 'bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border border-purple-300',
-      'delivered': 'bg-gradient-to-r from-teal-100 to-teal-200 text-teal-800 border border-teal-300'
+      'transfered': 'bg-green-50 text-green-700 border border-green-200',
+      'found': 'bg-purple-50 text-purple-700 border border-purple-200',
+      'shipped': 'bg-blue-50 text-blue-700 border border-blue-200',
+      'validated': 'bg-teal-50 text-teal-700 border border-teal-200',
+      'in-use': 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+      'not scanned': 'bg-orange-50 text-orange-700 border border-orange-200',
+      'scanned': 'bg-green-50 text-green-700 border border-green-200',
+      'in_progress': 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+      'info_received': 'bg-blue-50 text-blue-700 border border-blue-200',
+      'out_for_delivery': 'bg-purple-50 text-purple-700 border border-purple-200',
+      'delivered': 'bg-teal-50 text-teal-700 border border-teal-200'
     };
-    return classes[status] || 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-300';
+    return classes[status] || 'bg-gray-50 text-gray-700 border border-gray-200';
   };
 
   const formatStatusName = (status: string) => {
@@ -213,251 +96,270 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
   };
 
   const getProgressBarColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-gradient-to-r from-green-400 to-green-500';
-    if (percentage >= 50) return 'bg-gradient-to-r from-yellow-400 to-yellow-500';
-    if (percentage >= 25) return 'bg-gradient-to-r from-orange-400 to-orange-500';
-    return 'bg-gradient-to-r from-red-400 to-red-500';
+    if (percentage >= 80) return 'bg-green-500';
+    if (percentage >= 50) return 'bg-yellow-500';
+    if (percentage >= 25) return 'bg-orange-500';
+    return 'bg-red-500';
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-gradient-to-br from-blue-500/30 via-purple-500/20 to-pink-500/30 backdrop-blur-md transition-all duration-300"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div className="fixed inset-0 overflow-hidden flex items-center justify-center p-4">
-        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
-          {/* Header com detalhes expandidos */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-5 rounded-t-2xl">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                  <span className="text-3xl">📦</span>
-                  Order Items Details
-                </h2>
-
-                {/* Informações básicas */}
-                <div className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2">
-                  <div>
-                    <p className="text-blue-200 text-xs font-medium">Order Code</p>
-                    <code className="bg-blue-700 px-2 py-0.5 rounded text-white font-mono text-sm">
-                      {orderCode}
-                    </code>
-                  </div>
-
-                  <div>
-                    <p className="text-blue-200 text-xs font-medium">Flow ID</p>
-                    <span className="text-white font-semibold text-sm">{flowId}</span>
-                  </div>
-
-                  {orderDetails && (
-                    <>
-                      <div>
-                        <p className="text-blue-200 text-xs font-medium">Subject</p>
-                        <span className="text-white font-semibold text-sm" title={orderDetails.subject}>
-                          {orderDetails.subject || '-'}
-                        </span>
-                      </div>
-
-                      <div>
-                        <p className="text-blue-200 text-xs font-medium">Status</p>
-                        <span className={`px-2 py-0.5 inline-flex text-[10px] font-bold rounded-full ${getStatusBadgeClass(orderDetails.status_job)}`}>
-                          {formatStatusName(orderDetails.status_job)}
-                        </span>
-                      </div>
-
-                      <div>
-                        <p className="text-blue-200 text-xs font-medium">Job Type</p>
-                        <span className="text-white font-semibold text-sm">{orderDetails.job_type_name}</span>
-                      </div>
-
-                      <div>
-                        <p className="text-blue-200 text-xs font-medium">Job Class</p>
-                        <span className="text-white font-semibold text-sm">{orderDetails.job_class_name}</span>
-                      </div>
-
-                      <div>
-                        <p className="text-blue-200 text-xs font-medium">Custody</p>
-                        <span className="text-white font-semibold text-sm">{orderDetails.to_custody_name}</span>
-                      </div>
-
-                      <div>
-                        <p className="text-blue-200 text-xs font-medium">Zone</p>
-                        <span className="text-white font-semibold text-sm">{orderDetails.to_zone_name}</span>
-                      </div>
-
-                      <div>
-                        <p className="text-blue-200 text-xs font-medium">Scheduled Date</p>
-                        <span className="text-white font-semibold text-sm">
-                          {new Date(orderDetails.scheduled_Date).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                      </div>
-
-                      <div>
-                        <p className="text-blue-200 text-xs font-medium">Progress</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex-1 bg-blue-800 rounded-full h-2 overflow-hidden">
-                            <div
-                              className={`h-2 rounded-full transition-all ${getProgressBarColor(orderDetails.percentual_concluido)}`}
-                              style={{ width: `${Math.min(orderDetails.percentual_concluido, 100)}%` }}
-                            />
-                          </div>
-                          <span className="text-white text-xs font-bold w-10">
-                            {Number(orderDetails.percentual_concluido).toFixed(0)}%
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 ml-4">
+        <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+          {/* Header Compacto */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 rounded-t-xl">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                📦 Order Items Details
+              </h2>
+              <div className="flex items-center gap-2">
                 <ExportButtons onExport={handleExport} disabled={items.length === 0 || loading} />
                 <button
                   onClick={onClose}
-                  className="cursor-pointer text-white hover:bg-blue-700 rounded-lg p-2 transition-colors"
+                  className="text-white hover:bg-white/20 rounded-lg p-1.5 transition-colors"
                   aria-label="Close modal"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
+            </div>
+
+            {/* Grid Compacto de Informações */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2 text-xs">
+              {/* Order Code */}
+              <div>
+                <p className="text-blue-200 font-medium mb-0.5">Order Code</p>
+                <code className="bg-blue-700/50 px-2 py-0.5 rounded text-white font-mono">
+                  {orderCode}
+                </code>
+              </div>
+
+              {/* Flow ID */}
+              <div>
+                <p className="text-blue-200 font-medium mb-0.5">Flow ID</p>
+                <span className="text-white font-semibold">{flowId}</span>
+              </div>
+
+              {orderDetails && (
+                <>
+                  {/* Subject */}
+                  <div className="col-span-2">
+                    <p className="text-blue-200 font-medium mb-0.5">Subject</p>
+                    <span className="text-white font-semibold truncate block" title={orderDetails.subject}>
+                      {orderDetails.subject || '-'}
+                    </span>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <p className="text-blue-200 font-medium mb-0.5">Status</p>
+                    <span className={`px-2 py-0.5 inline-flex text-[10px] font-bold rounded-md ${getStatusBadgeClass(orderDetails.status_job)}`}>
+                      {formatStatusName(orderDetails.status_job)}
+                    </span>
+                  </div>
+
+                  {/* Progress */}
+                  <div>
+                    <p className="text-blue-200 font-medium mb-0.5">Progress</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-blue-900/50 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-1.5 rounded-full transition-all ${getProgressBarColor(orderDetails.percentual_concluido)}`}
+                          style={{ width: `${Math.min(orderDetails.percentual_concluido, 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-white text-xs font-bold min-w-[35px]">
+                        {Number(orderDetails.percentual_concluido).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Job Type */}
+                  <div>
+                    <p className="text-blue-200 font-medium mb-0.5">Job Type</p>
+                    <span className="text-white font-semibold truncate block" title={orderDetails.job_type_name}>
+                      {orderDetails.job_type_name}
+                    </span>
+                  </div>
+
+                  {/* Job Class */}
+                  <div>
+                    <p className="text-blue-200 font-medium mb-0.5">Job Class</p>
+                    <span className="text-white font-semibold truncate block" title={orderDetails.job_class_name}>
+                      {orderDetails.job_class_name}
+                    </span>
+                  </div>
+
+                  {/* Custody */}
+                  <div>
+                    <p className="text-blue-200 font-medium mb-0.5">Custody</p>
+                    <span className="text-white font-semibold truncate block" title={orderDetails.to_custody_name}>
+                      {orderDetails.to_custody_name}
+                    </span>
+                  </div>
+
+                  {/* Zone */}
+                  <div>
+                    <p className="text-blue-200 font-medium mb-0.5">Zone</p>
+                    <span className="text-white font-semibold truncate block" title={orderDetails.to_zone_name}>
+                      {orderDetails.to_zone_name}
+                    </span>
+                  </div>
+
+                  {/* Scheduled Date */}
+                  <div>
+                    <p className="text-blue-200 font-medium mb-0.5">Scheduled</p>
+                    <span className="text-white font-semibold">
+                      {new Date(orderDetails.scheduled_Date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+
+                  {/* Items Stats */}
+                  <div>
+                    <p className="text-blue-200 font-medium mb-0.5">Items</p>
+                    <span className="text-white font-semibold">
+                      <span className="text-green-300">{orderDetails.items_concluidos}</span>
+                      <span className="text-blue-200 mx-1">/</span>
+                      <span>{orderDetails.total_items}</span>
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
           {/* Content - Tabela de Items */}
           <div className="flex-1 overflow-auto p-6">
             {loading ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="animate-pulse space-y-3">
                   {[1, 2, 3, 4, 5].map(i => (
-                    <div key={i} className="h-20 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg"></div>
+                    <div key={i} className="h-16 bg-gray-200 rounded-lg"></div>
                   ))}
                 </div>
               </div>
             ) : error ? (
-              <div className="bg-red-50 border-2 border-red-200 rounded-xl p-8 text-center">
-                <span className="text-6xl mb-4 block">⚠️</span>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+                <span className="text-5xl mb-4 block">⚠️</span>
                 <p className="text-red-800 font-semibold text-lg">Error loading items</p>
-                <p className="text-red-600 mt-2">{error}</p>
+                <p className="text-red-600 mt-2 text-sm">{error}</p>
               </div>
             ) : items.length === 0 ? (
               <div className="text-center py-12">
-                <span className="text-8xl mb-4 block">📭</span>
-                <p className="text-gray-500 font-semibold text-xl">No items found</p>
-                <p className="text-gray-400 mt-2">This order doesn't have any items yet</p>
+                <span className="text-6xl mb-4 block">📭</span>
+                <p className="text-gray-500 font-semibold text-lg">No items found</p>
+                <p className="text-gray-400 mt-2 text-sm">This order doesn't have any items yet</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-xl border border-gray-200">
-                <div className="overflow-y-auto" style={{ maxHeight: 'calc(90vh - 380px)' }}>
+              <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+                <div className="overflow-auto" style={{ maxHeight: 'calc(90vh - 240px)' }}>
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
+                    <thead className="bg-gray-50 sticky top-0 z-10">
                       <tr>
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Item Code
                         </th>
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Item Name
                         </th>
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Brand / Model
                         </th>
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Serial
                         </th>
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Category
                         </th>
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                           Custody
                         </th>
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wider">
-                          Transfer Date
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                          Last Update
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-100">
-                      {items.map((item, index) => (
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {items.map((item) => (
                         <tr
                           key={item.obj_id}
-                          className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
-                            }`}
+                          className="hover:bg-gray-50 transition-colors"
                         >
-                          <td className="px-4 py-2.5 whitespace-nowrap">
-                            <code className="text-[10px] bg-gradient-to-r from-gray-100 to-gray-200 px-2 py-1 rounded-md font-mono font-semibold text-gray-700 border border-gray-300">
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono text-gray-700 border border-gray-200">
                               {item.code}
                             </code>
                           </td>
-                          <td className="px-4 py-2.5">
-                            <div className="text-xs font-semibold text-gray-900 max-w-xs">
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">
                               {item.item_name}
                             </div>
-                            <div className="text-[10px] text-gray-500 mt-0.5">
+                            <div className="text-xs text-gray-500 mt-0.5">
                               {item.item_aux_code}
                             </div>
                           </td>
-                          <td className="px-4 py-2.5">
-                            <div className="text-xs font-medium text-gray-900">{item.brand}</div>
-                            <div className="text-[10px] text-gray-500">{item.model}</div>
+                          <td className="px-4 py-3">
+                            <div className="text-sm text-gray-900">{item.brand}</div>
+                            <div className="text-xs text-gray-500">{item.model}</div>
                           </td>
-                          <td className="px-4 py-2.5 whitespace-nowrap">
-                            <span className="text-[10px] font-mono text-gray-700 bg-gray-100 px-2 py-1 rounded">
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <span className="text-xs font-mono text-gray-700 bg-gray-50 px-2 py-1 rounded border border-gray-200">
                               {item.serial || '-'}
                             </span>
                           </td>
-                          <td className="px-4 py-2.5 whitespace-nowrap">
-                            <span className="text-xs text-gray-700 font-medium">
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <span className="text-sm text-gray-700">
                               {item.category}
                             </span>
                           </td>
-                          <td className="px-4 py-2.5 whitespace-nowrap">
-                            <span className={`px-2 py-1 inline-flex text-[10px] leading-4 font-bold rounded-full ${getStatusBadgeClass(item.Flow_status)}`}>
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            <span className={`px-2.5 inline-flex text-xs font-medium rounded-full ${getStatusBadgeClass(item.Flow_status)}`}>
                               {formatStatusName(item.Flow_status)}
                             </span>
                           </td>
-                          <td className="px-4 py-2.5">
-                            <div>
-                              <div className="text-xs font-semibold text-gray-900">
-                                {item.custody_assigned}
-                              </div>
-                              <div className="text-[10px] text-gray-500 mt-0.5">
-                                {item.custody_code}
-                              </div>
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {item.custody_assigned}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              {item.custody_code}
                             </div>
                           </td>
-                          <td className="px-4 py-2.5 whitespace-nowrap">
-                            {item.tranfer_date ? (
+                          <td className="px-4 py-3 whitespace-nowrap">
+                            {item.Item_Flow_Modified_Date ? (
                               <div>
-                                <div className="text-xs text-gray-900 font-medium">
-                                  {new Date(item.tranfer_date).toLocaleDateString('en-US', {
+                                <div className="text-sm text-gray-900">
+                                  {new Date(item.Item_Flow_Modified_Date).toLocaleDateString('en-US', {
+                                    timeZone: 'UTC',
                                     month: 'short',
                                     day: 'numeric',
                                     year: 'numeric'
                                   })}
                                 </div>
-                                <div className="text-[10px] text-gray-500">
-                                  {new Date(item.tranfer_date).toLocaleTimeString('en-US', {
+                                <div className="text-xs text-gray-500">
+                                  {new Date(item.Item_Flow_Modified_Date).toLocaleTimeString('en-US', {
+                                    timeZone: 'UTC',
                                     hour: '2-digit',
                                     minute: '2-digit'
                                   })}
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-xs text-gray-400">Pending</span>
+                              <span className="text-sm text-gray-400">Pending</span>
                             )}
                           </td>
                         </tr>
@@ -469,10 +371,10 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
             )}
           </div>
 
-          {/* Footer */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 rounded-b-2xl border-t border-gray-200 flex items-center justify-between">
-            <div className="text-sm text-gray-600 font-medium">
-              Total Items: <span className="font-bold text-gray-900">{items.length}</span>
+          {/* Footer Compacto */}
+          <div className="bg-gray-50 px-6 py-3 rounded-b-xl border-t border-gray-200 flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              Total: <span className="font-bold text-gray-900">{items.length}</span>
               {orderDetails && (
                 <>
                   {' • '}
@@ -484,7 +386,7 @@ export function OrderItemsModal({ isOpen, onClose, flowId, orderCode, orderDetai
             </div>
             <button
               onClick={onClose}
-              className="cursor-pointer px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
+              className="px-5 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm shadow-sm"
             >
               Close
             </button>

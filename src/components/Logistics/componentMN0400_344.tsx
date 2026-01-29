@@ -6,7 +6,6 @@ import * as echarts from 'echarts';
 import { LoadingSpinner } from './components/Logistics/Orders/LoadingSpinner';
 import { ErrorDisplay } from './components/Logistics/Orders/ErrorDisplay';
 import { KPICard } from './components/Logistics/Orders/KPICard';
-import { FilterPanel } from './components/Logistics/Orders/FilterPanel';
 import { ChartCard } from './components/Logistics/Orders/ChartCard';
 import { ExportButton } from './components/Logistics/Orders/ExportButton';
 import { OrdersTable } from './components/Logistics/Orders/OrdersTable';
@@ -562,12 +561,6 @@ export default function OrderDashboard() {
         </div>
       )}
 
-      {/* Filters */}
-      <FilterPanel
-        initialFilters={initialFilters}  // ← Certifique que está passando aqui
-        onApplyFilters={fetchOrders}
-        onResetFilters={() => fetchOrders()}
-      />
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -623,7 +616,13 @@ export default function OrderDashboard() {
       </div>
 
       {/* Orders Table */}
-      <OrdersTable orders={orders} loading={loading} />
+        <OrdersTable 
+        orders={orders} 
+        loading={loading}
+        onApplyFilters={fetchOrders}
+        onResetFilters={() => fetchOrders()}
+        initialFilters={initialFilters}
+      />
     </div>
   );
 }

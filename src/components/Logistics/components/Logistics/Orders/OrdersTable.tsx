@@ -1,25 +1,47 @@
 // src/components/Logistics/Orders/OrdersTable.tsx
 import { useState, useMemo } from 'react';
-import type { OrdersSummary } from '../../../../../hooks/useOrders';
+import type { OrdersSummary, OrderFilters } from '../../../../../hooks/useOrders';
 import { OrderItemsModal } from './OrderItemsModal';
 import { ExportButtons } from './ExportButtons';
 import { exportToPDF, exportToExcel, exportToCSV, exportToTextTabular } from '../../../../../utils/tableExports';
 import { useCompany } from '../../../../../hooks/useCompany';
-import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
-
+import { 
+  ClipboardDocumentListIcon,
+  FunnelIcon,
+  CalendarIcon,
+  XMarkIcon,
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon
+} from '@heroicons/react/24/outline';
 
 interface OrdersTableProps {
   orders: OrdersSummary[];
   loading?: boolean;
+  onApplyFilters: (filters: OrderFilters) => void;
+  onResetFilters: () => void;
+  initialFilters?: OrderFilters;
 }
 
-export function OrdersTable({ orders, loading }: OrdersTableProps) {
-  const { logo } = useCompany()
+export function OrdersTable({ 
+  orders, 
+  loading,
+  onApplyFilters,
+  onResetFilters,
+  initialFilters 
+}: OrdersTableProps) {
+  const { logo } = useCompany();
+  
+  // Estados da tabela
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<keyof OrdersSummary>('scheduled_Date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  
+  // Estados do filtro
+  const [filters, setFilters] = useState<OrderFilters>(initialFilters || {});
+  const [showFilters, setShowFilters] = useState(false);
   
   const [selectedOrder, setSelectedOrder] = useState<{ 
     flowId: number; 
@@ -27,6 +49,62 @@ export function OrdersTable({ orders, loading }: OrdersTableProps) {
     orderDetails: OrdersSummary;
   } | null>(null);
 
+  const statusOptions = [
+    { value: 'complete', label: 'Complete', color: 'green' },
+    { value: 'in_progress', label: 'In Progress', color: 'orange' },
+    { value: 'info_received', label: 'Info Received', color: 'blue' },
+    { value: 'part_completed', label: 'Part Completed', color: 'teal' },
+  ];
+
+  // Sync com filtros iniciais
+  useMemo(() => {
+    if (initialFilters && Object.keys(initialFilters).length > 0) {
+      setFilters(initialFilters);
+    }
+  }, [initialFilters]);
+
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (filters.startDate) count++;
+    if (filters.endDate) count++;
+    if (filters.searchTerm) count++;
+    if (filters.status && filters.status.length > 0) count += filters.status.length;
+    return count;
+  };
+
+  const formatDateForInput = (dateString: string | undefined): string => {
+    if (!dateString) return '';
+    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) return dateString;
+    if (dateString.includes(' ')) return dateString.split(' ')[0];
+    return dateString;
+  };
+
+  const formatDateForDisplay = (dateString: string | undefined): string => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  const handleApplyFilters = () => {
+    onApplyFilters(filters);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({});
+    onResetFilters();
+  };
+
+  const activeFiltersCount = getActiveFiltersCount();
+
+  // Filtros locais da tabela
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
       const searchLower = searchTerm.toLowerCase();
@@ -181,331 +259,512 @@ export function OrdersTable({ orders, loading }: OrdersTableProps) {
     );
   }
 
-return (
-  <>
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-      {/* Header com Search e Export */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-xl"><ClipboardDocumentListIcon className="w-9 h-9 p-1 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-white"/></span>
-              Orders List
-            </h3>
-            <p className="text-xs text-gray-600 mt-1">
-              {sortedOrders.length} of {orders.length} orders • Click a row to view items
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {/* Search */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search orders..."
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="pl-10 pr-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-xs"
-              />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                🔍
-              </span>
+  return (
+    <>
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+        {/* Header com Search, Filters e Export */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+          <div className="flex flex-col gap-4">
+            {/* Primeira linha: Título e Ações */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <ClipboardDocumentListIcon className="w-9 h-9 p-1 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 text-white"/>
+                  Orders List
+                </h3>
+                <p className="text-xs text-gray-600 mt-1">
+                  {sortedOrders.length} of {orders.length} orders • Click a row to view items
+                </p>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {/* Search */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search orders..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="pl-10 pr-4 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 text-xs"
+                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                    🔍
+                  </span>
+                </div>
+
+                {/* Filter Toggle Button */}
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`
+                    cursor-pointer flex items-center gap-2 px-4 py-1.5 rounded-lg border-2 
+                    font-medium text-xs transition-all
+                    ${activeFiltersCount > 0 
+                      ? 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600' 
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }
+                  `}
+                >
+                  <FunnelIcon className="w-4 h-4" />
+                  Filters
+                  {activeFiltersCount > 0 && (
+                    <span className="bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                  {showFilters ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+                </button>
+
+                {/* Export Button */}
+                <ExportButtons onExport={handleExport} disabled={sortedOrders.length === 0} />
+              </div>
             </div>
 
-            {/* Export Button */}
-            <ExportButtons onExport={handleExport} disabled={sortedOrders.length === 0} />
+            {/* Filtros Expandíveis */}
+            {showFilters && (
+              <div className="bg-white rounded-lg p-4 border border-gray-200 space-y-4">
+                {/* Date Range & Search Filter */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Start Date */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                      <CalendarIcon className="w-3.5 h-3.5 text-gray-500" />
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      value={formatDateForInput(filters.startDate)}
+                      onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                      className="cursor-pointer w-full px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* End Date */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                      <CalendarIcon className="w-3.5 h-3.5 text-gray-500" />
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      value={formatDateForInput(filters.endDate)}
+                      onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                      className="cursor-pointer w-full px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Search Term */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                      Filter by text
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Order code, job type..."
+                      value={filters.searchTerm || ''}
+                      onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
+                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                {/* Status Filters */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-2">
+                    Order Status
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {statusOptions.map(({ value, label, color }) => {
+                      const isSelected = filters.status?.includes(value) || false;
+                      
+                      const colorClasses: Record<string, string> = {
+                        green: isSelected 
+                          ? 'bg-green-500 text-white border-green-500' 
+                          : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
+                        orange: isSelected 
+                          ? 'bg-orange-500 text-white border-orange-500' 
+                          : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
+                        blue: isSelected 
+                          ? 'bg-blue-500 text-white border-blue-500' 
+                          : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+                        teal: isSelected 
+                          ? 'bg-teal-500 text-white border-teal-500' 
+                          : 'bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100'
+                      };
+
+                      return (
+                        <button
+                          key={value}
+                          onClick={() => {
+                            const newStatus = isSelected
+                              ? (filters.status || []).filter(s => s !== value)
+                              : [...(filters.status || []), value];
+                            setFilters({ 
+                              ...filters, 
+                              status: newStatus.length > 0 ? newStatus : undefined 
+                            });
+                          }}
+                          className={`
+                            cursor-pointer px-3 py-1.5 rounded-lg border text-xs font-medium
+                            transition-all duration-200 flex items-center gap-1.5
+                            ${colorClasses[color]}
+                          `}
+                        >
+                          {isSelected && <CheckIcon className="w-3.5 h-3.5" />}
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                  <div className="text-xs text-gray-600">
+                    {activeFiltersCount > 0 && (
+                      <span className="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-medium">
+                        {activeFiltersCount} filter{activeFiltersCount > 1 ? 's' : ''} active
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleResetFilters}
+                      className="cursor-pointer px-4 py-1.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium text-xs flex items-center gap-1.5"
+                    >
+                      <XMarkIcon className="w-3.5 h-3.5" />
+                      Reset
+                    </button>
+                    <button
+                      onClick={handleApplyFilters}
+                      className="cursor-pointer px-4 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium text-xs shadow-lg shadow-blue-500/30 flex items-center gap-1.5"
+                    >
+                      <CheckIcon className="w-3.5 h-3.5" />
+                      Apply Filters
+                    </button>
+                  </div>
+                </div>
+
+                {/* Active Filters Summary */}
+                {activeFiltersCount > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                    {filters.startDate && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                        <CalendarIcon className="w-3 h-3" />
+                        From: {formatDateForDisplay(filters.startDate)}
+                      </span>
+                    )}
+                    {filters.endDate && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                        <CalendarIcon className="w-3 h-3" />
+                        To: {formatDateForDisplay(filters.endDate)}
+                      </span>
+                    )}
+                    {filters.searchTerm && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                        Search: {filters.searchTerm}
+                      </span>
+                    )}
+                    {filters.status?.map(status => (
+                      <span key={status} className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                        {formatStatusName(status)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      </div>
-      
-      {/* Tabela */}
-      <div className="overflow-x-auto" style={{ maxHeight: '600px' }}>
-        <div className="overflow-y-auto" style={{ maxHeight: '600px' }}>
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
-              <tr>
-                <th 
-                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('identifier1')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    Identifier 1
-                    <SortIcon field="identifier1" />
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('identifier2')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    Identifier 2
-                    <SortIcon field="identifier2" />
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('subject')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    Subject
-                    <SortIcon field="subject" />
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('job_type_name')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    Job Type
-                    <SortIcon field="job_type_name" />
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('status_job')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    Status
-                    <SortIcon field="status_job" />
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('total_items')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    Items
-                    <SortIcon field="total_items" />
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('percentual_concluido')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    Progress
-                    <SortIcon field="percentual_concluido" />
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('to_zone_name')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    Zone
-                    <SortIcon field="to_zone_name" />
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-                  onClick={() => handleSort('scheduled_Date')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    Scheduled Date
-                    <SortIcon field="scheduled_Date" />
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-100">
-              {paginatedOrders.length === 0 ? (
+        
+        {/* Tabela */}
+        <div className="overflow-x-auto" style={{ maxHeight: '600px' }}>
+          <div className="overflow-y-auto" style={{ maxHeight: '600px' }}>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <span className="text-6xl">📭</span>
-                      <p className="text-gray-500 font-medium">No orders found</p>
-                      <p className="text-xs text-gray-400">
-                        {searchTerm ? 'Try adjusting your search criteria' : 'No data available'}
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                paginatedOrders.map((order, index) => (
-                  <tr 
-                    key={order.id} 
-                    onClick={() => handleRowClick(order)}
-                    className={`cursor-pointer hover:bg-blue-50 hover:shadow-md transition-all duration-150 ${
-                      index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
-                    }`}
+                  <th 
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort('identifier1')}
                   >
-                    <td className="px-4 py-2.5 whitespace-nowrap">
-                      <code className="text-xs bg-gradient-to-r from-blue-50 to-blue-100 px-2.5 py-1 rounded-md font-mono font-bold text-blue-900 border border-blue-200">
-                        {order.identifier1 || '-'}
-                      </code>
-                    </td>
-                    <td className="px-4 py-2.5 whitespace-nowrap">
-                      <code className="text-xs bg-gradient-to-r from-indigo-50 to-indigo-100 px-2.5 py-1 rounded-md font-mono font-bold text-indigo-900 border border-indigo-200">
-                        {order.identifier2 || '-'}
-                      </code>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <div className="text-xs font-semibold text-gray-900 max-w-xs truncate" title={order.subject}>
-                        {order.subject || '-'}
-                      </div>
-                      <div className="text-[10px] text-gray-500 font-medium mt-0.5">
-                        {order.code_user_job}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <div>
-                        <div className="text-xs font-semibold text-gray-900">{order.job_type_name}</div>
-                        <div className="text-[10px] text-gray-500 font-medium mt-0.5">{order.job_class_name}</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2.5 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-[10px] leading-4 font-bold rounded-full ${getStatusBadgeClass(order.status_job)}`}>
-                        {formatStatusName(order.status_job)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 whitespace-nowrap">
-                      <div className="text-xs font-semibold text-gray-900">{order.total_items}</div>
-                      <div className="text-[10px] text-gray-500">
-                        <span className="font-medium text-green-600">{order.items_concluidos}</span> / {' '}
-                        <span className="font-medium text-orange-600">{order.items_pendentes}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2.5 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden shadow-inner">
-                          <div
-                            className={`h-2 rounded-full transition-all duration-500 ${getProgressBarColor(order.percentual_concluido)}`}
-                            style={{ width: `${Math.min(order.percentual_concluido, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-[10px] font-bold text-gray-700 w-10 text-right">
-                          {Number(order.percentual_concluido).toFixed(0)}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <div className="text-xs font-semibold text-gray-900">{order.to_zone_name || '-'}</div>
-                      {order.to_custody_name && (
-                        <div className="text-[10px] text-gray-500 font-medium mt-0.5">{order.to_custody_name}</div>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5 whitespace-nowrap">
-                      <div className="text-xs text-gray-900 font-medium">
-                        {new Date(order.scheduled_Date).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </div>
-                      <div className="text-[10px] text-gray-500">
-                        {new Date(order.scheduled_Date).toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                    <div className="flex items-center gap-1.5">
+                      Identifier 1
+                      <SortIcon field="identifier1" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort('identifier2')}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      Identifier 2
+                      <SortIcon field="identifier2" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort('subject')}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      Subject
+                      <SortIcon field="subject" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort('job_type_name')}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      Job Type
+                      <SortIcon field="job_type_name" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort('status_job')}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      Status
+                      <SortIcon field="status_job" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort('total_items')}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      Items
+                      <SortIcon field="total_items" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort('percentual_concluido')}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      Progress
+                      <SortIcon field="percentual_concluido" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort('to_zone_name')}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      Zone
+                      <SortIcon field="to_zone_name" />
+                    </div>
+                  </th>
+                  <th 
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
+                    onClick={() => handleSort('scheduled_Date')}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      Scheduled Date
+                      <SortIcon field="scheduled_Date" />
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100">
+                {paginatedOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <span className="text-6xl">📭</span>
+                        <p className="text-gray-500 font-medium">No orders found</p>
+                        <p className="text-xs text-gray-400">
+                          {searchTerm ? 'Try adjusting your search criteria' : 'No data available'}
+                        </p>
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  paginatedOrders.map((order, index) => (
+                    <tr 
+                      key={order.id} 
+                      onClick={() => handleRowClick(order)}
+                      className={`cursor-pointer hover:bg-blue-50 hover:shadow-md transition-all duration-150 ${
+                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                      }`}
+                    >
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        <code className="text-xs bg-gradient-to-r from-blue-50 to-blue-100 px-2.5 py-1 rounded-md font-mono font-bold text-blue-900 border border-blue-200">
+                          {order.identifier1 || '-'}
+                        </code>
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        <code className="text-xs bg-gradient-to-r from-indigo-50 to-indigo-100 px-2.5 py-1 rounded-md font-mono font-bold text-indigo-900 border border-indigo-200">
+                          {order.identifier2 || '-'}
+                        </code>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <div className="text-xs font-semibold text-gray-900 max-w-xs truncate" title={order.subject}>
+                          {order.subject || '-'}
+                        </div>
+                        <div className="text-[10px] text-gray-500 font-medium mt-0.5">
+                          {order.code_user_job}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <div>
+                          <div className="text-xs font-semibold text-gray-900">{order.job_type_name}</div>
+                          <div className="text-[10px] text-gray-500 font-medium mt-0.5">{order.job_class_name}</div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        <span className={`px-2 py-1 inline-flex text-[10px] leading-4 font-bold rounded-full ${getStatusBadgeClass(order.status_job)}`}>
+                          {formatStatusName(order.status_job)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        <div className="text-xs font-semibold text-gray-900">{order.total_items}</div>
+                        <div className="text-[10px] text-gray-500">
+                          <span className="font-medium text-green-600">{order.items_concluidos}</span> / {' '}
+                          <span className="font-medium text-orange-600">{order.items_pendentes}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden shadow-inner">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-500 ${getProgressBarColor(order.percentual_concluido)}`}
+                              style={{ width: `${Math.min(order.percentual_concluido, 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-bold text-gray-700 w-10 text-right">
+                            {Number(order.percentual_concluido).toFixed(0)}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <div className="text-xs font-semibold text-gray-900">{order.to_zone_name || '-'}</div>
+                        {order.to_custody_name && (
+                          <div className="text-[10px] text-gray-500 font-medium mt-0.5">{order.to_custody_name}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        <div className="text-xs text-gray-900 font-medium">
+                          {new Date(order.scheduled_Date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </div>
+                        <div className="text-[10px] text-gray-500">
+                          {new Date(order.scheduled_Date).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* Pagination Footer */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-3 border-t border-gray-200">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-700 font-medium">Rows per page:</label>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-              className="border border-gray-300 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-          </div>
-
-          <div className="text-xs text-gray-600 font-medium">
-            Showing {startIndex + 1} to {Math.min(endIndex, sortedOrders.length)} of {sortedOrders.length} results
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handlePageChange(1)}
-              disabled={currentPage === 1}
-              className="px-2 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              ««
-            </button>
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-2 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              ‹
-            </button>
-            
-            <div className="flex gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-                
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
-                      currentPage === pageNum
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'border border-gray-300 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+        {/* Pagination Footer */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-3 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-gray-700 font-medium">Rows per page:</label>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                className="border border-gray-300 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
             </div>
 
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-2 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              ›
-            </button>
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              disabled={currentPage === totalPages}
-              className="px-2 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              »»
-            </button>
+            <div className="text-xs text-gray-600 font-medium">
+              Showing {startIndex + 1} to {Math.min(endIndex, sortedOrders.length)} of {sortedOrders.length} results
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+                className="px-2 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                ««
+              </button>
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-2 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                ‹
+              </button>
+              
+              <div className="flex gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
+                        currentPage === pageNum
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'border border-gray-300 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-2 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                ›
+              </button>
+              <button
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+                className="px-2 py-1 rounded-lg border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                »»
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    {/* Modal */}
-    {selectedOrder && (
-      <OrderItemsModal
-        isOpen={!!selectedOrder}
-        onClose={handleCloseModal}
-        flowId={selectedOrder.flowId}
-        orderCode={selectedOrder.orderCode}
-        orderDetails={selectedOrder.orderDetails}
-      />
-    )}
-  </>
-);
+      {/* Modal */}
+      {selectedOrder && (
+        <OrderItemsModal
+          isOpen={!!selectedOrder}
+          onClose={handleCloseModal}
+          flowId={selectedOrder.flowId}
+          orderCode={selectedOrder.orderCode}
+          orderDetails={selectedOrder.orderDetails}
+        />
+      )}
+    </>
+  );
 }

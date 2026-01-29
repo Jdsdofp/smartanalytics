@@ -876,6 +876,7 @@ export interface OrderItem {
   flow_modified_by: string;
   tranfer_date: string | null;
   transfer_by: string;
+  Item_Flow_Modified_Date: string;
   Flow_status: string;
   transfer_status_description: string | null;
   transfer_audited_date: string | null;
