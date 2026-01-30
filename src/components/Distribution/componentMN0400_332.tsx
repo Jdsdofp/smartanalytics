@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { ClockIcon, ArrowPathIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { usePackingDistribution } from '../../hooks/usePackingDistribution';
+import { useCompany } from '../../hooks/useCompany';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 //@ts-ignore
@@ -38,6 +39,9 @@ export default function PackagingDistribution({ autoRefresh = false, refreshInte
     const [showPercentage, setShowPercentage] = useState(false);
     const [exportingPDF, setExportingPDF] = useState(false);
     
+    // 🏢 Hook para pegar logo da empresa
+    const { company } = useCompany();
+    
     // 🎯 Filtros de períodos (todos ativos por padrão)
     const [activeFilters, setActiveFilters] = useState({
         period0: true,  // <30 DIAS
@@ -71,70 +75,168 @@ export default function PackagingDistribution({ autoRefresh = false, refreshInte
         refetchInterval: autoRefresh ? refreshInterval : undefined
     });
 
-    // 📄 Função para exportar PDF
+    // 🖼️ Função helper para normalizar base64 da logo
+    const normalizeBase64Image = (base64: string): string => {
+        if (!base64) return '';
+
+        let result = base64.trim();
+
+        // Se vier com prefixo data:image/...
+        if (result.startsWith('data:')) {
+            result = result.split(',')[1];
+        }
+
+        // Se NÃO começa com assinatura PNG, mas quando decodifica vira PNG → decode 1x
+        if (!result.startsWith('iVBORw0KGgo')) {
+            try {
+                const decoded = atob(result);
+                if (decoded.startsWith('iVBORw0KGgo')) {
+                    result = decoded;
+                }
+            } catch (e) {
+                console.warn('Erro ao tentar decodificar base64 da logo');
+            }
+        }
+
+        return result;
+    };
+
+    // 📄 Função para exportar PDF com novo layout
     const exportToPDF = async () => {
         try {
             setExportingPDF(true);
             const doc = new jsPDF('landscape', 'mm', 'a4');
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
-            let yPosition = 20;
+            let yPosition = 10;
 
-            // 🎨 HEADER - Azul escuro
-            doc.setFillColor(30, 60, 114);
-            doc.rect(0, 0, pageWidth, 35, 'F');
-            
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(24);
-            doc.setFont('helvetica', 'bold');
-            doc.text('ONE PAGE REPORT', pageWidth / 2, 15, { align: 'center' });
-            
-            doc.setFontSize(14);
-            doc.setTextColor(168, 216, 255);
-            doc.text('EMBALAGEM', pageWidth / 2, 25, { align: 'center' });
+            // 🎨 HEADER - Card azul com logo e informações (estilo similar à imagem)
+            // Fundo azul principal
+            doc.setFillColor(37, 99, 235); // Blue-600
+            doc.roundedRect(10, yPosition, pageWidth - 20, 35, 3, 3, 'F');
 
-            // Badge "LOGÍSTICA"
+            // Logo (área branca no canto esquerdo)
+            const logoX = 15;
+            const logoY = yPosition + 5;
+            const logoWidth = 40;
+            const logoHeight = 12;
+            
             doc.setFillColor(255, 255, 255);
-            doc.roundedRect(pageWidth - 40, 10, 32, 10, 2, 2, 'F');
-            doc.setTextColor(30, 60, 114);
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'bold');
-            doc.text('LOGÍSTICA', pageWidth - 24, 16, { align: 'center' });
+            doc.roundedRect(logoX - 2, logoY - 2, logoWidth + 4, logoHeight + 4, 2, 2, 'F');
+            
+            // 🖼️ Adicionar logo da empresa se disponível
+            const companyLogoBase64 = company?.details?.logo ?? '';
+            if (companyLogoBase64) {
+                try {
+                    const finalBase64 = normalizeBase64Image(companyLogoBase64);
+                    doc.addImage(
+                        finalBase64,
+                        'PNG',
+                        logoX,
+                        logoY,
+                        logoWidth,
+                        logoHeight,
+                        undefined,
+                        'FAST'
+                    );
+                    console.log('✅ Logo adicionada com sucesso ao PDF');
+                } catch (error) {
+                    console.error('❌ Erro ao adicionar logo:', error);
+                    // Fallback: texto da logo
+                    doc.setTextColor(37, 99, 235);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('SMARTX', logoX + logoWidth / 2, logoY + 4, { align: 'center' });
+                    doc.setFontSize(6);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Logistics System', logoX + logoWidth / 2, logoY + 8, { align: 'center' });
+                }
+            } else {
+                // Texto da "logo" se não houver imagem
+                doc.setTextColor(37, 99, 235);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'bold');
+                doc.text('SMARTX', logoX + logoWidth / 2, logoY + 4, { align: 'center' });
+                doc.setFontSize(6);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Logistics System', logoX + logoWidth / 2, logoY + 8, { align: 'center' });
+            }
 
-            yPosition = 45;
+            // Título principal
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(18);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Packaging Distribution - Report', logoX + logoWidth + 15, yPosition + 12);
+
+            // Linha separadora
+            doc.setDrawColor(255, 255, 255);
+            doc.setLineWidth(0.3);
+            doc.line(15, yPosition + 22, pageWidth - 15, yPosition + 22);
+
+            // Informações em colunas (APENAS Report Code, Subject e Zone)
+            const infoY = yPosition + 28;
+            doc.setFontSize(9);
+            
+            // Coluna 1
+            doc.setFont('helvetica', 'bold');
+            doc.text('Report Code:', 15, infoY);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`PKG-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`, 42, infoY);
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text('Subject:', 15, infoY + 5);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Packaging Age Analysis', 42, infoY + 5);
+
+            // Coluna 2
+            doc.setFont('helvetica', 'bold');
+            doc.text('Zone:', 95, infoY);
+            doc.setFont('helvetica', 'normal');
+            doc.text('ALL CUSTODIES', 115, infoY);
+
+            const totalItems = totalStats.reduce((a, b) => a + b, 0);
+            yPosition = 50;
+
+            // Generation info
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(107, 114, 128);
+            doc.text(`Generated: ${new Date().toLocaleString('pt-BR')}`, 15, yPosition);
+            doc.text(`Total Records: ${totalItems}`, 200, yPosition);
+            yPosition += 8;
 
             // 📊 ESTATÍSTICAS GERAIS
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
-            doc.text('Resumo Geral:', 14, yPosition);
+            doc.text('Summary by Period:', 14, yPosition);
             yPosition += 3;
 
             const statsData = [
-                ['Período', 'Quantidade', 'Percentual'],
+                ['Period', 'Quantity', 'Percentage'],
                 [
-                    '<30 DIAS',
+                    '<30 DAYS',
                     totalStats[0].toString(),
-                    `${((totalStats[0] / totalStats.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%`
+                    `${((totalStats[0] / totalItems) * 100).toFixed(1)}%`
                 ],
                 [
-                    '30-60 DIAS',
+                    '30-60 DAYS',
                     totalStats[1].toString(),
-                    `${((totalStats[1] / totalStats.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%`
+                    `${((totalStats[1] / totalItems) * 100).toFixed(1)}%`
                 ],
                 [
-                    '60-90 DIAS',
+                    '60-90 DAYS',
                     totalStats[2].toString(),
-                    `${((totalStats[2] / totalStats.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%`
+                    `${((totalStats[2] / totalItems) * 100).toFixed(1)}%`
                 ],
                 [
-                    '>90 DIAS',
+                    '>90 DAYS',
                     totalStats[3].toString(),
-                    `${((totalStats[3] / totalStats.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%`
+                    `${((totalStats[3] / totalItems) * 100).toFixed(1)}%`
                 ],
                 [
                     'TOTAL',
-                    totalStats.reduce((a, b) => a + b, 0).toString(),
+                    totalItems.toString(),
                     '100.0%'
                 ]
             ];
@@ -145,7 +247,7 @@ export default function PackagingDistribution({ autoRefresh = false, refreshInte
                 body: statsData.slice(1),
                 theme: 'grid',
                 headStyles: {
-                    fillColor: [30, 60, 114],
+                    fillColor: [37, 99, 235],
                     textColor: 255,
                     fontStyle: 'bold',
                     halign: 'center'
@@ -223,7 +325,7 @@ export default function PackagingDistribution({ autoRefresh = false, refreshInte
                 (doc as any).autoTable({
                     startY: yPosition,
                     head: [[
-                        'Categoria',
+                        'Category',
                         '<30', '%',
                         '30-60', '%',
                         '60-90', '%',
@@ -274,17 +376,17 @@ export default function PackagingDistribution({ autoRefresh = false, refreshInte
                 doc.setTextColor(60, 60, 60);
                 doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
-                doc.text(`Atualização: ${updateTime || 'N/A'}`, 14, pageHeight - 8);
-                doc.text(`Página ${i} de ${totalPages}`, pageWidth - 14, pageHeight - 8, { align: 'right' });
+                doc.text(`Update: ${updateTime || new Date().toLocaleString('pt-BR')}`, 14, pageHeight - 8);
+                doc.text(`Page ${i} of ${totalPages}`, pageWidth - 14, pageHeight - 8, { align: 'right' });
                 
                 // Legenda de cores
                 doc.setFontSize(7);
                 let xLegend = pageWidth / 2 - 60;
                 const legends = [
-                    { label: '<30 DIAS', color: [91, 155, 213] },
-                    { label: '30-60 DIAS', color: [112, 173, 71] },
-                    { label: '60-90 DIAS', color: [255, 192, 0] },
-                    { label: '>90 DIAS', color: [166, 166, 166] }
+                    { label: '<30 DAYS', color: [91, 155, 213] },
+                    { label: '30-60 DAYS', color: [112, 173, 71] },
+                    { label: '60-90 DAYS', color: [255, 192, 0] },
+                    { label: '>90 DAYS', color: [166, 166, 166] }
                 ];
                 
                 legends.forEach(leg => {
@@ -297,13 +399,13 @@ export default function PackagingDistribution({ autoRefresh = false, refreshInte
             }
 
             // 💾 Salvar PDF
-            const fileName = `Relatorio_Embalagem_${new Date().toISOString().split('T')[0]}.pdf`;
+            const fileName = `Packaging_Distribution_${new Date().toISOString().split('T')[0]}.pdf`;
             doc.save(fileName);
 
-            console.log('✅ PDF exportado com sucesso!');
+            console.log('✅ PDF exported successfully!');
         } catch (error) {
-            console.error('❌ Erro ao gerar PDF:', error);
-            alert('Erro ao gerar PDF. Verifique o console para mais detalhes.');
+            console.error('❌ Error generating PDF:', error);
+            alert('Error generating PDF. Check console for details.');
         } finally {
             setExportingPDF(false);
         }
