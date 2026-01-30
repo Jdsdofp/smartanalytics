@@ -1,5 +1,4 @@
 // src/Distribution/componentMN0400_332.tsx
-// Versão COMPLETA - Com Exportação PDF
 
 import { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';

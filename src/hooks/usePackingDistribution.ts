@@ -140,7 +140,7 @@ interface FilterOptions {
  * ```
  */
 export const usePackingDistribution = ({
-    baseURL = 'http://localhost:4000/api',
+    baseURL = 'https://apinode.smartxhub.cloud/api',
     autoFetch = true,
     refetchInterval,
 }: UsePackingDistributionOptions): UsePackingDistributionReturn => {

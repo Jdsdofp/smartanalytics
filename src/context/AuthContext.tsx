@@ -372,8 +372,8 @@
 
   // 🔥 LISTA DE APIs PRIORITÁRIA
   const API_ENDPOINTS = [
-    'https://apisaudi.smartxhub.cloud/api',
-    'https://apinode.smartxhub.cloud/api'
+    'https://apinode.smartxhub.cloud/api',
+    'https://apisaudi.smartxhub.cloud/api'
   ]
 
   export function AuthProvider({ children }: { children: ReactNode }) {
