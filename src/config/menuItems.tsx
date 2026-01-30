@@ -201,10 +201,9 @@ export const menuItemsRaw: MenuItemProps[] = [
         icon: TruckIcon, 
         label: 'Transportation & Distribution', 
         path: '/MN0400_330', 
-        hidden: true, 
         children: [
           { icon: ChartBarIcon, label: 'Transportation Cost per Unit', path: '/MN0400_331', permissionCode: 'MN0400_331' },
-          { icon: ChartBarIcon, label: 'Fleet Utilization', path: '/MN0400_332', permissionCode: 'MN0400_332' },
+          { icon: ChartBarIcon, label: 'Asset Distribution', path: '/MN0400_332', permissionCode: 'MN0400_332' },
           { icon: ChartBarIcon, label: 'On-Time Delivery Performance', path: '/MN0400_333', permissionCode: 'MN0400_333' },
           { icon: DocumentTextIcon, label: 'Route Optimization Analysis', path: '/MN0400_334', permissionCode: 'MN0400_334' },
         ]

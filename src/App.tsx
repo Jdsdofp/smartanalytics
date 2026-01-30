@@ -25,6 +25,8 @@ import DashboardHub from './components/DashboardHub';
 import DashboardHubCompact from './components/Dashboardhubcompact';
 import DashboardHubHierarchical from './components/Dashboardhubhierarchica';
 import DashboardHubKanban from './components/Dashboardhubkanban';
+import NotFound from './pages/404';
+import MN0400_332 from './pages/Analytics/Distribution/MN0400_332';
 
 function App() {
 
@@ -53,7 +55,7 @@ function App() {
         }
       />
 
-            {/* Dashboard Hub Routes */}
+      {/* Dashboard Hub Routes */}
       <Route
         path="/dashboard-hub"
         element={
@@ -182,13 +184,13 @@ function App() {
           <MN0400_133 />
         </PrivateRoute>
       } />
-      <Route path='/MN0400_132' element={ 
+      <Route path='/MN0400_132' element={
         <PrivateRoute>
           <MN0400_132 />
         </PrivateRoute>
       } />
 
-       <Route path='/MN0400_134' element={
+      <Route path='/MN0400_134' element={
         <PrivateRoute>
           <MN0400_134 />
         </PrivateRoute>
@@ -202,9 +204,20 @@ function App() {
 
       <Route path='/MN0400_344' element={
         <PrivateRoute>
-          <MN0400_344/>
+          <MN0400_344 />
         </PrivateRoute>
-      } />  
+      } />
+
+      <Route
+        path='/MN0400_332'
+        element={
+          <PrivateRoute>
+            <MN0400_332 />
+          </PrivateRoute>
+        }
+      />
+
+      <Route path="*" element={<NotFound />} />
 
     </Routes>
 
