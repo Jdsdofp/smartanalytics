@@ -217,7 +217,7 @@ function App() {
         }
       />
 
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={<PrivateRoute><NotFound /></PrivateRoute>} />
 
     </Routes>
 

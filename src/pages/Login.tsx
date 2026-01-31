@@ -94,7 +94,7 @@ export default function Login() {
                 </p>
                 <div className="flex items-center justify-center gap-2 pt-2">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                  <span className="text-xs text-slate-500">Sistema Online</span>
+                  <span className="text-xs text-slate-500">System Online</span>
                 </div>
               </div>
             </div>
@@ -195,7 +195,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="relative w-full group overflow-hidden"
+                className="cursor-pointer relative w-full group overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-lg"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-lg opacity-0 group-hover:opacity-100 transition duration-300"></div>
@@ -223,7 +223,7 @@ export default function Login() {
             {/* Footer */}
             <div className="text-center pt-6 border-t border-slate-700/50">
               <p className="text-xs text-slate-500">
-  © {new Date().getFullYear()} SmartxHub. Todos os direitos reservados.
+  © {new Date().getFullYear()} SmartxHub. All rights reserved.
 </p>
             </div>
           </div>
@@ -232,11 +232,11 @@ export default function Login() {
         {/* Bottom decoration */}
         <div className="mt-8 text-center space-y-4 animate-fade-in-delayed">
           <div className="flex items-center justify-center gap-4 text-xs text-slate-500">
-            <a href="#" className="hover:text-blue-400 transition duration-200">Termos de Uso</a>
+            <a href="#" className="hover:text-blue-400 transition duration-200">Terms of Use</a>
             <span>•</span>
-            <a href="#" className="hover:text-blue-400 transition duration-200">Privacidade</a>
+            <a href="#" className="hover:text-blue-400 transition duration-200">Privacy</a>
             <span>•</span>
-            <a href="#" className="hover:text-blue-400 transition duration-200">Suporte</a>
+            <a href="#" className="hover:text-blue-400 transition duration-200">Support</a>
           </div>
         </div>
       </div>
