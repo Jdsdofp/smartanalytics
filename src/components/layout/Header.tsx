@@ -5,7 +5,7 @@ import { useCompany } from '../../hooks/useCompany'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { ArrowRightOnRectangleIcon, ChevronLeftIcon, ChevronRightIcon, Cog6ToothIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { useMenu } from '../../context/MenuContext'
 
 interface HeaderProps {
@@ -72,6 +72,7 @@ function Header({ onMenuClick }: HeaderProps) {
           <button
             onClick={toggleCollapsed}
             className={`
+              cursor-pointer
               hidden lg:flex items-center justify-center
               w-10 h-10 rounded-full
               bg-gradient-to-br from-primary-500 to-primary-700
@@ -182,16 +183,16 @@ function Header({ onMenuClick }: HeaderProps) {
             {/* DROPDOWN */}
             <div
               className="
-                absolute right-0 mt-3 w-60
-                rounded-2xl overflow-hidden
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                shadow-xl
-                opacity-0 invisible group-hover:opacity-100 group-hover:visible
-                translate-y-2 group-hover:translate-y-0
-                transition-all duration-200
-                z-50
-              "
+    absolute right-0 mt-3 w-60
+    rounded-2xl overflow-hidden
+    bg-white dark:bg-gray-900
+    border border-gray-200 dark:border-gray-800
+    shadow-xl
+    opacity-0 invisible group-hover:opacity-100 group-hover:visible
+    translate-y-2 group-hover:translate-y-0
+    transition-all duration-200
+    z-50
+  "
             >
               {/* User info */}
               <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-800">
@@ -207,13 +208,29 @@ function Header({ onMenuClick }: HeaderProps) {
               <div className="py-2">
                 <button
                   onClick={() => navigate('/user/perfil')}
-                  className="menu-item"
+                  className="
+      cursor-pointer
+        w-full flex items-center gap-3
+        px-4 py-2.5
+        text-sm font-medium text-gray-700 dark:text-gray-300
+        hover:bg-gray-50 dark:hover:bg-gray-800
+        transition-colors
+      "
                 >
-                  👤 {t('header.myProfile')}
+                  <UserCircleIcon className="w-5 h-5" />
+                  {t('header.myProfile')}
                 </button>
 
-                <button className="menu-item">
-                  ⚙️ {t('header.settings')}
+                <button className="
+      cursor-not-allowed
+      w-full flex items-center gap-3
+      px-4 py-2.5
+      text-sm font-medium text-gray-700 dark:text-gray-300
+      hover:bg-gray-50 dark:hover:bg-gray-800
+      transition-colors
+    ">
+                  <Cog6ToothIcon className="w-5 h-5" />
+                  {t('header.settings')}
                 </button>
               </div>
 
@@ -223,15 +240,17 @@ function Header({ onMenuClick }: HeaderProps) {
                 <button
                   onClick={logout}
                   className="
-                    w-full flex items-center justify-center gap-2
-                    px-4 py-2 rounded-xl
-                    text-sm font-medium
-                    text-red-600 dark:text-red-400
-                    hover:bg-red-50 dark:hover:bg-red-900/20
-                    transition-all
-                  "
+        cursor-pointer
+        w-full flex items-center justify-center gap-2
+        px-4 py-2.5 rounded-xl
+        text-sm font-medium
+        text-red-600 dark:text-red-400
+        hover:bg-red-50 dark:hover:bg-red-900/20
+        transition-all
+      "
                 >
-                  🚪 {t('header.logout')}
+                  <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                  {t('header.logout')}
                 </button>
               </div>
             </div>
