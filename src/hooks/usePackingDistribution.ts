@@ -95,6 +95,7 @@ interface UsePackingDistributionReturn {
     totalStats: number[];
     updateTime: string;
     assets: ProcessedAssetData[];
+    appliedRange: string;
     
     // Estados
     loading: boolean;
@@ -116,6 +117,8 @@ interface FilterOptions {
     ageCategory?: 'lessThan30' | 'between30And60' | 'between60And90' | 'moreThan90';
     startDate?: string;
     endDate?: string;
+    // 🆕 Novo filtro
+    lastSeenRange?: '30' | '60' | '90' | 'all';
 }
 
 /**
@@ -152,6 +155,8 @@ export const usePackingDistribution = ({
     const [assets, setAssets] = useState<ProcessedAssetData[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+
+    const [appliedRange, setAppliedRange] = useState<string>('all');
 
     /**
      * Converte estatísticas da API para o formato do frontend
@@ -211,7 +216,6 @@ export const usePackingDistribution = ({
             setLoading(true);
             setError(null);
 
-            // Determina a URL baseado se há filtros
             let url = `${baseURL}/dashboard/packaging/${companyId}/distribution`;
             
             if (filters && Object.keys(filters).length > 0) {
@@ -244,6 +248,11 @@ export const usePackingDistribution = ({
                 setTotalStats(stats);
                 setUpdateTime(formattedTime);
                 setAssets(apiAssets);
+                
+                // 🆕 Armazena o range aplicado
+                if (filters?.lastSeenRange) {
+                    setAppliedRange(filters.lastSeenRange);
+                }
             } else {
                 setError(response.data.message || 'Erro ao carregar dados');
             }
@@ -262,6 +271,7 @@ export const usePackingDistribution = ({
             setLoading(false);
         }
     }, [companyId, baseURL, convertToCustodyGroups, convertToTotalStats, formatUpdateTime]);
+
 
     /**
      * Função para recarregar dados
@@ -313,6 +323,7 @@ export const usePackingDistribution = ({
         totalStats,
         updateTime,
         assets,
+        appliedRange,
         
         // Estados
         loading,

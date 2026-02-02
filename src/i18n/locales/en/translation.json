@@ -2593,6 +2593,22 @@
         "period2": "60-90 DAYS",
         "period3": ">90 DAYS"
       },
+          "timeRangeFilter": "Time Range Filter",
+    "timeRangeDescription": "Select the period based on last seen date",
+    "ranges": {
+      "all": "All Periods",
+      "allDesc": "Display all records",
+      "last30": "Last 30 Days",
+      "last30Desc": "Seen in the last 30 days",
+      "last60": "Last 60 Days",
+      "last60Desc": "Seen in the last 60 days",
+      "last90": "Last 90 Days",
+      "last90Desc": "Seen in the last 90 days"
+    },
+        "active": "Active",
+    "note": "Note",
+    "rangeNote": "This filter considers the 'Last Seen' date of assets. Combine with other filters for more specific analysis.",
+   
       "charts": "Charts",
        "chart": "Chart",
       "chartsVisualization": "Charts Visualization",

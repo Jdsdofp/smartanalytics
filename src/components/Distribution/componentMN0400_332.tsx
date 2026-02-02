@@ -1205,7 +1205,7 @@
 
 // src/Distribution/componentMN0400_332.tsx
 
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import * as echarts from 'echarts';
 import { ClockIcon, ArrowPathIcon, DocumentArrowDownIcon, XMarkIcon, ArrowsPointingOutIcon, ChartBarSquareIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import { usePackingDistribution } from '../../hooks/usePackingDistribution';
@@ -1247,12 +1247,56 @@ const ageColors = [
     { base: '#A6A6A6', light: '#BFBFBF', dark: '#8C8C8C' },
 ];
 
+
+// 🆕 Componente de Filtro por Range Temporal
+const TimeRangeFilter = ({ 
+    onRangeChange, 
+    currentRange 
+}: { 
+    onRangeChange: (range: '30' | '60' | '90' | 'all') => void;
+    currentRange: string;
+}) => {
+    const { t } = useTranslation();
+
+    const ranges = [
+        { value: 'all', label: t('packagingDistribution.ranges.all') },
+        { value: '30', label: t('packagingDistribution.ranges.last30') },
+        { value: '60', label: t('packagingDistribution.ranges.last60') },
+        { value: '90', label: t('packagingDistribution.ranges.last90') }
+    ];
+
+    return (
+        <div className="mb-4 flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-medium text-gray-600">
+                {t('packagingDistribution.timeRangeFilter')}:
+            </span>
+            {ranges.map((range) => (
+                <button
+                    key={range.value}
+                    onClick={() => onRangeChange(range.value as '30' | '60' | '90' | 'all')}
+                    className={`
+                        px-3 py-1.5 rounded text-sm font-medium transition-colors
+                        ${currentRange === range.value
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                        }
+                    `}
+                >
+                    {range.label}
+                </button>
+            ))}
+        </div>
+    );
+};
+
 export default function PackagingDistribution({ autoRefresh = false, refreshInterval = 600000 }) {
     const { t } = useTranslation(); // ou useI18n(), dependendo da sua configuração
     const chartRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
     const chartInstances = useRef<{ [key: string]: echarts.ECharts }>({});
     const modalChartRef = useRef<HTMLDivElement | null>(null);
     const modalChartInstance = useRef<echarts.ECharts | null>(null);
+        const [currentRange, setCurrentRange] = useState<'30' | '60' | '90' | 'all'>('all');
+
 
     const [showPercentage, setShowPercentage] = useState(false);
     const [exportingPDF, setExportingPDF] = useState(false);
@@ -1274,6 +1318,8 @@ export default function PackagingDistribution({ autoRefresh = false, refreshInte
         }));
     };
 
+
+
     const toggleAllFilters = () => {
         const allActive = Object.values(activeFilters).every(v => v);
         setActiveFilters({
@@ -1285,10 +1331,21 @@ export default function PackagingDistribution({ autoRefresh = false, refreshInte
     };
 
     //@ts-ignore
-    const { custodyGroups, totalStats, updateTime, loading, error, refetch, exportData } = usePackingDistribution({
+    const { custodyGroups, totalStats, updateTime, loading, error, refetch, exportData, fetchWithFilters, appliedRange  } = usePackingDistribution({
         autoFetch: true,
         refetchInterval: autoRefresh ? refreshInterval : undefined
     });
+
+
+         // 🆕 Handler para mudança de range
+    const handleRangeChange = useCallback((range: '30' | '60' | '90' | 'all') => {
+        setCurrentRange(range);
+        if (range === 'all') {
+            refetch(); // Buscar todos os dados
+        } else {
+            fetchWithFilters({ lastSeenRange: range });
+        }
+    }, [refetch, fetchWithFilters]);
 
     const custodyConfig = useMemo(() => {
         if (!custodyGroups || Object.keys(custodyGroups).length === 0) return [];
@@ -2711,6 +2768,12 @@ export default function PackagingDistribution({ autoRefresh = false, refreshInte
                                     </svg>
                                     {showPercentage ? t('packagingDistribution.showNumbers') : t('packagingDistribution.showPercentage')}
                                 </button>
+                        {/* 🆕 FILTRO DE RANGE TEMPORAL */}
+                        <TimeRangeFilter 
+                            onRangeChange={handleRangeChange}
+                            currentRange={currentRange}
+                        />
+                                
                             </div>
 
                             {autoRefresh && (

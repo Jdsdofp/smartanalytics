@@ -2608,6 +2608,22 @@
         "period2": "60-90 DÍAS",
         "period3": ">90 DÍAS"
       },
+          "timeRangeFilter": "Filtro por Período de Tiempo",
+    "timeRangeDescription": "Seleccione el período basado en la última visualización (Last Seen)",
+    "ranges": {
+      "all": "Todos los Períodos",
+      "allDesc": "Mostrar todos los registros",
+      "last30": "Últimos 30 Días",
+      "last30Desc": "Visto en los últimos 30 días",
+      "last60": "Últimos 60 Días",
+      "last60Desc": "Visto en los últimos 60 días",
+      "last90": "Últimos 90 Días",
+      "last90Desc": "Visto en los últimos 90 días"
+    },
+        "active": "Activo",
+    "note": "Nota",
+    "rangeNote": "Este filtro considera la fecha de 'Last Seen' (última visualización) de los activos. Combine con otros filtros para análisis más específicos.",
+    
       "charts": "Gráficos",
       "chart": "Gráfico",
       "chartsVisualization": "Visualización de Gráficos",
