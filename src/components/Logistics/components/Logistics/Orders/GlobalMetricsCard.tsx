@@ -58,7 +58,7 @@ export function GlobalMetricsCompact({ metrics }: GlobalMetricsCompactProps) {
           <div className="flex-1">
             <p className="text-xs text-orange-700 font-medium mb-1">Not Scanned</p>
             <p className="text-2xl font-bold text-orange-600">
-              {metrics.items_pending.toLocaleString()}
+              {Number(metrics.items_pending).toLocaleString()}
             </p>
             <div className="mt-2 flex items-center gap-2">
               <div className="flex-1 bg-gray-200 rounded-full h-1.5">
