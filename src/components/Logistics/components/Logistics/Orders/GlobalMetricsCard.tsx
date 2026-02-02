@@ -32,7 +32,7 @@ export function GlobalMetricsCompact({ metrics }: GlobalMetricsCompactProps) {
           <div className="flex-1">
             <p className="text-xs text-green-700 font-medium mb-1">Scanned Items</p>
             <p className="text-2xl font-bold text-green-600">
-              {metrics.completed_items.toLocaleString()}
+              {Number(metrics.completed_items).toLocaleString()}
             </p>
             <div className="mt-2 flex items-center gap-2">
               <div className="flex-1 bg-gray-200 rounded-full h-1.5">
