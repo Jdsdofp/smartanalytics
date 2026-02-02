@@ -110,20 +110,43 @@ export default function Layout({
     }
   }
 
+  // const generateEmbedUrl = async () => {
+  //   setGeneratingQR(true)
+  //   const token = sessionStorage.getItem('token')
+  //   const baseUrl = window.location.origin
+  //   const embedUrlWithParams = `${baseUrl}${currentPath}?embedded=true&token=${token}`
+
+  //   setEmbedUrl(embedUrlWithParams)
+
+  //   const shortened = await shortenUrlWithBackend(embedUrlWithParams)
+  //   setShortUrl(shortened)
+
+  //   setGeneratingQR(false)
+  //   setShowEmbedModal(true)
+  // }
+
+
   const generateEmbedUrl = async () => {
-    setGeneratingQR(true)
-    const token = sessionStorage.getItem('token')
-    const baseUrl = window.location.origin
-    const embedUrlWithParams = `${baseUrl}${currentPath}?embedded=true&token=${token}`
+  setGeneratingQR(true)
+  const token = sessionStorage.getItem('token')
+  const apiEndpoint = sessionStorage.getItem('apiEndpoint') || 'https://apinode.smartxhub.cloud/api'
+  
+  // 🔥 Identifica qual API está sendo usada
+  const apiIdentifier = apiEndpoint.includes('apisaudi') ? 'saudi' : 'node'
+  
+  const baseUrl = window.location.origin
+  // 👇 Adiciona o parâmetro 'api' na URL
+  const embedUrlWithParams = `${baseUrl}${currentPath}?embedded=true&token=${token}&api=${apiIdentifier}`
 
-    setEmbedUrl(embedUrlWithParams)
+  setEmbedUrl(embedUrlWithParams)
 
-    const shortened = await shortenUrlWithBackend(embedUrlWithParams)
-    setShortUrl(shortened)
+  const shortened = await shortenUrlWithBackend(embedUrlWithParams)
+  setShortUrl(shortened)
 
-    setGeneratingQR(false)
-    setShowEmbedModal(true)
-  }
+  setGeneratingQR(false)
+  setShowEmbedModal(true)
+}
+
 
   const copyToClipboard = async () => {
     try {
