@@ -6,7 +6,7 @@ import Layout from "../../../components/layout/Layout";
 
 export default function MN0400_511() {
     return (
-        <Layout>
+        <Layout buttonsPosition={{y: 17, x: 20}}>
             <PredictiveCertificateAnalysis />
         </Layout>
     )

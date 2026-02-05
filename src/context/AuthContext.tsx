@@ -167,139 +167,139 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
   useEffect(() => {
-  const bootstrap = async () => {
-    const savedUser = sessionStorage.getItem('user')
-    const savedToken = sessionStorage.getItem('token')
-    const savedApiEndpoint = sessionStorage.getItem('apiEndpoint')
+    const bootstrap = async () => {
+      const savedUser = sessionStorage.getItem('user')
+      const savedToken = sessionStorage.getItem('token')
+      const savedApiEndpoint = sessionStorage.getItem('apiEndpoint')
 
-    const isEmbedded = searchParams.get('embedded') === 'true'
-    const embeddedToken = searchParams.get('token')
-    const apiParam = searchParams.get('api') // 👈 Novo parâmetro
+      const isEmbedded = searchParams.get('embedded') === 'true'
+      const embeddedToken = searchParams.get('token')
+      const apiParam = searchParams.get('api') // 👈 Novo parâmetro
 
-    // 🧹 EMBED sem token → limpa tudo
-    if (isEmbedded && !embeddedToken) {
-      console.warn('Embed sem token. Limpando sessão.')
-      clearSession()
-      setUser(null)
-      setIsLoading(false)
-      return
-    }
-
-    // ✅ Login normal
-    if (savedUser && savedToken && !isEmbedded) {
-      setUser(JSON.parse(savedUser))
-      setIsLoading(false)
-      return
-    }
-
-    // 🔥 Embed com token
-    if (isEmbedded && embeddedToken) {
-      try {
-        // 🎯 Define qual API usar baseado no parâmetro da URL
-        let endpointsToTry: string[]
-        
-        if (apiParam === 'saudi') {
-          // Se veio 'saudi' na URL, tenta Saudi primeiro
-          endpointsToTry = [
-            'https://apisaudi.smartxhub.cloud/api',
-            'https://apinode.smartxhub.cloud/api'
-          ]
-          console.log('🌍 Embed identificado como Saudi API')
-        } else if (apiParam === 'node') {
-          // Se veio 'node' na URL, tenta Node primeiro
-          endpointsToTry = [
-            'https://apinode.smartxhub.cloud/api',
-            'https://apisaudi.smartxhub.cloud/api'
-          ]
-          console.log('🌍 Embed identificado como Node API')
-        } else {
-          // Fallback: tenta a API salva primeiro, depois as outras
-          endpointsToTry = savedApiEndpoint
-            ? [savedApiEndpoint, ...API_ENDPOINTS.filter(e => e !== savedApiEndpoint)]
-            : API_ENDPOINTS
-          console.log('🌍 Embed sem API definida, tentando todas')
-        }
-
-        let validationSuccess = false
-        let userData = null
-        let workingEndpoint = null
-
-        for (const endpoint of endpointsToTry) {
-          try {
-            console.log(`Tentando validar token em: ${endpoint}`)
-
-            const { data } = await axios.post(
-              `${endpoint}/auth/validate`,
-              {},
-              {
-                headers: { Authorization: `Bearer ${embeddedToken}` },
-                timeout: 5000
-              }
-            )
-
-            if (data.success && data.valid) {
-              const u = data.user
-
-              userData = {
-                id: u.userId.toString(),
-                name: `${u.firstName} ${u.lastName}`.trim(),
-                email: u.email,
-                login: u.login,
-                role: u.role,
-                type: u.type,
-                active: u.active,
-                timeZone: u.timeZone,
-                companyId: u.companyId,
-                companyName: u.companyName,
-                webKey: u.webKey,
-                language: u.language,
-                permissions: u.permissions || [],
-                company: { components: u.components || [] }
-              }
-
-              workingEndpoint = endpoint
-              validationSuccess = true
-              console.log(`✅ Validação bem-sucedida em: ${endpoint}`)
-              break
-            }
-          } catch (err) {
-            console.warn(`❌ Falha ao validar em ${endpoint}:`, err)
-            continue
-          }
-        }
-
-        if (validationSuccess && userData && workingEndpoint) {
-          setUser(userData)
-          sessionStorage.setItem('token', embeddedToken)
-          sessionStorage.setItem('user', JSON.stringify(userData))
-          sessionStorage.setItem('apiEndpoint', workingEndpoint)
-          sessionStorage.setItem('companyData', JSON.stringify({
-            id: userData.companyId,
-            name: userData.companyName,
-            components: userData.company?.components || [],
-            devices: [],
-            details: { full_name: userData.companyName, logo: null }
-          }))
-        } else {
-          throw new Error('Token inválido em todas as APIs')
-        }
-
-      } catch (err) {
-        console.error('Erro no embed, limpando sessão:', err)
+      // 🧹 EMBED sem token → limpa tudo
+      if (isEmbedded && !embeddedToken) {
+        console.warn('Embed sem token. Limpando sessão.')
         clearSession()
         setUser(null)
-      } finally {
         setIsLoading(false)
+        return
       }
-      return
+
+      // ✅ Login normal
+      if (savedUser && savedToken && !isEmbedded) {
+        setUser(JSON.parse(savedUser))
+        setIsLoading(false)
+        return
+      }
+
+      // 🔥 Embed com token
+      if (isEmbedded && embeddedToken) {
+        try {
+          // 🎯 Define qual API usar baseado no parâmetro da URL
+          let endpointsToTry: string[]
+
+          if (apiParam === 'saudi') {
+            // Se veio 'saudi' na URL, tenta Saudi primeiro
+            endpointsToTry = [
+              'https://apisaudi.smartxhub.cloud/api',
+              'https://apinode.smartxhub.cloud/api'
+            ]
+            console.log('🌍 Embed identificado como Saudi API')
+          } else if (apiParam === 'node') {
+            // Se veio 'node' na URL, tenta Node primeiro
+            endpointsToTry = [
+              'https://apinode.smartxhub.cloud/api',
+              'https://apisaudi.smartxhub.cloud/api'
+            ]
+            console.log('🌍 Embed identificado como Node API')
+          } else {
+            // Fallback: tenta a API salva primeiro, depois as outras
+            endpointsToTry = savedApiEndpoint
+              ? [savedApiEndpoint, ...API_ENDPOINTS.filter(e => e !== savedApiEndpoint)]
+              : API_ENDPOINTS
+            console.log('🌍 Embed sem API definida, tentando todas')
+          }
+
+          let validationSuccess = false
+          let userData = null
+          let workingEndpoint = null
+
+          for (const endpoint of endpointsToTry) {
+            try {
+              console.log(`Tentando validar token em: ${endpoint}`)
+
+              const { data } = await axios.post(
+                `${endpoint}/auth/validate`,
+                {},
+                {
+                  headers: { Authorization: `Bearer ${embeddedToken}` },
+                  timeout: 5000
+                }
+              )
+
+              if (data.success && data.valid) {
+                const u = data.user
+
+                userData = {
+                  id: u.userId.toString(),
+                  name: `${u.firstName} ${u.lastName}`.trim(),
+                  email: u.email,
+                  login: u.login,
+                  role: u.role,
+                  type: u.type,
+                  active: u.active,
+                  timeZone: u.timeZone,
+                  companyId: u.companyId,
+                  companyName: u.companyName,
+                  webKey: u.webKey,
+                  language: u.language,
+                  permissions: u.permissions || [],
+                  company: { components: u.components || [] }
+                }
+
+                workingEndpoint = endpoint
+                validationSuccess = true
+                console.log(`✅ Validação bem-sucedida em: ${endpoint}`)
+                break
+              }
+            } catch (err) {
+              console.warn(`❌ Falha ao validar em ${endpoint}:`, err)
+              continue
+            }
+          }
+
+          if (validationSuccess && userData && workingEndpoint) {
+            setUser(userData)
+            sessionStorage.setItem('token', embeddedToken)
+            sessionStorage.setItem('user', JSON.stringify(userData))
+            sessionStorage.setItem('apiEndpoint', workingEndpoint)
+            sessionStorage.setItem('companyData', JSON.stringify({
+              id: userData.companyId,
+              name: userData.companyName,
+              components: userData.company?.components || [],
+              devices: [],
+              details: { full_name: userData.companyName, logo: null }
+            }))
+          } else {
+            throw new Error('Token inválido em todas as APIs')
+          }
+
+        } catch (err) {
+          console.error('Erro no embed, limpando sessão:', err)
+          clearSession()
+          setUser(null)
+        } finally {
+          setIsLoading(false)
+        }
+        return
+      }
+
+      // ❌ Sem sessão válida
+      setIsLoading(false)
     }
 
-    // ❌ Sem sessão válida
-    setIsLoading(false)
-  }
-
-  bootstrap()
-}, [searchParams])
+    bootstrap()
+  }, [searchParams])
 
   const login = async (username: string, password: string) => {
     const savedApiEndpoint = sessionStorage.getItem('apiEndpoint')
@@ -368,9 +368,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionStorage.setItem('webKey', webKey)
         sessionStorage.setItem('companyData', JSON.stringify(companyData))
         sessionStorage.setItem('theme', JSON.stringify(theme))
-        sessionStorage.setItem('apiEndpoint', apiUrl) // 👈 Salva qual API funcionou
+        sessionStorage.setItem('apiEndpoint', apiUrl)
 
-        console.log(`✅ Login bem-sucedido em: ${apiUrl}`)
+        //console.log(`✅ Login bem-sucedido em: ${apiUrl}`)
         return // Sucesso, sai da função
 
       } catch (error) {

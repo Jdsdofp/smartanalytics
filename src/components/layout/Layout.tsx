@@ -17,13 +17,18 @@ interface LayoutProps {
     category?: string
     icon?: string
   }
+  buttonsPosition?: {
+    x?: number
+    y?: number
+  }
 }
 
 export default function Layout({ 
   children, 
   showEmbedButton = true,
   showFavoriteButton = true,
-  favoriteConfig
+  favoriteConfig,
+  buttonsPosition = { x: 2, y: 2 }
 }: LayoutProps) {
   const { t } = useTranslation()
   const location = useLocation()
@@ -109,21 +114,6 @@ export default function Layout({
       return longUrl
     }
   }
-
-  // const generateEmbedUrl = async () => {
-  //   setGeneratingQR(true)
-  //   const token = sessionStorage.getItem('token')
-  //   const baseUrl = window.location.origin
-  //   const embedUrlWithParams = `${baseUrl}${currentPath}?embedded=true&token=${token}`
-
-  //   setEmbedUrl(embedUrlWithParams)
-
-  //   const shortened = await shortenUrlWithBackend(embedUrlWithParams)
-  //   setShortUrl(shortened)
-
-  //   setGeneratingQR(false)
-  //   setShowEmbedModal(true)
-  // }
 
 
   const generateEmbedUrl = async () => {
@@ -211,6 +201,48 @@ export default function Layout({
     }
   }
 
+   // 🔥 Função para gerar classes dinâmicas de posição
+  const getButtonPositionClasses = () => {
+    const { x = 2, y = 2 } = buttonsPosition
+    
+    // Mapeamento de valores numéricos para classes do Tailwind
+    const topClasses: { [key: number]: string } = {
+      0: 'top-0',
+      1: 'top-1',
+      2: 'top-2',
+      3: 'top-3',
+      4: 'top-4',
+      5: 'top-5',
+      6: 'top-6',
+      8: 'top-8',
+      9: 'top-9',
+      10: 'top-10',
+      12: 'top-12',
+      13: 'top-13',
+      16: 'top-16',
+      17: 'top-17',
+      20: 'top-20',
+    }
+
+    const rightClasses: { [key: number]: string } = {
+      0: 'right-0',
+      1: 'right-1',
+      2: 'right-2',
+      3: 'right-3',
+      4: 'right-4',
+      5: 'right-5',
+      6: 'right-6',
+      8: 'right-8',
+      9: 'right-9',
+      10: 'right-10',
+      12: 'right-12',
+      16: 'right-16',
+      20: 'right-20',
+    }
+
+    return `${topClasses[y] || 'top-2'} ${rightClasses[x] || 'right-2'}`
+  }
+
   return (
     <>
       {isEmbedded ? (
@@ -226,7 +258,7 @@ export default function Layout({
               <div className="w-full sm:px-2 lg:px-1 sm:py-1">
                 <div className="relative">
                   {(showEmbedButton || showFavoriteButton) && (
-                    <div className="absolute top-2 right-2 z-30 flex items-center gap-2">
+                    <div className={`absolute ${getButtonPositionClasses()} z-30 flex items-center gap-2`}>
                       {showFavoriteButton && (
                         <button
                           onClick={handleToggleFavorite}

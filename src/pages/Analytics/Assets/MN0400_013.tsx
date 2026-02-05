@@ -3,7 +3,7 @@ import Layout from "../../../components/layout/Layout";
 
 export default function MN0400_013() {
     return (
-        <Layout>
+        <Layout buttonsPosition={{y: 16}}>
             <AssetManagement />
         </Layout>
     )
