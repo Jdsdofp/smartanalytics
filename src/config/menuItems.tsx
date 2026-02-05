@@ -29,31 +29,31 @@ import type { MenuItemProps } from '../components/layout/Menu'
 
 export const menuItemsRaw: MenuItemProps[] = [
   {
-    icon: ChartBarIcon, 
-    label: 'Dashboard', 
+    icon: ChartBarIcon,
+    label: 'Dashboard',
     path: '/'
   },
   {
-    icon: CubeIcon, 
-    label: 'Assets Analytics', 
+    icon: CubeIcon,
+    label: 'Assets Analytics',
     path: '/MN0400_002',
     children: [
       {
-        icon: DocumentTextIcon, 
-        label: 'ISO 55000 Standards', 
-        path: '/MN0400_010', 
+        icon: DocumentTextIcon,
+        label: 'ISO 55000 Standards',
+        path: '/MN0400_010',
         children: [
+          { icon: DocumentChartBarIcon, label: 'Asset Management System', path: '/MN0400_013', permissionCode: 'MN0400_012' },
           { icon: ChartBarIcon, label: 'ISO 55000 Compliance Overview', path: '/MN0400_011', permissionCode: 'MN0400_010' },
           { icon: TableCellsIcon, label: 'ISO 55001 Requirements Status', path: '/MN0400_012', permissionCode: 'MN0400_011' },
-          { icon: DocumentChartBarIcon, label: 'Asset Management System Maturity', path: '/MN0400_013', permissionCode: 'MN0400_012' },
           { icon: DocumentTextIcon, label: 'ISO 55002 Gap Analysis', path: '/MN0400_014', permissionCode: 'MN0400_014', disabled: true },
           { icon: DocumentTextIcon, label: 'Strategic Asset Management Plan', path: '/MN0400_015', permissionCode: 'MN0400_015', disabled: true }
         ]
       },
       {
-        icon: ChartPieIcon, 
-        label: 'Financial & Cost Analysis', 
-        path: '/MN0400_020', 
+        icon: ChartPieIcon,
+        label: 'Financial & Cost Analysis',
+        path: '/MN0400_020',
         hidden: true,
         children: [
           { icon: ChartBarIcon, label: 'Total Cost of Ownership (TCO)', path: '/MN0400_021' },
@@ -65,10 +65,10 @@ export const menuItemsRaw: MenuItemProps[] = [
         ]
       },
       {
-        icon: ShieldCheckIcon, 
-        label: 'Performance & Risk', 
-        path: '/MN0400_030', 
-        hidden: true, 
+        icon: ShieldCheckIcon,
+        label: 'Performance & Risk',
+        path: '/MN0400_030',
+        hidden: true,
         children: [
           { icon: ChartBarIcon, label: 'Asset Health Score', path: '/MN0400_031', permissionCode: 'MN0400_031' },
           { icon: TableCellsIcon, label: 'Asset Criticality Matrix', path: '/MN0400_032', permissionCode: 'MN0400_032' },
@@ -78,10 +78,10 @@ export const menuItemsRaw: MenuItemProps[] = [
         ]
       },
       {
-        icon: DocumentChartBarIcon, 
-        label: 'Strategic Planning', 
-        path: '/MN0400_040', 
-        hidden: true, 
+        icon: DocumentChartBarIcon,
+        label: 'Strategic Planning',
+        path: '/MN0400_040',
+        hidden: true,
         children: [
           { icon: ChartPieIcon, label: 'Asset Portfolio Overview', path: '/MN0400_041', disabled: true },
           { icon: MapPinIcon, label: 'Assets by Location Hierarchy', path: '/MN0400_042', disabled: true },
@@ -93,16 +93,16 @@ export const menuItemsRaw: MenuItemProps[] = [
     ]
   },
   {
-    icon: UserGroupIcon, 
-    label: 'People Analytics', 
-    path: '/MN0400_003', 
+    icon: UserGroupIcon,
+    label: 'People Analytics',
+    path: '/MN0400_003',
     hidden: false,
     children: [
       {
-        icon: UserGroupIcon, 
-        label: 'Workforce Planning', 
-        path: '/MN0400_110', 
-        hidden: true, 
+        icon: UserGroupIcon,
+        label: 'Workforce Planning',
+        path: '/MN0400_110',
+        hidden: true,
         children: [
           { icon: ChartPieIcon, label: 'Workforce Composition', path: '/MN0400_111', permissionCode: 'MN0400_111' },
           { icon: MapPinIcon, label: 'Headcount by Location & Role', path: '/MN0400_112', permissionCode: 'MN0400_112' },
@@ -111,10 +111,10 @@ export const menuItemsRaw: MenuItemProps[] = [
         ]
       },
       {
-        icon: AcademicCapIcon, 
-        label: 'Talent & Development', 
-        path: '/MN0400_120', 
-        disabled: true, 
+        icon: AcademicCapIcon,
+        label: 'Talent & Development',
+        path: '/MN0400_120',
+        disabled: true,
         children: [
           { icon: ChartBarIcon, label: 'Onboarding Cycle Time', path: '/MN0400_121', permissionCode: 'MN0400_121' },
           { icon: TableCellsIcon, label: 'Competency Gap Analysis', path: '/MN0400_122', permissionCode: 'MN0400_122' },
@@ -124,9 +124,9 @@ export const menuItemsRaw: MenuItemProps[] = [
         ]
       },
       {
-        icon: ShieldCheckIcon, 
-        label: 'Safety & Wellbeing', 
-        path: '/MN0400_130', 
+        icon: ShieldCheckIcon,
+        label: 'Safety & Wellbeing',
+        path: '/MN0400_130',
         children: [
           { icon: MapIcon, label: 'GPS Tracking', path: '/MN0400_132', permissionCode: 'MN0400_132' },
           { icon: ChartBarIcon, label: 'Real-time People Visibility', path: '/MN0400_131', permissionCode: 'MN0400_131' },
@@ -136,10 +136,10 @@ export const menuItemsRaw: MenuItemProps[] = [
         ]
       },
       {
-        icon: ChartPieIcon, 
-        label: 'Cost & Productivity', 
-        path: '/MN0400_140', 
-        disabled: true, 
+        icon: ChartPieIcon,
+        label: 'Cost & Productivity',
+        path: '/MN0400_140',
+        disabled: true,
         children: [
           { icon: ChartPieIcon, label: 'Labor Cost Distribution', path: '/MN0400_141', permissionCode: 'MN0400_141' },
           { icon: ChartBarIcon, label: 'Productivity Metrics', path: '/MN0400_142', permissionCode: 'MN0400_142' },
@@ -150,15 +150,15 @@ export const menuItemsRaw: MenuItemProps[] = [
     ]
   },
   {
-    icon: BuildingOfficeIcon, 
-    label: 'Infrastructure Analytics', 
-    path: '/MN0400_004', 
+    icon: BuildingOfficeIcon,
+    label: 'Infrastructure Analytics',
+    path: '/MN0400_004',
     hidden: false,
     children: [
       {
-        icon: ServerIcon, 
-        label: 'Site Survey', 
-        path: '/MN0400_210', 
+        icon: ServerIcon,
+        label: 'Site Survey',
+        path: '/MN0400_210',
         children: [
           { icon: ChartBarIcon, label: 'Device Logs & Monitoring', path: '/MN0400_211', permissionCode: 'MN0500_110' },
           { icon: ChartBarIcon, label: 'Overall Equipment Effectiveness', path: '/MN0400_212', permissionCode: 'MN0400_212' }
@@ -167,14 +167,14 @@ export const menuItemsRaw: MenuItemProps[] = [
     ]
   },
   {
-    icon: TruckIcon, 
-    label: 'Logistics Analytics', 
+    icon: TruckIcon,
+    label: 'Logistics Analytics',
     path: '/MN0400_005',
     children: [
       {
-        icon: ArchiveBoxIcon, 
-        label: 'Inventory Management', 
-        path: '/MN0400_310', 
+        icon: ArchiveBoxIcon,
+        label: 'Inventory Management',
+        path: '/MN0400_310',
         children: [
           { icon: ChartBarIcon, label: 'Inventory Health Score', path: '/MN0400_311', permissionCode: 'MN0400_311' },
           { icon: MapPinIcon, label: 'Stock Distribution by Location', path: '/MN0400_312', permissionCode: 'MN0400_312' },
@@ -185,10 +185,10 @@ export const menuItemsRaw: MenuItemProps[] = [
         ]
       },
       {
-        icon: DocumentChartBarIcon, 
-        label: 'Supply Chain Performance', 
-        path: '/MN0400_320', 
-        hidden: true, 
+        icon: DocumentChartBarIcon,
+        label: 'Supply Chain Performance',
+        path: '/MN0400_320',
+        hidden: true,
         children: [
           { icon: ChartPieIcon, label: 'Supply Chain Cost Analysis', path: '/MN0400_321', permissionCode: 'MN0400_321' },
           { icon: TableCellsIcon, label: 'Supplier Performance Scorecard', path: '/MN0400_322', permissionCode: 'MN0400_322' },
@@ -198,9 +198,9 @@ export const menuItemsRaw: MenuItemProps[] = [
         ]
       },
       {
-        icon: TruckIcon, 
-        label: 'Transportation & Distribution', 
-        path: '/MN0400_330', 
+        icon: TruckIcon,
+        label: 'Transportation & Distribution',
+        path: '/MN0400_330',
         children: [
           { icon: ChartBarIcon, label: 'Transportation Cost per Unit', path: '/MN0400_331', permissionCode: 'MN0400_331' },
           { icon: ChartBarIcon, label: 'Asset Distribution', path: '/MN0400_332', permissionCode: 'MN0400_332' },
@@ -209,9 +209,9 @@ export const menuItemsRaw: MenuItemProps[] = [
         ]
       },
       {
-        icon: HomeModernIcon, 
-        label: 'Warehouse Operations', 
-        path: '/MN0400_340', 
+        icon: HomeModernIcon,
+        label: 'Warehouse Operations',
+        path: '/MN0400_340',
         children: [
           { icon: ChartBarIcon, label: 'Warehouse Space Utilization', path: '/MN0400_341', permissionCode: 'MN0400_341' },
           { icon: ChartBarIcon, label: 'Picking & Packing Efficiency', path: '/MN0400_342', permissionCode: 'MN0400_342' },
@@ -220,10 +220,10 @@ export const menuItemsRaw: MenuItemProps[] = [
         ]
       },
       {
-        icon: ChartPieIcon, 
-        label: 'Demand Planning', 
-        path: '/MN0400_350', 
-        hidden: true, 
+        icon: ChartPieIcon,
+        label: 'Demand Planning',
+        path: '/MN0400_350',
+        hidden: true,
         children: [
           { icon: ChartBarIcon, label: 'Demand Forecast Accuracy', path: '/MN0400_351', permissionCode: 'MN0400_351' },
           { icon: ChartBarIcon, label: 'Seasonal Demand Patterns', path: '/MN0400_352', permissionCode: 'MN0400_352' },
@@ -238,8 +238,8 @@ export const menuItemsRaw: MenuItemProps[] = [
     path: '/MN0400_006',
     children: [
       {
-        icon: DocumentCheckIcon, 
-        label: 'Compliance & Status', 
+        icon: DocumentCheckIcon,
+        label: 'Compliance & Status',
         path: '/MN0400_410',
         children: [
           { icon: ChartPieIcon, label: 'Certificate Status Overview', path: '/MN0400_511', permissionCode: 'MN0400_510' },

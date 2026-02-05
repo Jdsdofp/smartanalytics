@@ -260,7 +260,7 @@ function PopoverSubmenu({ item, currentPath }: { item: MenuItemProps, currentPat
               const isSubActive = subitem.path === currentPath
               return (
                 <div key={index} className="relative">
-                  <div className="absolute left-6 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-gray-300 dark:border-gray-600 rounded-bl-lg" />
+                  <div className="absolute p-2 left-6 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-gray-300 dark:border-gray-600 rounded-bl-lg" />
                   {index < item.children!.length - 1 && <div className="absolute left-6 top-1/2 bottom-0 w-3 border-l-2 border-gray-300 dark:border-gray-600" />}
                   <button
                     onClick={() => {
@@ -271,16 +271,16 @@ function PopoverSubmenu({ item, currentPath }: { item: MenuItemProps, currentPat
                       subitem.onClick?.()
                     }}
                     disabled={subitem.disabled}
-                    className={`w-full flex items-center gap-3 px-4 py-2 pl-12 transition-colors text-left relative z-10
+                    className={`w-full flex items-center gap-3 px-1 py-2 pl-12 transition-colors text-left relative z-10
                                ${subitem.disabled
                         ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'
                         : isSubActive
-                          ? 'text-company-primary bg-company-primary bg-opacity-10'
+                          ? 'text-white bg-company-primary bg-opacity-10 rounded-full'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                       }`}
                   >
                     <subitem.icon className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="text-sm">{subitem.label}</span>
+                    <span className="text-sm cursor-pointer">{subitem.label}</span>
                   </button>
                 </div>
               )
