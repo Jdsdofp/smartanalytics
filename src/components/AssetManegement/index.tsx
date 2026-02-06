@@ -5,7 +5,7 @@ import useAssetManagement from '../../hooks/useAssetManagement';
 
 export default function AssetManagement() {
   const [activeSection, setActiveSection] = useState('dashboard');
-  
+
   // Use o hook personalizado
   const {
     loading,
@@ -124,7 +124,7 @@ export default function AssetManagement() {
   const initCostCenterChart = () => {
     if (chartCostCenterRef.current && charts.costCenter.length > 0) {
       const chart = echarts.init(chartCostCenterRef.current);
-      
+
       chart.setOption({
         tooltip: {
           trigger: 'axis',
@@ -155,7 +155,7 @@ export default function AssetManagement() {
   const initInvestmentChart = () => {
     if (chartInvestmentRef.current && charts.investment.categories.length > 0) {
       const chart = echarts.init(chartInvestmentRef.current);
-      
+
       chart.setOption({
         tooltip: {
           trigger: 'axis',
@@ -165,13 +165,13 @@ export default function AssetManagement() {
           data: ['Purchase Cost', 'Replacement Cost'],
           bottom: 10
         },
-        xAxis: { 
-          type: 'value', 
-          axisLabel: { formatter: '${value/1000}K' } 
+        xAxis: {
+          type: 'value',
+          axisLabel: { formatter: '${value/1000}K' }
         },
-        yAxis: { 
-          type: 'category', 
-          data: charts.investment.categories 
+        yAxis: {
+          type: 'category',
+          data: charts.investment.categories
         },
         series: [
           {
@@ -198,18 +198,18 @@ export default function AssetManagement() {
   const initDepreciationChart = () => {
     if (chartDepreciationRef.current && charts.depreciation.categories.length > 0) {
       const chart = echarts.init(chartDepreciationRef.current);
-      
+
       chart.setOption({
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         legend: { data: ['Original Value', 'Current Value'], bottom: 10 },
-        xAxis: { 
-          type: 'category', 
-          data: charts.depreciation.categories, 
-          axisLabel: { rotate: 45 } 
+        xAxis: {
+          type: 'category',
+          data: charts.depreciation.categories,
+          axisLabel: { rotate: 45 }
         },
-        yAxis: { 
-          type: 'value', 
-          axisLabel: { formatter: '${value/1000}K' } 
+        yAxis: {
+          type: 'value',
+          axisLabel: { formatter: '${value/1000}K' }
         },
         series: [
           {
@@ -236,7 +236,7 @@ export default function AssetManagement() {
   const initCoverageChart = () => {
     if (chartCoverageRef.current && charts.coverage.length > 0) {
       const chart = echarts.init(chartCoverageRef.current);
-      
+
       chart.setOption({
         tooltip: { trigger: 'item' },
         legend: { bottom: 10 },
@@ -257,7 +257,7 @@ export default function AssetManagement() {
   const initMaintenanceChart = () => {
     if (chartMaintenanceRef.current && charts.maintenance.weeks.length > 0) {
       const chart = echarts.init(chartMaintenanceRef.current);
-      
+
       chart.setOption({
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: charts.maintenance.weeks },
@@ -285,18 +285,18 @@ export default function AssetManagement() {
   const initAuditChart = () => {
     if (chartAuditRef.current && charts.audit.categories.length > 0) {
       const chart = echarts.init(chartAuditRef.current);
-      
+
       chart.setOption({
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        xAxis: { 
-          type: 'category', 
-          data: charts.audit.categories, 
-          axisLabel: { rotate: 45, interval: 0 } 
+        xAxis: {
+          type: 'category',
+          data: charts.audit.categories,
+          axisLabel: { rotate: 45, interval: 0 }
         },
-        yAxis: { 
-          type: 'value', 
-          max: 100, 
-          axisLabel: { formatter: '{value}%' } 
+        yAxis: {
+          type: 'value',
+          max: 100,
+          axisLabel: { formatter: '{value}%' }
         },
         series: [{
           type: 'bar',
@@ -389,7 +389,7 @@ export default function AssetManagement() {
           <ExclamationTriangleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Dashboard</h2>
           <p className="text-gray-600 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
           >
@@ -402,7 +402,7 @@ export default function AssetManagement() {
 
   return (
     <div className="bg-gray-100 text-gray-900">
-      
+
       {/* Sidebar Navigation */}
       <nav className="bg-white border-b border-gray-200 overflow-x-auto overflow-y-hidden scrollbar-hide">
         <ul className="list-none p-0 m-0 flex h-12 justify-center gap-2 px-4 min-w-max max-[1450px]:justify-start">
@@ -412,11 +412,10 @@ export default function AssetManagement() {
               onClick={() => showSection('dashboard')}
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${
-                activeSection === 'dashboard'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'dashboard'
                   ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}>
+                }`}>
                 <ChartBarIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Dashboard</span>
               </div>
@@ -429,11 +428,10 @@ export default function AssetManagement() {
               onClick={() => showSection('executive')}
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${
-                activeSection === 'executive'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'executive'
                   ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}>
+                }`}>
                 <PresentationChartLineIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Executive</span>
               </div>
@@ -446,11 +444,10 @@ export default function AssetManagement() {
               onClick={() => showSection('tracking')}
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 relative ${
-                activeSection === 'tracking'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 relative ${activeSection === 'tracking'
                   ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}>
+                }`}>
                 <MapPinIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Tracking</span>
                 {tracking.totalOutOfPlace > 0 && (
@@ -468,11 +465,10 @@ export default function AssetManagement() {
               onClick={() => showSection('financial')}
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${
-                activeSection === 'financial'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'financial'
                   ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}>
+                }`}>
                 <CurrencyDollarIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Financial</span>
               </div>
@@ -485,11 +481,10 @@ export default function AssetManagement() {
               onClick={() => showSection('maintenance')}
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 relative ${
-                activeSection === 'maintenance'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 relative ${activeSection === 'maintenance'
                   ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}>
+                }`}>
                 <WrenchScrewdriverIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Maintenance</span>
                 {maintenance.overdue > 0 && (
@@ -507,11 +502,10 @@ export default function AssetManagement() {
               onClick={() => showSection('audit')}
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${
-                activeSection === 'audit'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'audit'
                   ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}>
+                }`}>
                 <ClipboardDocumentCheckIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Audit</span>
               </div>
@@ -524,11 +518,10 @@ export default function AssetManagement() {
               onClick={() => showSection('reports')}
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${
-                activeSection === 'reports'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'reports'
                   ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}>
+                }`}>
                 <DocumentTextIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Reports</span>
               </div>
@@ -541,11 +534,10 @@ export default function AssetManagement() {
               onClick={() => showSection('exports')}
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${
-                activeSection === 'exports'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'exports'
                   ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-              }`}>
+                }`}>
                 <ArrowDownTrayIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Export</span>
               </div>
@@ -565,137 +557,260 @@ export default function AssetManagement() {
               <p className="text-sm text-gray-600">Real-time overview of your asset portfolio</p>
             </div>
 
-            {/* KPI Cards Row - DADOS REAIS */}
+            {/* KPI Cards Row - COMPACT WHITE DESIGN */}
             <div className="grid grid-cols-6 gap-5 mb-5 max-xl:grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1">
               {/* Total Assets */}
-              <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
-                <div className="flex justify-between items-start">
-                  <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Assets</div>
-                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white bg-[#5B93FF]">
-                    <CubeIcon className="w-6 h-6" />
+              <div className="bg-white rounded-2xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-1 relative overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center gap-2 text-gray-500">
+                  <CubeIcon className="w-4 h-4" />
+                  <span className="text-xs font-medium">Total Assets</span>
+                </div>
+
+                {/* Value and Trend */}
+                <div className="flex items-end justify-between">
+                  <div className="text-3xl font-bold text-gray-900">
+                    {kpi.totalAssets.toLocaleString()}
                   </div>
-                </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">
-                  {kpi.totalAssets.toLocaleString()}
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <div className={`flex items-center gap-1 font-medium ${
-                    kpi.assetsTrend.isPositive ? 'text-[#2DD36F]' : 'text-[#FF4757]'
-                  }`}>
+                  <div className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${kpi.assetsTrend.isPositive
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : 'bg-red-50 text-red-600'
+                    }`}>
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d={
-                        kpi.assetsTrend.direction === 'up' 
+                        kpi.assetsTrend.direction === 'up'
                           ? "M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
                           : kpi.assetsTrend.direction === 'down'
-                          ? "M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z"
-                          : "M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                            ? "M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z"
+                            : "M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
                       } clipRule="evenodd" />
                     </svg>
                     <span>{kpi.assetsTrend.value.toFixed(1)}%</span>
                   </div>
-                  <span className="text-gray-600">vs last month</span>
+                </div>
+
+                {/* Mini Chart */}
+                <div className="h-12 -mx-5 -mb-5 mt-1">
+                  <svg viewBox="0 0 300 48" className="w-full h-full" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="gradient-assets" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#5B93FF" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#5B93FF" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,36 L30,38 L60,28 L90,32 L120,20 L150,24 L180,16 L210,22 L240,12 L270,20 L300,16"
+                      fill="none"
+                      stroke="#5B93FF"
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d="M0,36 L30,38 L60,28 L90,32 L120,20 L150,24 L180,16 L210,22 L240,12 L270,20 L300,16 L300,48 L0,48 Z"
+                      fill="url(#gradient-assets)"
+                    />
+                  </svg>
                 </div>
               </div>
 
               {/* Total Categories */}
-              <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
-                <div className="flex justify-between items-start">
-                  <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Categories</div>
-                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white bg-[#2DD36F]">
-                    <ChartBarIcon className="w-6 h-6" />
+              <div className="bg-white rounded-2xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-1 relative overflow-hidden">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <ChartBarIcon className="w-4 h-4" />
+                  <span className="text-xs font-medium">Total Categories</span>
+                </div>
+
+                <div className="flex items-end justify-between">
+                  <div className="text-3xl font-bold text-gray-900">
+                    {kpi.totalCategories}
                   </div>
-                </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">
-                  {kpi.totalCategories}
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <div className="flex items-center gap-1 font-medium text-gray-600">
+                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600">
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
                     </svg>
                     <span>0%</span>
                   </div>
-                  <span className="text-gray-600">no change</span>
+                </div>
+
+                <div className="h-12 -mx-5 -mb-5 mt-1">
+                  <svg viewBox="0 0 300 48" className="w-full h-full" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="gradient-categories" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#2DD36F" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#2DD36F" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,24 L50,24 L100,24 L150,24 L200,24 L250,24 L300,24"
+                      fill="none"
+                      stroke="#2DD36F"
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d="M0,24 L50,24 L100,24 L150,24 L200,24 L250,24 L300,24 L300,48 L0,48 Z"
+                      fill="url(#gradient-categories)"
+                    />
+                  </svg>
                 </div>
               </div>
 
               {/* Total Investment */}
-              <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
-                <div className="flex justify-between items-start">
-                  <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Investment</div>
-                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white bg-[#9D4EDD]">
-                    <CurrencyDollarIcon className="w-6 h-6" />
+              <div className="bg-white rounded-2xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-1 relative overflow-hidden">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <CurrencyDollarIcon className="w-4 h-4" />
+                  <span className="text-xs font-medium">Total Investment</span>
+                </div>
+
+                <div className="flex items-end justify-between">
+                  <div className="text-3xl font-bold text-gray-900">
+                    {kpi.totalInvestment}
                   </div>
                 </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">
-                  {kpi.totalInvestment}
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <span className="text-gray-600">from purchase costs</span>
+
+                <div className="h-12 -mx-5 -mb-5 mt-1">
+                  <svg viewBox="0 0 300 48" className="w-full h-full" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="gradient-investment" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#9D4EDD" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#9D4EDD" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,40 L30,36 L60,38 L90,34 L120,30 L150,28 L180,24 L210,20 L240,18 L270,14 L300,12"
+                      fill="none"
+                      stroke="#9D4EDD"
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d="M0,40 L30,36 L60,38 L90,34 L120,30 L150,28 L180,24 L210,20 L240,18 L270,14 L300,12 L300,48 L0,48 Z"
+                      fill="url(#gradient-investment)"
+                    />
+                  </svg>
                 </div>
               </div>
 
               {/* Misplaced Items */}
-              <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
-                <div className="flex justify-between items-start">
-                  <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Misplaced Items</div>
-                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white bg-[#FF9500]">
-                    <ExclamationTriangleIcon className="w-6 h-6" />
+              <div className="bg-white rounded-2xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-1 relative overflow-hidden">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <ExclamationTriangleIcon className="w-4 h-4" />
+                  <span className="text-xs font-medium">Misplaced Items</span>
+                </div>
+
+                <div className="flex items-end justify-between">
+                  <div className="text-3xl font-bold text-gray-900">
+                    {kpi.misplacedItems}
                   </div>
-                </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">
-                  {kpi.misplacedItems}
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <div className={`flex items-center gap-1 font-medium ${
-                    kpi.misplacedTrend.isPositive ? 'text-[#2DD36F]' : 'text-[#FF4757]'
-                  }`}>
+                  <div className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${kpi.misplacedTrend.isPositive
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : 'bg-red-50 text-red-600'
+                    }`}>
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d={
-                        kpi.misplacedTrend.direction === 'down' 
+                        kpi.misplacedTrend.direction === 'down'
                           ? "M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z"
                           : kpi.misplacedTrend.direction === 'up'
-                          ? "M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
-                          : "M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                            ? "M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
+                            : "M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
                       } clipRule="evenodd" />
                     </svg>
                     <span>{kpi.misplacedTrend.value.toFixed(1)}%</span>
                   </div>
-                  <span className="text-gray-600">
-                    {kpi.misplacedTrend.isPositive ? 'improvement' : 'increase'}
-                  </span>
+                </div>
+
+                <div className="h-12 -mx-5 -mb-5 mt-1">
+                  <svg viewBox="0 0 300 48" className="w-full h-full" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="gradient-misplaced" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#FF9500" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#FF9500" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,16 L30,20 L60,18 L90,22 L120,28 L150,26 L180,30 L210,28 L240,32 L270,28 L300,30"
+                      fill="none"
+                      stroke="#FF9500"
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d="M0,16 L30,20 L60,18 L90,22 L120,28 L150,26 L180,30 L210,28 L240,32 L270,28 L300,30 L300,48 L0,48 Z"
+                      fill="url(#gradient-misplaced)"
+                    />
+                  </svg>
                 </div>
               </div>
 
               {/* Maintenance Due */}
-              <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
-                <div className="flex justify-between items-start">
-                  <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Maintenance Due</div>
-                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white bg-[#FF4757]">
-                    <WrenchScrewdriverIcon className="w-6 h-6" />
+              <div className="bg-white rounded-2xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-1 relative overflow-hidden">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <WrenchScrewdriverIcon className="w-4 h-4" />
+                  <span className="text-xs font-medium">Maintenance Due</span>
+                </div>
+
+                <div className="flex items-end justify-between">
+                  <div className="text-3xl font-bold text-gray-900">
+                    {kpi.maintenanceDue}
                   </div>
                 </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">
-                  {kpi.maintenanceDue}
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <span className="text-gray-600">needs attention</span>
+
+                <div className="h-12 -mx-5 -mb-5 mt-1">
+                  <svg viewBox="0 0 300 48" className="w-full h-full" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="gradient-maintenance" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#FF4757" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#FF4757" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,32 L30,34 L60,30 L90,28 L120,32 L150,30 L180,28 L210,26 L240,28 L270,24 L300,22"
+                      fill="none"
+                      stroke="#FF4757"
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d="M0,32 L30,34 L60,30 L90,28 L120,32 L150,30 L180,28 L210,26 L240,28 L270,24 L300,22 L300,48 L0,48 Z"
+                      fill="url(#gradient-maintenance)"
+                    />
+                  </svg>
                 </div>
               </div>
 
               {/* Serial Completion */}
-              <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
-                <div className="flex justify-between items-start">
-                  <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Serial Completion</div>
-                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white bg-[#00D4AA]">
-                    <CheckCircleIcon className="w-6 h-6" />
+              <div className="bg-white rounded-2xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-1 relative overflow-hidden">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <CheckCircleIcon className="w-4 h-4" />
+                  <span className="text-xs font-medium">Serial Completion</span>
+                </div>
+
+                <div className="flex items-end justify-between">
+                  <div className="text-3xl font-bold text-gray-900">
+                    {kpi.serialCompletion}%
                   </div>
                 </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">
-                  {kpi.serialCompletion}%
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <span className="text-gray-600">data quality</span>
+
+                <div className="h-12 -mx-5 -mb-5 mt-1">
+                  <svg viewBox="0 0 300 48" className="w-full h-full" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="gradient-serial" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#00D4AA" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#00D4AA" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,28 L30,26 L60,22 L90,20 L120,18 L150,16 L180,14 L210,16 L240,14 L270,12 L300,10"
+                      fill="none"
+                      stroke="#00D4AA"
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d="M0,28 L30,26 L60,22 L90,20 L120,18 L150,16 L180,14 L210,16 L240,14 L270,12 L300,10 L300,48 L0,48 Z"
+                      fill="url(#gradient-serial)"
+                    />
+                  </svg>
                 </div>
               </div>
             </div>
@@ -839,8 +954,8 @@ export default function AssetManagement() {
                   <div className="text-sm font-semibold">Critical: Assets Out of Place</div>
                 </div>
                 <div className="text-[13px] text-gray-600 leading-relaxed">
-                  <strong>{tracking.totalOutOfPlace} assets</strong> are currently outside their designated locations. 
-                  Total value at risk: <strong>${(tracking.totalValueAtRisk / 1000).toFixed(0)}K</strong>. 
+                  <strong>{tracking.totalOutOfPlace} assets</strong> are currently outside their designated locations.
+                  Total value at risk: <strong>${(tracking.totalValueAtRisk / 1000).toFixed(0)}K</strong>.
                   Avg days out: <strong>{tracking.avgDaysOutOfPlace}</strong>.
                 </div>
               </div>
@@ -851,7 +966,7 @@ export default function AssetManagement() {
                   <div className="text-sm font-semibold">Warning: Unread Assets</div>
                 </div>
                 <div className="text-[13px] text-gray-600 leading-relaxed">
-                  <strong>{alerts.critical.unread} assets</strong> haven't been read in over 7 days. 
+                  <strong>{alerts.critical.unread} assets</strong> haven't been read in over 7 days.
                   Review tracking status and investigate potential issues.
                 </div>
               </div>
@@ -862,7 +977,7 @@ export default function AssetManagement() {
                   <div className="text-sm font-semibold">Info: Alarmed Assets</div>
                 </div>
                 <div className="text-[13px] text-gray-600 leading-relaxed">
-                  <strong>{alerts.critical.alarmed} assets</strong> have triggered alarms. 
+                  <strong>{alerts.critical.alarmed} assets</strong> have triggered alarms.
                   All cases under investigation.
                 </div>
               </div>
@@ -921,7 +1036,7 @@ export default function AssetManagement() {
                   <div className="text-sm font-semibold">Critical: Missing Cost Center Assignment</div>
                 </div>
                 <div className="text-[13px] text-gray-600 leading-relaxed">
-                  <strong>{alerts.financial.missingCostCenter} assets</strong> do not have a cost center assigned. 
+                  <strong>{alerts.financial.missingCostCenter} assets</strong> do not have a cost center assigned.
                   This creates governance risk and prevents proper financial tracking. Immediate action required.
                 </div>
               </div>
@@ -968,20 +1083,18 @@ export default function AssetManagement() {
                         ${(cc.investment / 1000).toFixed(0)}K
                       </td>
                       <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${
-                          cc.utilization >= 70 ? 'bg-[rgba(45,211,111,0.15)] text-[#2DD36F]' :
-                          cc.utilization >= 50 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
-                          'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
-                        }`}>
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${cc.utilization >= 70 ? 'bg-[rgba(45,211,111,0.15)] text-[#2DD36F]' :
+                            cc.utilization >= 50 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
+                              'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
+                          }`}>
                           {cc.utilization}%
                         </span>
                       </td>
                       <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${
-                          cc.dataQuality >= 90 ? 'bg-[rgba(45,211,111,0.15)] text-[#2DD36F]' :
-                          cc.dataQuality >= 70 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
-                          'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
-                        }`}>
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${cc.dataQuality >= 90 ? 'bg-[rgba(45,211,111,0.15)] text-[#2DD36F]' :
+                            cc.dataQuality >= 70 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
+                              'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
+                          }`}>
                           {cc.dataQuality}%
                         </span>
                       </td>
@@ -1065,9 +1178,8 @@ export default function AssetManagement() {
                 <div className="text-[32px] font-bold text-gray-900 leading-none">
                   {audit.workOrderPassRate.toFixed(1)}%
                 </div>
-                <div className={`flex items-center gap-1 font-medium ${
-                  audit.workOrderPassRate >= 80 ? 'text-[#2DD36F]' : 'text-[#FF9500]'
-                }`}>
+                <div className={`flex items-center gap-1 font-medium ${audit.workOrderPassRate >= 80 ? 'text-[#2DD36F]' : 'text-[#FF9500]'
+                  }`}>
                   <CheckCircleIcon className="w-3 h-3" />
                   <span className="text-xs">
                     {audit.workOrderPassRate >= 80 ? 'Good' : 'Needs improvement'}
