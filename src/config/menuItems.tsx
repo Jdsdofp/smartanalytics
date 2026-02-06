@@ -43,7 +43,7 @@ export const menuItemsRaw: MenuItemProps[] = [
         label: 'ISO 55000 Standards',
         path: '/MN0400_010',
         children: [
-          { icon: DocumentChartBarIcon, label: 'Asset Management System', path: '/MN0400_013', permissionCode: 'MN0400_012' },
+          { icon: DocumentChartBarIcon, label: 'Asset Management Overview', path: '/MN0400_013', permissionCode: 'MN0400_012' },
           { icon: ChartBarIcon, label: 'ISO 55000 Compliance Overview', path: '/MN0400_011', permissionCode: 'MN0400_010' },
           { icon: TableCellsIcon, label: 'ISO 55001 Requirements Status', path: '/MN0400_012', permissionCode: 'MN0400_011' },
           { icon: DocumentTextIcon, label: 'ISO 55002 Gap Analysis', path: '/MN0400_014', permissionCode: 'MN0400_014', disabled: true },
