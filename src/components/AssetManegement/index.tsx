@@ -1,9 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { ArrowDownTrayIcon, ChartBarIcon, CheckCircleIcon, ClipboardDocumentCheckIcon, CubeIcon, CurrencyDollarIcon, DocumentTextIcon, ExclamationTriangleIcon, MapPinIcon, PresentationChartLineIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import useAssetManagement from '../../hooks/useAssetManagement';
 
 export default function AssetManagement() {
   const [activeSection, setActiveSection] = useState('dashboard');
+  
+  // Use o hook personalizado
+  const {
+    loading,
+    error,
+    charts,
+    kpi,
+    ageBrackets,
+    alerts,
+    financial,
+    executive,
+    tracking,
+    costCenters,
+    maintenance,
+    audit,
+  } = useAssetManagement();
 
   // Refs para os charts
   const chartDepartmentRef = useRef(null);
@@ -15,29 +32,9 @@ export default function AssetManagement() {
   const chartMaintenanceRef = useRef(null);
   const chartAuditRef = useRef(null);
 
-  // Chart Data
-  const departmentData = [
-    { name: 'IT Department', value: 234 },
-    { name: 'Operations', value: 347 },
-    { name: 'Finance', value: 156 },
-    { name: 'HR', value: 89 },
-    { name: 'Marketing', value: 123 },
-    { name: 'Sales', value: 187 },
-    { name: 'R&D', value: 98 }
-  ];
-
-  const categoryCostData = [
-    { name: 'Computers', value: 450000 },
-    { name: 'Vehicles', value: 380000 },
-    { name: 'Equipment', value: 310000 },
-    { name: 'Furniture', value: 220000 },
-    { name: 'Appliances', value: 180000 },
-    { name: 'Tools', value: 120000 }
-  ];
-
   // Initialize Department Chart
   const initDepartmentChart = () => {
-    if (chartDepartmentRef.current) {
+    if (chartDepartmentRef.current && charts.department.length > 0) {
       const chart = echarts.init(chartDepartmentRef.current);
       chart.setOption({
         tooltip: {
@@ -53,7 +50,7 @@ export default function AssetManagement() {
         series: [{
           type: 'pie',
           radius: ['40%', '70%'],
-          data: departmentData,
+          data: charts.department,
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -75,7 +72,7 @@ export default function AssetManagement() {
 
   // Initialize Category Cost Chart
   const initCategoryCostChart = () => {
-    if (chartCategoryCostRef.current) {
+    if (chartCategoryCostRef.current && charts.categoryCost.length > 0) {
       const chart = echarts.init(chartCategoryCostRef.current);
       chart.setOption({
         tooltip: {
@@ -87,7 +84,7 @@ export default function AssetManagement() {
         },
         xAxis: {
           type: 'category',
-          data: categoryCostData.map(d => d.name),
+          data: charts.categoryCost.map((d: any) => d.name),
           axisLabel: { rotate: 45, interval: 0 }
         },
         yAxis: {
@@ -100,7 +97,7 @@ export default function AssetManagement() {
         },
         series: [{
           type: 'bar',
-          data: categoryCostData.map(d => d.value),
+          data: charts.categoryCost.map((d: any) => d.value),
           itemStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: '#5B93FF' },
@@ -125,16 +122,9 @@ export default function AssetManagement() {
 
   // Initialize Cost Center Chart
   const initCostCenterChart = () => {
-    if (chartCostCenterRef.current) {
+    if (chartCostCenterRef.current && charts.costCenter.length > 0) {
       const chart = echarts.init(chartCostCenterRef.current);
-      const data = [
-        { name: 'CC-001 Operations', value: 347 },
-        { name: 'CC-002 IT', value: 234 },
-        { name: 'CC-003 Manufacturing', value: 412 },
-        { name: 'CC-004 Logistics', value: 156 },
-        { name: 'No Cost Center', value: 85 }
-      ];
-
+      
       chart.setOption({
         tooltip: {
           trigger: 'axis',
@@ -143,11 +133,11 @@ export default function AssetManagement() {
         xAxis: { type: 'value' },
         yAxis: {
           type: 'category',
-          data: data.map(d => d.name)
+          data: charts.costCenter.map((d: any) => d.name)
         },
         series: [{
           type: 'bar',
-          data: data.map(d => d.value),
+          data: charts.costCenter.map((d: any) => d.value),
           itemStyle: {
             color: '#2DD36F',
             borderRadius: [0, 5, 5, 0]
@@ -163,12 +153,9 @@ export default function AssetManagement() {
 
   // Initialize Investment Chart
   const initInvestmentChart = () => {
-    if (chartInvestmentRef.current) {
+    if (chartInvestmentRef.current && charts.investment.categories.length > 0) {
       const chart = echarts.init(chartInvestmentRef.current);
-      const ccData = ['CC-001', 'CC-002', 'CC-003', 'CC-004', 'NO_CC'];
-      const purchase = [892500, 567800, 723400, 345600, 523000];
-      const replacement = [1120000, 710000, 905000, 432000, 650000];
-
+      
       chart.setOption({
         tooltip: {
           trigger: 'axis',
@@ -178,19 +165,25 @@ export default function AssetManagement() {
           data: ['Purchase Cost', 'Replacement Cost'],
           bottom: 10
         },
-        xAxis: { type: 'value', axisLabel: { formatter: '${value/1000}K' } },
-        yAxis: { type: 'category', data: ccData },
+        xAxis: { 
+          type: 'value', 
+          axisLabel: { formatter: '${value/1000}K' } 
+        },
+        yAxis: { 
+          type: 'category', 
+          data: charts.investment.categories 
+        },
         series: [
           {
             name: 'Purchase Cost',
             type: 'bar',
-            data: purchase,
+            data: charts.investment.purchase,
             itemStyle: { color: '#5B93FF' }
           },
           {
             name: 'Replacement Cost',
             type: 'bar',
-            data: replacement,
+            data: charts.investment.replacement,
             itemStyle: { color: '#9D4EDD' }
           }
         ],
@@ -203,28 +196,32 @@ export default function AssetManagement() {
 
   // Initialize Depreciation Chart
   const initDepreciationChart = () => {
-    if (chartDepreciationRef.current) {
+    if (chartDepreciationRef.current && charts.depreciation.categories.length > 0) {
       const chart = echarts.init(chartDepreciationRef.current);
-      const categories = ['Electronics', 'Vehicles', 'Machinery', 'Furniture', 'Tools'];
-      const original = [1500000, 1200000, 1100000, 850000, 700000];
-      const current = [1125000, 840000, 935000, 720000, 595000];
-
+      
       chart.setOption({
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         legend: { data: ['Original Value', 'Current Value'], bottom: 10 },
-        xAxis: { type: 'category', data: categories, axisLabel: { rotate: 45 } },
-        yAxis: { type: 'value', axisLabel: { formatter: '${value/1000}K' } },
+        xAxis: { 
+          type: 'category', 
+          data: charts.depreciation.categories, 
+          axisLabel: { rotate: 45 } 
+        },
+        yAxis: { 
+          type: 'value', 
+          axisLabel: { formatter: '${value/1000}K' } 
+        },
         series: [
           {
             name: 'Original Value',
             type: 'bar',
-            data: original,
+            data: charts.depreciation.original,
             itemStyle: { color: '#FF9500' }
           },
           {
             name: 'Current Value',
             type: 'bar',
-            data: current,
+            data: charts.depreciation.current,
             itemStyle: { color: '#2DD36F' }
           }
         ],
@@ -237,20 +234,16 @@ export default function AssetManagement() {
 
   // Initialize Coverage Chart
   const initCoverageChart = () => {
-    if (chartCoverageRef.current) {
+    if (chartCoverageRef.current && charts.coverage.length > 0) {
       const chart = echarts.init(chartCoverageRef.current);
+      
       chart.setOption({
         tooltip: { trigger: 'item' },
         legend: { bottom: 10 },
         series: [{
           type: 'pie',
           radius: '60%',
-          data: [
-            { name: 'Insurance Expires This Month', value: 23 },
-            { name: 'Warranty Expires This Month', value: 15 },
-            { name: 'Insurance Already Expired', value: 8 },
-            { name: 'Warranty Already Expired', value: 12 }
-          ],
+          data: charts.coverage,
           label: { formatter: '{b}\n{c}' }
         }],
         color: ['#FF9500', '#5B93FF', '#FF4757', '#E67E22']
@@ -262,18 +255,16 @@ export default function AssetManagement() {
 
   // Initialize Maintenance Chart
   const initMaintenanceChart = () => {
-    if (chartMaintenanceRef.current) {
+    if (chartMaintenanceRef.current && charts.maintenance.weeks.length > 0) {
       const chart = echarts.init(chartMaintenanceRef.current);
-      const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-      const scheduled = [15, 12, 8, 12];
-
+      
       chart.setOption({
         tooltip: { trigger: 'axis' },
-        xAxis: { type: 'category', data: weeks },
+        xAxis: { type: 'category', data: charts.maintenance.weeks },
         yAxis: { type: 'value' },
         series: [{
           type: 'bar',
-          data: scheduled,
+          data: charts.maintenance.scheduled,
           itemStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: '#00D4AA' },
@@ -292,18 +283,24 @@ export default function AssetManagement() {
 
   // Initialize Audit Chart
   const initAuditChart = () => {
-    if (chartAuditRef.current) {
+    if (chartAuditRef.current && charts.audit.categories.length > 0) {
       const chart = echarts.init(chartAuditRef.current);
-      const categories = ['Electronics', 'Vehicles', 'Machinery', 'Furniture', 'Tools', 'Safety', 'IT Equipment'];
-      const compliance = [85, 72, 68, 91, 77, 88, 79];
-
+      
       chart.setOption({
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        xAxis: { type: 'category', data: categories, axisLabel: { rotate: 45, interval: 0 } },
-        yAxis: { type: 'value', max: 100, axisLabel: { formatter: '{value}%' } },
+        xAxis: { 
+          type: 'category', 
+          data: charts.audit.categories, 
+          axisLabel: { rotate: 45, interval: 0 } 
+        },
+        yAxis: { 
+          type: 'value', 
+          max: 100, 
+          axisLabel: { formatter: '{value}%' } 
+        },
         series: [{
           type: 'bar',
-          data: compliance,
+          data: charts.audit.compliance,
           itemStyle: {
             color: function (params: any) {
               if (params.value >= 80) return '#2DD36F';
@@ -354,10 +351,14 @@ export default function AssetManagement() {
 
   // Initialize charts on mount and when section changes
   useEffect(() => {
-    initChartsForSection(activeSection);
+    if (!loading) {
+      initChartsForSection(activeSection);
+    }
 
     const handleResize = () => {
-      initChartsForSection(activeSection);
+      if (!loading) {
+        initChartsForSection(activeSection);
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -365,7 +366,39 @@ export default function AssetManagement() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [activeSection]);
+  }, [activeSection, loading, charts]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg font-medium">Loading Asset Dashboard...</p>
+          <p className="text-gray-500 text-sm mt-2">Please wait while we fetch your data</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center max-w-md">
+          <ExclamationTriangleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Dashboard</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-100 text-gray-900">
@@ -420,9 +453,11 @@ export default function AssetManagement() {
               }`}>
                 <MapPinIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Tracking</span>
-                <span className="px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-semibold rounded-full min-w-[16px] text-center">
-                  12
-                </span>
+                {tracking.totalOutOfPlace > 0 && (
+                  <span className="px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-semibold rounded-full min-w-[16px] text-center">
+                    {tracking.totalOutOfPlace}
+                  </span>
+                )}
               </div>
             </button>
           </li>
@@ -457,9 +492,11 @@ export default function AssetManagement() {
               }`}>
                 <WrenchScrewdriverIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Maintenance</span>
-                <span className="px-1.5 py-0.5 bg-orange-500 text-white text-[9px] font-semibold rounded-full min-w-[16px] text-center">
-                  23
-                </span>
+                {maintenance.overdue > 0 && (
+                  <span className="px-1.5 py-0.5 bg-orange-500 text-white text-[9px] font-semibold rounded-full min-w-[16px] text-center">
+                    {maintenance.overdue}
+                  </span>
+                )}
               </div>
             </button>
           </li>
@@ -528,8 +565,9 @@ export default function AssetManagement() {
               <p className="text-sm text-gray-600">Real-time overview of your asset portfolio</p>
             </div>
 
-            {/* KPI Cards Row */}
+            {/* KPI Cards Row - DADOS REAIS */}
             <div className="grid grid-cols-6 gap-5 mb-5 max-xl:grid-cols-3 max-lg:grid-cols-2 max-md:grid-cols-1">
+              {/* Total Assets */}
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
                 <div className="flex justify-between items-start">
                   <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Assets</div>
@@ -537,18 +575,29 @@ export default function AssetManagement() {
                     <CubeIcon className="w-6 h-6" />
                   </div>
                 </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">1,234</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {kpi.totalAssets.toLocaleString()}
+                </div>
                 <div className="flex items-center gap-1.5 text-xs">
-                  <div className="flex items-center gap-1 font-medium text-[#2DD36F]">
+                  <div className={`flex items-center gap-1 font-medium ${
+                    kpi.assetsTrend.isPositive ? 'text-[#2DD36F]' : 'text-[#FF4757]'
+                  }`}>
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d={
+                        kpi.assetsTrend.direction === 'up' 
+                          ? "M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
+                          : kpi.assetsTrend.direction === 'down'
+                          ? "M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z"
+                          : "M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                      } clipRule="evenodd" />
                     </svg>
-                    <span>12.5%</span>
+                    <span>{kpi.assetsTrend.value.toFixed(1)}%</span>
                   </div>
-                  <span>vs last month</span>
+                  <span className="text-gray-600">vs last month</span>
                 </div>
               </div>
 
+              {/* Total Categories */}
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
                 <div className="flex justify-between items-start">
                   <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Categories</div>
@@ -556,7 +605,9 @@ export default function AssetManagement() {
                     <ChartBarIcon className="w-6 h-6" />
                   </div>
                 </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">45</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {kpi.totalCategories}
+                </div>
                 <div className="flex items-center gap-1.5 text-xs">
                   <div className="flex items-center gap-1 font-medium text-gray-600">
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -564,10 +615,11 @@ export default function AssetManagement() {
                     </svg>
                     <span>0%</span>
                   </div>
-                  <span>no change</span>
+                  <span className="text-gray-600">no change</span>
                 </div>
               </div>
 
+              {/* Total Investment */}
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
                 <div className="flex justify-between items-start">
                   <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Investment</div>
@@ -575,18 +627,15 @@ export default function AssetManagement() {
                     <CurrencyDollarIcon className="w-6 h-6" />
                   </div>
                 </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">$2.50M</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {kpi.totalInvestment}
+                </div>
                 <div className="flex items-center gap-1.5 text-xs">
-                  <div className="flex items-center gap-1 font-medium text-[#2DD36F]">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <span>8.3%</span>
-                  </div>
-                  <span>vs last quarter</span>
+                  <span className="text-gray-600">from purchase costs</span>
                 </div>
               </div>
 
+              {/* Misplaced Items */}
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
                 <div className="flex justify-between items-start">
                   <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Misplaced Items</div>
@@ -594,18 +643,31 @@ export default function AssetManagement() {
                     <ExclamationTriangleIcon className="w-6 h-6" />
                   </div>
                 </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">12</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {kpi.misplacedItems}
+                </div>
                 <div className="flex items-center gap-1.5 text-xs">
-                  <div className="flex items-center gap-1 font-medium text-[#FF4757]">
+                  <div className={`flex items-center gap-1 font-medium ${
+                    kpi.misplacedTrend.isPositive ? 'text-[#2DD36F]' : 'text-[#FF4757]'
+                  }`}>
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d={
+                        kpi.misplacedTrend.direction === 'down' 
+                          ? "M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z"
+                          : kpi.misplacedTrend.direction === 'up'
+                          ? "M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
+                          : "M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                      } clipRule="evenodd" />
                     </svg>
-                    <span>-25%</span>
+                    <span>{kpi.misplacedTrend.value.toFixed(1)}%</span>
                   </div>
-                  <span>improvement</span>
+                  <span className="text-gray-600">
+                    {kpi.misplacedTrend.isPositive ? 'improvement' : 'increase'}
+                  </span>
                 </div>
               </div>
 
+              {/* Maintenance Due */}
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
                 <div className="flex justify-between items-start">
                   <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Maintenance Due</div>
@@ -613,18 +675,15 @@ export default function AssetManagement() {
                     <WrenchScrewdriverIcon className="w-6 h-6" />
                   </div>
                 </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">23</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {kpi.maintenanceDue}
+                </div>
                 <div className="flex items-center gap-1.5 text-xs">
-                  <div className="flex items-center gap-1 font-medium text-[#2DD36F]">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <span>15%</span>
-                  </div>
-                  <span>needs attention</span>
+                  <span className="text-gray-600">needs attention</span>
                 </div>
               </div>
 
+              {/* Serial Completion */}
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 relative overflow-hidden">
                 <div className="flex justify-between items-start">
                   <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Serial Completion</div>
@@ -632,40 +691,23 @@ export default function AssetManagement() {
                     <CheckCircleIcon className="w-6 h-6" />
                   </div>
                 </div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">87%</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {kpi.serialCompletion}%
+                </div>
                 <div className="flex items-center gap-1.5 text-xs">
-                  <div className="flex items-center gap-1 font-medium text-[#2DD36F]">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <span>3%</span>
-                  </div>
-                  <span>data quality</span>
+                  <span className="text-gray-600">data quality</span>
                 </div>
               </div>
             </div>
 
-            {/* Age Bracket Cards Row */}
+            {/* Age Bracket Cards Row - DADOS REAIS */}
             <div className="grid grid-cols-4 gap-5 mb-5 max-lg:grid-cols-2 max-md:grid-cols-1">
-              <div className="bg-gradient-to-br from-[#8B5CF6] to-[#6B46C1] rounded-xl p-6 text-white shadow-[0_4px_12px_rgba(139,92,246,0.3)] transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(139,92,246,0.4)]">
-                <div className="text-[13px] font-medium opacity-90 mb-2">Assets 0-3 Months</div>
-                <div className="text-[40px] font-bold leading-none">156</div>
-              </div>
-
-              <div className="bg-gradient-to-br from-[#8B5CF6] to-[#6B46C1] rounded-xl p-6 text-white shadow-[0_4px_12px_rgba(139,92,246,0.3)] transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(139,92,246,0.4)]">
-                <div className="text-[13px] font-medium opacity-90 mb-2">Assets 3-12 Months</div>
-                <div className="text-[40px] font-bold leading-none">289</div>
-              </div>
-
-              <div className="bg-gradient-to-br from-[#8B5CF6] to-[#6B46C1] rounded-xl p-6 text-white shadow-[0_4px_12px_rgba(139,92,246,0.3)] transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(139,92,246,0.4)]">
-                <div className="text-[13px] font-medium opacity-90 mb-2">Assets 1-2 Years</div>
-                <div className="text-[40px] font-bold leading-none">412</div>
-              </div>
-
-              <div className="bg-gradient-to-br from-[#8B5CF6] to-[#6B46C1] rounded-xl p-6 text-white shadow-[0_4px_12px_rgba(139,92,246,0.3)] transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(139,92,246,0.4)]">
-                <div className="text-[13px] font-medium opacity-90 mb-2">Assets Over 2 Years</div>
-                <div className="text-[40px] font-bold leading-none">377</div>
-              </div>
+              {ageBrackets.map((bracket: any, index: number) => (
+                <div key={index} className="bg-gradient-to-br from-[#8B5CF6] to-[#6B46C1] rounded-xl p-6 text-white shadow-[0_4px_12px_rgba(139,92,246,0.3)] transition-all hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(139,92,246,0.4)]">
+                  <div className="text-[13px] font-medium opacity-90 mb-2">{bracket.label}</div>
+                  <div className="text-[40px] font-bold leading-none">{bracket.count}</div>
+                </div>
+              ))}
             </div>
 
             {/* Charts Row */}
@@ -675,7 +717,7 @@ export default function AssetManagement() {
                   <div className="text-base font-semibold text-gray-900">Assets by Department</div>
                   <div className="flex gap-2">
                     <button className="w-9 h-9 rounded-lg border-0 bg-gray-100 text-gray-600 cursor-pointer flex items-center justify-center hover:bg-gray-300 transition-all" title="Download">
-                      <i className="fas fa-download"></i>
+                      <ArrowDownTrayIcon className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -687,7 +729,7 @@ export default function AssetManagement() {
                   <div className="text-base font-semibold text-gray-900">Average Purchase Cost by Category</div>
                   <div className="flex gap-2">
                     <button className="w-9 h-9 rounded-lg border-0 bg-gray-100 text-gray-600 cursor-pointer flex items-center justify-center hover:bg-gray-300 transition-all" title="Download">
-                      <i className="fas fa-download"></i>
+                      <ArrowDownTrayIcon className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -726,19 +768,27 @@ export default function AssetManagement() {
                 <h3 className="mb-4 text-base font-semibold">Asset Distribution Summary</h3>
                 <div className="flex justify-between items-center py-3 border-b border-gray-300 last:border-b-0">
                   <span className="text-sm text-gray-600">In Use</span>
-                  <span className="text-base font-semibold text-gray-900">687 (55.7%)</span>
+                  <span className="text-base font-semibold text-gray-900">
+                    {executive.distribution.inUse.toLocaleString()} ({((executive.distribution.inUse / kpi.totalAssets) * 100).toFixed(1)}%)
+                  </span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-gray-300 last:border-b-0">
                   <span className="text-sm text-gray-600">Available</span>
-                  <span className="text-base font-semibold text-gray-900">412 (33.4%)</span>
+                  <span className="text-base font-semibold text-gray-900">
+                    {executive.distribution.available.toLocaleString()} ({((executive.distribution.available / kpi.totalAssets) * 100).toFixed(1)}%)
+                  </span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-gray-300 last:border-b-0">
                   <span className="text-sm text-gray-600">In Transit</span>
-                  <span className="text-base font-semibold text-gray-900">89 (7.2%)</span>
+                  <span className="text-base font-semibold text-gray-900">
+                    {executive.distribution.inTransit.toLocaleString()} ({((executive.distribution.inTransit / kpi.totalAssets) * 100).toFixed(1)}%)
+                  </span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-gray-300 last:border-b-0">
                   <span className="text-sm text-gray-600">Under Maintenance</span>
-                  <span className="text-base font-semibold text-gray-900">46 (3.7%)</span>
+                  <span className="text-base font-semibold text-gray-900">
+                    {executive.distribution.underMaintenance.toLocaleString()} ({((executive.distribution.underMaintenance / kpi.totalAssets) * 100).toFixed(1)}%)
+                  </span>
                 </div>
               </div>
 
@@ -746,19 +796,27 @@ export default function AssetManagement() {
                 <h3 className="mb-4 text-base font-semibold">Financial Summary</h3>
                 <div className="flex justify-between items-center py-3 border-b border-gray-300 last:border-b-0">
                   <span className="text-sm text-gray-600">Purchase Cost</span>
-                  <span className="text-base font-semibold text-gray-900">$2.50M</span>
+                  <span className="text-base font-semibold text-gray-900">
+                    ${(executive.financial.purchaseCost / 1000000).toFixed(2)}M
+                  </span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-gray-300 last:border-b-0">
                   <span className="text-sm text-gray-600">Replacement Cost</span>
-                  <span className="text-base font-semibold text-gray-900">$3.12M</span>
+                  <span className="text-base font-semibold text-gray-900">
+                    ${(executive.financial.replacementCost / 1000000).toFixed(2)}M
+                  </span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-gray-300 last:border-b-0">
                   <span className="text-sm text-gray-600">Net Book Value</span>
-                  <span className="text-base font-semibold text-gray-900">$2.18M</span>
+                  <span className="text-base font-semibold text-gray-900">
+                    ${(executive.financial.netBookValue / 1000000).toFixed(2)}M
+                  </span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-gray-300 last:border-b-0">
                   <span className="text-sm text-gray-600">Depreciation</span>
-                  <span className="text-base font-semibold text-gray-900">$320K</span>
+                  <span className="text-base font-semibold text-gray-900">
+                    ${(executive.financial.depreciation / 1000).toFixed(0)}K
+                  </span>
                 </div>
               </div>
             </div>
@@ -770,28 +828,31 @@ export default function AssetManagement() {
           <div className="animate-[fadeIn_0.3s]">
             <div className="mb-8">
               <h1 className="text-[28px] font-bold text-gray-900 mb-2">Asset Tracking</h1>
-              <p className="text-sm text-gray-600">Real-time location and reading status</p>
+              <p className="text-sm text-gray-600">Real-time location and status monitoring</p>
             </div>
 
             {/* Alert Cards */}
             <div className="grid grid-cols-3 gap-5 mb-5 max-lg:grid-cols-1">
               <div className="bg-white rounded-xl p-5 border-l-4 border-[#FF4757] shadow-[0_2px_8px_rgba(0,0,0,0.06)] bg-[rgba(255,71,87,0.05)]">
                 <div className="flex items-center gap-2.5 mb-2">
-                  <i className="text-lg fas fa-exclamation-circle text-[#FF4757]"></i>
-                  <div className="text-sm font-semibold">Critical: Unread Assets &gt; 30 Days</div>
+                  <ExclamationTriangleIcon className="w-5 h-5 text-[#FF4757]" />
+                  <div className="text-sm font-semibold">Critical: Assets Out of Place</div>
                 </div>
                 <div className="text-[13px] text-gray-600 leading-relaxed">
-                  <strong>47 assets</strong> haven't been read in over 30 days. Total value at risk: <strong>$876K</strong>. Immediate attention required.
+                  <strong>{tracking.totalOutOfPlace} assets</strong> are currently outside their designated locations. 
+                  Total value at risk: <strong>${(tracking.totalValueAtRisk / 1000).toFixed(0)}K</strong>. 
+                  Avg days out: <strong>{tracking.avgDaysOutOfPlace}</strong>.
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-5 border-l-4 border-[#FF9500] shadow-[0_2px_8px_rgba(0,0,0,0.06)] bg-[rgba(255,149,0,0.05)]">
                 <div className="flex items-center gap-2.5 mb-2">
-                  <i className="text-lg fas fa-map-marker-alt text-[#FF9500]"></i>
-                  <div className="text-sm font-semibold">Warning: Out of Place Assets</div>
+                  <MapPinIcon className="w-5 h-5 text-[#FF9500]" />
+                  <div className="text-sm font-semibold">Warning: Unread Assets</div>
                 </div>
                 <div className="text-[13px] text-gray-600 leading-relaxed">
-                  <strong>89 assets</strong> are currently outside their designated home locations. Review and relocate as needed.
+                  <strong>{alerts.critical.unread} assets</strong> haven't been read in over 7 days. 
+                  Review tracking status and investigate potential issues.
                 </div>
               </div>
 
@@ -801,81 +862,10 @@ export default function AssetManagement() {
                   <div className="text-sm font-semibold">Info: Alarmed Assets</div>
                 </div>
                 <div className="text-[13px] text-gray-600 leading-relaxed">
-                  <strong>12 assets</strong> triggered alarms in the last 24 hours. All cases under investigation.
+                  <strong>{alerts.critical.alarmed} assets</strong> have triggered alarms. 
+                  All cases under investigation.
                 </div>
               </div>
-            </div>
-
-            {/* Tracking Table */}
-            <div className="bg-white rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] overflow-x-auto">
-              <div className="flex justify-between items-center p-0 mb-5">
-                <div className="text-base font-semibold text-gray-900">Real-Time Asset Location</div>
-                <input type="text" placeholder="Search assets..." className="p-2 px-3 border border-gray-300 rounded-lg w-[250px]" />
-              </div>
-              <table className="w-full border-collapse">
-                <thead className="bg-gray-100 rounded-lg">
-                  <tr>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Asset Code</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Asset Name</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Current Location</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Last Seen</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Status</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">AST-1001</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Laptop Dell XPS 15</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Site A / Area 1 / Zone 12</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">2 hours ago</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(45,211,111,0.15)] text-[#2DD36F]">Active</span>
-                    </td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$1,500</td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">AST-1002</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Forklift Toyota 8FD25</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Site B / Area 3 / Zone 5</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">15 min ago</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(45,211,111,0.15)] text-[#2DD36F]">Active</span>
-                    </td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$18,500</td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">AST-1003</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Scanner Zebra TC52</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Site A / Area 2 / Zone 8</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">3 days ago</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,149,0,0.15)] text-[#FF9500]">Inactive</span>
-                    </td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$850</td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">AST-1004</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Pallet Jack Electric</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Unknown</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Never</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,71,87,0.15)] text-[#FF4757]">Never Seen</span>
-                    </td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$2,200</td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 text-sm">AST-1005</td>
-                    <td className="p-3.5 px-3 text-sm">Safety Equipment Set</td>
-                    <td className="p-3.5 px-3 text-sm">Site C / Area 1 / Zone 3</td>
-                    <td className="p-3.5 px-3 text-sm">1 hour ago</td>
-                    <td className="p-3.5 px-3 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(45,211,111,0.15)] text-[#2DD36F]">Active</span>
-                    </td>
-                    <td className="p-3.5 px-3 text-sm">$450</td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
           </div>
         )}
@@ -892,51 +882,50 @@ export default function AssetManagement() {
             <div className="grid grid-cols-4 gap-5 mb-5 max-lg:grid-cols-2 max-md:grid-cols-1">
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                 <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Purchase Cost</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">$2.50M</div>
-                <div className="flex items-center gap-1 font-medium text-[#2DD36F]">
-                  <i className="fas fa-arrow-up"></i>
-                  <span>8.3% YoY</span>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  ${(financial.totalPurchaseCost / 1000000).toFixed(2)}M
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                 <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Replacement Cost</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">$3.12M</div>
-                <div className="flex items-center gap-1 font-medium text-[#2DD36F]">
-                  <i className="fas fa-arrow-up"></i>
-                  <span>$620K premium</span>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  ${(financial.totalReplacementCost / 1000000).toFixed(2)}M
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                 <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Net Book Value</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">$2.18M</div>
-                <div className="flex items-center gap-1 font-medium text-[#FF4757]">
-                  <i className="fas fa-arrow-down"></i>
-                  <span>-12.8% depreciation</span>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  ${(financial.totalNetBookValue / 1000000).toFixed(2)}M
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                 <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Uninsured Value</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">$387K</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  ${(financial.uninsuredValue / 1000).toFixed(0)}K
+                </div>
                 <div className="flex items-center gap-1 font-medium text-[#FF4757]">
-                  <i className="fas fa-exclamation-triangle"></i>
-                  <span>At Risk</span>
+                  <ExclamationTriangleIcon className="w-3 h-3" />
+                  <span className="text-xs">At Risk</span>
                 </div>
               </div>
             </div>
 
-            {/* Financial Alerts */}
-            <div className="bg-white rounded-xl p-5 border-l-4 border-[#FF4757] mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)] bg-[rgba(255,71,87,0.05)]">
-              <div className="flex items-center gap-2.5 mb-2">
-                <i className="text-lg fas fa-exclamation-triangle text-[#FF4757]"></i>
-                <div className="text-sm font-semibold">Critical: Missing Cost Center Assignment</div>
+            {/* Financial Alert */}
+            {alerts.financial.missingCostCenter > 0 && (
+              <div className="bg-white rounded-xl p-5 border-l-4 border-[#FF4757] mb-4 shadow-[0_2px_8px_rgba(0,0,0,0.06)] bg-[rgba(255,71,87,0.05)]">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-[#FF4757]" />
+                  <div className="text-sm font-semibold">Critical: Missing Cost Center Assignment</div>
+                </div>
+                <div className="text-[13px] text-gray-600 leading-relaxed">
+                  <strong>{alerts.financial.missingCostCenter} assets</strong> do not have a cost center assigned. 
+                  This creates governance risk and prevents proper financial tracking. Immediate action required.
+                </div>
               </div>
-              <div className="text-[13px] text-gray-600 leading-relaxed">
-                <strong>156 assets</strong> (12.6%) do not have a cost center assigned. Total value: <strong>$523K</strong>. This creates governance risk and prevents proper financial tracking. Immediate action required.
-              </div>
-            </div>
+            )}
 
             {/* Charts */}
             <div className="grid grid-cols-2 gap-5 mb-5 max-lg:grid-cols-1">
@@ -971,50 +960,33 @@ export default function AssetManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">CC-001 Operations</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">347</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$892,500</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(45,211,111,0.15)] text-[#2DD36F]">72%</span>
-                    </td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(45,211,111,0.15)] text-[#2DD36F]">94%</span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">CC-002 IT</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">234</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$567,800</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(45,211,111,0.15)] text-[#2DD36F]">68%</span>
-                    </td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(45,211,111,0.15)] text-[#2DD36F]">88%</span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">CC-003 Manufacturing</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">412</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$723,400</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,149,0,0.15)] text-[#FF9500]">45%</span>
-                    </td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,149,0,0.15)] text-[#FF9500]">76%</span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 text-sm">NO_CC (Unassigned)</td>
-                    <td className="p-3.5 px-3 text-sm">156</td>
-                    <td className="p-3.5 px-3 text-sm">$523,000</td>
-                    <td className="p-3.5 px-3 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,71,87,0.15)] text-[#FF4757]">N/A</span>
-                    </td>
-                    <td className="p-3.5 px-3 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,71,87,0.15)] text-[#FF4757]">42%</span>
-                    </td>
-                  </tr>
+                  {costCenters.map((cc: any, index: number) => (
+                    <tr key={index} className="hover:bg-gray-100">
+                      <td className="p-3.5 px-3 border-b border-gray-300 text-sm">{cc.name}</td>
+                      <td className="p-3.5 px-3 border-b border-gray-300 text-sm">{cc.assets}</td>
+                      <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
+                        ${(cc.investment / 1000).toFixed(0)}K
+                      </td>
+                      <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${
+                          cc.utilization >= 70 ? 'bg-[rgba(45,211,111,0.15)] text-[#2DD36F]' :
+                          cc.utilization >= 50 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
+                          'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
+                        }`}>
+                          {cc.utilization}%
+                        </span>
+                      </td>
+                      <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${
+                          cc.dataQuality >= 90 ? 'bg-[rgba(45,211,111,0.15)] text-[#2DD36F]' :
+                          cc.dataQuality >= 70 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
+                          'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
+                        }`}>
+                          {cc.dataQuality}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -1033,82 +1005,39 @@ export default function AssetManagement() {
             <div className="grid grid-cols-4 gap-5 mb-5 max-lg:grid-cols-2 max-md:grid-cols-1">
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                 <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Overdue Maintenance</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">23</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {maintenance.overdue}
+                </div>
                 <div className="flex items-center gap-1 font-medium text-[#FF4757]">
-                  <i className="fas fa-arrow-up"></i>
-                  <span>Needs attention</span>
+                  <ExclamationTriangleIcon className="w-3 h-3" />
+                  <span className="text-xs">Needs attention</span>
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                 <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Due This Week</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">15</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {maintenance.dueThisWeek}
+                </div>
               </div>
 
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                 <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Due This Month</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">47</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {maintenance.dueThisMonth}
+                </div>
               </div>
 
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                 <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Completed This Month</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">89</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {maintenance.completedThisMonth}
+                </div>
                 <div className="flex items-center gap-1 font-medium text-[#2DD36F]">
-                  <i className="fas fa-arrow-up"></i>
-                  <span>On track</span>
+                  <CheckCircleIcon className="w-3 h-3" />
+                  <span className="text-xs">{maintenance.completionRate}% rate</span>
                 </div>
               </div>
-            </div>
-
-            {/* Overdue Table */}
-            <div className="bg-white rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] overflow-x-auto mb-5">
-              <div className="flex justify-between items-center p-0 mb-5">
-                <div className="text-base font-semibold text-gray-900">Critical Overdue Service Items</div>
-              </div>
-              <table className="w-full border-collapse">
-                <thead className="bg-gray-100 rounded-lg">
-                  <tr>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Asset Code</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Asset Name</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Due Date</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Days Overdue</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Priority</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">AST-2045</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Forklift Toyota</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Jan 15, 2026</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">18 days</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,71,87,0.15)] text-[#FF4757]">URGENT</span>
-                    </td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$18,500</td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">AST-3012</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">HVAC System Unit 3</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Jan 20, 2026</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">13 days</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,71,87,0.15)] text-[#FF4757]">URGENT</span>
-                    </td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$12,300</td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 text-sm">AST-1567</td>
-                    <td className="p-3.5 px-3 text-sm">Conveyor Belt Main</td>
-                    <td className="p-3.5 px-3 text-sm">Jan 28, 2026</td>
-                    <td className="p-3.5 px-3 text-sm">5 days</td>
-                    <td className="p-3.5 px-3 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,149,0,0.15)] text-[#FF9500]">HIGH</span>
-                    </td>
-                    <td className="p-3.5 px-3 text-sm">$8,900</td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
 
             {/* Maintenance Chart */}
@@ -1126,91 +1055,56 @@ export default function AssetManagement() {
           <div className="animate-[fadeIn_0.3s]">
             <div className="mb-8">
               <h1 className="text-[28px] font-bold text-gray-900 mb-2">Audit & Governance</h1>
-              <p className="text-sm text-gray-600">Compliance tracking and audit status</p>
+              <p className="text-sm text-gray-600">Compliance tracking and work order status</p>
             </div>
 
             {/* Audit KPIs */}
             <div className="grid grid-cols-4 gap-5 mb-5 max-lg:grid-cols-2 max-md:grid-cols-1">
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Audit Compliance</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">76.5%</div>
-                <div className="flex items-center gap-1 font-medium text-[#2DD36F]">
-                  <i className="fas fa-arrow-up"></i>
-                  <span>+5.2% vs Q3</span>
+                <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Work Order Pass Rate</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {audit.workOrderPassRate.toFixed(1)}%
+                </div>
+                <div className={`flex items-center gap-1 font-medium ${
+                  audit.workOrderPassRate >= 80 ? 'text-[#2DD36F]' : 'text-[#FF9500]'
+                }`}>
+                  <CheckCircleIcon className="w-3 h-3" />
+                  <span className="text-xs">
+                    {audit.workOrderPassRate >= 80 ? 'Good' : 'Needs improvement'}
+                  </span>
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Audited Assets</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">944</div>
+                <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Work Orders</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {audit.totalWorkOrders}
+                </div>
               </div>
 
               <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Unaudited Assets</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">290</div>
+                <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Passed Inspections</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {audit.passed}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Failed Inspections</div>
+                <div className="text-[32px] font-bold text-gray-900 leading-none">
+                  {audit.failed}
+                </div>
                 <div className="flex items-center gap-1 font-medium text-[#FF4757]">
-                  <i className="fas fa-arrow-down"></i>
-                  <span>-12% improvement</span>
+                  <ExclamationTriangleIcon className="w-3 h-3" />
+                  <span className="text-xs">Requires attention</span>
                 </div>
               </div>
-
-              <div className="bg-white rounded-xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Audited This Month</div>
-                <div className="text-[32px] font-bold text-gray-900 leading-none">127</div>
-              </div>
-            </div>
-
-            {/* Audit Priority Table */}
-            <div className="bg-white rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] overflow-x-auto mb-5">
-              <div className="flex justify-between items-center p-0 mb-5">
-                <div className="text-base font-semibold text-gray-900">Unaudited High-Priority Assets</div>
-              </div>
-              <table className="w-full border-collapse">
-                <thead className="bg-gray-100 rounded-lg">
-                  <tr>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Asset Code</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Asset Name</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Days Since Creation</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Value</th>
-                    <th className="p-3 text-left font-semibold text-xs uppercase text-gray-600 tracking-wide">Priority</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">AST-5678</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">CNC Machine Haas</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">127 days</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$45,000</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,71,87,0.15)] text-[#FF4757]">CRITICAL</span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">AST-5679</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">Laser Cutter Industrial</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">95 days</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">$32,500</td>
-                    <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,71,87,0.15)] text-[#FF4757]">CRITICAL</span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-100">
-                    <td className="p-3.5 px-3 text-sm">AST-5680</td>
-                    <td className="p-3.5 px-3 text-sm">Robot Arm KUKA</td>
-                    <td className="p-3.5 px-3 text-sm">156 days</td>
-                    <td className="p-3.5 px-3 text-sm">$18,900</td>
-                    <td className="p-3.5 px-3 text-sm">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide bg-[rgba(255,149,0,0.15)] text-[#FF9500]">HIGH</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
 
             {/* Audit Chart */}
             <div className="bg-white rounded-xl p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
               <div className="flex justify-between items-center mb-5">
-                <div className="text-base font-semibold text-gray-900">Audit Compliance by Category</div>
+                <div className="text-base font-semibold text-gray-900">Compliance by Category</div>
               </div>
               <div ref={chartAuditRef} className="w-full h-[350px]"></div>
             </div>
