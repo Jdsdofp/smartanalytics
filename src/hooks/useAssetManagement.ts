@@ -6,6 +6,67 @@ import { useCompany } from "./useCompany";
 // 📊 INTERFACES
 // =====================================
 
+interface AssetDetail {
+  company_id: number;
+  asset_code: string;
+  asset_name: string;
+  category: string;
+  department: string | null;
+  owner: string | null;
+  cost_center: string | null;
+  purchase_date: string | null;
+  purchased_from: string | null;
+  purchase_cost: string;
+  replacement_cost: string;
+  purchase_order: string | null;
+  project_id: string | null;
+  depreciation_enabled: string;
+  in_service_date: string | null;
+  depreciation_months: number | null;
+  depreciated_value: string;
+  salvage_value: string;
+  depreciation_stop_date: string | null;
+  current_book_value: string;
+  insurance_status: string;
+  policy_number: string | null;
+  insurance_company: string | null;
+  insurance_cost: string;
+  insurance_expiry: string | null;
+  condition_status: string | null;
+  disposition: string | null;
+  active_status: string;
+  last_activity: string | null;
+  last_modified: string | null;
+}
+
+interface AssetDetailFilters {
+  categories?: string[];
+  departments?: string[];
+  owners?: string[];
+  cost_centers?: string[];
+  depreciation_enabled?: number;
+  insurance_status?: string[];
+  condition_status?: string[];
+  active_status?: string[];
+  searchTerm?: string;
+  minPurchaseCost?: number;
+  maxPurchaseCost?: number;
+  purchaseDateFrom?: string;
+  purchaseDateTo?: string;
+}
+
+interface AssetDetailsResponse {
+  success: boolean;
+  data: AssetDetail[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+  filters: AssetDetailFilters;
+}
+
 interface DailyOperationsKPI {
   total_assets: number;
   total_categories: number;
@@ -55,6 +116,17 @@ export const useAssetManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Asset Details state
+  const [assetDetails, setAssetDetails] = useState<AssetDetail[]>([]);
+  const [assetDetailsLoading, setAssetDetailsLoading] = useState(false);
+  const [assetDetailsError, setAssetDetailsError] = useState<string | null>(null);
+  const [assetDetailsPagination, setAssetDetailsPagination] = useState({
+    total: 0,
+    limit: 100,
+    offset: 0,
+    hasMore: false,
+  });
+
   // Fetch dashboard data
   const fetchDashboardData = useCallback(async () => {
     if (!companyId) {
@@ -92,6 +164,107 @@ export const useAssetManagement = () => {
       setLoading(false);
     }
   }, [companyId]);
+
+  // Fetch asset details with filters
+  const fetchAssetDetails = useCallback(async (
+    filters?: AssetDetailFilters,
+    limit: number = 100,
+    offset: number = 0
+  ) => {
+    if (!companyId) {
+      console.log('No company ID available for asset details');
+      return;
+    }
+
+    try {
+      setAssetDetailsLoading(true);
+      setAssetDetailsError(null);
+
+      // Build query string
+      const queryParams = new URLSearchParams({
+        limit: limit.toString(),
+        offset: offset.toString(),
+      });
+
+      // Add filters to query params
+      if (filters) {
+        if (filters.categories?.length) {
+          queryParams.append('categories', filters.categories.join(','));
+        }
+        if (filters.departments?.length) {
+          queryParams.append('departments', filters.departments.join(','));
+        }
+        if (filters.owners?.length) {
+          queryParams.append('owners', filters.owners.join(','));
+        }
+        if (filters.cost_centers?.length) {
+          queryParams.append('cost_centers', filters.cost_centers.join(','));
+        }
+        if (filters.depreciation_enabled !== undefined) {
+          queryParams.append('depreciation_enabled', filters.depreciation_enabled.toString());
+        }
+        if (filters.insurance_status?.length) {
+          queryParams.append('insurance_status', filters.insurance_status.join(','));
+        }
+        if (filters.condition_status?.length) {
+          queryParams.append('condition_status', filters.condition_status.join(','));
+        }
+        if (filters.active_status?.length) {
+          queryParams.append('active_status', filters.active_status.join(','));
+        }
+        if (filters.searchTerm) {
+          queryParams.append('searchTerm', filters.searchTerm);
+        }
+        if (filters.minPurchaseCost !== undefined) {
+          queryParams.append('minPurchaseCost', filters.minPurchaseCost.toString());
+        }
+        if (filters.maxPurchaseCost !== undefined) {
+          queryParams.append('maxPurchaseCost', filters.maxPurchaseCost.toString());
+        }
+        if (filters.purchaseDateFrom) {
+          queryParams.append('purchaseDateFrom', filters.purchaseDateFrom);
+        }
+        if (filters.purchaseDateTo) {
+          queryParams.append('purchaseDateTo', filters.purchaseDateTo);
+        }
+      }
+
+      const response = await fetch(
+        `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/asset-details?${queryParams.toString()}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch asset details");
+      }
+
+      const result: AssetDetailsResponse = await response.json();
+      console.log('Asset Details API response:', result);
+
+      if (result.success && result.data) {
+        setAssetDetails(result.data);
+        setAssetDetailsPagination(result.pagination);
+        console.log(`Loaded ${result.data.length} asset details`);
+      } else {
+        throw new Error('Invalid API response structure');
+      }
+    } catch (err) {
+      setAssetDetailsError(err instanceof Error ? err.message : "Unknown error");
+      console.error("Error fetching asset details:", err);
+    } finally {
+      setAssetDetailsLoading(false);
+    }
+  }, [companyId]);
+
+  // Load next page of asset details
+  const loadMoreAssetDetails = useCallback(async (filters?: AssetDetailFilters) => {
+    if (!assetDetailsPagination.hasMore) {
+      console.log('No more asset details to load');
+      return;
+    }
+
+    const nextOffset = assetDetailsPagination.offset + assetDetailsPagination.limit;
+    await fetchAssetDetails(filters, assetDetailsPagination.limit, nextOffset);
+  }, [assetDetailsPagination, fetchAssetDetails]);
 
   // Load data on mount and when company changes
   useEffect(() => {
@@ -326,6 +499,7 @@ export const useAssetManagement = () => {
     },
     kpi,
     ageBracketsLength: ageBrackets.length,
+    assetDetailsCount: assetDetails.length,
   });
 
   return {
@@ -366,6 +540,18 @@ export const useAssetManagement = () => {
     
     // Audit
     audit,
+
+    // =====================================
+    // 🆕 ASSET DETAILS
+    // =====================================
+    assetDetails: {
+      data: assetDetails,
+      loading: assetDetailsLoading,
+      error: assetDetailsError,
+      pagination: assetDetailsPagination,
+      fetch: fetchAssetDetails,
+      loadMore: loadMoreAssetDetails,
+    },
   };
 };
 
