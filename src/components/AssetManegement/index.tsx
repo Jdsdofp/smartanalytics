@@ -413,8 +413,8 @@ export default function AssetManagement() {
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'dashboard'
-                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}>
                 <ChartBarIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Dashboard</span>
@@ -429,8 +429,8 @@ export default function AssetManagement() {
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'executive'
-                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}>
                 <PresentationChartLineIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Executive</span>
@@ -445,8 +445,8 @@ export default function AssetManagement() {
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 relative ${activeSection === 'tracking'
-                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}>
                 <MapPinIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Tracking</span>
@@ -466,8 +466,8 @@ export default function AssetManagement() {
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'financial'
-                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}>
                 <CurrencyDollarIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Financial</span>
@@ -482,8 +482,8 @@ export default function AssetManagement() {
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 relative ${activeSection === 'maintenance'
-                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}>
                 <WrenchScrewdriverIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Maintenance</span>
@@ -503,8 +503,8 @@ export default function AssetManagement() {
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'audit'
-                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}>
                 <ClipboardDocumentCheckIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Audit</span>
@@ -519,8 +519,8 @@ export default function AssetManagement() {
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'reports'
-                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}>
                 <DocumentTextIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Reports</span>
@@ -535,8 +535,8 @@ export default function AssetManagement() {
               className="cursor-pointer flex items-center h-full transition-all duration-200"
             >
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'exports'
-                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
+                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}>
                 <ArrowDownTrayIcon className="w-4 h-4" />
                 <span className="text-sm font-medium max-md:hidden">Export</span>
@@ -573,8 +573,8 @@ export default function AssetManagement() {
                     {kpi.totalAssets.toLocaleString()}
                   </div>
                   <div className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${kpi.assetsTrend.isPositive
-                      ? 'bg-emerald-50 text-emerald-600'
-                      : 'bg-red-50 text-red-600'
+                    ? 'bg-emerald-50 text-emerald-600'
+                    : 'bg-red-50 text-red-600'
                     }`}>
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d={
@@ -703,8 +703,8 @@ export default function AssetManagement() {
                     {kpi.misplacedItems}
                   </div>
                   <div className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${kpi.misplacedTrend.isPositive
-                      ? 'bg-emerald-50 text-emerald-600'
-                      : 'bg-red-50 text-red-600'
+                    ? 'bg-emerald-50 text-emerald-600'
+                    : 'bg-red-50 text-red-600'
                     }`}>
                     <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d={
@@ -1084,16 +1084,16 @@ export default function AssetManagement() {
                       </td>
                       <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${cc.utilization >= 70 ? 'bg-[rgba(45,211,111,0.15)] text-[#2DD36F]' :
-                            cc.utilization >= 50 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
-                              'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
+                          cc.utilization >= 50 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
+                            'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
                           }`}>
                           {cc.utilization}%
                         </span>
                       </td>
                       <td className="p-3.5 px-3 border-b border-gray-300 text-sm">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${cc.dataQuality >= 90 ? 'bg-[rgba(45,211,111,0.15)] text-[#2DD36F]' :
-                            cc.dataQuality >= 70 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
-                              'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
+                          cc.dataQuality >= 70 ? 'bg-[rgba(255,149,0,0.15)] text-[#FF9500]' :
+                            'bg-[rgba(255,71,87,0.15)] text-[#FF4757]'
                           }`}>
                           {cc.dataQuality}%
                         </span>
