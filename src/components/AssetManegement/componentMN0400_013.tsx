@@ -4,6 +4,7 @@
   import { ArrowDownTrayIcon, ChartBarIcon, CheckCircleIcon, ClipboardDocumentCheckIcon, CubeIcon, CurrencyDollarIcon, DocumentTextIcon, ExclamationTriangleIcon, MapPinIcon, PresentationChartLineIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
   import useAssetManagement from '../../hooks/useAssetManagement';
   import AssetDetailsTable from './DataGrid/AssetFinancialGrid';
+import AssetAvailabilityGrid from './DataGrid/AssetAvailabilityGrid';
 
   export default function AssetManagement() {
     const [activeSection, setActiveSection] = useState('dashboard');
@@ -1369,6 +1370,10 @@
                   <button className="px-5 py-2.5 bg-[#5B93FF] text-white border-0 rounded-lg text-sm font-medium cursor-pointer hover:bg-[#4A7FE6]">Generate</button>
                 </div>
               </div>
+
+                <div className="animate-[fadeIn_0.3s] mt-8">
+                  <AssetAvailabilityGrid />
+                </div>
             </div>
           )}
 
