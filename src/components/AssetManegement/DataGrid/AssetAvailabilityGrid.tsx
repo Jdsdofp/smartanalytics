@@ -1,8 +1,8 @@
 // src/components/AssetManagement/DataGrid/AssetAvailabilityGrid.tsx
 import React, { useEffect, useState } from 'react';
-import { 
-  MagnifyingGlassIcon, 
-  FunnelIcon, 
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
   ArrowPathIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -39,7 +39,7 @@ interface AssetAvailabilityGridProps {
 
 const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFilters }) => {
   const { logo, companyId } = useCompany();
-  
+
   // Use the custom hook
   const {
     data,
@@ -49,27 +49,35 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
     loading,
     error,
     filterOptions,
+    hierarchicalAreas,
+    hierarchicalZones,
+    fetchAreasBySite,
+    fetchZonesByArea,
     fetchAssetAvailability,
     fetchStatistics,
     fetchAllFilterOptions
   } = useAssetAvailability();
-  
+
   // State Management
   const [filters, setFilters] = useState(initialFilters || {});
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  
+
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showExportModal, setShowExportModal] = useState(false);
 
   // Date filters
   const [searchBy, setSearchBy] = useState('LAST_SEEN');
-  const [dateFrom, setDateFrom] = useState('2026-01-23T17:30');
-  const [dateTo, setDateTo] = useState('2026-02-07T17:30');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+
+  // Estados para controlar IDs selecionados (filtros hierárquicos)
+  const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null);
+  const [selectedAreaId, setSelectedAreaId] = useState<number | null>(null);
 
   // Load initial data
   useEffect(() => {
@@ -83,7 +91,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
     if (!companyId) return;
 
     const offset = (currentPage - 1) * itemsPerPage;
-    
+
     const apiFilters = {
       ...filters,
       searchTerm,
@@ -101,14 +109,6 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
     return filterOptions.sites.map(s => s.name);
   }, [filterOptions.sites]);
 
-  const uniqueAreas = React.useMemo(() => {
-    return filterOptions.areas.map(a => a.name);
-  }, [filterOptions.areas]);
-
-  const uniqueZones = React.useMemo(() => {
-    return filterOptions.zones.map(z => z.name);
-  }, [filterOptions.zones]);
-  //@ts-ignore
   const uniqueTypes = React.useMemo(() => {
     return filterOptions.types.map(t => t.name);
   }, [filterOptions.types]);
@@ -121,22 +121,44 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
     return filterOptions.custody.map(c => c.name);
   }, [filterOptions.custody]);
 
-  // Apply filters
+  // Apply filters (apenas para filtros de data)
   const applyFilters = () => {
     setCurrentPage(1);
     fetchData();
   };
 
+  // Auto-fetch quando filtros básicos mudam
   useEffect(() => {
     if (companyId) {
       fetchData();
     }
-  }, [filters, searchTerm, currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage]);
 
-  // Handle filter changes
+  // Handle filter changes - COM LIVE MODE
   const handleFilterChange = (newFilters: any) => {
-    setFilters({ ...filters, ...newFilters });
+    const updatedFilters = { ...filters, ...newFilters };
+    setFilters(updatedFilters);
     setCurrentPage(1);
+
+    // Aplica os filtros imediatamente (live mode)
+    applyFiltersImmediate(updatedFilters);
+  };
+
+  // Aplica filtros imediatamente
+  const applyFiltersImmediate = async (currentFilters: any) => {
+    if (!companyId) return;
+
+    const offset = 0; // Reset para primeira página
+    const apiFilters = {
+      ...currentFilters,
+      searchTerm,
+      searchBy,
+      dateFrom,
+      dateTo
+    };
+
+    await fetchAssetAvailability(companyId, apiFilters, itemsPerPage, offset);
+    await fetchStatistics(companyId, apiFilters);
   };
 
   // Handle search
@@ -152,7 +174,75 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
     setSearchBy('LAST_SEEN');
     setDateFrom('2026-01-23T17:30');
     setDateTo('2026-02-07T17:30');
+    setSelectedSiteId(null);
+    setSelectedAreaId(null);
     setCurrentPage(1);
+  };
+
+  // Handler para mudança de Site
+  const handleSiteChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+
+    if (value) {
+      const selectedSite = filterOptions.sites.find(s => s.name === value);
+      if (selectedSite) {
+        setSelectedSiteId(selectedSite.id);
+        // Buscar areas deste site
+        await fetchAreasBySite(companyId!, selectedSite.id);
+
+        // Limpar seleções dependentes
+        setSelectedAreaId(null);
+
+        handleFilterChange({
+          sites: [value],
+          areas: undefined,
+          zones: undefined
+        });
+      }
+    } else {
+      setSelectedSiteId(null);
+      setSelectedAreaId(null);
+
+      handleFilterChange({
+        sites: undefined,
+        areas: undefined,
+        zones: undefined
+      });
+    }
+  };
+
+  // Handler para mudança de Area
+  const handleAreaChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+
+    if (value) {
+      const selectedArea = hierarchicalAreas.find(a => a.name === value);
+      if (selectedArea) {
+        setSelectedAreaId(selectedArea.id);
+        // Buscar zones desta area
+        await fetchZonesByArea(companyId!, selectedArea.id);
+
+        handleFilterChange({
+          areas: [value],
+          zones: undefined
+        });
+      }
+    } else {
+      setSelectedAreaId(null);
+
+      handleFilterChange({
+        areas: undefined,
+        zones: undefined
+      });
+    }
+  };
+
+  // Handler para mudança de Zone
+  const handleZoneChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    handleFilterChange({
+      zones: value ? [value] : undefined
+    });
   };
 
   // Handle sort
@@ -165,19 +255,19 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
   // Sort data (client-side sorting on current page)
   const sortedData = React.useMemo(() => {
     if (!sortField) return data;
-    
+
     return [...data].sort((a: any, b: any) => {
       let aValue = a[sortField];
       let bValue = b[sortField];
-      
+
       if (aValue === null || aValue === undefined) return 1;
       if (bValue === null || bValue === undefined) return -1;
-      
+
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
       }
-      
+
       if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
@@ -188,7 +278,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
   const totalPages = pagination.totalPages;
   const startItem = pagination.offset + 1;
   const endItem = Math.min(pagination.offset + pagination.limit, pagination.total);
-  const paginatedData = sortedData; // Data is already paginated from API
+  const paginatedData = sortedData;
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
@@ -222,13 +312,12 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
 
   const handleExport = async (format: 'excel' | 'pdf', scope: 'filtered' | 'all') => {
     let exportData = [];
-    
+
     if (scope === 'filtered') {
       exportData = sortedData;
     } else {
-      // Fetch all data for export
       if (!companyId) return;
-      
+
       try {
         const apiFilters = {
           ...filters,
@@ -237,11 +326,11 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
           dateFrom,
           dateTo
         };
-        
+
         const response = await fetch(
           `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/asset-availability?limit=${pagination.total}&offset=0&${buildQueryString(apiFilters)}`
         );
-        
+
         const result = await response.json();
         if (result.success) {
           exportData = result.data;
@@ -252,17 +341,16 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
         return;
       }
     }
-    
+
     if (format === 'excel') {
       exportToExcel(exportData, scope);
     } else {
       exportToPDF(exportData, scope);
     }
-    
+
     setShowExportModal(false);
   };
 
-  // Helper to build query string
   const buildQueryString = (filters: any) => {
     const params = new URLSearchParams();
     if (filters.sites?.length) params.append('sites', filters.sites.join(','));
@@ -319,10 +407,10 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
     ws['!cols'] = colWidths;
 
     const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
-    
+
     const fileName = `asset-availability-${scope}-${new Date().toISOString().split('T')[0]}.xlsx`;
     saveAs(blob, fileName);
   };
@@ -333,10 +421,9 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
       unit: 'mm',
       format: 'a4'
     });
-    
+
     let currentY = 15;
 
-    // Header
     doc.setFillColor(37, 99, 235);
     doc.roundedRect(10, 10, 277, 50, 3, 3, 'F');
 
@@ -366,10 +453,9 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
     doc.line(15, currentY, 282, currentY);
     currentY += 6;
 
-    // Metadata
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    
+
     let col1Y = currentY;
     doc.setFont('helvetica', 'bold');
     doc.text('Export Date:', 15, col1Y);
@@ -400,7 +486,6 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
 
     currentY += 5;
 
-    // Table data
     const tableData = exportData.map(asset => [
       asset.asset_code,
       asset.asset_name,
@@ -417,8 +502,8 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
       body: tableData,
       startY: currentY,
       theme: 'striped',
-      styles: { 
-        fontSize: 7, 
+      styles: {
+        fontSize: 7,
         cellPadding: 2,
         lineColor: [229, 231, 235],
         lineWidth: 0.1,
@@ -448,14 +533,13 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
       margin: { top: 10, right: 10, bottom: 10, left: 14 }
     });
 
-    // Footer
     const pageCount = doc.internal.pages.length - 1;
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       const pageHeight = doc.internal.pageSize.getHeight();
       doc.setFillColor(249, 250, 251);
       doc.rect(10, pageHeight - 15, 277, 10, 'F');
-      
+
       doc.setFontSize(8);
       doc.setTextColor(107, 114, 128);
       doc.text(
@@ -464,7 +548,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
         pageHeight - 8,
         { align: 'center' }
       );
-      
+
       doc.setFontSize(7);
       doc.text(
         `Generated: ${new Date().toLocaleDateString('pt-BR')} | SmartX Asset Management`,
@@ -482,10 +566,9 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
     doc.save(`asset-availability-${scope}-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
-  // SortHeader component
   const SortHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
-    <th 
-      className="px-3 py-3 text-left text-[11px] font-bold text-gray-700 uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors select-none"
+    <th
+      className="px-3 py-2 text-left text-[11px] font-bold text-gray-700 uppercase tracking-wide cursor-pointer hover:bg-gray-200 transition-colors select-none"
       onClick={() => handleSort(field)}
     >
       <div className="flex items-center gap-1">
@@ -503,11 +586,10 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
     </th>
   );
 
-  // Page numbers
   const getPageNumbers = () => {
     const pages = [];
     const maxVisible = 5;
-    
+
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -531,24 +613,22 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="bg-white rounded-xl shadow-sm p-12">
-        <div className="flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-500 mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading asset availability data...</p>
-          <p className="text-gray-500 text-sm mt-2">Please wait while we fetch the data</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="bg-white rounded-xl shadow-sm p-12">
+  //       <div className="flex flex-col items-center justify-center">
+  //         <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-500 mb-4"></div>
+  //         <p className="text-gray-600 font-medium">Loading asset availability data...</p>
+  //         <p className="text-gray-500 text-sm mt-2">Please wait while we fetch the data</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  // Error state
   if (error) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6">
@@ -570,6 +650,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
   return (
     <div className="space-y-5">
       {/* Header Section */}
+
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div>
@@ -585,7 +666,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
               Track asset locations, conditions, and maintenance schedules
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <button
               onClick={fetchData}
@@ -595,7 +676,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
               <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               <span className="text-sm font-medium">Refresh</span>
             </button>
-            
+
             <button
               onClick={() => setShowExportModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
@@ -624,11 +705,10 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-2.5 border rounded-lg transition-all ${
-                showFilters 
-                  ? 'bg-primary-50 border-primary-500 text-primary-700' 
-                  : 'bg-white border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`flex items-center gap-2 px-4 py-2.5 border rounded-lg transition-all ${showFilters
+                ? 'bg-primary-50 border-primary-500 text-primary-700'
+                : 'bg-white border-gray-300 hover:bg-gray-50'
+                }`}
             >
               <FunnelIcon className="w-5 h-5" />
               <span className="text-sm font-medium">Filters</span>
@@ -643,20 +723,15 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
           {/* Filter Panel */}
           {showFilters && (
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              {/* Basic Filters */}
               <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-4">
-                {/* Site Filter */}
+                {/* Site Filter - HIERÁRQUICO */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
                     Current Site
                   </label>
                   <select
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      handleFilterChange({
-                        sites: value ? [value] : undefined,
-                      });
-                    }}
+                    value={filters.sites?.[0] || ''}
+                    onChange={handleSiteChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                   >
                     <option value="">All Sites</option>
@@ -666,57 +741,65 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                   </select>
                 </div>
 
-                {/* Area Filter */}
+                {/* Area Filter - HIERÁRQUICO (habilitado apenas se Site foi selecionado) */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
                     Current Area
                   </label>
                   <select
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      handleFilterChange({
-                        areas: value ? [value] : undefined,
-                      });
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
+                    value={filters.areas?.[0] || ''}
+                    onChange={handleAreaChange}
+                    disabled={!selectedSiteId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
-                    <option value="">Nothing selected</option>
-                    {uniqueAreas.map(area => (
-                      <option key={area} value={area}>{area}</option>
+                    <option value="">
+                      {selectedSiteId ? 'Select Area' : 'Select Site first'}
+                    </option>
+                    {hierarchicalAreas.map(area => (
+                      <option key={area.id} value={area.name}>{area.name}</option>
                     ))}
                   </select>
                 </div>
 
-                {/* Zone Filter */}
+                {/* Zone Filter - HIERÁRQUICO (habilitado apenas se Area foi selecionada) */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
                     Current Location
                   </label>
                   <select
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      handleFilterChange({
-                        zones: value ? [value] : undefined,
-                      });
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
+                    value={filters.zones?.[0] || ''}
+                    onChange={handleZoneChange}
+                    disabled={!selectedAreaId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
-                    <option value="">Nothing selected</option>
-                    {uniqueZones.map(zone => (
-                      <option key={zone} value={zone}>{zone}</option>
+                    <option value="">
+                      {selectedAreaId ? 'Select Zone' : 'Select Area first'}
+                    </option>
+                    {hierarchicalZones.map(zone => (
+                      <option key={zone.id} value={zone.name}>{zone.name}</option>
                     ))}
                   </select>
                 </div>
 
-                {/* Type/Category Filter */}
+                {/* Type Filter */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
                     Type
                   </label>
                   <select
+                    value={filters.types?.[0] || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleFilterChange({
+                        types: value ? [value] : undefined,
+                      });
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                   >
                     <option value="">All Types</option>
+                    {uniqueTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -726,6 +809,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     Category
                   </label>
                   <select
+                    value={filters.categories?.[0] || ''}
                     onChange={(e) => {
                       const value = e.target.value;
                       handleFilterChange({
@@ -747,6 +831,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     Custody
                   </label>
                   <select
+                    value={filters.custody?.[0] || ''}
                     onChange={(e) => {
                       const value = e.target.value;
                       handleFilterChange({
@@ -772,7 +857,6 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-end">
-                  {/* Search By */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
                       Search By
@@ -792,7 +876,6 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     </select>
                   </div>
 
-                  {/* Date From */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
                       Date Interval
@@ -805,12 +888,10 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     />
                   </div>
 
-                  {/* To Label */}
                   <div className="text-center text-sm text-gray-600 pb-2">
                     to
                   </div>
 
-                  {/* Date To */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
                       &nbsp;
@@ -823,7 +904,6 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     />
                   </div>
 
-                  {/* Additional Filter */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
                       Filter
@@ -835,7 +915,6 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     />
                   </div>
 
-                  {/* Apply Filter Button */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
                       &nbsp;
@@ -848,7 +927,6 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     </button>
                   </div>
 
-                  {/* Clear Filters Button */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
                       &nbsp;
@@ -873,7 +951,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
             <span className="font-semibold text-gray-900">{endItem}</span> of{' '}
             <span className="font-semibold text-gray-900">{pagination.total}</span> records
           </div>
-          
+
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-600">Show:</label>
             <select
@@ -891,88 +969,116 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-              <tr>
-                <SortHeader field="asset_name">Name</SortHeader>
-                <SortHeader field="last_seen">Last Seen</SortHeader>
-                <SortHeader field="category_name">Category</SortHeader>
-                <SortHeader field="condition_name">Condition</SortHeader>
-                <SortHeader field="custody_name">Custody Assigned</SortHeader>
-                <th className="px-3 py-3 text-left text-[11px] font-bold text-gray-700 uppercase tracking-wide">
-                  Current Location
-                </th>
-                <SortHeader field="next_service">Next Service</SortHeader>
-                <SortHeader field="expiration_date">Expiration Date</SortHeader>
-                <SortHeader field="warranty_ends">Warranty Ends</SortHeader>
-                <SortHeader field="service_ends">Service Ends</SortHeader>
-                <SortHeader field="insured_ends">Insured Ends</SortHeader>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedData.map((asset, index) => (
-                <tr 
-                  key={asset.asset_code} 
-                  className={`hover:bg-primary-50 transition-colors ${
-                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  }`}
-                >
-                  <td className="px-3 py-4">
-                    <div className="font-semibold text-sm text-primary-700">
-                      [{asset.asset_code}] - {asset.asset_name}
-                    </div>
-                  </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{asset.last_seen_formatted}</div>
-                  </td>
-                  <td className="px-3 py-4">
-                    <div className="text-xs text-gray-700">[{asset.category_code}] -</div>
-                    <div className="text-xs text-gray-600">{asset.category_name}</div>
-                  </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-yellow-100 text-yellow-800">
-                      [{asset.condition_code}] - {asset.condition_name}
-                    </span>
-                  </td>
-                  <td className="px-3 py-4">
-                    <div className="text-sm text-gray-900">
-                      [{asset.custody_assigned_code}] - {asset.custody_assigned_name}
-                    </div>
-                  </td>
-                  <td className="px-3 py-4">
-                    <div className="text-xs text-gray-700 leading-relaxed">
-                      <div>[{asset.site_current_code}] - {asset.site_current_name} /</div>
-                      <div>[{asset.area_current_code}] - {asset.area_current_name} /</div>
-                      <div className="font-semibold">[{asset.zone_current_code}] - {asset.zone_current_name}</div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{asset.next_service_formatted || '-'}</div>
-                  </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{asset.expiration_date_formatted || '-'}</div>
-                  </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{asset.warranty_end_formatted || '-'}</div>
-                  </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{asset.service_end_formatted || '-'}</div>
-                  </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{asset.insured_end_formatted || '-'}</div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="bg-white rounded-xl shadow-sm relative">
+
+        {/* Loading Overlay Glassmorphism */}
+        {loading && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center rounded-xl">
+            {/* Backdrop com glassmorphism */}
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl"></div>
+
+            {/* Conteúdo do loading */}
+            <div className="relative z-10 flex flex-col items-center justify-center p-8">
+              <div className="relative">
+                {/* Círculo animado externo */}
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200"></div>
+                {/* Círculo animado interno */}
+                <div className="absolute top-0 left-0 animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-primary-500 border-r-primary-500"></div>
+              </div>
+
+              <div className="mt-6 text-center bg-white/90 backdrop-blur-sm rounded-lg px-6 py-3 shadow-lg">
+                <p className="text-gray-900 font-semibold text-base">Loading asset data...</p>
+                <p className="text-gray-600 text-sm mt-1">Please wait a moment</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white rounded-xl shadow-sm">
+          <div className={`overflow-x-auto transition-opacity duration-200 ${loading ? 'opacity-50' : 'opacity-100'}`}>
+            <div className="max-h-[650px] overflow-y-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
+                  <tr>
+                    <SortHeader field="asset_name">Name</SortHeader>
+                    <SortHeader field="last_seen">Last Seen</SortHeader>
+                    <SortHeader field="category_name">Category</SortHeader>
+                    <SortHeader field="condition_name">Condition</SortHeader>
+                    <SortHeader field="custody_name">Custody Assigned</SortHeader>
+                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wide">
+                      Current Location
+                    </th>
+                    <SortHeader field="next_service">Next Service</SortHeader>
+                    <SortHeader field="expiration_date">Expiration Date</SortHeader>
+                    <SortHeader field="warranty_ends">Warranty Ends</SortHeader>
+                    <SortHeader field="service_ends">Service Ends</SortHeader>
+                    <SortHeader field="insured_ends">Insured Ends</SortHeader>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {paginatedData.map((asset, index) => (
+                    <tr
+                      key={asset.asset_code}
+                      className={`hover:bg-primary-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                        }`}
+                    >
+                      <td className="px-3 py-2">
+                        <div className="font-semibold text-xs text-primary-700">
+                          [{asset.asset_code}] - {asset.asset_name}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{asset.last_seen_formatted}</div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="text-[10px] text-gray-700">[{asset.category_code}] -</div>
+                        <div className="text-[10px] text-gray-600">{asset.category_name}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-yellow-100 text-yellow-800">
+                          [{asset.condition_code}] - {asset.condition_name}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="text-xs text-gray-900">
+                          [{asset.custody_assigned_code}] - {asset.custody_assigned_name}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="text-[10px] text-gray-700 leading-tight">
+                          <div>[{asset.site_current_code}] - {asset.site_current_name} /</div>
+                          <div>[{asset.area_current_code}] - {asset.area_current_name} /</div>
+                          <div className="font-semibold">[{asset.zone_current_code}] - {asset.zone_current_name}</div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{asset.next_service_formatted || '-'}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{asset.expiration_date_formatted || '-'}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{asset.warranty_end_formatted || '-'}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{asset.service_end_formatted || '-'}</div>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs text-gray-900">{asset.insured_end_formatted || '-'}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
+
       </div>
 
       {/* Pagination */}
       {sortedData.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm p-4">
+        <div className={`bg-white rounded-xl shadow-sm p-4 transition-opacity duration-200 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-gray-600">
               Page <span className="font-semibold text-gray-900">{currentPage}</span> of{' '}
@@ -995,11 +1101,10 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                   ) : (
                     <button
                       onClick={() => handlePageChange(page as number)}
-                      className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        currentPage === page
-                          ? 'bg-primary-500 text-white'
-                          : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
-                      }`}
+                      className={`min-w-[40px] px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                        ? 'bg-primary-500 text-white'
+                        : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
+                        }`}
                     >
                       {page}
                     </button>
@@ -1092,8 +1197,8 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                   >
                     <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
                       <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                        <path d="M8 12h8v2H8zm0 4h8v2H8zm0-8h5v2H8z"/>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+                        <path d="M8 12h8v2H8zm0 4h8v2H8zm0-8h5v2H8z" />
                       </svg>
                     </div>
                     <div className="text-center">
@@ -1111,8 +1216,8 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                   >
                     <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
                       <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                        <path d="M8 12h8v2H8zm0 4h8v2H8zm0-8h5v2H8z"/>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+                        <path d="M8 12h8v2H8zm0 4h8v2H8zm0-8h5v2H8z" />
                       </svg>
                     </div>
                     <div className="text-center">
@@ -1130,8 +1235,8 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                   >
                     <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
                       <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                        <path d="M9 13h6v2H9zm0 4h6v2H9z"/>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+                        <path d="M9 13h6v2H9zm0 4h6v2H9z" />
                       </svg>
                     </div>
                     <div className="text-center">
@@ -1149,8 +1254,8 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                   >
                     <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
                       <svg className="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                        <path d="M9 13h6v2H9zm0 4h6v2H9z"/>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+                        <path d="M9 13h6v2H9zm0 4h6v2H9z" />
                       </svg>
                     </div>
                     <div className="text-center">
