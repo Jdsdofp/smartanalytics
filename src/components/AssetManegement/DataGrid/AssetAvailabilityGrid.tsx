@@ -924,15 +924,15 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                       [{asset.asset_code}] - {asset.asset_name}
                     </div>
                   </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2whitespace-nowrap">
                     <div className="text-sm text-gray-900">{asset.last_seen_formatted}</div>
                   </td>
                   <td className="px-3 py-4">
                     <div className="text-xs text-gray-700">[{asset.category_code}] -</div>
                     <div className="text-xs text-gray-600">{asset.category_name}</div>
                   </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-yellow-100 text-yellow-800">
+                  <td className="px-3 py-2whitespace-nowrap">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-yellow-100 text-yellow-800">
                       [{asset.condition_code}] - {asset.condition_name}
                     </span>
                   </td>
@@ -942,25 +942,25 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     </div>
                   </td>
                   <td className="px-3 py-4">
-                    <div className="text-xs text-gray-700 leading-relaxed">
+                    <div className="text-xs text-gray-700 leading-tight">
                       <div>[{asset.site_current_code}] - {asset.site_current_name} /</div>
                       <div>[{asset.area_current_code}] - {asset.area_current_name} /</div>
                       <div className="font-semibold">[{asset.zone_current_code}] - {asset.zone_current_name}</div>
                     </div>
                   </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2whitespace-nowrap">
                     <div className="text-sm text-gray-900">{asset.next_service_formatted || '-'}</div>
                   </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2whitespace-nowrap">
                     <div className="text-sm text-gray-900">{asset.expiration_date_formatted || '-'}</div>
                   </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2whitespace-nowrap">
                     <div className="text-sm text-gray-900">{asset.warranty_end_formatted || '-'}</div>
                   </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2whitespace-nowrap">
                     <div className="text-sm text-gray-900">{asset.service_end_formatted || '-'}</div>
                   </td>
-                  <td className="px-3 py-4 whitespace-nowrap">
+                  <td className="px-3 py-2whitespace-nowrap">
                     <div className="text-sm text-gray-900">{asset.insured_end_formatted || '-'}</div>
                   </td>
                 </tr>
