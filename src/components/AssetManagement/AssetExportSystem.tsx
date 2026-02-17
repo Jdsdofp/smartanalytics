@@ -33,9 +33,6 @@ interface ExportTemplate {
   bgColor: string;
 }
 
-interface AssetExportSystemProps {
-  companyId: number;
-}
 
 // =====================================
 // 🎨 EXPORT TEMPLATES
