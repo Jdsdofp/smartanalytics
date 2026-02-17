@@ -160,6 +160,11 @@ const useAssetAvailability = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Adicionar no hook
+  const [hierarchicalAreas, setHierarchicalAreas] = useState<FilterOption[]>([]);
+  const [hierarchicalZones, setHierarchicalZones] = useState<FilterOption[]>([]);
+
+
   // Filter options
   const [filterOptions, setFilterOptions] = useState<{
     sites: FilterOption[];
@@ -324,6 +329,56 @@ const useAssetAvailability = () => {
     }
   }, []);
 
+
+  /**
+ * Fetch Areas by Site
+ */
+const fetchAreasBySite = useCallback(async (companyId: number, siteId: number) => {
+    try {
+        const response = await fetch(
+            `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/areas-by-site/${siteId}`
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch areas by site');
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            setHierarchicalAreas(result.data);
+        }
+
+    } catch (err) {
+        console.error('Error fetching areas by site:', err);
+    }
+}, []);
+
+/**
+ * Fetch Zones by Area
+ */
+const fetchZonesByArea = useCallback(async (companyId: number, areaId: number) => {
+    try {
+        const response = await fetch(
+            `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/zones-by-area/${areaId}`
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch zones by area');
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            setHierarchicalZones(result.data);
+        }
+
+    } catch (err) {
+        console.error('Error fetching zones by area:', err);
+    }
+}, []);
+
+
   /**
    * Fetch All Filter Options
    */
@@ -344,6 +399,10 @@ const useAssetAvailability = () => {
     loading,
     error,
     filterOptions,
+    hierarchicalAreas,
+    hierarchicalZones,
+    fetchAreasBySite,
+    fetchZonesByArea,
     fetchAssetAvailability,
     fetchStatistics,
     fetchFilterOptions,

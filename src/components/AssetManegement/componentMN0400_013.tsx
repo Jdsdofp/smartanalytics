@@ -5,6 +5,7 @@
   import useAssetManagement from '../../hooks/useAssetManagement';
   import AssetDetailsTable from './DataGrid/AssetFinancialGrid';
 import AssetAvailabilityGrid from './DataGrid/AssetAvailabilityGrid';
+import AssetExportSystem from '../AssetManagement/AssetExportSystem';
 
   export default function AssetManagement() {
     const [activeSection, setActiveSection] = useState('dashboard');
@@ -1384,7 +1385,7 @@ import AssetAvailabilityGrid from './DataGrid/AssetAvailabilityGrid';
                 <h1 className="text-[28px] font-bold text-gray-900 mb-2">Export Data</h1>
                 <p className="text-sm text-gray-600">Download data in various formats</p>
               </div>
-
+{/* 
               <div className="bg-white rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)] max-w-[600px]">
                 <h3 className="mb-5">Export Options</h3>
                 <div className="flex justify-between items-center py-3 border-b border-gray-300">
@@ -1399,7 +1400,9 @@ import AssetAvailabilityGrid from './DataGrid/AssetAvailabilityGrid';
                   <span className="text-sm text-gray-600">Export to PDF</span>
                   <button className="px-5 py-2.5 bg-[#5B93FF] text-white border-0 rounded-lg text-sm font-medium cursor-pointer hover:bg-[#4A7FE6]">Download</button>
                 </div>
-              </div>
+              </div> */}
+
+            <AssetExportSystem />
             </div>
           )}
 
