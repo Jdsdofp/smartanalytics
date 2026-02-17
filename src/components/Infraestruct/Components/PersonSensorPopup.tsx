@@ -255,7 +255,7 @@ const TemperatureCard: React.FC<{
         <span className="text-[9px] font-semibold text-gray-600 uppercase tracking-wide">{t('personSensorPopup.temperature')}</span>
       </div>
       <div className={`text-lg font-bold ${colors.text} leading-none mb-0.5`}>
-        {temperature.toFixed(1)}{unit}
+        {Number(temperature).toFixed(1)}{unit}
       </div>
       {category && (
         <div className="text-[9px] text-gray-600 font-medium">

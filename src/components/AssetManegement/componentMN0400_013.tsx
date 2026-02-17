@@ -438,7 +438,7 @@ import AssetExportSystem from '../AssetManagement/AssetExportSystem';
     // Initialize charts based on active section
     const initChartsForSection = (sectionId: any) => {
       setTimeout(() => {
-        if (sectionId === 'dashboard' || sectionId === 'executive') {
+        if (sectionId === 'dashboard' || sectionId === 'custody') {
           initDepartmentChart();
           initCategoryCostChart();
           initCostCenterChart();
@@ -539,22 +539,6 @@ import AssetExportSystem from '../AssetManagement/AssetExportSystem';
               </button>
             </li>
 
-            {/* Executive Overview */}
-            <li className="list-none h-full">
-              <button
-                onClick={() => showSection('executive')}
-                className="cursor-pointer flex items-center h-full transition-all duration-200"
-              >
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'executive'
-                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}>
-                  <PresentationChartLineIcon className="w-4 h-4" />
-                  <span className="text-sm font-medium max-md:hidden">Executive</span>
-                </div>
-              </button>
-            </li>
-
             {/* Asset Tracking */}
             <li className="list-none h-full">
               <button
@@ -572,6 +556,22 @@ import AssetExportSystem from '../AssetManagement/AssetExportSystem';
                       {tracking.totalOutOfPlace}
                     </span>
                   )}
+                </div>
+              </button>
+            </li>
+
+            {/* Custody Overview */}
+            <li className="list-none h-full">
+              <button
+                onClick={() => showSection('custody')}
+                className="cursor-pointer flex items-center h-full transition-all duration-200"
+              >
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-200 ${activeSection === 'custody'
+                  ? 'bg-gradient-to-br from-primary-300 to-primary-700 text-white'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`}>
+                  <PresentationChartLineIcon className="w-4 h-4" />
+                  <span className="text-sm font-medium max-md:hidden">Custody</span>
                 </div>
               </button>
             </li>
@@ -984,18 +984,8 @@ import AssetExportSystem from '../AssetManagement/AssetExportSystem';
                   <div ref={chartInvestmentRef} className="w-full h-[350px]"></div>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* SECTION: EXECUTIVE OVERVIEW */}
-          {activeSection === 'executive' && (
-            <div className="animate-[fadeIn_0.3s]">
-              <div className="mb-8">
-                <h1 className="text-[28px] font-bold text-gray-900 mb-2">Executive Overview</h1>
-                <p className="text-sm text-gray-600">High-level insights for management decisions</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
+              <div className="grid grid-cols-2 gap-5 p-5 max-lg:grid-cols-1">
                 <div className="bg-white rounded-xl p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
                   <h3 className="mb-4 text-base font-semibold">Asset Distribution Summary</h3>
                   <div className="flex justify-between items-center py-3 border-b border-gray-300 last:border-b-0">
@@ -1052,6 +1042,7 @@ import AssetExportSystem from '../AssetManagement/AssetExportSystem';
                   </div>
                 </div>
               </div>
+
             </div>
           )}
 
@@ -1099,6 +1090,17 @@ import AssetExportSystem from '../AssetManagement/AssetExportSystem';
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* SECTION: EXECUTIVE OVERVIEW */}
+          {activeSection === 'custody' && (
+            <div className="animate-[fadeIn_0.3s]">
+              <div className="mb-8">
+                <h1 className="text-[28px] font-bold text-gray-900 mb-2">Custody Overview</h1>
+                <p className="text-sm text-gray-600">High-level insights for management decisions</p>
+              </div>
+
             </div>
           )}
 
@@ -1347,7 +1349,7 @@ import AssetExportSystem from '../AssetManagement/AssetExportSystem';
           {/* SECTION: REPORTS */}
           {activeSection === 'reports' && (
             <div className="animate-[fadeIn_0.3s]">
-              <div className="mb-8">
+              {/* <div className="mb-8">
                 <h1 className="text-[28px] font-bold text-gray-900 mb-2">Custom Reports</h1>
                 <p className="text-sm text-gray-600">Generate and schedule custom reports</p>
               </div>
@@ -1370,7 +1372,7 @@ import AssetExportSystem from '../AssetManagement/AssetExportSystem';
                   <span className="text-sm text-gray-600">Asset Inventory</span>
                   <button className="px-5 py-2.5 bg-[#5B93FF] text-white border-0 rounded-lg text-sm font-medium cursor-pointer hover:bg-[#4A7FE6]">Generate</button>
                 </div>
-              </div>
+              </div> */}
 
                 <div className="animate-[fadeIn_0.3s] mt-8">
                   <AssetAvailabilityGrid />
