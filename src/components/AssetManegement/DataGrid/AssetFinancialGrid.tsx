@@ -1290,6 +1290,25 @@ interface AssetDetailsTableProps {
   };
 }
 
+// =====================================
+// 🎯 API BASE URL - DINÂMICA
+// =====================================
+
+/**
+ * Retorna a URL base da API salva no sessionStorage
+ * ou fallback para a API padrão
+ */
+const getApiBaseUrl = (): string => {
+  const savedEndpoint = sessionStorage.getItem('apiEndpoint');
+  
+  if (savedEndpoint) {
+    return `${savedEndpoint}/dashboard`;
+  }
+  
+  // Fallback para API padrão (pode ser qualquer uma das duas)
+  return 'https://apinode.smartxhub.cloud/api/dashboard';
+};
+
 const AssetFinancialGrid: React.FC<AssetDetailsTableProps> = ({ initialFilters }) => {
   const { assetDetails } = useAssetManagement();
   const {logo} = useCompany()
@@ -1428,7 +1447,7 @@ const AssetFinancialGrid: React.FC<AssetDetailsTableProps> = ({ initialFilters }
           <span>Fetching all ${assetDetails.pagination.total.toLocaleString()} assets...</span>
         `;
         document.body.appendChild(loadingMessage);
-        
+          const API_BASE_URL = getApiBaseUrl();
         try {
           const queryParams = new URLSearchParams({
             limit: assetDetails.pagination.total.toString(),
@@ -1454,7 +1473,7 @@ const AssetFinancialGrid: React.FC<AssetDetailsTableProps> = ({ initialFilters }
           }
           
           const response = await fetch(
-            `https://apinode.smartxhub.cloud/api/dashboard/asset/${currentCompanyId}/asset-details?${queryParams.toString()}`
+            `${API_BASE_URL}/asset/${currentCompanyId}/asset-details?${queryParams.toString()}`
           );
           
           if (!response.ok) {

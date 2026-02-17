@@ -147,6 +147,25 @@ interface Pagination {
   totalPages: number;
 }
 
+// =====================================
+// 🎯 API BASE URL - DINÂMICA
+// =====================================
+
+/**
+ * Retorna a URL base da API salva no sessionStorage
+ * ou fallback para a API padrão
+ */
+const getApiBaseUrl = (): string => {
+  const savedEndpoint = sessionStorage.getItem('apiEndpoint');
+  
+  if (savedEndpoint) {
+    return `${savedEndpoint}/dashboard`;
+  }
+  
+  // Fallback para API padrão (pode ser qualquer uma das duas)
+  return 'https://apinode.smartxhub.cloud/api/dashboard';
+};
+
 const useAssetAvailability = () => {
   const [data, setData] = useState<AssetAvailabilityData[]>([]);
   const [statistics, setStatistics] = useState<AssetAvailabilityStatistics | null>(null);
@@ -191,6 +210,7 @@ const useAssetAvailability = () => {
     limit: number = 10,
     offset: number = 0
   ) => {
+    const API_BASE_URL = getApiBaseUrl(); 
     try {
       setLoading(true);
       setError(null);
@@ -226,7 +246,7 @@ const useAssetAvailability = () => {
       }
 
       const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/asset-availability?${queryParams.toString()}`
+        `${API_BASE_URL}/asset/${companyId}/asset-availability?${queryParams.toString()}`
       );
 
       if (!response.ok) {
@@ -258,6 +278,7 @@ const useAssetAvailability = () => {
     companyId: number,
     filters?: AssetAvailabilityFilters
   ) => {
+    const API_BASE_URL = getApiBaseUrl(); 
     try {
       setLoading(true);
       setError(null);
@@ -275,7 +296,7 @@ const useAssetAvailability = () => {
       }
 
       const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/asset-availability-statistics?${queryParams.toString()}`
+        `${API_BASE_URL}/asset/${companyId}/asset-availability-statistics?${queryParams.toString()}`
       );
 
       if (!response.ok) {
@@ -306,9 +327,10 @@ const useAssetAvailability = () => {
     companyId: number,
     filterType: 'sites' | 'areas' | 'zones' | 'types' | 'categories' | 'custody'
   ) => {
+    const API_BASE_URL = getApiBaseUrl();
     try {
       const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/availability-filter-options/${filterType}`
+        `${API_BASE_URL}/asset/${companyId}/availability-filter-options/${filterType}`
       );
 
       if (!response.ok) {
@@ -334,9 +356,10 @@ const useAssetAvailability = () => {
  * Fetch Areas by Site
  */
 const fetchAreasBySite = useCallback(async (companyId: number, siteId: number) => {
-    try {
+  const API_BASE_URL = getApiBaseUrl();  
+  try {
         const response = await fetch(
-            `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/areas-by-site/${siteId}`
+            `${API_BASE_URL}/asset/${companyId}/areas-by-site/${siteId}`
         );
 
         if (!response.ok) {
@@ -358,9 +381,10 @@ const fetchAreasBySite = useCallback(async (companyId: number, siteId: number) =
  * Fetch Zones by Area
  */
 const fetchZonesByArea = useCallback(async (companyId: number, areaId: number) => {
-    try {
+  const API_BASE_URL = getApiBaseUrl();   
+  try {
         const response = await fetch(
-            `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/zones-by-area/${areaId}`
+            `${API_BASE_URL}/asset/${companyId}/zones-by-area/${areaId}`
         );
 
         if (!response.ok) {

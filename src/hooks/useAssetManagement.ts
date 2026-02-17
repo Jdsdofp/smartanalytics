@@ -128,8 +128,30 @@ interface ApiResponse {
 // 🎯 HOOK
 // =====================================
 
+
+// =====================================
+// 🎯 API BASE URL - DINÂMICA
+// =====================================
+
+/**
+ * Retorna a URL base da API salva no sessionStorage
+ * ou fallback para a API padrão
+ */
+const getApiBaseUrl = (): string => {
+  const savedEndpoint = sessionStorage.getItem('apiEndpoint');
+  
+  if (savedEndpoint) {
+    return `${savedEndpoint}/dashboard`;
+  }
+  
+  // Fallback para API padrão (pode ser qualquer uma das duas)
+  return 'https://apinode.smartxhub.cloud/api/dashboard';
+};
+
+
 export const useAssetManagement = () => {
   const { companyId } = useCompany();
+  const API_BASE_URL = getApiBaseUrl(); 
   const [data, setData] = useState<AssetDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -158,7 +180,7 @@ export const useAssetManagement = () => {
       setError(null);
       
       const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/dashboard-data`
+        `${API_BASE_URL}/asset/${companyId}/dashboard-data`
       );
 
       if (!response.ok) {
@@ -193,7 +215,7 @@ export const useAssetManagement = () => {
       console.log('No company ID available for asset details');
       return;
     }
-
+      const API_BASE_URL = getApiBaseUrl();
     try {
       setAssetDetailsLoading(true);
       setAssetDetailsError(null);
@@ -258,7 +280,7 @@ export const useAssetManagement = () => {
       }
 
       const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/asset-details?${queryParams.toString()}`
+        `${API_BASE_URL}/asset/${companyId}/asset-details?${queryParams.toString()}`
       );
 
       if (!response.ok) {

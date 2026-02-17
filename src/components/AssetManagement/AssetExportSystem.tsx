@@ -181,6 +181,26 @@ const EXPORT_TEMPLATES: ExportTemplate[] = [
   },
 ];
 
+
+// =====================================
+// 🎯 API BASE URL - DINÂMICA
+// =====================================
+
+/**
+ * Retorna a URL base da API salva no sessionStorage
+ * ou fallback para a API padrão
+ */
+const getApiBaseUrl = (): string => {
+  const savedEndpoint = sessionStorage.getItem('apiEndpoint');
+  
+  if (savedEndpoint) {
+    return `${savedEndpoint}/dashboard`;
+  }
+  
+  // Fallback para API padrão (pode ser qualquer uma das duas)
+  return 'https://apinode.smartxhub.cloud/api/dashboard';
+};
+
 // =====================================
 // 🎯 COMPONENT
 // =====================================
@@ -208,11 +228,12 @@ export default function AssetExportSystem() {
   // Handle export
   const handleExport = async (template: ExportTemplate) => {
     const { id, endpoint, title } = template;
+    const API_BASE_URL = getApiBaseUrl(); 
     try {
       setExportStatus((prev) => ({ ...prev, [id]: 'exporting' }));
 
       const response = await fetch(
-        `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/export/${endpoint}`
+        `${API_BASE_URL}/asset/${companyId}/export/${endpoint}`
       );
 
       if (!response.ok) throw new Error(`Export failed: ${response.statusText}`);

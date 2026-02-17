@@ -37,6 +37,26 @@ interface AssetAvailabilityGridProps {
   };
 }
 
+
+// =====================================
+// 🎯 API BASE URL - DINÂMICA
+// =====================================
+
+/**
+ * Retorna a URL base da API salva no sessionStorage
+ * ou fallback para a API padrão
+ */
+const getApiBaseUrl = (): string => {
+  const savedEndpoint = sessionStorage.getItem('apiEndpoint');
+  
+  if (savedEndpoint) {
+    return `${savedEndpoint}/dashboard`;
+  }
+  
+  // Fallback para API padrão (pode ser qualquer uma das duas)
+  return 'https://apinode.smartxhub.cloud/api/dashboard';
+};
+
 const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFilters }) => {
   const { logo, companyId } = useCompany();
 
@@ -317,7 +337,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
       exportData = sortedData;
     } else {
       if (!companyId) return;
-
+      const API_BASE_URL = getApiBaseUrl();
       try {
         const apiFilters = {
           ...filters,
@@ -328,7 +348,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
         };
 
         const response = await fetch(
-          `https://apinode.smartxhub.cloud/api/dashboard/asset/${companyId}/asset-availability?limit=${pagination.total}&offset=0&${buildQueryString(apiFilters)}`
+          `${API_BASE_URL}/asset/${companyId}/asset-availability?limit=${pagination.total}&offset=0&${buildQueryString(apiFilters)}`
         );
 
         const result = await response.json();
