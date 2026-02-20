@@ -22,6 +22,7 @@ import BoundaryTrendsChart from './Components/BoundaryTrendsChart';
 import BoundaryAnomaliesChart from './Components/BoundaryAnomaliesChart';
 import { useTheme } from '../../context/ThemeContext';
 import EnhancedHeatmap from './Components/EnhancedHeatmap';
+import BoundaryTrackingTable from './Components/BoundaryTrackingTable';
 
 
 
@@ -1681,7 +1682,7 @@ export default function BoundaryAccessAnalytics() {
         </div>
       </nav>
 
-      <main className="max-w-[1400px] mx-auto p-8">
+      <main className="mx-auto p-8">
         {/* SECTION 1: Overview */}
         {activeTab === 'overview' && kpis && (
           <div className="animate-fade-in">
@@ -2908,6 +2909,8 @@ export default function BoundaryAccessAnalytics() {
         {/* SECTION 2: Temporal */}
         {activeTab === 'temporal' && (
           <div className="animate-fade-in">
+
+            <BoundaryTrackingTable /> 
 
             <WeekdayWeekendComparison
               data={weekdayWeekendData}
