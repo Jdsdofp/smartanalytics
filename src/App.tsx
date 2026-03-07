@@ -27,6 +27,7 @@ import DashboardHubHierarchical from './components/Dashboardhubhierarchica';
 import DashboardHubKanban from './components/Dashboardhubkanban';
 import NotFound from './pages/404';
 import MN0400_332 from './pages/Analytics/Distribution/MN0400_332';
+import CamAutomation from './pages/CamAutomation';
 
 function App() {
 
@@ -214,6 +215,13 @@ function App() {
           <PrivateRoute>
             <MN0400_332 />
           </PrivateRoute>
+        }
+      />
+
+      <Route
+        path='/cam-automation'
+        element={
+            <CamAutomation />
         }
       />
 
