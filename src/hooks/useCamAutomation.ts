@@ -24,38 +24,66 @@ const getApiBaseUrl = (): string => {
 const makeHttp = () =>
   axios.create({ baseURL: getApiBaseUrl(), timeout: 30000 });
 
+// Prefixo base do router EPI no backend FastAPI
+// Montado em: /api/v1/epi  (router = APIRouter(), incluído com prefix="/api/v1/epi")
+const EPI = '/api/v1/epi';
+
 const api = {
+  // Não existe endpoint /local/config no backend — retorna objeto vazio silenciosamente
   getLocalConfig: async (): Promise<Partial<SysConfig>> => {
-    const { data } = await makeHttp().get('/api/local/config');
-    return data;
+    try {
+      const { data } = await makeHttp().get(`${EPI}/local/config`);
+      return data;
+    } catch {
+      return {}; // fallback para DEFAULT_CONFIG
+    }
   },
 
+  // GET /api/v1/epi/analytics/dashboard
   getDashboard: async (): Promise<DashboardData> => {
-    const { data } = await makeHttp().get('/api/analytics/dashboard');
+    const { data } = await makeHttp().get(`${EPI}/analytics/dashboard`);
     return data;
   },
 
+  // GET /api/v1/epi/analytics/people
   getPeople: async (activeOnly = false): Promise<{ people?: WorkerRecord[] } | WorkerRecord[]> => {
-    const { data } = await makeHttp().get('/api/analytics/people', { params: { active_only: activeOnly } });
+    const { data } = await makeHttp().get(`${EPI}/analytics/people`, { params: { active_only: activeOnly } });
     return data;
   },
 
+  // GET /api/v1/epi/config
   getEpiConfig: async (): Promise<EpiConfig> => {
-    const { data } = await makeHttp().get('/api/epi/config');
-    return data;
+    const { data } = await makeHttp().get(`${EPI}/config`);
+    // backend retorna { config, active_classes, all_classes }
+    // mapeia para o formato EpiConfig esperado pelo hook
+    return {
+      required_ppe:       data.config?.required_ppe ?? [],
+      available_classes:  data.all_classes ? Object.values(data.all_classes) as string[] : [],
+      config:             data.config,
+    };
   },
 
+  // POST /api/v1/epi/config  — body: { required_ppe: string[] }
   saveEpiConfig: async (config: { required_ppe: string[] }): Promise<void> => {
-    await makeHttp().post('/api/epi/config', config);
+    await makeHttp().post(`${EPI}/config`, config);
   },
 
+  // POST /api/v1/epi/validation/start  — Form data (FastAPI usa Form(...))
   startValidationSession: async (
     overrides: Record<string, unknown> = {},
   ): Promise<{ session_uuid: string; sessionUuid?: string }> => {
-    const { data } = await makeHttp().post('/api/validation/start', overrides);
+    const form = new FormData();
+    form.append('door_id',    String(overrides.door_id  ?? 'DOOR_01'));
+    form.append('direction',  String(overrides.direction ?? 'ENTRY'));
+    form.append('zone_id',    String(overrides.zone_id  ?? ''));
+    form.append('compliance_mode',       'majority');
+    form.append('photo_count_required',  '1');   // 1 foto por captura (face ou body)
+    form.append('timeout_seconds',       '30');
+    const { data } = await makeHttp().post(`${EPI}/validation/start`, form);
     return data;
   },
 
+  // POST /api/v1/epi/validation/photo  — multipart/form-data
   sendValidationPhoto: async (
     sessionUuid: string,
     frameBlob: Blob,
@@ -66,28 +94,36 @@ const api = {
     form.append('file', frameBlob, 'frame.jpg');
     if (opts.cameraId !== undefined) form.append('camera_id', String(opts.cameraId));
     if (opts.photoType) form.append('photo_type', opts.photoType);
-    const { data } = await makeHttp().post('/api/validation/photo', form, {
+    const { data } = await makeHttp().post(`${EPI}/validation/photo`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data;
   },
 
+  // POST /api/v1/epi/validation/close  — Form data
   closeValidationSession: async (sessionUuid: string): Promise<void> => {
-    await makeHttp().post('/api/validation/close', { session_uuid: sessionUuid });
+    const form = new FormData();
+    form.append('session_uuid', sessionUuid);
+    await makeHttp().post(`${EPI}/validation/close`, form);
   },
 
+  // Endpoint de porta — não existe no backend atual, silencioso
   openDoor: async (payload: {
     personCode?: string;
     personName?: string;
     sessionUuid?: string | null;
     reason: string;
   }): Promise<void> => {
-    await makeHttp().post('/api/door/open', {
-      person_code:  payload.personCode,
-      person_name:  payload.personName,
-      session_uuid: payload.sessionUuid,
-      reason:       payload.reason,
-    });
+    try {
+      const form = new FormData();
+      if (payload.personCode)  form.append('person_code',  payload.personCode);
+      if (payload.personName)  form.append('person_name',  payload.personName);
+      if (payload.sessionUuid) form.append('session_uuid', payload.sessionUuid);
+      form.append('reason', payload.reason);
+      await makeHttp().post(`${EPI}/door/open`, form);
+    } catch (e) {
+      console.warn('[openDoor] endpoint não disponível:', e);
+    }
   },
 };
 
@@ -214,17 +250,42 @@ export interface CameraHook {
 // ─── Tipos internos da API ────────────────────────────────────────────────────
 
 interface PhotoResult {
-  face_recognized?: boolean;
-  person_code?:     string;
-  person_name?:     string;
-  confidence?:      number;
-  face_confidence?: number;
-  daily_exposure?:  DailyExposure;
-  compliant?:       boolean;
-  detected?:        string[];
-  detected_ppe?:    string[];
-  missing?:         string[];
-  missing_ppe?:     string[];
+  // Retorno do /validation/photo (backend real)
+  session_uuid?:          string;
+  photo_seq?:             number;
+  photo_count_received?:  number;
+  photo_count_required?:  number;
+  session_complete?:      boolean;
+
+  // Face
+  face_detected?:         boolean;
+  face_recognized?:       boolean;   // alias legado
+  face_confidence?:       number;
+  face_person_code?:      string;
+  person_code?:           string;    // alias legado
+  person_name?:           string;
+  confidence?:            number;    // alias legado
+
+  // EPI
+  epi_compliant?:         boolean;
+  compliant?:             boolean;   // alias legado
+  compliance_score?:      number;
+  missing?:               string[];
+  missing_ppe?:           string[];
+  detected?:              string[];
+  detected_ppe?:          string[];
+
+  // Sessão finalizada
+  final_decision?: {
+    access_decision:       string;
+    epi_compliant:         boolean;
+    face_confirmed:        boolean;
+    face_confidence_max?:  number;
+    person_code?:          string;
+    person_name?:          string;
+  } | null;
+
+  daily_exposure?: DailyExposure;
 }
 
 // ─── Estados por screen/modal (expostos como props prontas) ───────────────────
@@ -709,16 +770,21 @@ export function useCamAutomation(): UseCamAutomationReturn {
       const photo = await api.sendValidationPhoto(uuid, blob, { photoType: 'face', cameraId: 1 });
       setFaceProgress(80);
 
-      if (photo.face_recognized || photo.person_code) {
+      if (photo.face_detected || photo.face_recognized || photo.face_person_code || photo.person_code) {
         setFaceProgress(100);
         setFaceStep('done');
-        setFaceStatusMsg(`Identificado: ${photo.person_name || photo.person_code}`);
-        setFaceSubMsg(`Confiança: ${Math.round((photo.confidence || photo.face_confidence || 0) * 100)}%`);
+
+        const resolvedCode = photo.face_person_code || photo.person_code || '';
+        const resolvedName = photo.person_name || resolvedCode;
+        const resolvedConf = photo.face_confidence || photo.confidence || 0;
+
+        setFaceStatusMsg(`Identificado: ${resolvedName}`);
+        setFaceSubMsg(`Confiança: ${Math.round(resolvedConf * 100)}%`);
 
         const person: Person = {
-          personCode: photo.person_code!,
-          personName: photo.person_name!,
-          confidence: photo.confidence || photo.face_confidence || 0,
+          personCode: resolvedCode,
+          personName: resolvedName,
+          confidence: resolvedConf,
         };
         setSession((prev) => ({ ...prev, sessionUuid: uuid, person, dailyExposure: photo.daily_exposure ?? null }));
 
@@ -791,7 +857,7 @@ export function useCamAutomation(): UseCamAutomationReturn {
       if (blob2) {
         try {
           const photo2 = await api.sendValidationPhoto(session.sessionUuid, blob2, { photoType: 'body', cameraId: 3 });
-          if (!(photo2.compliant ?? true)) finalResult = { ...photo2, compliant: photo2.compliant ?? false };
+          if (!photo2.compliant) finalResult = { ...photo2, compliant: photo2.compliant ?? false };
         } catch (e3) {
           console.warn('[useCamAutomation] Body2 send failed:', (e3 as Error).message);
         }
