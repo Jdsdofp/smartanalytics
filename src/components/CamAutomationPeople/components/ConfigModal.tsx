@@ -1,9 +1,9 @@
 // src/components/CamAutomationPeople/components/ConfigModal.tsx
-// Modal de configuração — sem estado próprio, sem chamadas de API
+// Modal de configuração — ATUALIZADO COM ABA DE CÂMERAS IP
 // Tudo vem de configState + cameraHook via useCamAutomation
 
 import { useState } from 'react';
-import type { CamRole, CameraHook, SysConfig, ConfigState } from '../../../hooks/useCamAutomation';
+import type { CamRole, CameraHook, SysConfig, ConfigState, CameraSourceType } from '../../../hooks/useCamAutomation';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -14,7 +14,7 @@ interface ConfigModalProps {
   onClose:     () => void;
 }
 
-type TabId = 'cameras' | 'limits' | 'epi' | 'system';
+type TabId = 'cameras' | 'cameras_ip' | 'limits' | 'epi' | 'system';
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -32,10 +32,11 @@ const SYSTEM_FIELDS: { label: string; key: keyof SysConfig; type: 'number' | 'te
 ];
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'cameras', label: '📷 Câmeras'     },
-  { id: 'limits',  label: '⏱ Permanência' },
-  { id: 'epi',     label: '🦺 EPIs'        },
-  { id: 'system',  label: '⚙ Sistema'     },
+  { id: 'cameras',    label: '📷 Câmeras USB'  },
+  { id: 'cameras_ip', label: '🌐 Câmeras IP'   },
+  { id: 'limits',     label: '⏱ Permanência'  },
+  { id: 'epi',        label: '🦺 EPIs'         },
+  { id: 'system',     label: '⚙ Sistema'      },
 ];
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -50,7 +51,7 @@ export default function ConfigModal({ configState, cameraHook, apiBase, onClose 
     handleSave,
   } = configState;
 
-  const { devices, assignments, assignDevice, enumerateDevices } = cameraHook;
+  const { devices, assignments, assignDevice, enumerateDevices, sourceTypes, ipUrls, setSourceType, setIpUrl } = cameraHook;
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -72,7 +73,7 @@ export default function ConfigModal({ configState, cameraHook, apiBase, onClose 
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 4, padding: '12px 24px 0', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', gap: 4, padding: '12px 24px 0', borderBottom: '1px solid var(--border)', overflowX: 'auto' }}>
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -83,9 +84,10 @@ export default function ConfigModal({ configState, cameraHook, apiBase, onClose 
                 borderBottom: 'none',
                 color:        activeTab === t.id ? '#fff' : 'var(--gray-light)',
                 borderRadius: '8px 8px 0 0',
-                padding: '8px 16px', fontSize: '0.8rem',
+                padding: '8px 12px', fontSize: '0.75rem',
                 fontFamily: 'var(--font-head)', fontWeight: 600,
                 cursor: 'pointer', letterSpacing: '0.04em', marginBottom: -1,
+                whiteSpace: 'nowrap',
               }}
             >
               {t.label}
@@ -94,13 +96,13 @@ export default function ConfigModal({ configState, cameraHook, apiBase, onClose 
         </div>
 
         {/* Content */}
-        <div style={{ padding: 24, minHeight: 280 }}>
+        <div style={{ padding: 24, minHeight: 280, maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
 
-          {/* ── CÂMERAS ── */}
+          {/* ── CÂMERAS USB ── */}
           {activeTab === 'cameras' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--gray-light)', lineHeight: 1.5 }}>
-                Atribua cada câmera ao seu papel. A câmera facial deve ser a embutida/frontal.
+                Atribua cada câmera USB ao seu papel. A câmera facial deve ser a embutida/frontal.
                 As câmeras de corpo são as USB externas conectadas via hub.
               </p>
 
@@ -137,6 +139,155 @@ export default function ConfigModal({ configState, cameraHook, apiBase, onClose 
                   </select>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* ── CÂMERAS IP ── */}
+          {activeTab === 'cameras_ip' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              
+              {/* Single Camera Mode */}
+              <div style={{ 
+                padding: '12px 16px', 
+                background: 'rgba(59, 130, 246, 0.1)', 
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                borderRadius: 8 
+              }}>
+                <label style={{ display: 'flex', alignItems: 'start', gap: 10, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={localConfig.useSingleCamera}
+                    onChange={(e) => setLocalConfig({ ...localConfig, useSingleCamera: e.target.checked })}
+                    style={{ marginTop: 2, width: 18, height: 18 }}
+                  />
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-head)', fontWeight: 700, fontSize: '0.9rem', color: 'var(--blue)' }}>
+                      ✅ Usar Mesma Câmera para Face e EPI
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--gray-light)', marginTop: 4 }}>
+                      Recomendado quando há apenas uma câmera. A câmera Face será usada tanto para reconhecimento facial quanto para detecção de EPI.
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              {/* Configuração de cada câmera */}
+              {CAM_ROLE_LIST.map(({ role, label }) => {
+                // Se single camera mode, só mostra Face
+                if (localConfig.useSingleCamera && role !== 'face') return null;
+
+                const sourceType = sourceTypes[role];
+                const isLocal = sourceType === 'local';
+
+                return (
+                  <div key={role} style={{ 
+                    padding: 16, 
+                    background: 'var(--bg-card)', 
+                    border: '1px solid var(--border)',
+                    borderRadius: 8 
+                  }}>
+                    
+                    {/* Header */}
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      marginBottom: 12 
+                    }}>
+                      <div style={{ 
+                        fontFamily: 'var(--font-head)', 
+                        fontWeight: 700, 
+                        fontSize: '0.9rem', 
+                        color: 'var(--white)' 
+                      }}>
+                        {label}
+                      </div>
+                      
+                      {/* Tipo de Câmera */}
+                      <select
+                        value={sourceType}
+                        onChange={(e) => setSourceType(role, e.target.value as CameraSourceType)}
+                        style={{ padding: '6px 12px', fontSize: '0.75rem' }}
+                      >
+                        <option value="local">📹 Local (USB)</option>
+                        <option value="ip_url">🌐 IP (URL)</option>
+                      </select>
+                    </div>
+
+                    {/* Config Local */}
+                    {isLocal && (
+                      <div>
+                        <div style={{ 
+                          fontFamily: 'var(--font-mono)', 
+                          fontSize: '0.65rem', 
+                          color: 'var(--gray-light)',
+                          marginBottom: 6 
+                        }}>
+                          Dispositivo USB:
+                        </div>
+                        <select
+                          value={assignments[role] || ''}
+                          onChange={(e) => assignDevice(role, e.target.value)}
+                        >
+                          <option value="">— Selecione —</option>
+                          {devices.map((d) => (
+                            <option key={d.deviceId} value={d.deviceId}>
+                              {d.label || `Câmera ${d.deviceId.slice(0, 8)}…`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Config IP */}
+                    {!isLocal && (
+                      <div>
+                        <div style={{ 
+                          fontFamily: 'var(--font-mono)', 
+                          fontSize: '0.65rem', 
+                          color: 'var(--gray-light)',
+                          marginBottom: 6 
+                        }}>
+                          URL da Câmera IP:
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="http://admin:senha@192.168.1.100:8070/snapshot.cgi"
+                          value={ipUrls[role] || ''}
+                          onChange={(e) => setIpUrl(role, e.target.value)}
+                          style={{ 
+                            width: '100%',
+                            fontFamily: 'var(--font-mono)', 
+                            fontSize: '0.75rem' 
+                          }}
+                        />
+                        <div style={{ 
+                          fontFamily: 'var(--font-mono)', 
+                          fontSize: '0.6rem', 
+                          color: 'var(--gray)',
+                          marginTop: 6 
+                        }}>
+                          💡 Exemplo: http://usuario:senha@177.62.189.25:8070/cgi-bin/snapshot.cgi?channel=1
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Avisos */}
+              <div style={{
+                padding: '10px 14px',
+                background: 'rgba(251, 191, 36, 0.1)',
+                border: '1px solid rgba(251, 191, 36, 0.3)',
+                borderRadius: 8,
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.65rem',
+                color: 'var(--gray-light)',
+                lineHeight: 1.5
+              }}>
+                ⚠️ <strong>Câmeras IP:</strong> Se houver erro de CORS, configure o backend para fazer proxy das requisições de imagem.
+              </div>
             </div>
           )}
 
