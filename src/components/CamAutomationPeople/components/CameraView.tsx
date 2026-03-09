@@ -1,8 +1,10 @@
 // src/components/CameraView/index.tsx
 // Componente de exibição de câmera com overlays de scan e status
+// Otimizado para tablets com layout responsivo dinâmico
 
 import React, { useEffect, useRef } from 'react';
 import type { CamRole, CameraHook } from '../../../hooks/useCamAutomation';
+import { useTabletLayout } from '../../../hooks/useTabletLayout';
 
 type CamStatus = 'idle' | 'scanning' | 'ok' | 'fail' | 'warning';
 
@@ -17,6 +19,7 @@ interface CameraViewProps {
   overlay?: React.ReactNode;
   className?: string;
   aspectRatio?: string;
+  dynamicSize?: boolean; // Nova prop para ativar dimensionamento dinâmico
 }
 
 const STATUS_COLORS: Record<CamStatus, string> = {
@@ -45,9 +48,11 @@ export default function CameraView({
   autoStart = true,
   overlay,
   className = '',
-  aspectRatio = '4/3',
+  aspectRatio,
+  dynamicSize = true,
 }: CameraViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const layoutInfo = useTabletLayout();
 
   useEffect(() => {
     if (!cameraHook || !role) return;
@@ -60,18 +65,35 @@ export default function CameraView({
 
   const borderColor = STATUS_COLORS[status] ?? 'transparent';
 
+  // Calcula aspect ratio dinamicamente baseado no dispositivo e orientação
+  const computedAspectRatio = aspectRatio || (
+    dynamicSize ? layoutInfo.aspectRatio : (role === 'face' ? '9/12' : '16/12')
+  );
+
+  // Calcula tamanho máximo baseado na orientação
+  const maxSize = dynamicSize 
+    ? (layoutInfo.orientation === 'landscape' ? '75vh' : '85vh')
+    : '100%';
+
+  // Ajusta corner brackets e oval guide para diferentes tamanhos
+  const cornerSize = layoutInfo.size === 'large' ? 40 : layoutInfo.size === 'small' ? 25 : 30;
+  const cornerOffset = layoutInfo.size === 'large' ? '15%' : '12%';
+
   return (
     <div
       className={`cam-view ${className}`}
       style={{
         position: 'relative',
-        aspectRatio,
+        aspectRatio: computedAspectRatio,
+        width: '100%',
+        maxHeight: maxSize,
         background: '#000',
         borderRadius: 'var(--radius-lg)',
         overflow: 'hidden',
         border: `2px solid ${borderColor}`,
-        transition: 'border-color 300ms ease',
+        transition: 'border-color 300ms ease, max-height 300ms ease',
         boxShadow: status !== 'idle' ? `0 0 24px ${borderColor}44` : 'none',
+        margin: '0 auto', // centraliza horizontalmente
       }}
     >
       {/* Vídeo ao vivo */}
@@ -162,16 +184,16 @@ export default function CameraView({
                 key={pos}
                 style={{
                   position: 'absolute',
-                  [isTop ? 'top' : 'bottom']: '12%',
+                  [isTop ? 'top' : 'bottom']: cornerOffset,
                   [isLeft ? 'left' : 'right']: '20%',
-                  width: 30,
-                  height: 30,
+                  width: cornerSize,
+                  height: cornerSize,
                   borderTop: isTop ? `3px solid ${borderColor || 'var(--blue)'}` : 'none',
                   borderBottom: !isTop ? `3px solid ${borderColor || 'var(--blue)'}` : 'none',
                   borderLeft: isLeft ? `3px solid ${borderColor || 'var(--blue)'}` : 'none',
                   borderRight: !isLeft ? `3px solid ${borderColor || 'var(--blue)'}` : 'none',
                   opacity: 0.8,
-                  transition: 'border-color 300ms ease',
+                  transition: 'border-color 300ms ease, width 300ms ease, height 300ms ease',
                 }}
               />
             );

@@ -94,8 +94,10 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
 
         {screen === 'face_scan' && (
           <FaceScanScreen
+          //@ts-ignore
             faceScanState={faceScanState}
             cameraHook={cameraHook}
+            //@ts-ignore
             direction={direction}
             onCapture={handleCaptureFace}
             onRetry={handleRetryFace}

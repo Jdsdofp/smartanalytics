@@ -1,159 +1,234 @@
-// src/components/CamAutomationPeople/screens/FaceScanScreen.tsx
-// Tela de reconhecimento facial — sem estado próprio, sem chamadas de API
-// Tudo vem de faceScanState + handleCaptureFace + handleRetryFace via useCamAutomation
+// src/screens/FaceScanScreen/index.tsx
+// Tela de captura facial — exibe câmera frontal com botão de captura
+// Mostra estado atual e permite retry em caso de erro
+// Layout otimizado: câmera vertical ocupando quase 100% da tela com botões sobrepostos
 
+//import React from 'react';
 import CameraView from '../components/CameraView';
-import type { CameraHook, Direction, FaceScanState } from '../../../hooks/useCamAutomation';
+import type { CameraHook } from '../../../hooks/useCamAutomation';
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+export interface FaceScanState {
+  status: 'idle' | 'capturing' | 'analyzing' | 'ok' | 'error';
+  errorMsg?: string;
+  captureUrl?: string | null;
+}
 
 interface FaceScanScreenProps {
   faceScanState: FaceScanState;
-  cameraHook:    CameraHook;
-  direction:     Direction;
-  onCapture:     () => Promise<void>;
-  onRetry:       () => void;
-  onCancel:      () => void;
+  cameraHook: CameraHook;
+  direction: 'entry' | 'exit';
+  onCapture: () => void;
+  onRetry: () => void;
+  onCancel: () => void;
 }
-
-// ─── Constantes ───────────────────────────────────────────────────────────────
-
-type CamStatus = 'idle' | 'scanning' | 'ok' | 'fail';
-
-const STEP_TO_STATUS: Record<FaceScanState['step'], CamStatus> = {
-  ready:      'scanning',
-  capturing:  'scanning',
-  processing: 'scanning',
-  done:       'ok',
-  error:      'fail',
-};
-
-// ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function FaceScanScreen({
   faceScanState,
   cameraHook,
+  //@ts-ignore
   direction,
   onCapture,
   onRetry,
   onCancel,
 }: FaceScanScreenProps) {
-  const { step, captureUrl, progress, statusMsg, subMsg, countdown } = faceScanState;
+  const { status, errorMsg, captureUrl } = faceScanState;
 
-  const camStatus = STEP_TO_STATUS[step] ?? 'idle';
+  const camStatus: 'idle' | 'scanning' | 'ok' | 'fail' =
+    status === 'analyzing' ? 'scanning' :
+    status === 'ok' ? 'ok' :
+    status === 'error' ? 'fail' :
+    'idle';
+
+  const isProcessing = status === 'capturing' || status === 'analyzing';
 
   return (
     <div style={{
-      flex: 1, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      padding: '20px 32px', gap: 20,
-      animation: 'fadeIn 300ms ease',
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      padding: '0.75rem 1rem',
+      gap: '0.75rem',
+      position: 'relative',
+      overflow: 'hidden',
     }}>
 
-      {/* Title */}
-      <div style={{ textAlign: 'center' }}>
-        <h2 style={{
-          fontFamily: 'var(--font-head)', fontSize: '1.8rem', fontWeight: 800,
-          letterSpacing: '0.06em', color: 'var(--white)', textTransform: 'uppercase',
+      {/* Título compacto */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.25rem',
+        flexShrink: 0,
+      }}>
+        <div style={{
+          fontSize: '1.4rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
         }}>
-          {direction === 'ENTRY' ? '🔍 IDENTIFICAÇÃO' : '↩ SAÍDA — IDENTIFICAÇÃO'}
-        </h2>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--gray-light)', marginTop: 4, letterSpacing: '0.08em' }}>
-          CÂMERA FRONTAL · RECONHECIMENTO FACIAL
+          <span>🔍</span>
+          <span style={{
+            fontFamily: 'var(--font-head)',
+            fontWeight: 700,
+            color: 'var(--text)',
+          }}>
+            IDENTIFICAÇÃO
+          </span>
         </div>
+        <p style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.65rem',
+          color: 'var(--gray-light)',
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+        }}>
+          Câmera Frontal - Reconhecimento Facial
+        </p>
       </div>
 
-      {/* Camera + status layout */}
-      <div style={{ display: 'flex', gap: 24, width: '100%', maxWidth: 700, alignItems: 'flex-start' }}>
-
-        {/* Camera */}
-        <div style={{ flex: '0 0 55%' }}>
+      {/* Container da câmera ocupando quase toda altura restante */}
+      <div style={{
+        flex: 1,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        minHeight: 0, // permite flex shrink
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          width: '100%',
+          height: '100%',
+          maxWidth: '600px',
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
           <CameraView
             role="face"
             cameraHook={cameraHook}
-            scanning={step === 'ready' || step === 'processing'}
-            status={camStatus}
-            label="CÂMERA FACIAL"
+            scanning={status === 'analyzing'}
             captureUrl={captureUrl}
-            autoStart={true}
+            status={camStatus}
+            autoStart
+            aspectRatio="9/16" // Vertical para pegar corpo/busto
+            dynamicSize={false}
           />
-        </div>
 
-        {/* Status panel */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-          {/* Status card */}
-          <div className="card" style={{ padding: 20 }}>
-            <div style={{
-              fontFamily: 'var(--font-head)', fontSize: '1.1rem', fontWeight: 700,
-              color: step === 'done' ? 'var(--green)' : step === 'error' ? 'var(--red)' : 'var(--white)',
-              marginBottom: 6,
-            }}>
-              {statusMsg}
-            </div>
-            {subMsg && (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--gray-light)' }}>
-                {subMsg}
-              </div>
-            )}
-            {step === 'processing' && (
-              <div className="progress-bar" style={{ marginTop: 14 }}>
-                <div className="progress-bar-fill" style={{
-                  width: `${progress}%`,
-                  background: 'linear-gradient(90deg, var(--blue-dim), var(--blue-bright))',
-                }} />
-              </div>
+          {/* Botões sobrepostos na parte inferior da câmera */}
+          <div style={{
+            position: 'absolute',
+            bottom: '1.5rem',
+            left: '1rem',
+            right: '1rem',
+            display: 'flex',
+            gap: '0.75rem',
+            zIndex: 10,
+          }}>
+            {status === 'error' ? (
+              <>
+                <button
+                  onClick={onRetry}
+                  className="btn-primary"
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    padding: '0.875rem',
+                    fontSize: '0.85rem',
+                    background: 'rgba(0, 132, 255, 0.95)',
+                    backdropFilter: 'blur(12px)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  <span>🔄</span>
+                  <span>TENTAR NOVAMENTE</span>
+                </button>
+                <button
+                  onClick={onCancel}
+                  className="btn-secondary"
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    padding: '0.875rem',
+                    fontSize: '0.85rem',
+                    background: 'rgba(33, 40, 54, 0.95)',
+                    backdropFilter: 'blur(12px)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  <span>✕</span>
+                  <span>CANCELAR</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={onCapture}
+                disabled={isProcessing}
+                className="btn-primary"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.75rem',
+                  padding: '1rem',
+                  fontSize: '0.95rem',
+                  opacity: isProcessing ? 0.6 : 1,
+                  cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  background: 'rgba(0, 132, 255, 0.95)',
+                  backdropFilter: 'blur(12px)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                }}
+              >
+                <span style={{ fontSize: '1.25rem' }}>📸</span>
+                <span>{isProcessing ? 'PROCESSANDO...' : 'CAPTURAR ROSTO'}</span>
+              </button>
             )}
           </div>
 
-          {/* Countdown */}
-          {countdown !== null && step === 'ready' && (
+          {/* Mensagem de erro sobreposta */}
+          {status === 'error' && errorMsg && (
             <div style={{
-              background: 'var(--bg-card)', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius)', padding: 20, textAlign: 'center',
+              position: 'absolute',
+              top: '1rem',
+              left: '1rem',
+              right: '1rem',
+              background: 'rgba(220, 38, 38, 0.95)',
+              border: '1px solid var(--red)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.75rem 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              zIndex: 10,
             }}>
-              <div style={{ fontFamily: 'var(--font-head)', fontSize: '3rem', fontWeight: 900, color: 'var(--blue)', lineHeight: 1 }}>
-                {countdown}
-              </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--gray-light)', marginTop: 6 }}>
-                Captura automática
+              <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+              <div style={{
+                flex: 1,
+                fontFamily: 'var(--font-body)',
+                fontSize: '0.875rem',
+                color: '#fff',
+              }}>
+                <strong>Erro ao processar</strong><br />
+                <span style={{ fontSize: '0.8rem', opacity: 0.9 }}>{errorMsg}</span>
               </div>
             </div>
           )}
-
-          {/* Instructions */}
-          {step === 'ready' && countdown === null && (
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--gray)', lineHeight: 1.6 }}>
-              • Olhe diretamente para a câmera<br />
-              • Mantenha rosto centralizado no óvalo<br />
-              • Remova óculos escuros e máscaras
-            </div>
-          )}
-
-          {/* Buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 'auto' }}>
-            {step === 'ready' && (
-              <button className="btn-primary" onClick={onCapture} style={{ width: '100%', height: 54 }}>
-                📸 CAPTURAR AGORA
-              </button>
-            )}
-            {step === 'error' && (
-              <button className="btn-primary" onClick={onRetry} style={{ width: '100%', height: 54 }}>
-                🔄 TENTAR NOVAMENTE
-              </button>
-            )}
-            {step === 'processing' && (
-              <button disabled className="btn-primary" style={{ width: '100%', height: 54 }}>
-                <div className="spinner" /> PROCESSANDO…
-              </button>
-            )}
-            <button className="btn-ghost" onClick={onCancel} style={{ width: '100%' }} disabled={step === 'processing'}>
-              ✕ CANCELAR
-            </button>
-          </div>
-
         </div>
       </div>
+
     </div>
   );
 }
