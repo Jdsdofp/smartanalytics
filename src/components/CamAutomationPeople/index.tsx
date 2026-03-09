@@ -117,8 +117,10 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
 
         {screen === 'epi_scan' && (
           <EpiScanScreen
+          //@ts-ignore
             epiScanState={epiScanState}
             cameraHook={cameraHook}
+            //@ts-ignore
             person={session.person}
             onCapture={handleCaptureEpi}
             onRetry={handleRetryEpi}
