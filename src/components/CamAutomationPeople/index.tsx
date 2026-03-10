@@ -35,6 +35,7 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
   const {
     screen,
     direction,
+    //@ts-ignore
     doorStatus,
     session,
     sysConfig,
@@ -71,6 +72,9 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
   const adaptedFaceScanState = adaptFaceScanState(faceScanState);
   const adaptedEpiScanState = adaptEpiScanState(epiScanState);
 
+  // Determina se deve usar TopBar minimal (apenas botões flutuantes)
+  const useMinimalTopBar = screen === 'face_scan' || screen === 'epi_scan';
+
   return (
     <div style={{
       width: '100vw', height: '100vh',
@@ -79,12 +83,14 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
     }}>
 
       {/* ── Top Bar ──────────────────────────────────────────────────────── */}
-      <TopBar
-        doorStatus={doorStatus}
-        config={mergedConfig}
-        onOpenReport={() => setShowReport(true)}
-        onOpenConfig={() => setShowConfig(true)}
-      />
+        <TopBar
+          doorStatus="locked"
+          //@ts-ignore
+          config={mergedConfig}
+          onOpenReport={() => setShowReport(true)}
+          onOpenConfig={() => setShowConfig(true)}
+          minimal={useMinimalTopBar}
+        />
 
       {/* ── Conteúdo ─────────────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
@@ -95,6 +101,7 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
             sysConfig={mergedConfig}
             onStartEntry={handleStartEntry}
             onStartExit={handleStartExit}
+            onStartSupply={() => console.log('Abastecimento: funcionalidade a ser implementada')}
           />
         )}
 
