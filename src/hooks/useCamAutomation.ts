@@ -2,7 +2,6 @@
 // // Hook central da máquina de estados do fluxo de automação EPI Check
 // // Responsável por: estado da sessão, câmeras, configuração, todas as chamadas de API
 // // Os screens e components NÃO importam a API diretamente — tudo vem deste hook
-// // ⚠️  VERSÃO COM DEBUG ATIVO - Ver logs com 🔍 [DEBUG] no console
 
 // import { useState, useEffect, useCallback, useRef } from 'react';
 // import axios from 'axios';
@@ -11,52 +10,38 @@
 // // API LAYER (interno ao hook — nenhum screen/component precisa importar)
 // // ─────────────────────────────────────────────────────────────────────────────
 
-// /**
-//  * Retorna a URL base da API — mesmo padrão do useAssetAvailability.
-//  * Usa sessionStorage['apiEndpoint'] quando disponível,
-//  * com fallback para a URL de produção do SmartX.
-//  */
 // const getApiBaseUrl = (): string => {
 //   const saved = sessionStorage.getItem('apiEndpoint');
 //   return saved ?? 'https://aihub.smartxhub.cloud';
 // };
 
-// /** Cria um axios instance apontando para o endpoint atual */
 // const makeHttp = () =>
 //   axios.create({ baseURL: getApiBaseUrl(), timeout: 30000 });
 
-// // Prefixo base do router EPI no backend FastAPI
-// // Montado em: /api/v1/epi  (router = APIRouter(), incluído com prefix="/api/v1/epi")
 // const EPI = '/api/v1/epi';
 
 // const api = {
-//   // Não existe endpoint /local/config no backend — retorna objeto vazio silenciosamente
 //   getLocalConfig: async (): Promise<Partial<SysConfig>> => {
 //     try {
 //       const { data } = await makeHttp().get(`${EPI}/local/config`);
 //       return data;
 //     } catch {
-//       return {}; // fallback para DEFAULT_CONFIG
+//       return {};
 //     }
 //   },
 
-//   // GET /api/v1/epi/analytics/dashboard
 //   getDashboard: async (): Promise<DashboardData> => {
 //     const { data } = await makeHttp().get(`${EPI}/analytics/dashboard`);
 //     return data;
 //   },
 
-//   // GET /api/v1/epi/analytics/people
 //   getPeople: async (activeOnly = false): Promise<{ people?: WorkerRecord[] } | WorkerRecord[]> => {
 //     const { data } = await makeHttp().get(`${EPI}/analytics/people`, { params: { active_only: activeOnly } });
 //     return data;
 //   },
 
-//   // GET /api/v1/epi/config
 //   getEpiConfig: async (): Promise<EpiConfig> => {
 //     const { data } = await makeHttp().get(`${EPI}/config`);
-//     // backend retorna { config, active_classes, all_classes }
-//     // mapeia para o formato EpiConfig esperado pelo hook
 //     return {
 //       required_ppe:       data.config?.required_ppe ?? [],
 //       available_classes:  data.all_classes ? Object.values(data.all_classes) as string[] : [],
@@ -64,12 +49,10 @@
 //     };
 //   },
 
-//   // POST /api/v1/epi/config  — body: { required_ppe: string[] }
 //   saveEpiConfig: async (config: { required_ppe: string[] }): Promise<void> => {
 //     await makeHttp().post(`${EPI}/config`, config);
 //   },
 
-//   // POST /api/v1/epi/validation/start  — Form data (FastAPI usa Form(...))
 //   startValidationSession: async (
 //     overrides: Record<string, unknown> = {},
 //   ): Promise<{ session_uuid: string; sessionUuid?: string }> => {
@@ -78,83 +61,36 @@
 //     form.append('direction',  String(overrides.direction ?? 'ENTRY'));
 //     form.append('zone_id',    String(overrides.zone_id  ?? ''));
 //     form.append('compliance_mode',       'majority');
-//     form.append('photo_count_required',  '1');   // 1 foto por captura (face ou body)
+//     form.append('photo_count_required',  '1');
 //     form.append('timeout_seconds',       '30');
 //     const { data } = await makeHttp().post(`${EPI}/validation/start`, form);
 //     return data;
 //   },
 
-//   // POST /api/v1/epi/validation/photo  — multipart/form-data
-//   // ⚠️  COM LOGS DE DEBUG
 //   sendValidationPhoto: async (
 //     sessionUuid: string,
 //     frameBlob: Blob,
 //     opts: { photoType?: string; cameraId?: number } = {},
 //   ): Promise<PhotoResult> => {
-//     console.log('🔍 [API] ========================================');
-//     console.log('🔍 [API] sendValidationPhoto CHAMADA');
-//     console.log('🔍 [API] ========================================');
-//     console.log('🔍 [API] sessionUuid:', sessionUuid);
-//     console.log('🔍 [API] frameBlob:', {
-//       size: frameBlob.size,
-//       type: frameBlob.type,
-//     });
-//     console.log('🔍 [API] opts:', opts);
-
 //     const form = new FormData();
 //     form.append('session_uuid', sessionUuid);
 //     form.append('file', frameBlob, 'frame.jpg');
 //     if (opts.cameraId !== undefined) form.append('camera_id', String(opts.cameraId));
 //     if (opts.photoType) form.append('photo_type', opts.photoType);
 
-//     // Log de todos os campos do FormData
-//     console.log('🔍 [API] FormData fields:');
-//     for (const [key, value] of form.entries()) {
-//       if (value instanceof Blob) {
-//         console.log(`  ${key}: Blob(${value.size} bytes, ${value.type})`);
-//       } else {
-//         console.log(`  ${key}:`, value);
-//       }
-//     }
-
 //     const endpoint = `${EPI}/validation/photo`;
-//     const fullUrl = `${getApiBaseUrl()}${endpoint}`;
-//     console.log('🔍 [API] Full URL:', fullUrl);
-
-//     try {
-//       const { data } = await makeHttp().post(endpoint, form, {
-//         headers: { 'Content-Type': 'multipart/form-data' },
-//       });
-      
-//       console.log('🔍 [API] ✅ SUCCESS');
-//       console.log('🔍 [API] Response data:', data);
-//       return data;
-      
-//     } catch (error) {
-//       console.error('🔍 [API] ========================================');
-//       console.error('🔍 [API] ❌ REQUEST FAILED');
-//       console.error('🔍 [API] ========================================');
-//       console.error('🔍 [API] Error:', error);
-      
-//       const axiosError = error as any;
-//       if (axiosError.response) {
-//         console.error('🔍 [API] Status:', axiosError.response.status);
-//         console.error('🔍 [API] Data:', axiosError.response.data);
-//         console.error('🔍 [API] Headers:', axiosError.response.headers);
-//       }
-      
-//       throw error;
-//     }
+//     const { data } = await makeHttp().post(endpoint, form, {
+//       headers: { 'Content-Type': 'multipart/form-data' },
+//     });
+//     return data;
 //   },
 
-//   // POST /api/v1/epi/validation/close  — Form data
 //   closeValidationSession: async (sessionUuid: string): Promise<void> => {
 //     const form = new FormData();
 //     form.append('session_uuid', sessionUuid);
 //     await makeHttp().post(`${EPI}/validation/close`, form);
 //   },
 
-//   // Endpoint de porta — não existe no backend atual, silencioso
 //   openDoor: async (payload: {
 //     personCode?: string;
 //     personName?: string;
@@ -205,13 +141,12 @@
 // export type DoorStatus = 'closed' | 'open' | 'alert' | 'waiting';
 // export type CamRole    = 'face' | 'body1' | 'body2';
 
-// // ✅ NOVOS TIPOS PARA CÂMERAS IP E SINGLE CAMERA
 // export type CameraSourceType = 'local' | 'ip_url';
 
 // export interface CameraSource {
 //   type: CameraSourceType;
-//   deviceId?: string;  // Para câmeras locais
-//   url?: string;       // Para câmeras IP
+//   deviceId?: string;
+//   url?: string;
 // }
 
 // export interface Person {
@@ -240,6 +175,8 @@
 //   dailyExposure: DailyExposure | null;
 //   epiResult:     EpiResult | null;
 //   missingEpi:    string[];
+//   // ✅ Motivo do bloqueio para a tela access_denied
+//   deniedReason?: 'user_not_found' | 'epi_incomplete' | null;
 // }
 
 // export interface SysConfig {
@@ -251,11 +188,9 @@
 //   doorOpenMaxMin:    number;
 //   faceConfidenceMin: number;
 //   apiBase:           string;
-  
-//   // ✅ NOVOS CAMPOS PARA CÂMERAS IP E SINGLE CAMERA
-//   useSingleCamera:   boolean;  // Usar mesma câmera para face e EPI
-//   cameraSourceType:  Record<CamRole, CameraSourceType>;  // 'local' ou 'ip_url'
-//   cameraIpUrl:       Record<CamRole, string | null>;     // URLs das câmeras IP
+//   useSingleCamera:   boolean;
+//   cameraSourceType:  Record<CamRole, CameraSourceType>;
+//   cameraIpUrl:       Record<CamRole, string | null>;
 // }
 
 // export interface EpiConfig {
@@ -306,8 +241,6 @@
 //   setVideoRef:      (role: CamRole, element: HTMLVideoElement | null) => void;
 //   hasStream:        (role: CamRole) => boolean;
 //   getAssignment:    (role: CamRole) => string | null;
-  
-//   // ✅ NOVOS MÉTODOS PARA CÂMERAS IP
 //   sourceTypes:   Record<CamRole, CameraSourceType>;
 //   ipUrls:        Record<CamRole, string | null>;
 //   setSourceType: (role: CamRole, type: CameraSourceType) => void;
@@ -317,32 +250,25 @@
 // // ─── Tipos internos da API ────────────────────────────────────────────────────
 
 // interface PhotoResult {
-//   // Retorno do /validation/photo (backend real)
 //   session_uuid?:          string;
 //   photo_seq?:             number;
 //   photo_count_received?:  number;
 //   photo_count_required?:  number;
 //   session_complete?:      boolean;
-
-//   // Face
 //   face_detected?:         boolean;
-//   face_recognized?:       boolean;   // alias legado
+//   face_recognized?:       boolean;
 //   face_confidence?:       number;
 //   face_person_code?:      string;
-//   person_code?:           string;    // alias legado
+//   person_code?:           string;
 //   person_name?:           string;
-//   confidence?:            number;    // alias legado
-
-//   // EPI
+//   confidence?:            number;
 //   epi_compliant?:         boolean;
-//   compliant?:             boolean;   // alias legado
+//   compliant?:             boolean;
 //   compliance_score?:      number;
 //   missing?:               string[];
 //   missing_ppe?:           string[];
 //   detected?:              string[];
 //   detected_ppe?:          string[];
-
-//   // Sessão finalizada
 //   final_decision?: {
 //     access_decision:       string;
 //     epi_compliant:         boolean;
@@ -351,11 +277,10 @@
 //     person_code?:          string;
 //     person_name?:          string;
 //   } | null;
-
 //   daily_exposure?: DailyExposure;
 // }
 
-// // ─── Estados por screen/modal (expostos como props prontas) ───────────────────
+// // ─── Estados por screen/modal ─────────────────────────────────────────────────
 
 // export type FaceScanStep = 'ready' | 'capturing' | 'processing' | 'done' | 'error';
 
@@ -401,41 +326,28 @@
 //   fetchPeople: () => Promise<void>;
 // }
 
-// // ─── Return do hook ───────────────────────────────────────────────────────────
-
 // export interface UseCamAutomationReturn {
-//   // Máquina de estados
 //   screen:     Screen;
 //   direction:  Direction;
 //   doorStatus: DoorStatus;
 //   session:    Session;
 //   sysConfig:  SysConfig;
-
-//   // Modais
 //   showReport:    boolean;
 //   showConfig:    boolean;
 //   setShowReport: (v: boolean) => void;
 //   setShowConfig: (v: boolean) => void;
-
-//   // Câmeras
 //   cameraHook: CameraHook;
-
-//   // Estados prontos para cada screen/modal
 //   idleState:       IdleState;
 //   faceScanState:   FaceScanState;
 //   epiScanState:    EpiScanState;
 //   configState:     ConfigState;
 //   permanenceState: PermanenceState;
-
-//   // Navegação
 //   handleStartEntry:      () => void;
 //   handleStartExit:       () => void;
 //   handleGoIdle:          () => void;
 //   handleTimeOverride:    () => void;
 //   handleRetryFromDenied: () => void;
 //   handleSaveConfig:      (newConfig: Partial<SysConfig>) => void;
-
-//   // Ações (chamam API internamente)
 //   handleCaptureFace: () => Promise<void>;
 //   handleRetryFace:   () => void;
 //   handleCaptureEpi:  () => Promise<void>;
@@ -452,7 +364,6 @@
 //   body2: 'epi_cam_body2',
 // };
 
-// // ✅ NOVOS KEYS PARA TIPO E URL DE CÂMERA
 // const LS_KEYS_TYPE: Record<CamRole, string> = {
 //   face:  'epi_cam_face_type',
 //   body1: 'epi_cam_body1_type',
@@ -471,6 +382,7 @@
 //   dailyExposure: null,
 //   epiResult:     null,
 //   missingEpi:    [],
+//   deniedReason:  null,
 // };
 
 // const DEFAULT_CONFIG: SysConfig = {
@@ -482,8 +394,6 @@
 //   doorOpenMaxMin:    15,
 //   faceConfidenceMin: 70,
 //   apiBase:           'https://aihub.smartxhub.cloud',
-  
-//   // ✅ VALORES PADRÃO PARA CÂMERAS IP E SINGLE CAMERA
 //   useSingleCamera:   false,
 //   cameraSourceType: {
 //     face:  'local',
@@ -513,30 +423,38 @@
 // const epiLabel = (k: string) => EPI_LABELS_PT[k] ?? k;
 
 // // ─────────────────────────────────────────────────────────────────────────────
-// // ✅ HELPER: CAPTURA DE FRAME DE CÂMERA IP VIA URL
+// // HELPER: CAPTURA DE FRAME DE CÂMERA IP VIA URL
 // // ─────────────────────────────────────────────────────────────────────────────
 
 // async function captureFrameFromUrl(url: string): Promise<Blob> {
-//   console.log('🔍 [CAM] Capturando de URL IP:', url);
-  
+//   let finalUrl = url;
+//   let authHeader: string | undefined;
+
 //   try {
-//     const response = await fetch(url, {
-//       method: 'GET',
-//       mode: 'cors',
-//     });
-    
-//     if (!response.ok) {
-//       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+//     const urlObj = new URL(url);
+//     if (urlObj.username || urlObj.password) {
+//       const username = decodeURIComponent(urlObj.username);
+//       const password = decodeURIComponent(urlObj.password);
+//       authHeader = 'Basic ' + btoa(`${username}:${password}`);
+//       urlObj.username = '';
+//       urlObj.password = '';
+//       finalUrl = urlObj.toString();
 //     }
-    
-//     const blob = await response.blob();
-//     console.log('🔍 [CAM] ✅ Frame capturado da URL:', blob.size, 'bytes');
-//     return blob;
-    
-//   } catch (error) {
-//     console.error('🔍 [CAM] ❌ Erro ao capturar de URL:', error);
-//     throw error;
+//   } catch (e) {
+//     console.warn('[CAM] Erro ao parsear URL, usando como está:', e);
 //   }
+
+//   const response = await fetch(finalUrl, {
+//     method: 'GET',
+//     mode: 'cors',
+//     headers: authHeader ? { 'Authorization': authHeader } : undefined,
+//   });
+
+//   if (!response.ok) {
+//     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+//   }
+
+//   return response.blob();
 // }
 
 // // ─────────────────────────────────────────────────────────────────────────────
@@ -550,20 +468,19 @@
 //     body1: localStorage.getItem(LS_KEYS.body1) || null,
 //     body2: localStorage.getItem(LS_KEYS.body2) || null,
 //   });
-  
-//   // ✅ NOVOS ESTADOS PARA CÂMERAS IP
+
 //   const [sourceTypes, setSourceTypes] = useState<Record<CamRole, CameraSourceType>>({
 //     face:  (localStorage.getItem(LS_KEYS_TYPE.face)  as CameraSourceType) || 'local',
 //     body1: (localStorage.getItem(LS_KEYS_TYPE.body1) as CameraSourceType) || 'local',
 //     body2: (localStorage.getItem(LS_KEYS_TYPE.body2) as CameraSourceType) || 'local',
 //   });
-  
+
 //   const [ipUrls, setIpUrls] = useState<Record<CamRole, string | null>>({
 //     face:  localStorage.getItem(LS_KEYS_URL.face)  || null,
 //     body1: localStorage.getItem(LS_KEYS_URL.body1) || null,
 //     body2: localStorage.getItem(LS_KEYS_URL.body2) || null,
 //   });
-  
+
 //   const [streams, setStreams] = useState<Partial<Record<CamRole, MediaStream>>>({});
 //   const [loading, setLoading] = useState(false);
 //   const [error,   setError]   = useState<string | null>(null);
@@ -594,14 +511,8 @@
 
 //   const startStream = useCallback(async (role: CamRole): Promise<MediaStream | null> => {
 //     const sourceType = sourceTypes[role];
-    
-//     // ✅ Câmera IP não precisa de stream - usa snapshot direto
-//     if (sourceType === 'ip_url') {
-//       console.log(`🔍 [CAM] Role ${role} configurado como IP - não inicia stream`);
-//       return null;
-//     }
-    
-//     // Câmera local - comportamento normal
+//     if (sourceType === 'ip_url') return null;
+
 //     const deviceId = assignments[role];
 //     if (!deviceId) return null;
 //     streams[role]?.getTracks().forEach((t) => t.stop());
@@ -638,22 +549,16 @@
 
 //   const captureFrame = useCallback(async (role: CamRole) => {
 //     const sourceType = sourceTypes[role];
-    
-//     // ✅ CÂMERA IP - Captura via URL
+
 //     if (sourceType === 'ip_url') {
 //       const url = ipUrls[role];
-//       if (!url) {
-//         throw new Error(`URL não configurada para câmera ${role}`);
-//       }
-      
+//       if (!url) throw new Error(`URL não configurada para câmera ${role}`);
 //       const blob = await captureFrameFromUrl(url);
 //       const dataUrl = URL.createObjectURL(blob);
 //       const canvas = document.createElement('canvas');
-      
 //       return { blob, dataUrl, canvas };
 //     }
-    
-//     // ✅ CÂMERA LOCAL - Comportamento original
+
 //     const video = videoRefs.current[role];
 //     if (!video || video.readyState < 2) throw new Error(`Câmera "${role}" não está pronta.`);
 //     const canvas = document.createElement('canvas');
@@ -675,7 +580,6 @@
 //     if (element && streams[role]) element.srcObject = streams[role]!;
 //   }, [streams]);
 
-//   // ✅ NOVOS MÉTODOS PARA CONFIGURAR CÂMERAS IP
 //   const setSourceType = useCallback((role: CamRole, type: CameraSourceType) => {
 //     setSourceTypes((prev) => ({ ...prev, [role]: type }));
 //     localStorage.setItem(LS_KEYS_TYPE[role], type);
@@ -707,8 +611,6 @@
 //     captureFrame, assignDevice, setVideoRef,
 //     hasStream:     (role) => !!streams[role],
 //     getAssignment: (role) => assignments[role],
-    
-//     // ✅ NOVOS MÉTODOS E ESTADOS
 //     sourceTypes,
 //     ipUrls,
 //     setSourceType,
@@ -722,7 +624,6 @@
 
 // export function useCamAutomation(): UseCamAutomationReturn {
 
-//   // ── Máquina de estados ────────────────────────────────────────────────────
 //   const [screen,     setScreen]     = useState<Screen>('idle');
 //   const [direction,  setDirection]  = useState<Direction>('ENTRY');
 //   const [doorStatus, setDoorStatus] = useState<DoorStatus>('closed');
@@ -731,14 +632,11 @@
 //   const [showReport, setShowReport] = useState(false);
 //   const [showConfig, setShowConfig] = useState(false);
 
-//   // ── Câmeras ───────────────────────────────────────────────────────────────
 //   const cameraHook = useCameraInternal(sysConfig);
 
-//   // ── Idle state ────────────────────────────────────────────────────────────
 //   const [dashboard,   setDashboard]   = useState<DashboardData | null>(null);
 //   const [loadingDash, setLoadingDash] = useState(true);
 
-//   // ── FaceScan state ────────────────────────────────────────────────────────
 //   const [faceStep,       setFaceStep]       = useState<FaceScanStep>('ready');
 //   const [faceCaptureUrl, setFaceCaptureUrl] = useState<string | null>(null);
 //   const [faceProgress,   setFaceProgress]   = useState(0);
@@ -747,7 +645,6 @@
 //   const [faceCountdown,  setFaceCountdown]  = useState<number | null>(null);
 //   const faceAutoCapture = useRef(false);
 
-//   // ── EpiScan state ─────────────────────────────────────────────────────────
 //   const [epiStep,        setEpiStep]        = useState<EpiScanStep>('ready');
 //   const [epiCaptureUrl1, setEpiCaptureUrl1] = useState<string | null>(null);
 //   const [epiCaptureUrl2, setEpiCaptureUrl2] = useState<string | null>(null);
@@ -756,17 +653,21 @@
 //   const [epiResult,      setEpiResult]      = useState<EpiResult | null>(null);
 //   const epiAutoCapture = useRef(false);
 
-//   // ── Config modal state ────────────────────────────────────────────────────
+//   // Keep session in sync with a ref to avoid stale closure in async callbacks
+//   const sessionRef = useRef<Session>(EMPTY_SESSION);
+
 //   const [localConfig, setLocalConfig] = useState<SysConfig>(DEFAULT_CONFIG);
 //   const [epiConfig,   setEpiConfig]   = useState<EpiConfig | null>(null);
 //   const [saving,      setSaving]      = useState(false);
 //   const [saved,       setSaved]       = useState(false);
 
-//   // ── Permanence modal state ────────────────────────────────────────────────
 //   const [people,        setPeople]        = useState<WorkerRecord[]>([]);
 //   const [loadingPeople, setLoadingPeople] = useState(false);
 
 //   // ─── Helpers de reset ─────────────────────────────────────────────────────
+
+//   // Mantém sessionRef sempre sincronizado para uso em callbacks com closure stale
+//   useEffect(() => { sessionRef.current = session; }, [session]);
 
 //   const resetSession = useCallback(() => setSession(EMPTY_SESSION), []);
 
@@ -790,7 +691,7 @@
 //     setEpiResult(null);
 //   }, []);
 
-//   // ─── Carrega config do backend ────────────────────────────────────────────
+//   // ─── Config ───────────────────────────────────────────────────────────────
 
 //   useEffect(() => {
 //     api.getLocalConfig()
@@ -801,7 +702,7 @@
 //       .catch((e: Error) => console.warn('[useCamAutomation] Config load failed:', e.message));
 //   }, []);
 
-//   // ─── Dashboard polling (apenas na tela idle) ──────────────────────────────
+//   // ─── Dashboard polling ────────────────────────────────────────────────────
 
 //   const refreshDashboard = useCallback(async () => {
 //     try {
@@ -821,15 +722,11 @@
 //     return () => clearInterval(t);
 //   }, [screen, refreshDashboard]);
 
-//   // ─── EpiConfig ao abrir modal de config ──────────────────────────────────
-
 //   useEffect(() => {
 //     if (!showConfig) return;
 //     setLocalConfig({ ...sysConfig });
 //     api.getEpiConfig().then(setEpiConfig).catch(console.warn);
 //   }, [showConfig, sysConfig]);
-
-//   // ─── People ao abrir modal de permanência ─────────────────────────────────
 
 //   const fetchPeople = useCallback(async () => {
 //     try {
@@ -907,22 +804,17 @@
 
 //   const handleTimeOverride = useCallback(() => {
 //     resetEpiScan(true);
-    
 //     if (sysConfig.useSingleCamera) {
-//       // ✅ Modo single camera - reutiliza câmera face
-//       console.log('🔍 [SINGLE CAM] Usando câmera face para EPI');
-//       // Não precisa iniciar nova stream - a face já está ativa
+//       // câmera face já está ativa
 //     } else {
-//       // Modo tradicional - câmeras separadas
 //       cameraHook.startStream('body1');
 //       if (cameraHook.getAssignment('body2')) cameraHook.startStream('body2');
 //     }
-    
 //     setScreen('epi_scan');
 //   }, [cameraHook, resetEpiScan, sysConfig.useSingleCamera]);
 
 //   const handleRetryFromDenied = useCallback(() => {
-//     setSession((prev) => ({ ...prev, epiResult: null, missingEpi: [] }));
+//     setSession((prev) => ({ ...prev, epiResult: null, missingEpi: [], deniedReason: null }));
 //     resetEpiScan(false);
 //     setScreen('epi_scan');
 //   }, [resetEpiScan]);
@@ -1013,73 +905,54 @@
 //   const handleRetryFace = useCallback(() => resetFaceScan(false), [resetFaceScan]);
 
 //   // ─── ACTION: Captura EPI ──────────────────────────────────────────────────
-//   // ⚠️  COM LOGS DE DEBUG
 
 //   const handleCaptureEpi = useCallback(async () => {
-//     if (epiStep !== 'ready') {
-//       console.log('🔍 [DEBUG] handleCaptureEpi abortado - epiStep:', epiStep);
-//       return;
-//     }
+//     if (epiStep !== 'ready') return;
 //     epiAutoCapture.current = false;
 
-//     const hasBody2 = !sysConfig.useSingleCamera && !!cameraHook.getAssignment('body2');
+//     // ✅ BLOQUEIO: pessoa não identificada → acesso negado imediato, sem câmera EPI
+//     // Usa sessionRef para evitar closure stale quando chamado pelo auto-capture (setInterval)
+//     const personCode = sessionRef.current.person?.personCode?.trim();
+//     const personName = sessionRef.current.person?.personName?.trim();
+//     if (!personCode && !personName) {
+//       console.warn('[EPI] Pessoa não identificada — acesso negado sem leitura EPI');
+//       epiAutoCapture.current = false;
+//       setEpiStep('error');
+//       setEpiStatusMsg('❌ Usuário não encontrado — Acesso negado');
+//       setDoorStatus('closed');
+//       setSession((prev) => ({
+//         ...prev,
+//         missingEpi:   [],
+//         deniedReason: 'user_not_found',
+//         epiResult:    { compliant: false },
+//       }));
+//       setTimeout(() => setScreen('access_denied'), 1500);
+//       return;
+//     }
 
-//     // ===== LOGS DE DEBUG DETALHADOS =====
-//     console.log('🔍 [DEBUG] ========================================');
-//     console.log('🔍 [DEBUG] INICIANDO CAPTURA EPI');
-//     console.log('🔍 [DEBUG] ========================================');
-//     console.log('🔍 [DEBUG] Person:', session.person);
-//     console.log('🔍 [DEBUG] Previous Session UUID (facial):', session.sessionUuid);
-//     console.log('🔍 [DEBUG] Single Camera Mode:', sysConfig.useSingleCamera);
-//     console.log('🔍 [DEBUG] SysConfig:', {
-//       companyId: sysConfig.companyId,
-//       zoneId: sysConfig.zoneId,
-//       doorId: sysConfig.doorId,
-//       apiBase: sysConfig.apiBase,
-//     });
-//     console.log('🔍 [DEBUG] Has Body2:', hasBody2);
-//     console.log('🔍 [DEBUG] ========================================');
+//     const hasBody2 = !sysConfig.useSingleCamera && !!cameraHook.getAssignment('body2');
 
 //     try {
 //       setEpiStep('capturing');
 //       setEpiStatusMsg('Capturando frames…');
 
-//       // ✅ SINGLE CAMERA MODE - Captura da câmera face
 //       const captureRole: CamRole = sysConfig.useSingleCamera ? 'face' : 'body1';
-      
-//       console.log('🔍 [DEBUG] Capturando body1 de role:', captureRole);
 //       const { blob: blob1, dataUrl: url1 } = await cameraHook.captureFrame(captureRole);
 //       setEpiCaptureUrl1(url1);
-      
-//       console.log('🔍 [DEBUG] ✅ Body1 capturado:', {
-//         size: blob1.size,
-//         type: blob1.type,
-//       });
 
-//       // Captura body2 (opcional)
 //       let blob2: Blob | null = null;
 //       if (hasBody2) {
 //         try {
-//           console.log('🔍 [DEBUG] Capturando body2...');
 //           const f2 = await cameraHook.captureFrame('body2');
 //           setEpiCaptureUrl2(f2.dataUrl);
 //           blob2 = f2.blob;
-//           console.log('🔍 [DEBUG] ✅ Body2 capturado:', {
-//             size: f2.blob.size,
-//             type: f2.blob.type,
-//           });
 //         } catch (e2) {
-//           console.warn('🔍 [DEBUG] ⚠️  Body2 capture failed:', (e2 as Error).message);
+//           console.warn('[EPI] Body2 capture failed:', (e2 as Error).message);
 //         }
 //       }
 
 //       setEpiStep('processing');
 //       setEpiStatusMsg('Detectando EPIs… aguarde');
-
-//       // ===== ✅ CRIAR NOVA SESSÃO PARA EPI =====
-//       console.log('🔍 [DEBUG] ========================================');
-//       console.log('🔍 [DEBUG] CRIANDO NOVA SESSÃO PARA VALIDAÇÃO EPI');
-//       console.log('🔍 [DEBUG] ========================================');
 
 //       const epiSessionData = await api.startValidationSession({
 //         direction,
@@ -1087,137 +960,63 @@
 //         zone_id: sysConfig.zoneId,
 //       });
 //       const epiSessionUuid = epiSessionData.session_uuid || epiSessionData.sessionUuid!;
-      
-//       console.log('🔍 [DEBUG] ✅ Nova sessão EPI criada:', epiSessionUuid);
 
-//       // ===== ENVIO PARA API - BODY1 =====
-//       console.log('🔍 [DEBUG] ========================================');
-//       console.log('🔍 [DEBUG] ENVIANDO BODY1 PARA API');
-//       console.log('🔍 [DEBUG] ========================================');
-//       console.log('🔍 [DEBUG] Endpoint:', `${sysConfig.apiBase}/api/v1/epi/validation/photo`);
-//       console.log('🔍 [DEBUG] Params enviados:', {
-//         session_uuid: epiSessionUuid,
-//         photoType: 'body',
-//         cameraId: 2,
-//         blobSize: blob1.size,
-//         blobType: blob1.type,
-//       });
+//       const photo1 = await api.sendValidationPhoto(epiSessionUuid, blob1, { photoType: 'body', cameraId: 2 });
+//       let finalResult: EpiResult = { ...photo1, compliant: photo1.compliant ?? false };
+
+//       if (blob2) {
+//         try {
+//           const photo2 = await api.sendValidationPhoto(epiSessionUuid, blob2, { photoType: 'body', cameraId: 3 });
+//           if (!photo2.compliant) finalResult = { ...photo2, compliant: photo2.compliant ?? false };
+//         } catch (e3) {
+//           console.warn('[EPI] Body2 send failed:', (e3 as Error).message);
+//         }
+//       }
 
 //       try {
-//         const photo1 = await api.sendValidationPhoto(epiSessionUuid, blob1, { photoType: 'body', cameraId: 2 });
-//         console.log('🔍 [DEBUG] ✅ Body1 API response:', photo1);
-        
-//         let finalResult: EpiResult = { ...photo1, compliant: photo1.compliant ?? false };
+//         await api.closeValidationSession(epiSessionUuid);
+//       } catch (_) {
+//         // ignorado
+//       }
 
-//         // ===== ENVIO PARA API - BODY2 (se existir) =====
-//         if (blob2) {
-//           console.log('🔍 [DEBUG] ========================================');
-//           console.log('🔍 [DEBUG] ENVIANDO BODY2 PARA API');
-//           console.log('🔍 [DEBUG] ========================================');
-//           try {
-//             const photo2 = await api.sendValidationPhoto(epiSessionUuid, blob2, { photoType: 'body', cameraId: 3 });
-//             console.log('🔍 [DEBUG] ✅ Body2 API response:', photo2);
-//             if (!photo2.compliant) finalResult = { ...photo2, compliant: photo2.compliant ?? false };
-//           } catch (e3) {
-//             console.error('🔍 [DEBUG] ❌ Body2 API error:', e3);
-//             console.warn('[useCamAutomation] Body2 send failed:', (e3 as Error).message);
-//           }
-//         }
+//       setEpiResult(finalResult);
+//       setEpiStep('done');
+//       setSession((prev) => ({ ...prev, epiResult: finalResult, deniedReason: null }));
 
-//         // ===== FECHAR SESSÃO =====
-//         console.log('🔍 [DEBUG] Fechando sessão...');
-//         try { 
-//           await api.closeValidationSession(epiSessionUuid);
-//           console.log('🔍 [DEBUG] ✅ Sessão fechada');
-//         } catch (_) { 
-//           console.log('🔍 [DEBUG] ⚠️  Erro ao fechar sessão (ignorado)');
+//       if (finalResult.compliant) {
+//         setEpiStatusMsg('✅ EPI Completo — Acesso liberado');
+//         try {
+//           await api.openDoor({
+//             personCode:  sessionRef.current.person?.personCode,
+//             personName:  sessionRef.current.person?.personName,
+//             sessionUuid: epiSessionUuid,
+//             reason:      'EPI_COMPLIANT',
+//           });
+//           setDoorStatus('open');
+//         } catch (e) {
+//           console.error('[EPI] Erro ao abrir porta:', e);
 //         }
-
-//         // ===== PROCESSAR RESULTADO =====
-//         console.log('🔍 [DEBUG] ========================================');
-//         console.log('🔍 [DEBUG] RESULTADO FINAL');
-//         console.log('🔍 [DEBUG] ========================================');
-//         console.log('🔍 [DEBUG] finalResult:', finalResult);
-
-//         setEpiResult(finalResult);
-//         setEpiStep('done');
-//         setSession((prev) => ({ ...prev, epiResult: finalResult }));
-
-//         if (finalResult.compliant) {
-//           setEpiStatusMsg('✅ EPI Completo — Acesso liberado');
-//           console.log('🔍 [DEBUG] ✅ EPI COMPLETO - Abrindo porta');
-//           try {
-//             await api.openDoor({
-//               personCode:  session.person?.personCode,
-//               personName:  session.person?.personName,
-//               sessionUuid: epiSessionUuid,
-//               reason:      'EPI_COMPLIANT',
-//             });
-//             setDoorStatus('open');
-//             console.log('🔍 [DEBUG] ✅ Porta aberta');
-//           } catch (e) {
-//             console.error('🔍 [DEBUG] ❌ Erro ao abrir porta:', e);
-//           }
-//           setTimeout(() => setScreen('access_granted'), 1200);
-//         } else {
-//           setEpiStatusMsg('❌ EPI Incompleto — Acesso negado');
-//           console.log('🔍 [DEBUG] ❌ EPI INCOMPLETO');
-//           const missing = (finalResult.missing || finalResult.missing_ppe || []).map(epiLabel);
-//           console.log('🔍 [DEBUG] EPIs faltando:', missing);
-//           setSession((prev) => ({ ...prev, missingEpi: missing }));
-//           setDoorStatus('closed');
-//           setTimeout(() => setScreen('access_denied'), 1200);
-//         }
-
-//       } catch (apiError) {
-//         // ===== CAPTURAR ERRO 400 DETALHADO =====
-//         console.error('🔍 [DEBUG] ========================================');
-//         console.error('🔍 [DEBUG] ❌ ERRO 400 NA API');
-//         console.error('🔍 [DEBUG] ========================================');
-//         console.error('🔍 [DEBUG] Error object:', apiError);
-        
-//         const axiosError = apiError as any;
-        
-//         if (axiosError.response) {
-//           console.error('🔍 [DEBUG] Response status:', axiosError.response.status);
-//           console.error('🔍 [DEBUG] Response data:', axiosError.response.data);
-//           console.error('🔍 [DEBUG] Response headers:', axiosError.response.headers);
-//         }
-        
-//         if (axiosError.config) {
-//           console.error('🔍 [DEBUG] Request URL:', axiosError.config.url);
-//           console.error('🔍 [DEBUG] Request method:', axiosError.config.method);
-//           console.error('🔍 [DEBUG] Request headers:', axiosError.config.headers);
-//         }
-        
-//         if (axiosError.request) {
-//           console.error('🔍 [DEBUG] Request object:', axiosError.request);
-//         }
-        
-//         throw apiError; // Re-throw para cair no catch externo
+//         setTimeout(() => setScreen('access_granted'), 1200);
+//       } else {
+//         setEpiStatusMsg('❌ EPI Incompleto — Acesso negado');
+//         const missing = (finalResult.missing || finalResult.missing_ppe || []).map(epiLabel);
+//         setSession((prev) => ({ ...prev, missingEpi: missing, deniedReason: 'epi_incomplete' }));
+//         setDoorStatus('closed');
+//         setTimeout(() => setScreen('access_denied'), 1200);
 //       }
 
 //     } catch (e) {
-//       console.error('🔍 [DEBUG] ========================================');
-//       console.error('🔍 [DEBUG] ❌ ERRO GERAL NO FLUXO EPI');
-//       console.error('🔍 [DEBUG] ========================================');
 //       console.error('[useCamAutomation] EPI capture failed:', e);
-      
 //       setEpiStep('error');
-//       setEpiStatusMsg('Erro na detecção de EPI');
-      
-//       const errorMsg = (e as any)?.response?.data?.detail 
-//         || (e as Error)?.message 
-//         || 'Erro desconhecido';
-      
-//       console.error('🔍 [DEBUG] Error message:', errorMsg);
+//       const errorMsg = (e as any)?.response?.data?.detail || (e as Error)?.message || 'Erro desconhecido';
+//       setEpiStatusMsg(`Erro na detecção de EPI: ${errorMsg}`);
 //     }
 //   // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [epiStep, session, cameraHook, direction, sysConfig]);
+//   }, [epiStep, cameraHook, direction, sysConfig]);
 
 //   const handleRetryEpi = useCallback(() => resetEpiScan(false), [resetEpiScan]);
 
-//   // ─── ACTION: Salva config (modal) ─────────────────────────────────────────
+//   // ─── ACTION: Salva config ─────────────────────────────────────────────────
 
 //   const handleSaveConfigModal = useCallback(async () => {
 //     try {
@@ -1304,12 +1103,10 @@
 // }
 
 
-
 // src/hooks/useCamAutomation.ts
 // Hook central da máquina de estados do fluxo de automação EPI Check
 // Responsável por: estado da sessão, câmeras, configuração, todas as chamadas de API
 // Os screens e components NÃO importam a API diretamente — tudo vem deste hook
-// ⚠️  VERSÃO COM DEBUG ATIVO - Ver logs com 🔍 [DEBUG] no console
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
@@ -1318,52 +1115,38 @@ import axios from 'axios';
 // API LAYER (interno ao hook — nenhum screen/component precisa importar)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Retorna a URL base da API — mesmo padrão do useAssetAvailability.
- * Usa sessionStorage['apiEndpoint'] quando disponível,
- * com fallback para a URL de produção do SmartX.
- */
 const getApiBaseUrl = (): string => {
   const saved = sessionStorage.getItem('apiEndpoint');
   return saved ?? 'https://aihub.smartxhub.cloud';
 };
 
-/** Cria um axios instance apontando para o endpoint atual */
 const makeHttp = () =>
   axios.create({ baseURL: getApiBaseUrl(), timeout: 30000 });
 
-// Prefixo base do router EPI no backend FastAPI
-// Montado em: /api/v1/epi  (router = APIRouter(), incluído com prefix="/api/v1/epi")
 const EPI = '/api/v1/epi';
 
 const api = {
-  // Não existe endpoint /local/config no backend — retorna objeto vazio silenciosamente
   getLocalConfig: async (): Promise<Partial<SysConfig>> => {
     try {
       const { data } = await makeHttp().get(`${EPI}/local/config`);
       return data;
     } catch {
-      return {}; // fallback para DEFAULT_CONFIG
+      return {};
     }
   },
 
-  // GET /api/v1/epi/analytics/dashboard
   getDashboard: async (): Promise<DashboardData> => {
     const { data } = await makeHttp().get(`${EPI}/analytics/dashboard`);
     return data;
   },
 
-  // GET /api/v1/epi/analytics/people
   getPeople: async (activeOnly = false): Promise<{ people?: WorkerRecord[] } | WorkerRecord[]> => {
     const { data } = await makeHttp().get(`${EPI}/analytics/people`, { params: { active_only: activeOnly } });
     return data;
   },
 
-  // GET /api/v1/epi/config
   getEpiConfig: async (): Promise<EpiConfig> => {
     const { data } = await makeHttp().get(`${EPI}/config`);
-    // backend retorna { config, active_classes, all_classes }
-    // mapeia para o formato EpiConfig esperado pelo hook
     return {
       required_ppe:       data.config?.required_ppe ?? [],
       available_classes:  data.all_classes ? Object.values(data.all_classes) as string[] : [],
@@ -1371,12 +1154,10 @@ const api = {
     };
   },
 
-  // POST /api/v1/epi/config  — body: { required_ppe: string[] }
   saveEpiConfig: async (config: { required_ppe: string[] }): Promise<void> => {
     await makeHttp().post(`${EPI}/config`, config);
   },
 
-  // POST /api/v1/epi/validation/start  — Form data (FastAPI usa Form(...))
   startValidationSession: async (
     overrides: Record<string, unknown> = {},
   ): Promise<{ session_uuid: string; sessionUuid?: string }> => {
@@ -1385,83 +1166,36 @@ const api = {
     form.append('direction',  String(overrides.direction ?? 'ENTRY'));
     form.append('zone_id',    String(overrides.zone_id  ?? ''));
     form.append('compliance_mode',       'majority');
-    form.append('photo_count_required',  '1');   // 1 foto por captura (face ou body)
+    form.append('photo_count_required',  '1');
     form.append('timeout_seconds',       '30');
     const { data } = await makeHttp().post(`${EPI}/validation/start`, form);
     return data;
   },
 
-  // POST /api/v1/epi/validation/photo  — multipart/form-data
-  // ⚠️  COM LOGS DE DEBUG
   sendValidationPhoto: async (
     sessionUuid: string,
     frameBlob: Blob,
     opts: { photoType?: string; cameraId?: number } = {},
   ): Promise<PhotoResult> => {
-    console.log('🔍 [API] ========================================');
-    console.log('🔍 [API] sendValidationPhoto CHAMADA');
-    console.log('🔍 [API] ========================================');
-    console.log('🔍 [API] sessionUuid:', sessionUuid);
-    console.log('🔍 [API] frameBlob:', {
-      size: frameBlob.size,
-      type: frameBlob.type,
-    });
-    console.log('🔍 [API] opts:', opts);
-
     const form = new FormData();
     form.append('session_uuid', sessionUuid);
     form.append('file', frameBlob, 'frame.jpg');
     if (opts.cameraId !== undefined) form.append('camera_id', String(opts.cameraId));
     if (opts.photoType) form.append('photo_type', opts.photoType);
 
-    // Log de todos os campos do FormData
-    console.log('🔍 [API] FormData fields:');
-    for (const [key, value] of form.entries()) {
-      if (value instanceof Blob) {
-        console.log(`  ${key}: Blob(${value.size} bytes, ${value.type})`);
-      } else {
-        console.log(`  ${key}:`, value);
-      }
-    }
-
     const endpoint = `${EPI}/validation/photo`;
-    const fullUrl = `${getApiBaseUrl()}${endpoint}`;
-    console.log('🔍 [API] Full URL:', fullUrl);
-
-    try {
-      const { data } = await makeHttp().post(endpoint, form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      
-      console.log('🔍 [API] ✅ SUCCESS');
-      console.log('🔍 [API] Response data:', data);
-      return data;
-      
-    } catch (error) {
-      console.error('🔍 [API] ========================================');
-      console.error('🔍 [API] ❌ REQUEST FAILED');
-      console.error('🔍 [API] ========================================');
-      console.error('🔍 [API] Error:', error);
-      
-      const axiosError = error as any;
-      if (axiosError.response) {
-        console.error('🔍 [API] Status:', axiosError.response.status);
-        console.error('🔍 [API] Data:', axiosError.response.data);
-        console.error('🔍 [API] Headers:', axiosError.response.headers);
-      }
-      
-      throw error;
-    }
+    const { data } = await makeHttp().post(endpoint, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
   },
 
-  // POST /api/v1/epi/validation/close  — Form data
   closeValidationSession: async (sessionUuid: string): Promise<void> => {
     const form = new FormData();
     form.append('session_uuid', sessionUuid);
     await makeHttp().post(`${EPI}/validation/close`, form);
   },
 
-  // Endpoint de porta — não existe no backend atual, silencioso
   openDoor: async (payload: {
     personCode?: string;
     personName?: string;
@@ -1512,13 +1246,12 @@ export type Direction  = 'ENTRY' | 'EXIT';
 export type DoorStatus = 'closed' | 'open' | 'alert' | 'waiting';
 export type CamRole    = 'face' | 'body1' | 'body2';
 
-// ✅ NOVOS TIPOS PARA CÂMERAS IP E SINGLE CAMERA
 export type CameraSourceType = 'local' | 'ip_url';
 
 export interface CameraSource {
   type: CameraSourceType;
-  deviceId?: string;  // Para câmeras locais
-  url?: string;       // Para câmeras IP
+  deviceId?: string;
+  url?: string;
 }
 
 export interface Person {
@@ -1547,6 +1280,8 @@ export interface Session {
   dailyExposure: DailyExposure | null;
   epiResult:     EpiResult | null;
   missingEpi:    string[];
+  // Motivo do bloqueio para a tela access_denied
+  deniedReason?: 'user_not_found' | 'epi_incomplete' | null;
 }
 
 export interface SysConfig {
@@ -1558,11 +1293,9 @@ export interface SysConfig {
   doorOpenMaxMin:    number;
   faceConfidenceMin: number;
   apiBase:           string;
-  
-  // ✅ NOVOS CAMPOS PARA CÂMERAS IP E SINGLE CAMERA
-  useSingleCamera:   boolean;  // Usar mesma câmera para face e EPI
-  cameraSourceType:  Record<CamRole, CameraSourceType>;  // 'local' ou 'ip_url'
-  cameraIpUrl:       Record<CamRole, string | null>;     // URLs das câmeras IP
+  useSingleCamera:   boolean;
+  cameraSourceType:  Record<CamRole, CameraSourceType>;
+  cameraIpUrl:       Record<CamRole, string | null>;
 }
 
 export interface EpiConfig {
@@ -1613,8 +1346,6 @@ export interface CameraHook {
   setVideoRef:      (role: CamRole, element: HTMLVideoElement | null) => void;
   hasStream:        (role: CamRole) => boolean;
   getAssignment:    (role: CamRole) => string | null;
-  
-  // ✅ NOVOS MÉTODOS PARA CÂMERAS IP
   sourceTypes:   Record<CamRole, CameraSourceType>;
   ipUrls:        Record<CamRole, string | null>;
   setSourceType: (role: CamRole, type: CameraSourceType) => void;
@@ -1624,32 +1355,25 @@ export interface CameraHook {
 // ─── Tipos internos da API ────────────────────────────────────────────────────
 
 interface PhotoResult {
-  // Retorno do /validation/photo (backend real)
   session_uuid?:          string;
   photo_seq?:             number;
   photo_count_received?:  number;
   photo_count_required?:  number;
   session_complete?:      boolean;
-
-  // Face
   face_detected?:         boolean;
-  face_recognized?:       boolean;   // alias legado
+  face_recognized?:       boolean;
   face_confidence?:       number;
   face_person_code?:      string;
-  person_code?:           string;    // alias legado
+  person_code?:           string;
   person_name?:           string;
-  confidence?:            number;    // alias legado
-
-  // EPI
+  confidence?:            number;
   epi_compliant?:         boolean;
-  compliant?:             boolean;   // alias legado
+  compliant?:             boolean;
   compliance_score?:      number;
   missing?:               string[];
   missing_ppe?:           string[];
   detected?:              string[];
   detected_ppe?:          string[];
-
-  // Sessão finalizada
   final_decision?: {
     access_decision:       string;
     epi_compliant:         boolean;
@@ -1658,11 +1382,10 @@ interface PhotoResult {
     person_code?:          string;
     person_name?:          string;
   } | null;
-
   daily_exposure?: DailyExposure;
 }
 
-// ─── Estados por screen/modal (expostos como props prontas) ───────────────────
+// ─── Estados por screen/modal ─────────────────────────────────────────────────
 
 export type FaceScanStep = 'ready' | 'capturing' | 'processing' | 'done' | 'error';
 
@@ -1708,41 +1431,28 @@ export interface PermanenceState {
   fetchPeople: () => Promise<void>;
 }
 
-// ─── Return do hook ───────────────────────────────────────────────────────────
-
 export interface UseCamAutomationReturn {
-  // Máquina de estados
   screen:     Screen;
   direction:  Direction;
   doorStatus: DoorStatus;
   session:    Session;
   sysConfig:  SysConfig;
-
-  // Modais
   showReport:    boolean;
   showConfig:    boolean;
   setShowReport: (v: boolean) => void;
   setShowConfig: (v: boolean) => void;
-
-  // Câmeras
   cameraHook: CameraHook;
-
-  // Estados prontos para cada screen/modal
   idleState:       IdleState;
   faceScanState:   FaceScanState;
   epiScanState:    EpiScanState;
   configState:     ConfigState;
   permanenceState: PermanenceState;
-
-  // Navegação
   handleStartEntry:      () => void;
   handleStartExit:       () => void;
   handleGoIdle:          () => void;
   handleTimeOverride:    () => void;
   handleRetryFromDenied: () => void;
   handleSaveConfig:      (newConfig: Partial<SysConfig>) => void;
-
-  // Ações (chamam API internamente)
   handleCaptureFace: () => Promise<void>;
   handleRetryFace:   () => void;
   handleCaptureEpi:  () => Promise<void>;
@@ -1759,7 +1469,6 @@ const LS_KEYS: Record<CamRole, string> = {
   body2: 'epi_cam_body2',
 };
 
-// ✅ NOVOS KEYS PARA TIPO E URL DE CÂMERA
 const LS_KEYS_TYPE: Record<CamRole, string> = {
   face:  'epi_cam_face_type',
   body1: 'epi_cam_body1_type',
@@ -1778,6 +1487,7 @@ const EMPTY_SESSION: Session = {
   dailyExposure: null,
   epiResult:     null,
   missingEpi:    [],
+  deniedReason:  null,
 };
 
 const DEFAULT_CONFIG: SysConfig = {
@@ -1789,8 +1499,6 @@ const DEFAULT_CONFIG: SysConfig = {
   doorOpenMaxMin:    15,
   faceConfidenceMin: 70,
   apiBase:           'https://aihub.smartxhub.cloud',
-  
-  // ✅ VALORES PADRÃO PARA CÂMERAS IP E SINGLE CAMERA
   useSingleCamera:   false,
   cameraSourceType: {
     face:  'local',
@@ -1820,58 +1528,38 @@ const EPI_LABELS_PT: Record<string, string> = {
 const epiLabel = (k: string) => EPI_LABELS_PT[k] ?? k;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ✅ HELPER: CAPTURA DE FRAME DE CÂMERA IP VIA URL
+// HELPER: CAPTURA DE FRAME DE CÂMERA IP VIA URL
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function captureFrameFromUrl(url: string): Promise<Blob> {
-  console.log('🔍 [CAM] Capturando de URL IP:', url);
-  
+  let finalUrl = url;
+  let authHeader: string | undefined;
+
   try {
-    // Extrair credenciais da URL (se existirem)
-    let finalUrl = url;
-    let authHeader: string | undefined;
-    
-    try {
-      const urlObj = new URL(url);
-      
-      // Se tem username e password na URL
-      if (urlObj.username || urlObj.password) {
-        const username = decodeURIComponent(urlObj.username);
-        const password = decodeURIComponent(urlObj.password);
-        
-        // Criar header de autenticação Basic
-        authHeader = 'Basic ' + btoa(`${username}:${password}`);
-        
-        // Remover credenciais da URL
-        urlObj.username = '';
-        urlObj.password = '';
-        finalUrl = urlObj.toString();
-        
-        console.log('🔍 [CAM] Usando Basic Authentication');
-      }
-    } catch (e) {
-      console.warn('🔍 [CAM] Erro ao parsear URL, usando como está:', e);
+    const urlObj = new URL(url);
+    if (urlObj.username || urlObj.password) {
+      const username = decodeURIComponent(urlObj.username);
+      const password = decodeURIComponent(urlObj.password);
+      authHeader = 'Basic ' + btoa(`${username}:${password}`);
+      urlObj.username = '';
+      urlObj.password = '';
+      finalUrl = urlObj.toString();
     }
-    
-    // Fazer requisição com header de autenticação
-    const response = await fetch(finalUrl, {
-      method: 'GET',
-      mode: 'cors',
-      headers: authHeader ? { 'Authorization': authHeader } : undefined,
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    
-    const blob = await response.blob();
-    console.log('🔍 [CAM] ✅ Frame capturado da URL:', blob.size, 'bytes');
-    return blob;
-    
-  } catch (error) {
-    console.error('🔍 [CAM] ❌ Erro ao capturar de URL:', error);
-    throw error;
+  } catch (e) {
+    console.warn('[CAM] Erro ao parsear URL, usando como está:', e);
   }
+
+  const response = await fetch(finalUrl, {
+    method: 'GET',
+    mode: 'cors',
+    headers: authHeader ? { 'Authorization': authHeader } : undefined,
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  return response.blob();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1885,20 +1573,19 @@ function useCameraInternal(sysConfig: SysConfig): CameraHook {
     body1: localStorage.getItem(LS_KEYS.body1) || null,
     body2: localStorage.getItem(LS_KEYS.body2) || null,
   });
-  
-  // ✅ NOVOS ESTADOS PARA CÂMERAS IP
+
   const [sourceTypes, setSourceTypes] = useState<Record<CamRole, CameraSourceType>>({
     face:  (localStorage.getItem(LS_KEYS_TYPE.face)  as CameraSourceType) || 'local',
     body1: (localStorage.getItem(LS_KEYS_TYPE.body1) as CameraSourceType) || 'local',
     body2: (localStorage.getItem(LS_KEYS_TYPE.body2) as CameraSourceType) || 'local',
   });
-  
+
   const [ipUrls, setIpUrls] = useState<Record<CamRole, string | null>>({
     face:  localStorage.getItem(LS_KEYS_URL.face)  || null,
     body1: localStorage.getItem(LS_KEYS_URL.body1) || null,
     body2: localStorage.getItem(LS_KEYS_URL.body2) || null,
   });
-  
+
   const [streams, setStreams] = useState<Partial<Record<CamRole, MediaStream>>>({});
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
@@ -1929,14 +1616,8 @@ function useCameraInternal(sysConfig: SysConfig): CameraHook {
 
   const startStream = useCallback(async (role: CamRole): Promise<MediaStream | null> => {
     const sourceType = sourceTypes[role];
-    
-    // ✅ Câmera IP não precisa de stream - usa snapshot direto
-    if (sourceType === 'ip_url') {
-      console.log(`🔍 [CAM] Role ${role} configurado como IP - não inicia stream`);
-      return null;
-    }
-    
-    // Câmera local - comportamento normal
+    if (sourceType === 'ip_url') return null;
+
     const deviceId = assignments[role];
     if (!deviceId) return null;
     streams[role]?.getTracks().forEach((t) => t.stop());
@@ -1973,22 +1654,16 @@ function useCameraInternal(sysConfig: SysConfig): CameraHook {
 
   const captureFrame = useCallback(async (role: CamRole) => {
     const sourceType = sourceTypes[role];
-    
-    // ✅ CÂMERA IP - Captura via URL
+
     if (sourceType === 'ip_url') {
       const url = ipUrls[role];
-      if (!url) {
-        throw new Error(`URL não configurada para câmera ${role}`);
-      }
-      
+      if (!url) throw new Error(`URL não configurada para câmera ${role}`);
       const blob = await captureFrameFromUrl(url);
       const dataUrl = URL.createObjectURL(blob);
       const canvas = document.createElement('canvas');
-      
       return { blob, dataUrl, canvas };
     }
-    
-    // ✅ CÂMERA LOCAL - Comportamento original
+
     const video = videoRefs.current[role];
     if (!video || video.readyState < 2) throw new Error(`Câmera "${role}" não está pronta.`);
     const canvas = document.createElement('canvas');
@@ -2010,7 +1685,6 @@ function useCameraInternal(sysConfig: SysConfig): CameraHook {
     if (element && streams[role]) element.srcObject = streams[role]!;
   }, [streams]);
 
-  // ✅ NOVOS MÉTODOS PARA CONFIGURAR CÂMERAS IP
   const setSourceType = useCallback((role: CamRole, type: CameraSourceType) => {
     setSourceTypes((prev) => ({ ...prev, [role]: type }));
     localStorage.setItem(LS_KEYS_TYPE[role], type);
@@ -2042,8 +1716,6 @@ function useCameraInternal(sysConfig: SysConfig): CameraHook {
     captureFrame, assignDevice, setVideoRef,
     hasStream:     (role) => !!streams[role],
     getAssignment: (role) => assignments[role],
-    
-    // ✅ NOVOS MÉTODOS E ESTADOS
     sourceTypes,
     ipUrls,
     setSourceType,
@@ -2057,7 +1729,6 @@ function useCameraInternal(sysConfig: SysConfig): CameraHook {
 
 export function useCamAutomation(): UseCamAutomationReturn {
 
-  // ── Máquina de estados ────────────────────────────────────────────────────
   const [screen,     setScreen]     = useState<Screen>('idle');
   const [direction,  setDirection]  = useState<Direction>('ENTRY');
   const [doorStatus, setDoorStatus] = useState<DoorStatus>('closed');
@@ -2066,14 +1737,11 @@ export function useCamAutomation(): UseCamAutomationReturn {
   const [showReport, setShowReport] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
 
-  // ── Câmeras ───────────────────────────────────────────────────────────────
   const cameraHook = useCameraInternal(sysConfig);
 
-  // ── Idle state ────────────────────────────────────────────────────────────
   const [dashboard,   setDashboard]   = useState<DashboardData | null>(null);
   const [loadingDash, setLoadingDash] = useState(true);
 
-  // ── FaceScan state ────────────────────────────────────────────────────────
   const [faceStep,       setFaceStep]       = useState<FaceScanStep>('ready');
   const [faceCaptureUrl, setFaceCaptureUrl] = useState<string | null>(null);
   const [faceProgress,   setFaceProgress]   = useState(0);
@@ -2082,7 +1750,6 @@ export function useCamAutomation(): UseCamAutomationReturn {
   const [faceCountdown,  setFaceCountdown]  = useState<number | null>(null);
   const faceAutoCapture = useRef(false);
 
-  // ── EpiScan state ─────────────────────────────────────────────────────────
   const [epiStep,        setEpiStep]        = useState<EpiScanStep>('ready');
   const [epiCaptureUrl1, setEpiCaptureUrl1] = useState<string | null>(null);
   const [epiCaptureUrl2, setEpiCaptureUrl2] = useState<string | null>(null);
@@ -2091,17 +1758,21 @@ export function useCamAutomation(): UseCamAutomationReturn {
   const [epiResult,      setEpiResult]      = useState<EpiResult | null>(null);
   const epiAutoCapture = useRef(false);
 
-  // ── Config modal state ────────────────────────────────────────────────────
+  // Keep session in sync with a ref to avoid stale closure in async callbacks
+  const sessionRef = useRef<Session>(EMPTY_SESSION);
+
   const [localConfig, setLocalConfig] = useState<SysConfig>(DEFAULT_CONFIG);
   const [epiConfig,   setEpiConfig]   = useState<EpiConfig | null>(null);
   const [saving,      setSaving]      = useState(false);
   const [saved,       setSaved]       = useState(false);
 
-  // ── Permanence modal state ────────────────────────────────────────────────
   const [people,        setPeople]        = useState<WorkerRecord[]>([]);
   const [loadingPeople, setLoadingPeople] = useState(false);
 
   // ─── Helpers de reset ─────────────────────────────────────────────────────
+
+  // Mantém sessionRef sempre sincronizado para uso em callbacks com closure stale
+  useEffect(() => { sessionRef.current = session; }, [session]);
 
   const resetSession = useCallback(() => setSession(EMPTY_SESSION), []);
 
@@ -2125,7 +1796,7 @@ export function useCamAutomation(): UseCamAutomationReturn {
     setEpiResult(null);
   }, []);
 
-  // ─── Carrega config do backend ────────────────────────────────────────────
+  // ─── Config ───────────────────────────────────────────────────────────────
 
   useEffect(() => {
     api.getLocalConfig()
@@ -2136,7 +1807,7 @@ export function useCamAutomation(): UseCamAutomationReturn {
       .catch((e: Error) => console.warn('[useCamAutomation] Config load failed:', e.message));
   }, []);
 
-  // ─── Dashboard polling (apenas na tela idle) ──────────────────────────────
+  // ─── Dashboard polling ────────────────────────────────────────────────────
 
   const refreshDashboard = useCallback(async () => {
     try {
@@ -2156,15 +1827,11 @@ export function useCamAutomation(): UseCamAutomationReturn {
     return () => clearInterval(t);
   }, [screen, refreshDashboard]);
 
-  // ─── EpiConfig ao abrir modal de config ──────────────────────────────────
-
   useEffect(() => {
     if (!showConfig) return;
     setLocalConfig({ ...sysConfig });
     api.getEpiConfig().then(setEpiConfig).catch(console.warn);
   }, [showConfig, sysConfig]);
-
-  // ─── People ao abrir modal de permanência ─────────────────────────────────
 
   const fetchPeople = useCallback(async () => {
     try {
@@ -2242,22 +1909,17 @@ export function useCamAutomation(): UseCamAutomationReturn {
 
   const handleTimeOverride = useCallback(() => {
     resetEpiScan(true);
-    
     if (sysConfig.useSingleCamera) {
-      // ✅ Modo single camera - reutiliza câmera face
-      console.log('🔍 [SINGLE CAM] Usando câmera face para EPI');
-      // Não precisa iniciar nova stream - a face já está ativa
+      // câmera face já está ativa
     } else {
-      // Modo tradicional - câmeras separadas
       cameraHook.startStream('body1');
       if (cameraHook.getAssignment('body2')) cameraHook.startStream('body2');
     }
-    
     setScreen('epi_scan');
   }, [cameraHook, resetEpiScan, sysConfig.useSingleCamera]);
 
   const handleRetryFromDenied = useCallback(() => {
-    setSession((prev) => ({ ...prev, epiResult: null, missingEpi: [] }));
+    setSession((prev) => ({ ...prev, epiResult: null, missingEpi: [], deniedReason: null }));
     resetEpiScan(false);
     setScreen('epi_scan');
   }, [resetEpiScan]);
@@ -2295,12 +1957,15 @@ export function useCamAutomation(): UseCamAutomationReturn {
       const photo = await api.sendValidationPhoto(uuid, blob, { photoType: 'face', cameraId: 1 });
       setFaceProgress(80);
 
-      if (photo.face_detected || photo.face_recognized || photo.face_person_code || photo.person_code) {
+      // ✅ GUARD: só avança se pessoa foi identificada com código E nome preenchidos
+      // Impede que face_detected=true sem reconhecimento avance para EPI
+      const resolvedCode = (photo.face_person_code || photo.person_code || '').trim();
+      const resolvedName = (photo.person_name || '').trim();
+
+      if (resolvedCode && resolvedName) {
         setFaceProgress(100);
         setFaceStep('done');
 
-        const resolvedCode = photo.face_person_code || photo.person_code || '';
-        const resolvedName = photo.person_name || resolvedCode;
         const resolvedConf = photo.face_confidence || photo.confidence || 0;
 
         setFaceStatusMsg(`Identificado: ${resolvedName}`);
@@ -2330,10 +1995,13 @@ export function useCamAutomation(): UseCamAutomationReturn {
         }, 900);
 
       } else {
+        // Rosto detectado mas não reconhecido como pessoa cadastrada → nega acesso
         setFaceStep('error');
         setFaceStatusMsg('Rosto não reconhecido');
-        setFaceSubMsg('Tente novamente ou solicite acesso manual');
+        setFaceSubMsg('Usuário não encontrado — solicite acesso manual');
         setFaceProgress(0);
+        // Garante que session.person permanece null, bloqueando qualquer avanço para EPI
+        setSession((prev) => ({ ...prev, person: null, deniedReason: 'user_not_found' }));
       }
     } catch (e) {
       const err = e as { response?: { data?: { detail?: string } }; message?: string };
@@ -2348,73 +2016,54 @@ export function useCamAutomation(): UseCamAutomationReturn {
   const handleRetryFace = useCallback(() => resetFaceScan(false), [resetFaceScan]);
 
   // ─── ACTION: Captura EPI ──────────────────────────────────────────────────
-  // ⚠️  COM LOGS DE DEBUG
 
   const handleCaptureEpi = useCallback(async () => {
-    if (epiStep !== 'ready') {
-      console.log('🔍 [DEBUG] handleCaptureEpi abortado - epiStep:', epiStep);
-      return;
-    }
+    if (epiStep !== 'ready') return;
     epiAutoCapture.current = false;
 
-    const hasBody2 = !sysConfig.useSingleCamera && !!cameraHook.getAssignment('body2');
+    // ✅ BLOQUEIO DUPLO: pessoa não identificada → acesso negado imediato, sem câmera EPI
+    // Usa sessionRef para evitar closure stale quando chamado pelo auto-capture (setInterval)
+    const personCode = sessionRef.current.person?.personCode?.trim();
+    const personName = sessionRef.current.person?.personName?.trim();
+    if (!personCode || !personName) {
+      console.warn('[EPI] Pessoa não identificada — acesso negado sem leitura EPI');
+      epiAutoCapture.current = false;
+      setEpiStep('error');
+      setEpiStatusMsg('❌ Usuário não encontrado — Acesso negado');
+      setDoorStatus('closed');
+      setSession((prev) => ({
+        ...prev,
+        missingEpi:   [],
+        deniedReason: 'user_not_found',
+        epiResult:    { compliant: false },
+      }));
+      setTimeout(() => setScreen('access_denied'), 1500);
+      return;
+    }
 
-    // ===== LOGS DE DEBUG DETALHADOS =====
-    console.log('🔍 [DEBUG] ========================================');
-    console.log('🔍 [DEBUG] INICIANDO CAPTURA EPI');
-    console.log('🔍 [DEBUG] ========================================');
-    console.log('🔍 [DEBUG] Person:', session.person);
-    console.log('🔍 [DEBUG] Previous Session UUID (facial):', session.sessionUuid);
-    console.log('🔍 [DEBUG] Single Camera Mode:', sysConfig.useSingleCamera);
-    console.log('🔍 [DEBUG] SysConfig:', {
-      companyId: sysConfig.companyId,
-      zoneId: sysConfig.zoneId,
-      doorId: sysConfig.doorId,
-      apiBase: sysConfig.apiBase,
-    });
-    console.log('🔍 [DEBUG] Has Body2:', hasBody2);
-    console.log('🔍 [DEBUG] ========================================');
+    const hasBody2 = !sysConfig.useSingleCamera && !!cameraHook.getAssignment('body2');
 
     try {
       setEpiStep('capturing');
       setEpiStatusMsg('Capturando frames…');
 
-      // ✅ SINGLE CAMERA MODE - Captura da câmera face
       const captureRole: CamRole = sysConfig.useSingleCamera ? 'face' : 'body1';
-      
-      console.log('🔍 [DEBUG] Capturando body1 de role:', captureRole);
       const { blob: blob1, dataUrl: url1 } = await cameraHook.captureFrame(captureRole);
       setEpiCaptureUrl1(url1);
-      
-      console.log('🔍 [DEBUG] ✅ Body1 capturado:', {
-        size: blob1.size,
-        type: blob1.type,
-      });
 
-      // Captura body2 (opcional)
       let blob2: Blob | null = null;
       if (hasBody2) {
         try {
-          console.log('🔍 [DEBUG] Capturando body2...');
           const f2 = await cameraHook.captureFrame('body2');
           setEpiCaptureUrl2(f2.dataUrl);
           blob2 = f2.blob;
-          console.log('🔍 [DEBUG] ✅ Body2 capturado:', {
-            size: f2.blob.size,
-            type: f2.blob.type,
-          });
         } catch (e2) {
-          console.warn('🔍 [DEBUG] ⚠️  Body2 capture failed:', (e2 as Error).message);
+          console.warn('[EPI] Body2 capture failed:', (e2 as Error).message);
         }
       }
 
       setEpiStep('processing');
       setEpiStatusMsg('Detectando EPIs… aguarde');
-
-      // ===== ✅ CRIAR NOVA SESSÃO PARA EPI =====
-      console.log('🔍 [DEBUG] ========================================');
-      console.log('🔍 [DEBUG] CRIANDO NOVA SESSÃO PARA VALIDAÇÃO EPI');
-      console.log('🔍 [DEBUG] ========================================');
 
       const epiSessionData = await api.startValidationSession({
         direction,
@@ -2422,137 +2071,63 @@ export function useCamAutomation(): UseCamAutomationReturn {
         zone_id: sysConfig.zoneId,
       });
       const epiSessionUuid = epiSessionData.session_uuid || epiSessionData.sessionUuid!;
-      
-      console.log('🔍 [DEBUG] ✅ Nova sessão EPI criada:', epiSessionUuid);
 
-      // ===== ENVIO PARA API - BODY1 =====
-      console.log('🔍 [DEBUG] ========================================');
-      console.log('🔍 [DEBUG] ENVIANDO BODY1 PARA API');
-      console.log('🔍 [DEBUG] ========================================');
-      console.log('🔍 [DEBUG] Endpoint:', `${sysConfig.apiBase}/api/v1/epi/validation/photo`);
-      console.log('🔍 [DEBUG] Params enviados:', {
-        session_uuid: epiSessionUuid,
-        photoType: 'body',
-        cameraId: 2,
-        blobSize: blob1.size,
-        blobType: blob1.type,
-      });
+      const photo1 = await api.sendValidationPhoto(epiSessionUuid, blob1, { photoType: 'body', cameraId: 2 });
+      let finalResult: EpiResult = { ...photo1, compliant: photo1.compliant ?? false };
+
+      if (blob2) {
+        try {
+          const photo2 = await api.sendValidationPhoto(epiSessionUuid, blob2, { photoType: 'body', cameraId: 3 });
+          if (!photo2.compliant) finalResult = { ...photo2, compliant: photo2.compliant ?? false };
+        } catch (e3) {
+          console.warn('[EPI] Body2 send failed:', (e3 as Error).message);
+        }
+      }
 
       try {
-        const photo1 = await api.sendValidationPhoto(epiSessionUuid, blob1, { photoType: 'body', cameraId: 2 });
-        console.log('🔍 [DEBUG] ✅ Body1 API response:', photo1);
-        
-        let finalResult: EpiResult = { ...photo1, compliant: photo1.compliant ?? false };
+        await api.closeValidationSession(epiSessionUuid);
+      } catch (_) {
+        // ignorado
+      }
 
-        // ===== ENVIO PARA API - BODY2 (se existir) =====
-        if (blob2) {
-          console.log('🔍 [DEBUG] ========================================');
-          console.log('🔍 [DEBUG] ENVIANDO BODY2 PARA API');
-          console.log('🔍 [DEBUG] ========================================');
-          try {
-            const photo2 = await api.sendValidationPhoto(epiSessionUuid, blob2, { photoType: 'body', cameraId: 3 });
-            console.log('🔍 [DEBUG] ✅ Body2 API response:', photo2);
-            if (!photo2.compliant) finalResult = { ...photo2, compliant: photo2.compliant ?? false };
-          } catch (e3) {
-            console.error('🔍 [DEBUG] ❌ Body2 API error:', e3);
-            console.warn('[useCamAutomation] Body2 send failed:', (e3 as Error).message);
-          }
-        }
+      setEpiResult(finalResult);
+      setEpiStep('done');
+      setSession((prev) => ({ ...prev, epiResult: finalResult, deniedReason: null }));
 
-        // ===== FECHAR SESSÃO =====
-        console.log('🔍 [DEBUG] Fechando sessão...');
-        try { 
-          await api.closeValidationSession(epiSessionUuid);
-          console.log('🔍 [DEBUG] ✅ Sessão fechada');
-        } catch (_) { 
-          console.log('🔍 [DEBUG] ⚠️  Erro ao fechar sessão (ignorado)');
+      if (finalResult.compliant) {
+        setEpiStatusMsg('✅ EPI Completo — Acesso liberado');
+        try {
+          await api.openDoor({
+            personCode:  sessionRef.current.person?.personCode,
+            personName:  sessionRef.current.person?.personName,
+            sessionUuid: epiSessionUuid,
+            reason:      'EPI_COMPLIANT',
+          });
+          setDoorStatus('open');
+        } catch (e) {
+          console.error('[EPI] Erro ao abrir porta:', e);
         }
-
-        // ===== PROCESSAR RESULTADO =====
-        console.log('🔍 [DEBUG] ========================================');
-        console.log('🔍 [DEBUG] RESULTADO FINAL');
-        console.log('🔍 [DEBUG] ========================================');
-        console.log('🔍 [DEBUG] finalResult:', finalResult);
-
-        setEpiResult(finalResult);
-        setEpiStep('done');
-        setSession((prev) => ({ ...prev, epiResult: finalResult }));
-
-        if (finalResult.compliant) {
-          setEpiStatusMsg('✅ EPI Completo — Acesso liberado');
-          console.log('🔍 [DEBUG] ✅ EPI COMPLETO - Abrindo porta');
-          try {
-            await api.openDoor({
-              personCode:  session.person?.personCode,
-              personName:  session.person?.personName,
-              sessionUuid: epiSessionUuid,
-              reason:      'EPI_COMPLIANT',
-            });
-            setDoorStatus('open');
-            console.log('🔍 [DEBUG] ✅ Porta aberta');
-          } catch (e) {
-            console.error('🔍 [DEBUG] ❌ Erro ao abrir porta:', e);
-          }
-          setTimeout(() => setScreen('access_granted'), 1200);
-        } else {
-          setEpiStatusMsg('❌ EPI Incompleto — Acesso negado');
-          console.log('🔍 [DEBUG] ❌ EPI INCOMPLETO');
-          const missing = (finalResult.missing || finalResult.missing_ppe || []).map(epiLabel);
-          console.log('🔍 [DEBUG] EPIs faltando:', missing);
-          setSession((prev) => ({ ...prev, missingEpi: missing }));
-          setDoorStatus('closed');
-          setTimeout(() => setScreen('access_denied'), 1200);
-        }
-
-      } catch (apiError) {
-        // ===== CAPTURAR ERRO 400 DETALHADO =====
-        console.error('🔍 [DEBUG] ========================================');
-        console.error('🔍 [DEBUG] ❌ ERRO 400 NA API');
-        console.error('🔍 [DEBUG] ========================================');
-        console.error('🔍 [DEBUG] Error object:', apiError);
-        
-        const axiosError = apiError as any;
-        
-        if (axiosError.response) {
-          console.error('🔍 [DEBUG] Response status:', axiosError.response.status);
-          console.error('🔍 [DEBUG] Response data:', axiosError.response.data);
-          console.error('🔍 [DEBUG] Response headers:', axiosError.response.headers);
-        }
-        
-        if (axiosError.config) {
-          console.error('🔍 [DEBUG] Request URL:', axiosError.config.url);
-          console.error('🔍 [DEBUG] Request method:', axiosError.config.method);
-          console.error('🔍 [DEBUG] Request headers:', axiosError.config.headers);
-        }
-        
-        if (axiosError.request) {
-          console.error('🔍 [DEBUG] Request object:', axiosError.request);
-        }
-        
-        throw apiError; // Re-throw para cair no catch externo
+        setTimeout(() => setScreen('access_granted'), 1200);
+      } else {
+        setEpiStatusMsg('❌ EPI Incompleto — Acesso negado');
+        const missing = (finalResult.missing || finalResult.missing_ppe || []).map(epiLabel);
+        setSession((prev) => ({ ...prev, missingEpi: missing, deniedReason: 'epi_incomplete' }));
+        setDoorStatus('closed');
+        setTimeout(() => setScreen('access_denied'), 1200);
       }
 
     } catch (e) {
-      console.error('🔍 [DEBUG] ========================================');
-      console.error('🔍 [DEBUG] ❌ ERRO GERAL NO FLUXO EPI');
-      console.error('🔍 [DEBUG] ========================================');
       console.error('[useCamAutomation] EPI capture failed:', e);
-      
       setEpiStep('error');
-      setEpiStatusMsg('Erro na detecção de EPI');
-      
-      const errorMsg = (e as any)?.response?.data?.detail 
-        || (e as Error)?.message 
-        || 'Erro desconhecido';
-      
-      console.error('🔍 [DEBUG] Error message:', errorMsg);
+      const errorMsg = (e as any)?.response?.data?.detail || (e as Error)?.message || 'Erro desconhecido';
+      setEpiStatusMsg(`Erro na detecção de EPI: ${errorMsg}`);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [epiStep, session, cameraHook, direction, sysConfig]);
+  }, [epiStep, cameraHook, direction, sysConfig]);
 
   const handleRetryEpi = useCallback(() => resetEpiScan(false), [resetEpiScan]);
 
-  // ─── ACTION: Salva config (modal) ─────────────────────────────────────────
+  // ─── ACTION: Salva config ─────────────────────────────────────────────────
 
   const handleSaveConfigModal = useCallback(async () => {
     try {
