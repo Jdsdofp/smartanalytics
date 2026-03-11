@@ -1658,6 +1658,8 @@ function useCameraInternal(sysConfig: SysConfig): CameraHook {
             width: { ideal: 1280 },
             height: { ideal: 720 },
             frameRate: { ideal: 30 },
+            //@ts-ignore
+            zoom: 1.0
           },
           audio: false,
         });

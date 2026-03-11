@@ -105,7 +105,8 @@ export default function CameraView({
         style={{
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
+          // objectFit: 'cover',
+          objectFit: role === 'face' ? 'cover' : 'contain',
           display: captureUrl ? 'none' : 'block',
           transform: role === 'face' ? 'scaleX(-1)' : 'none',
         }}
