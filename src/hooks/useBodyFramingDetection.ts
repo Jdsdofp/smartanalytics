@@ -93,8 +93,11 @@ export function useBodyFramingDetection({
         canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.8);
       });
 
-      const formData = new FormData();
-      formData.append('image', blob, 'frame.jpg');
+    //   const formData = new FormData();
+    //   formData.append('image', blob, 'frame.jpg');
+
+        const formData = new FormData();
+        formData.append('file', blob, 'frame.jpg');  // ← CORRETO
 
           console.log('📤 Sending to API:', apiEndpoint);
 
