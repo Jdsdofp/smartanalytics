@@ -428,7 +428,10 @@ export default function EpiScanScreen({
   const isProcessing = status === 'capturing' || status === 'analyzing';
   
   // Bloquear captura se enquadramento não estiver adequado
+  // const canCapture = isWellFramed || status !== 'idle';
   const canCapture = isWellFramed || status !== 'idle';
+  // IMPORTANTE: Bloquear captura se não estiver bem enquadrado
+  const shouldBlockCapture = !isWellFramed && status === 'idle';
 
   // Determinar cor do feedback baseado no status
   const getFeedbackColor = () => {
@@ -828,7 +831,8 @@ export default function EpiScanScreen({
             ) : (
               <button
                 onClick={onCapture}
-                disabled={isProcessing || !canCapture}
+                // disabled={isProcessing || !canCapture}
+                disabled={isProcessing || shouldBlockCapture}
                 className="btn-primary"
                 style={{
                   width: '100%',
@@ -908,6 +912,39 @@ export default function EpiScanScreen({
             </div>
           )}
 
+          {/* NOVO: Aviso de bloqueio por enquadramento */}
+          {status === 'idle' && !isWellFramed && (
+            <div style={{
+              position: 'absolute',
+              bottom: '6rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(220, 38, 38, 0.95)',
+              border: '2px solid rgba(220, 38, 38, 0.6)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1rem 1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(220, 38, 38, 0.5)',
+              zIndex: 11,
+              maxWidth: '85%',
+              animation: 'pulse-warning 2s ease-in-out infinite',
+            }}>
+              <span style={{ fontSize: '1.5rem' }}>🚫</span>
+              <div style={{
+                fontFamily: 'var(--font-head)',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                color: '#fff',
+                textAlign: 'center',
+              }}>
+                Ajuste o enquadramento antes de capturar
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
 
@@ -928,6 +965,11 @@ export default function EpiScanScreen({
         @keyframes pulse-border {
           0%, 100% { opacity: 0.6; border-width: 3px; }
           50% { opacity: 0.9; border-width: 4px; }
+        }
+
+        @keyframes pulse-warning {
+          0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+          50% { opacity: 0.85; transform: translateX(-50%) scale(1.02); }
         }
       `}</style>
 
