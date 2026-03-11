@@ -36,7 +36,7 @@ export function useBodyFramingDetection({
   videoElement,
   enabled,
   checkIntervalMs = 1000,
-  apiEndpoint = '/api/detect-pose', // Endpoint que retorna keypoints do corpo
+  apiEndpoint = '/api/v1/epi/camera/analyze-framing', // Endpoint que retorna keypoints do corpo
 }: BodyFramingDetectionOptions) {
   
   const [feedback, setFeedback] = useState<FramingFeedback>({
