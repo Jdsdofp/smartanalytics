@@ -105,7 +105,7 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
           />
         )}
 
-        {screen === 'face_scan' && (
+        {/* {screen === 'face_scan' && (
           <FaceScanScreen
             faceScanState={adaptedFaceScanState}
             cameraHook={cameraHook}
@@ -114,7 +114,24 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
             onRetry={handleRetryFace}
             onCancel={handleGoIdle}
           />
-        )}
+        )} */}
+
+
+        {screen === 'face_scan' && (
+        <FaceScanScreen
+          faceScanState={{
+            ...adaptedFaceScanState,
+            personCode: session.person?.personCode,
+            personName: session.person?.personName,
+          }}
+          cameraHook={cameraHook}
+          direction={direction}
+          onCapture={handleCaptureFace}
+          onRetry={handleRetryFace}
+          onCancel={handleGoIdle}
+        />
+      )}
+
 
         {screen === 'time_alert' && (
           <TimeAlertScreen

@@ -1959,14 +1959,34 @@ export function useCamAutomation(): UseCamAutomationReturn {
 
       // ✅ GUARD: só avança se pessoa foi identificada com código E nome preenchidos
       // Impede que face_detected=true sem reconhecimento avance para EPI
-      const resolvedCode = (photo.face_person_code || photo.person_code || '').trim();
-      const resolvedName = (photo.person_name || '').trim();
+      const resolvedCode = (
+        photo.face_person_code ||
+        photo.person_code ||
+        photo.final_decision?.person_code ||
+        ''
+      ).trim();
+
+      const resolvedName = (
+        photo.person_name ||
+        photo.final_decision?.person_name ||
+        ''
+      ).trim();
+
+      // const resolvedCode = (photo.face_person_code || photo.person_code || '').trim();
+      // const resolvedName = (photo.person_name || '').trim();
+
 
       if (resolvedCode && resolvedName) {
         setFaceProgress(100);
         setFaceStep('done');
 
-        const resolvedConf = photo.face_confidence || photo.confidence || 0;
+        // const resolvedConf = photo.face_confidence || photo.confidence || 0;
+
+        const resolvedConf =
+          photo.face_confidence ||
+          photo.confidence ||
+          photo.final_decision?.face_confidence_max ||
+          0;
 
         setFaceStatusMsg(`Identificado: ${resolvedName}`);
         setFaceSubMsg(`Confiança: ${Math.round(resolvedConf * 100)}%`);
