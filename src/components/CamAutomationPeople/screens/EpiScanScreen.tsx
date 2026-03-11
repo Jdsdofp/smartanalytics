@@ -413,7 +413,7 @@ export default function EpiScanScreen({
   //@ts-ignore
   const { feedback, isWellFramed, shouldBlock } = useBodyFramingDetection({
     videoElement: videoRef.current,
-    enabled: status === 'idle', // Só verifica quando em idle (antes de capturar)
+     enabled: true, // Só verifica quando em idle (antes de capturar)
     checkIntervalMs: 800,
     apiEndpoint: 'https://aihub.smartxhub.cloud/api/v1/epi/camera/analyze-framing', // Ajuste para seu endpoint
   });
