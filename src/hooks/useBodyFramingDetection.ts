@@ -59,11 +59,20 @@ export function useBodyFramingDetection({
   };
 
   const analyzeFraming = useCallback(async () => {
+
+      console.log('🔍 analyzeFraming called', {
+            hasVideo: !!videoElement,
+            enabled,
+            readyState: videoElement?.readyState
+        });
+
     if (!videoElement || !enabled || videoElement.readyState < 2) {
+        
       return;
     }
 
     try {
+        console.log('📸 Capturing frame...');
       // Criar canvas temporário para capturar frame
       if (!canvasRef.current) {
         canvasRef.current = document.createElement('canvas');
@@ -71,6 +80,8 @@ export function useBodyFramingDetection({
       const canvas = canvasRef.current;
       canvas.width = videoElement.videoWidth;
       canvas.height = videoElement.videoHeight;
+
+      
       
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -85,11 +96,14 @@ export function useBodyFramingDetection({
       const formData = new FormData();
       formData.append('image', blob, 'frame.jpg');
 
+          console.log('📤 Sending to API:', apiEndpoint);
+
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         body: formData,
       });
 
+    console.log('✅ API Response:', response.status);
       if (!response.ok) {
         throw new Error('Falha na detecção de pose');
       }

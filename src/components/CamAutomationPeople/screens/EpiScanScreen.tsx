@@ -397,6 +397,8 @@ export default function EpiScanScreen({
   const { status, errorMsg, captureUrl, detectedEpi = [] } = epiScanState;
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  
+
   // Obter referência do vídeo do hook de câmera
   useEffect(() => {
     const assignment = cameraHook.getAssignment('body1');
@@ -451,6 +453,17 @@ export default function EpiScanScreen({
       default: return '•';
     }
   };
+
+  // Adicione depois da declaração do hook
+  useEffect(() => {
+    console.log('🎯 Framing Detection State:', {
+      enabled: status === 'idle',
+      hasVideo: !!videoRef.current,
+      feedback: feedback.status,
+      isWellFramed,
+      shouldBlock
+    });
+  }, [status, feedback, isWellFramed, shouldBlock]);
 
   return (
     <div style={{

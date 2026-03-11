@@ -99,6 +99,7 @@ export default function CameraView({
       {/* Vídeo ao vivo */}
       <video
         ref={videoRef}
+        data-role={role}
         autoPlay
         muted
         playsInline
