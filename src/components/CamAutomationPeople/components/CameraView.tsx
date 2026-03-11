@@ -23,18 +23,18 @@ interface CameraViewProps {
 }
 
 const STATUS_COLORS: Record<CamStatus, string> = {
-  idle:    'transparent',
-  scanning:'var(--blue)',
-  ok:      'var(--green)',
-  fail:    'var(--red)',
+  idle: 'transparent',
+  scanning: 'var(--blue)',
+  ok: 'var(--green)',
+  fail: 'var(--red)',
   warning: 'var(--amber)',
 };
 
 const STATUS_LABELS: Record<CamStatus, string | null> = {
-  idle:    null,
-  scanning:'Analisando…',
-  ok:      'Aprovado',
-  fail:    'Reprovado',
+  idle: null,
+  scanning: 'Analisando…',
+  ok: 'Aprovado',
+  fail: 'Reprovado',
   warning: 'Atenção',
 };
 
@@ -60,7 +60,7 @@ export default function CameraView({
     if (autoStart && cameraHook.getAssignment(role)) {
       cameraHook.startStream(role);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role, autoStart, cameraHook?.getAssignment(role)]);
 
   const borderColor = STATUS_COLORS[status] ?? 'transparent';
@@ -71,7 +71,7 @@ export default function CameraView({
   );
 
   // Calcula tamanho máximo baseado na orientação
-  const maxSize = dynamicSize 
+  const maxSize = dynamicSize
     ? (layoutInfo.orientation === 'landscape' ? '75vh' : '85vh')
     : '100%';
 
@@ -214,6 +214,73 @@ export default function CameraView({
           />
         </div>
       )}
+
+
+      {/* Body guide para câmeras de corpo */}
+      {(role === 'body1' || role === 'body2') && (
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          {/* Silhueta humana */}
+          <div style={{
+            position: 'absolute',
+            top: '3%',
+            left: '25%',
+            right: '25%',
+            bottom: '3%',
+            border: `1px dashed ${scanning ? 'var(--blue)' : 'rgba(255,255,255,0.2)'}`,
+            borderRadius: '40% 40% 20% 20% / 20% 20% 10% 10%',
+            transition: 'border-color 300ms ease',
+          }} />
+          {/* Label de posicionamento */}
+          <div style={{
+            position: 'absolute',
+            bottom: 36,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0,0,0,0.6)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 6,
+            padding: '4px 12px',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.65rem',
+            color: 'rgba(255,255,255,0.7)',
+            letterSpacing: '0.08em',
+            whiteSpace: 'nowrap',
+          }}>
+            POSICIONE O CORPO INTEIRO
+          </div>
+          {/* Setas indicando cabeça e pés */}
+          <div style={{
+            position: 'absolute',
+            top: '5%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0,132,255,0.7)',
+            borderRadius: 4,
+            padding: '2px 8px',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.6rem',
+            color: '#fff',
+          }}>
+            ↑ CABEÇA
+          </div>
+          <div style={{
+            position: 'absolute',
+            bottom: '5%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0,132,255,0.7)',
+            borderRadius: 4,
+            padding: '2px 8px',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.6rem',
+            color: '#fff',
+          }}>
+            ↓ PÉS
+          </div>
+        </div>
+      )}
+
+
 
       {/* Label superior */}
       {label && (
