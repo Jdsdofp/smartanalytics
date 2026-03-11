@@ -413,7 +413,7 @@ export default function EpiScanScreen({
     videoElement: videoRef.current,
     enabled: status === 'idle', // Só verifica quando em idle (antes de capturar)
     checkIntervalMs: 800,
-    apiEndpoint: '/api/v3/detect-pose', // Ajuste para seu endpoint
+    apiEndpoint: 'https://aihub.smartxhub.cloud/api/v1/epi/camera/analyze-framing', // Ajuste para seu endpoint
   });
 
   const camStatus: 'idle' | 'scanning' | 'ok' | 'fail' | 'warning' =
