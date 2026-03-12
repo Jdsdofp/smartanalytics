@@ -28,6 +28,13 @@ interface ObservabilityKPIs {
     lowPredictability: number;
     avgPredictabilityScore: number;
   };
+  certificateReports: {
+    renewalStatus: {
+      backlog: number;
+      pendingThisMonth: number;
+      renewedThisMonth: number;
+    };
+  };
 }
 
 interface Analytics {
@@ -81,6 +88,7 @@ interface CertificateTypeAnalysis {
   avgComplexity: number;
   avgComplianceScore: number;
 }
+
 
 interface ApiResponse {
   analytics: Analytics;
@@ -1348,18 +1356,18 @@ export default function PredictiveCertificateAnalysis() {
         </div>
       </div>
 
-      {/* KPIs PRINCIPAIS - ATUALIZADOS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
+      {/* KPIs PRINCIPAIS - ULTRA COMPACTOS COM RADIUS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-2 mb-4">
         {/* Total */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-600 text-sm font-medium">TOTAL</p>
-              <p className="text-3xl font-bold text-slate-800 mt-2">{data.analytics.totalCertificates.toLocaleString()}</p>
-              <p className="text-xs text-slate-500 mt-1">Certificates</p>
+        <div className="bg-white rounded-lg shadow-md p-2 border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-slate-600 text-[10px] font-medium uppercase truncate">TOTAL</p>
+              <p className="text-xl font-bold text-slate-800">{data.analytics.totalCertificates.toLocaleString()}</p>
+              <p className="text-[10px] text-slate-500">Certificates</p>
             </div>
-            <div className="bg-blue-100 p-3 rounded-full">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-blue-100 p-1.5 rounded-lg">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
@@ -1367,19 +1375,19 @@ export default function PredictiveCertificateAnalysis() {
         </div>
 
         {/* Expired */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500 hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.expiredCertificates').toUpperCase()}</p>
-              <p className="text-3xl font-bold text-red-600 mt-2">{data.analytics.expiredCertificates.toLocaleString()}</p>
-              <p className="text-red-500 text-xs mt-1">
+        <div className="bg-white rounded-lg shadow-md p-2 border-l-4 border-red-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-slate-600 text-[10px] font-medium uppercase truncate">{t('predictiveCertificateAnalysis.kpi.expiredCertificates')}</p>
+              <p className="text-xl font-bold text-red-600">{data.analytics.expiredCertificates.toLocaleString()}</p>
+              <p className="text-red-500 text-[10px] truncate">
                 {t('predictiveCertificateAnalysis.kpi.ofTotal', {
                   percentage: ((data.analytics.expiredCertificates / data.analytics.totalCertificates) * 100).toFixed(1)
                 })}
               </p>
             </div>
-            <div className="bg-red-100 p-3 rounded-full">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-red-100 p-1.5 rounded-lg">
+              <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
@@ -1387,19 +1395,19 @@ export default function PredictiveCertificateAnalysis() {
         </div>
 
         {/* High Risk */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500 hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.highRiskItems').toUpperCase()}</p>
-              <p className="text-3xl font-bold text-orange-600 mt-2">{data.analytics.highRisk.toLocaleString()}</p>
-              <p className="text-orange-500 text-xs mt-1">
+        <div className="bg-white rounded-lg shadow-md p-2 border-l-4 border-orange-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-slate-600 text-[10px] font-medium uppercase truncate">{t('predictiveCertificateAnalysis.kpi.highRiskItems')}</p>
+              <p className="text-xl font-bold text-orange-600">{data.analytics.highRisk.toLocaleString()}</p>
+              <p className="text-orange-500 text-[10px] truncate">
                 {t('predictiveCertificateAnalysis.kpi.ofTotal', {
                   percentage: ((data.analytics.highRisk / data.analytics.totalCertificates) * 100).toFixed(1)
                 })}
               </p>
             </div>
-            <div className="bg-orange-100 p-3 rounded-full">
-              <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-orange-100 p-1.5 rounded-lg">
+              <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
@@ -1407,47 +1415,31 @@ export default function PredictiveCertificateAnalysis() {
         </div>
 
         {/* Urgent Actions */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500 hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.urgentRiskItems').toUpperCase()}</p>
-              <p className="text-3xl font-bold text-purple-600 mt-2">{data.analytics.urgentActions.toLocaleString()}</p>
-              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.kpi.actionsRequired')}</p>
+        <div className="bg-white rounded-lg shadow-md p-2 border-l-4 border-purple-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-slate-600 text-[10px] font-medium uppercase truncate">{t('predictiveCertificateAnalysis.kpi.urgentRiskItems')}</p>
+              <p className="text-xl font-bold text-purple-600">{data.analytics.urgentActions.toLocaleString()}</p>
+              <p className="text-[10px] text-slate-500 truncate">{t('predictiveCertificateAnalysis.kpi.actionsRequired')}</p>
             </div>
-            <div className="bg-purple-100 p-3 rounded-full">
-              <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-purple-100 p-1.5 rounded-lg">
+              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        {/* Financial Risk */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.financialRisk').toUpperCase()}</p>
-              <p className="text-2xl font-bold text-slate-800 mt-2">R$ {(data.analytics.totalFinancialRisk / 1000).toFixed(1)}k</p>
-              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.kpi.TotalAtRisk')}</p>
-            </div>
-            <div className="bg-green-100 p-3 rounded-full">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
         {/* Compliance */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-indigo-500 hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-600 text-sm font-medium">{t('predictiveCertificateAnalysis.kpi.compliance').toUpperCase()}</p>
-              <p className="text-3xl font-bold text-indigo-600 mt-2">{data.analytics.averageComplianceScore.toFixed(0)}%</p>
-              <p className="text-xs text-slate-500 mt-1">{t('predictiveCertificateAnalysis.kpi.averageScore')}</p>
+        <div className="bg-white rounded-lg shadow-md p-2 border-l-4 border-indigo-500 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-slate-600 text-[10px] font-medium uppercase truncate">{t('predictiveCertificateAnalysis.kpi.compliance')}</p>
+              <p className="text-xl font-bold text-indigo-600">{data.analytics.averageComplianceScore.toFixed(0)}%</p>
+              <p className="text-[10px] text-slate-500 truncate">{t('predictiveCertificateAnalysis.kpi.averageScore')}</p>
             </div>
-            <div className="bg-indigo-100 p-3 rounded-full">
-              <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-indigo-100 p-1.5 rounded-lg">
+              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
@@ -1459,52 +1451,6 @@ export default function PredictiveCertificateAnalysis() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
           <div className="flex items-center space-x-2 mb-4">
-            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            <h3 className="font-semibold text-slate-800">{t('predictiveCertificateAnalysis.kpi.dataQuality')}</h3>
-          </div>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.completeness')}:</span>
-              <span className="font-bold text-blue-600">{data.observabilityKPIs.dataQuality.completenessScore.toFixed(1)}%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.complete')}:</span>
-              <span className="font-medium text-green-600">{data.observabilityKPIs.dataQuality.recordsWithCompleteData}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.incomplete')}:</span>
-              <span className="font-medium text-orange-600">{data.observabilityKPIs.dataQuality.recordsWithIncompleteData}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div className="flex items-center space-x-2 mb-4">
-            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 className="font-semibold text-slate-800">{t('predictiveCertificateAnalysis.kpi.processHealth')}</h3>
-          </div>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.onTime')}:</span>
-              <span className="font-medium text-green-600">{data.observabilityKPIs.processHealth.onTimeRenewals}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.delayed')}:</span>
-              <span className="font-medium text-red-600">{data.observabilityKPIs.processHealth.delayedRenewals}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.avgTime')}:</span>
-              <span className="font-medium text-slate-800">{t('predictiveCertificateAnalysis.kpi.days', { days: data.observabilityKPIs.processHealth.avgProcessingTime.toFixed(0) })}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div className="flex items-center space-x-2 mb-4">
             <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
@@ -1512,37 +1458,21 @@ export default function PredictiveCertificateAnalysis() {
           </div>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.high')}:</span>
-              <span className="font-medium text-green-600">{data.observabilityKPIs.predictability.highPredictability}</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.backlog')}:</span>
+              
+              <span className="font-medium text-green-600">{data.observabilityKPIs.certificateReports.renewalStatus.backlog}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.medium')}:</span>
-              <span className="font-medium text-yellow-600">{data.observabilityKPIs.predictability.mediumPredictability}</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.pendingMonth')}:</span>
+              <span className="font-medium text-yellow-600">{data.observabilityKPIs.certificateReports.renewalStatus.pendingThisMonth}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.avgScore')}:</span>
-              <span className="font-bold text-purple-600">{data.observabilityKPIs.predictability.avgPredictabilityScore.toFixed(1)}%</span>
+              <span className="text-sm text-slate-600">{t('predictiveCertificateAnalysis.kpi.renewedMonth')}:</span>
+              <span className="font-bold text-purple-600">{data.observabilityKPIs.certificateReports.renewalStatus.renewedThisMonth}</span>
             </div>
           </div>
         </div>
       </div>
-
-      {/* ANOMALIAS ALERT */}
-      {data.analytics.anomaliesDetected > 0 && (
-        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl shadow-lg p-6 mb-8 border-l-4 border-red-500">
-          <div className="flex items-center space-x-3">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div>
-              <h3 className="text-lg font-bold text-red-800">{t('predictiveCertificateAnalysis.kpi.anomaliesDetected')}</h3>
-              <p className="text-sm text-red-700 mt-1">
-                {t('predictiveCertificateAnalysis.kpi.unusualPatternsIdentified', { total: data.analytics.anomaliesDetected, score: data.analytics.averageAnomalyScore })}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* TABS */}
       <div className="mb-6">
@@ -1585,12 +1515,12 @@ export default function PredictiveCertificateAnalysis() {
 
           {/* Terceira linha - Matriz de Complexidade */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            {/* <div className="bg-white rounded-xl shadow-lg p-6">
               <div ref={complexityMatrixRef} className="w-full" style={{ height: '400px' }}></div>
-            </div>
+            </div> */}
 
             {/* Espaço para adicionar outro gráfico ou métricas */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            {/* <div className="bg-white rounded-xl shadow-lg p-6">
               <h3 className="text-lg font-semibold text-slate-800 mb-4">Métricas Adicionais</h3>
               <div className="space-y-4">
                 <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
@@ -1613,7 +1543,7 @@ export default function PredictiveCertificateAnalysis() {
                   <p className="text-3xl font-bold text-green-600">{data.analytics.averageComplexityScore.toFixed(1)}</p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       )}
@@ -2002,7 +1932,7 @@ export default function PredictiveCertificateAnalysis() {
       )}
 
       {/* QUICK STATS FOOTER */}
-      <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
+      {/* <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-lg font-semibold text-slate-800 mb-4">{t('predictiveCertificateAnalysis.quickStats.quickStatistics')}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           <div className="text-center p-4 bg-slate-50 rounded-lg">
@@ -2030,7 +1960,7 @@ export default function PredictiveCertificateAnalysis() {
             <p className="text-sm text-slate-600">Custodians</p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
