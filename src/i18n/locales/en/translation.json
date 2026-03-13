@@ -2642,5 +2642,231 @@
       "of": "of",
       "pdfExported": "PDF exported successfully!",
       "pdfError": "Error generating PDF. Check console for details."
+  },
+  "assetManagement": {
+    "title": "Asset Management",
+    "subtitle": "Real-time overview of your asset portfolio",
+    
+    "navigation": {
+      "dashboard": "Dashboard",
+      "tracking": "Tracking",
+      "custody": "Custody",
+      "financial": "Financial",
+      "maintenance": "Maintenance",
+      "audit": "Audit",
+      "reports": "Reports",
+      "exports": "Export"
+    },
+    
+    "loading": {
+      "title": "Loading Asset Dashboard...",
+      "message": "Please wait while we fetch your data"
+    },
+    
+    "error": {
+      "title": "Error Loading Dashboard",
+      "retry": "Retry"
+    },
+    
+    "kpi": {
+      "totalAssets": {
+        "label": "Total Assets",
+        "trend": "{{value}}%"
+      },
+      "totalCategories": {
+        "label": "Total Categories"
+      },
+      "totalInvestment": {
+        "label": "Total Investment"
+      },
+      "misplacedItems": {
+        "label": "Misplaced Items"
+      },
+      "maintenanceDue": {
+        "label": "Maintenance Due"
+      },
+      "serialCompletion": {
+        "label": "Serial Completion"
+      }
+    },
+    
+    "dashboard": {
+      "title": "Asset Management Dashboard",
+      "subtitle": "Real-time overview of your asset portfolio",
+      
+      "charts": {
+        "assetsByDepartment": "Assets by Department",
+        "avgCostByCategory": "Average Purchase Cost by Category",
+        "assetsByCostCenter": "Assets by Cost Center",
+        "investmentByCostCenter": "Investment by Cost Center",
+        "download": "Download"
+      },
+      
+      "assetDistribution": {
+        "title": "Asset Distribution Summary",
+        "inUse": "In Use",
+        "available": "Available",
+        "inTransit": "In Transit",
+        "underMaintenance": "Under Maintenance"
+      },
+      
+      "financialSummary": {
+        "title": "Financial Summary",
+        "purchaseCost": "Purchase Cost",
+        "replacementCost": "Replacement Cost",
+        "netBookValue": "Net Book Value",
+        "depreciation": "Depreciation"
+      }
+    },
+    
+    "tracking": {
+      "title": "Asset Tracking",
+      "subtitle": "Real-time location and status monitoring",
+      
+      "alerts": {
+        "outOfPlace": {
+          "title": "Critical: Assets Out of Place",
+          "description": "<strong>{{count}} assets</strong> are currently outside their designated locations. Total value at risk: <strong>${{value}}K</strong>. Avg days out: <strong>{{days}}</strong>."
+        },
+        "unread": {
+          "title": "Warning: Unread Assets",
+          "description": "<strong>{{count}} assets</strong> haven't been read in over 7 days. Review tracking status and investigate potential issues."
+        },
+        "alarmed": {
+          "title": "Info: Alarmed Assets",
+          "description": "<strong>{{count}} assets</strong> have triggered alarms. All cases under investigation."
+        }
+      }
+    },
+    
+    "custody": {
+      "title": "Custody Overview",
+      "subtitle": "High-level insights for management decisions"
+    },
+    
+    "financial": {
+      "title": "Financial Control",
+      "subtitle": "CFO dashboard for asset governance",
+      
+      "kpi": {
+        "totalPurchaseCost": "Total Purchase Cost",
+        "replacementCost": "Replacement Cost",
+        "netBookValue": "Net Book Value",
+        "uninsuredValue": "Uninsured Value",
+        "atRisk": "At Risk"
+      },
+      
+      "alerts": {
+        "missingCostCenter": {
+          "title": "Critical: Missing Cost Center Assignment",
+          "description": "<strong>{{count}} assets</strong> do not have a cost center assigned. This creates governance risk and prevents proper financial tracking. Immediate action required."
+        }
+      },
+      
+      "charts": {
+        "depreciation": "Depreciation Analysis",
+        "coverage": "Insurance & Warranty Expiring"
+      },
+      
+      "costCenterPerformance": {
+        "title": "Cost Center Financial Performance",
+        "columns": {
+          "costCenter": "Cost Center",
+          "assets": "Assets",
+          "totalInvestment": "Total Investment",
+          "utilization": "Utilization",
+          "dataQuality": "Data Quality"
+        }
+      }
+    },
+    
+    "maintenance": {
+      "title": "Maintenance & Compliance",
+      "subtitle": "Service scheduling and overdue tracking",
+      
+      "kpi": {
+        "overdue": {
+          "label": "Overdue Maintenance",
+          "status": "Needs attention"
+        },
+        "dueThisWeek": {
+          "label": "Due This Week"
+        },
+        "dueThisMonth": {
+          "label": "Due This Month"
+        },
+        "completedThisMonth": {
+          "label": "Completed This Month",
+          "rate": "{{rate}}% rate"
+        }
+      },
+      
+      "charts": {
+        "schedule": "Maintenance Schedule - Next 30 Days"
+      }
+    },
+    
+    "audit": {
+      "title": "Audit & Governance",
+      "subtitle": "Compliance tracking and work order status",
+      
+      "kpi": {
+        "workOrderPassRate": {
+          "label": "Work Order Pass Rate",
+          "good": "Good",
+          "needsImprovement": "Needs improvement"
+        },
+        "totalWorkOrders": {
+          "label": "Total Work Orders"
+        },
+        "passed": {
+          "label": "Passed Inspections"
+        },
+        "failed": {
+          "label": "Failed Inspections",
+          "status": "Requires attention"
+        }
+      },
+      
+      "charts": {
+        "complianceByCategory": "Compliance by Category"
+      }
+    },
+    
+    "reports": {
+      "title": "Custom Reports",
+      "subtitle": "Generate and schedule custom reports",
+      
+      "templates": {
+        "title": "Report Templates",
+        "executiveSummary": "Executive Summary",
+        "financialSummary": "Financial Summary",
+        "complianceReport": "Compliance Report",
+        "assetInventory": "Asset Inventory",
+        "generate": "Generate"
+      }
+    },
+    
+    "exports": {
+      "title": "Export Data",
+      "subtitle": "Download data in various formats",
+      
+      "options": {
+        "title": "Export Options",
+        "excel": "Export to Excel (XLSX)",
+        "csv": "Export to CSV",
+        "pdf": "Export to PDF",
+        "download": "Download"
+      }
+    },
+    
+    "common": {
+      "percentage": "{{value}}%",
+      "currency": "${{value}}",
+      "currencyK": "${{value}}K",
+      "currencyM": "${{value}}M",
+      "assets": "{{count}} assets",
+      "days": "{{count}} days"
     }
+  }
 }

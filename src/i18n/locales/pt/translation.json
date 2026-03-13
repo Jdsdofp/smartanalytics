@@ -2691,5 +2691,231 @@
       "of": "de",
       "pdfExported": "PDF exportado com sucesso!",
       "pdfError": "Erro ao gerar PDF. Verifique o console para detalhes."
+  },
+  "assetManagement": {
+    "title": "Gestão de Ativos",
+    "subtitle": "Visão em tempo real do seu portfólio de ativos",
+    
+    "navigation": {
+      "dashboard": "Dashboard",
+      "tracking": "Rastreamento",
+      "custody": "Custódia",
+      "financial": "Financeiro",
+      "maintenance": "Manutenção",
+      "audit": "Auditoria",
+      "reports": "Relatórios",
+      "exports": "Exportar"
+    },
+    
+    "loading": {
+      "title": "Carregando Dashboard de Ativos...",
+      "message": "Por favor, aguarde enquanto buscamos seus dados"
+    },
+    
+    "error": {
+      "title": "Erro ao Carregar Dashboard",
+      "retry": "Tentar Novamente"
+    },
+    
+    "kpi": {
+      "totalAssets": {
+        "label": "Total de Ativos",
+        "trend": "{{value}}%"
+      },
+      "totalCategories": {
+        "label": "Total de Categorias"
+      },
+      "totalInvestment": {
+        "label": "Investimento Total"
+      },
+      "misplacedItems": {
+        "label": "Itens Fora do Lugar"
+      },
+      "maintenanceDue": {
+        "label": "Manutenção Pendente"
+      },
+      "serialCompletion": {
+        "label": "Completude de Serial"
+      }
+    },
+    
+    "dashboard": {
+      "title": "Dashboard de Gestão de Ativos",
+      "subtitle": "Visão em tempo real do seu portfólio de ativos",
+      
+      "charts": {
+        "assetsByDepartment": "Ativos por Departamento",
+        "avgCostByCategory": "Custo Médio de Compra por Categoria",
+        "assetsByCostCenter": "Ativos por Centro de Custo",
+        "investmentByCostCenter": "Investimento por Centro de Custo",
+        "download": "Baixar"
+      },
+      
+      "assetDistribution": {
+        "title": "Resumo de Distribuição de Ativos",
+        "inUse": "Em Uso",
+        "available": "Disponível",
+        "inTransit": "Em Trânsito",
+        "underMaintenance": "Em Manutenção"
+      },
+      
+      "financialSummary": {
+        "title": "Resumo Financeiro",
+        "purchaseCost": "Custo de Compra",
+        "replacementCost": "Custo de Reposição",
+        "netBookValue": "Valor Contábil Líquido",
+        "depreciation": "Depreciação"
+      }
+    },
+    
+    "tracking": {
+      "title": "Rastreamento de Ativos",
+      "subtitle": "Monitoramento de localização e status em tempo real",
+      
+      "alerts": {
+        "outOfPlace": {
+          "title": "Crítico: Ativos Fora do Lugar",
+          "description": "<strong>{{count}} ativos</strong> estão atualmente fora de suas localizações designadas. Valor total em risco: <strong>${{value}}K</strong>. Dias médios fora: <strong>{{days}}</strong>."
+        },
+        "unread": {
+          "title": "Aviso: Ativos Não Lidos",
+          "description": "<strong>{{count}} ativos</strong> não foram lidos há mais de 7 dias. Revise o status de rastreamento e investigue possíveis problemas."
+        },
+        "alarmed": {
+          "title": "Info: Ativos com Alarme",
+          "description": "<strong>{{count}} ativos</strong> dispararam alarmes. Todos os casos sob investigação."
+        }
+      }
+    },
+    
+    "custody": {
+      "title": "Visão Geral de Custódia",
+      "subtitle": "Insights de alto nível para decisões gerenciais"
+    },
+    
+    "financial": {
+      "title": "Controle Financeiro",
+      "subtitle": "Dashboard CFO para governança de ativos",
+      
+      "kpi": {
+        "totalPurchaseCost": "Custo Total de Compra",
+        "replacementCost": "Custo de Reposição",
+        "netBookValue": "Valor Contábil Líquido",
+        "uninsuredValue": "Valor Não Segurado",
+        "atRisk": "Em Risco"
+      },
+      
+      "alerts": {
+        "missingCostCenter": {
+          "title": "Crítico: Atribuição de Centro de Custo Ausente",
+          "description": "<strong>{{count}} ativos</strong> não possuem um centro de custo atribuído. Isso cria risco de governança e impede o rastreamento financeiro adequado. Ação imediata necessária."
+        }
+      },
+      
+      "charts": {
+        "depreciation": "Análise de Depreciação",
+        "coverage": "Seguro e Garantia Expirando"
+      },
+      
+      "costCenterPerformance": {
+        "title": "Desempenho Financeiro por Centro de Custo",
+        "columns": {
+          "costCenter": "Centro de Custo",
+          "assets": "Ativos",
+          "totalInvestment": "Investimento Total",
+          "utilization": "Utilização",
+          "dataQuality": "Qualidade de Dados"
+        }
+      }
+    },
+    
+    "maintenance": {
+      "title": "Manutenção e Conformidade",
+      "subtitle": "Agendamento de serviços e rastreamento de atrasos",
+      
+      "kpi": {
+        "overdue": {
+          "label": "Manutenção Atrasada",
+          "status": "Requer atenção"
+        },
+        "dueThisWeek": {
+          "label": "Vence Esta Semana"
+        },
+        "dueThisMonth": {
+          "label": "Vence Este Mês"
+        },
+        "completedThisMonth": {
+          "label": "Concluído Este Mês",
+          "rate": "{{rate}}% taxa"
+        }
+      },
+      
+      "charts": {
+        "schedule": "Agenda de Manutenção - Próximos 30 Dias"
+      }
+    },
+    
+    "audit": {
+      "title": "Auditoria e Governança",
+      "subtitle": "Rastreamento de conformidade e status de ordens de serviço",
+      
+      "kpi": {
+        "workOrderPassRate": {
+          "label": "Taxa de Aprovação de Ordens",
+          "good": "Bom",
+          "needsImprovement": "Precisa melhorar"
+        },
+        "totalWorkOrders": {
+          "label": "Total de Ordens de Serviço"
+        },
+        "passed": {
+          "label": "Inspeções Aprovadas"
+        },
+        "failed": {
+          "label": "Inspeções Reprovadas",
+          "status": "Requer atenção"
+        }
+      },
+      
+      "charts": {
+        "complianceByCategory": "Conformidade por Categoria"
+      }
+    },
+    
+    "reports": {
+      "title": "Relatórios Personalizados",
+      "subtitle": "Gerar e agendar relatórios personalizados",
+      
+      "templates": {
+        "title": "Modelos de Relatório",
+        "executiveSummary": "Resumo Executivo",
+        "financialSummary": "Resumo Financeiro",
+        "complianceReport": "Relatório de Conformidade",
+        "assetInventory": "Inventário de Ativos",
+        "generate": "Gerar"
+      }
+    },
+    
+    "exports": {
+      "title": "Exportar Dados",
+      "subtitle": "Baixar dados em vários formatos",
+      
+      "options": {
+        "title": "Opções de Exportação",
+        "excel": "Exportar para Excel (XLSX)",
+        "csv": "Exportar para CSV",
+        "pdf": "Exportar para PDF",
+        "download": "Baixar"
+      }
+    },
+    
+    "common": {
+      "percentage": "{{value}}%",
+      "currency": "${{value}}",
+      "currencyK": "${{value}}K",
+      "currencyM": "${{value}}M",
+      "assets": "{{count}} ativos",
+      "days": "{{count}} dias"
     }
+  }
 }

@@ -86,7 +86,7 @@ export default function PoseOverlay({
   videoHeight,
   showPoints = true,
   showSkeleton = true,
-  showLabels = false,
+  showLabels = true,
   pointColor,
   lineColor = 'rgba(0, 255, 0, 0.8)',
   pointSize = 6,
