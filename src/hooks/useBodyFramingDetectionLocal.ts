@@ -315,6 +315,7 @@ export function useBodyFramingDetectionLocal({
     const initMediaPipe = async () => {
       try {
         // Importa MediaPipe dinamicamente
+        //@ts-ignore
         const { PoseLandmarker, FilesetResolver } = await import('@mediapipe/tasks-vision');
 
         const vision = await FilesetResolver.forVisionTasks(

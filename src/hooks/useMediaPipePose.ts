@@ -3,11 +3,13 @@
 // Verifica se a pessoa está completamente enquadrada na câmera
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+
 import { 
   PoseLandmarker, 
   FilesetResolver,
   DrawingUtils,
   type PoseLandmarkerResult 
+  //@ts-ignore
 } from '@mediapipe/tasks-vision';
 
 export interface PoseDetectionStatus {

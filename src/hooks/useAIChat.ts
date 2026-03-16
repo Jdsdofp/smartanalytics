@@ -9,13 +9,6 @@ export interface ChatMessage {
   content: string
 }
 
-export interface SmartChatResponse {
-  success: boolean
-  message: string
-  contextUsed: string[]
-  model: string
-}
-
 export interface AnalyticsReportResponse {
   success: boolean
   topic: string
@@ -43,6 +36,11 @@ const TOPIC_ICONS: Record<ReportTopic, string> = {
   alerts: '🚨',
 }
 
+// ─────────────────────────────────────────────
+// useAIChat — chat com streaming SSE
+// Resolve timeout do Stackhero enviando chunks em tempo real
+// ─────────────────────────────────────────────
+
 export function useAIChat(companyId: number) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [loading, setLoading] = useState(false)
@@ -58,21 +56,63 @@ export function useAIChat(companyId: number) {
     setLoading(true)
     setError(null)
 
+    // Adiciona mensagem vazia do assistant que vai sendo preenchida em tempo real
+    setMessages(prev => [...prev, { role: 'assistant', content: '' }])
+
     try {
-      const { data } = await axios.post<SmartChatResponse>(
-        `${API_BASE_URL}/dashboard/ai/smart-chat`,
-        { companyId, messages: updatedMessages, model }
+      const response = await fetch(
+        `${API_BASE_URL}/dashboard/ai/smart-chat-stream`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ companyId, messages: updatedMessages, model }),
+        }
       )
 
-      const assistantMessage: ChatMessage = {
-        role: 'assistant',
-        content: data.message,
-      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      if (!response.body) throw new Error('Stream não disponível')
 
-      setMessages(prev => [...prev, assistantMessage])
-      setContextUsed(data.contextUsed || [])
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let fullContent = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const text = decoder.decode(value, { stream: true })
+        const lines = text.split('\n').filter(l => l.startsWith('data: '))
+
+        for (const line of lines) {
+          try {
+            const data = JSON.parse(line.replace('data: ', ''))
+
+            if (data.chunk) {
+              fullContent += data.chunk
+              // Atualiza a última mensagem (assistant) em tempo real
+              setMessages(prev => {
+                const updated = [...prev]
+                updated[updated.length - 1] = { role: 'assistant', content: fullContent }
+                return updated
+              })
+            }
+
+            if (data.done) {
+              setContextUsed(data.contextUsed || [])
+            }
+
+            if (data.error) {
+              setError('Erro ao processar resposta da IA.')
+            }
+          } catch {
+            // linha incompleta ou ping, ignora
+          }
+        }
+      }
     } catch (err: any) {
       setError('Erro ao conectar com a IA. Tente novamente.')
+      // Remove a mensagem vazia do assistant em caso de erro
+      setMessages(prev => prev.filter((_, i) => i !== prev.length - 1))
       console.error('[useAIChat] Erro:', err)
     } finally {
       setLoading(false)
@@ -87,6 +127,10 @@ export function useAIChat(companyId: number) {
 
   return { messages, loading, error, contextUsed, sendMessage, clearMessages }
 }
+
+// ─────────────────────────────────────────────
+// useAnalyticsReport — relatório por tópico
+// ─────────────────────────────────────────────
 
 export function useAnalyticsReport(companyId: number) {
   const [report, setReport] = useState<string | null>(null)
@@ -107,9 +151,9 @@ export function useAnalyticsReport(companyId: number) {
     try {
       const { data } = await axios.post<AnalyticsReportResponse>(
         `${API_BASE_URL}/dashboard/ai/analytics-report`,
-        { companyId, topic, extraContext, model }
+        { companyId, topic, extraContext, model },
+        { timeout: 300000 } // 5 minutos
       )
-
       setReport(data.report)
       setReportData(data.data)
     } catch (err: any) {
