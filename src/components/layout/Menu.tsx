@@ -679,6 +679,7 @@ function Menu({ isOpen = true, onClose }: MenuProps) {
               />
             ))}
           </nav>
+          
         </div>
       </aside>
     </>

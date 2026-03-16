@@ -125,7 +125,7 @@ function Header({ onMenuClick }: HeaderProps) {
         <div className="flex items-center gap-2">
 
           {/* Notificações */}
-          <button
+          {/* <button
             className="
               relative p-2 rounded-xl
               hover:bg-gray-100 dark:hover:bg-gray-800
@@ -138,7 +138,30 @@ function Header({ onMenuClick }: HeaderProps) {
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-          </button>
+          </button> */}
+
+          {/* SmartX AI */}
+<button
+  onClick={() => navigate('/analytics/ai')}
+  title="SmartX AI — Assistente Inteligente"
+  className="
+    relative p-[2px] rounded-full
+    transition-all active:scale-95
+    animate-gradient
+  "
+>
+  <span
+    className="
+      flex items-center justify-center
+      bg-blue-200 dark:bg-gray-900
+      hover:bg-blue-100 dark:hover:bg-gray-800
+      rounded-full p-1.5
+      relative z-10
+    "
+  >
+    <img src="/logoSmartxAI.png" alt="AI" className="w-6 h-6 object-contain" />
+  </span>
+</button>
 
           {/* Theme */}
           <ThemeToggle />

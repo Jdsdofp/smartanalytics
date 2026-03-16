@@ -520,3 +520,32 @@
   background: #f9fafb;
   border-radius: 8px;
 }
+
+
+@keyframes gradientBorder {
+  0% {
+    background-position: 0% 50%;
+    box-shadow: 0 0 6px rgba(59,130,246,0.4);
+  }
+  50% {
+    background-position: 100% 50%;
+    box-shadow: 0 0 18px rgba(59,130,246,0.9);
+  }
+  100% {
+    background-position: 0% 50%;
+    box-shadow: 0 0 6px rgba(59,130,246,0.4);
+  }
+}
+
+.animate-gradient {
+  background: linear-gradient(
+    270deg,
+    #3b82f6,
+    #06b6d4,
+    #6366f1,
+    #3b82f6
+  );
+  background-size: 400% 400%;
+  animation: gradientBorder 4s ease infinite;
+  border-radius: 9999px;
+}

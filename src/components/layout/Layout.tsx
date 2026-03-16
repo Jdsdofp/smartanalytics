@@ -7,6 +7,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { useTranslation } from 'react-i18next'
 import { useFavorites } from '../../context/FavoritesContext'
 import { getMenuItemInfo, menuItemsRaw } from '../../utils/menuUtils'
+import AIFloatingButton from '../AI/AIFloatingButton'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -247,6 +248,7 @@ export default function Layout({
     <>
       {isEmbedded ? (
         <div className="w-full sm:px-2 lg:px-1 sm:py-1">
+          
           {children}
         </div>
       ) : (
@@ -255,6 +257,7 @@ export default function Layout({
           <div className="flex flex-col lg:flex-row">
             <Menu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
             <main className="flex-1 w-full min-w-0 relative">
+              <AIFloatingButton />
               <div className="w-full sm:px-2 lg:px-1 sm:py-1">
                 <div className="relative">
                   {(showEmbedButton || showFavoriteButton) && (
