@@ -1299,7 +1299,7 @@ const getApiBaseUrl = (): string => {
 };
 
 const makeHttp = () =>
-  axios.create({ baseURL: getApiBaseUrl(), timeout: 30000 });
+  axios.create({ baseURL: getApiBaseUrl(), timeout: 60000 });
 
 const EPI = "https://aihub.smartxhub.cloud/api/v1/epi";
 
