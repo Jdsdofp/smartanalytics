@@ -84,7 +84,8 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
 
       {/* ── Top Bar ──────────────────────────────────────────────────────── */}
         <TopBar
-          doorStatus="locked"
+          // doorStatus="locked"
+          doorStatus={doorStatus}
           //@ts-ignore
           config={mergedConfig}
           onOpenReport={() => setShowReport(true)}
