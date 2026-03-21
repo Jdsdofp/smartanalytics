@@ -1122,7 +1122,7 @@ const getApiBaseUrl = (): string => {
 const makeHttp = () =>
   axios.create({ baseURL: getApiBaseUrl(), timeout: 30000 });
 
-const EPI = "/api/v1/epi";
+const EPI = "https://aihub.smartxhub.cloud/api/v1/epi";
 
 const api = {
   getLocalConfig: async (): Promise<Partial<SysConfig>> => {
