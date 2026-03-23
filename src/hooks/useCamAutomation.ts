@@ -5432,14 +5432,26 @@ const EPI = "https://aihub.smartxhub.cloud/api/v1/epi";
 // Ver: app/projects/epi_check/api/ws_proxy.py
 // ─────────────────────────────────────────────────────────────────────────────
 
+// function getLockWsUrl(lockIp: string): string {
+//   const isSecure = window.location.protocol === "https:";
+//   if (isSecure) {
+//     // Proxy backend — evita Mixed Content
+//     const base = getApiBaseUrl().replace(/^http/, "ws"); // https→wss, http→ws
+//     return `${base}/api/v1/epi/ws/lock?lock_ip=${encodeURIComponent(lockIp)}`;
+//   }
+//   // Desenvolvimento local — conecta direto
+//   return `ws://${lockIp}:81`;
+// }
+
+
 function getLockWsUrl(lockIp: string): string {
   const isSecure = window.location.protocol === "https:";
   if (isSecure) {
-    // Proxy backend — evita Mixed Content
-    const base = getApiBaseUrl().replace(/^http/, "ws"); // https→wss, http→ws
-    return `${base}/api/v1/epi/ws/lock?lock_ip=${encodeURIComponent(lockIp)}`;
+    const base = getApiBaseUrl().replace(/^http/, "ws");
+    // API key via query param — browsers não suportam headers em WebSocket
+    const apiKey = sessionStorage.getItem("apiKey") ?? import.meta.env.VITE_API_KEY ?? "";
+    return `${base}/api/v1/epi/ws/lock?lock_ip=${encodeURIComponent(lockIp)}&api_key=${encodeURIComponent(apiKey)}`;
   }
-  // Desenvolvimento local — conecta direto
   return `ws://${lockIp}:81`;
 }
 
