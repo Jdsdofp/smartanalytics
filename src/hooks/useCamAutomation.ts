@@ -5444,37 +5444,29 @@ const EPI = "https://aihub.smartxhub.cloud/api/v1/epi";
 // }
 
 
-// function getLockWsUrl(lockIp: string): string {
-//   const host = window.location.hostname;
-//   const isSecure = window.location.protocol === "https:";
-  
-//   // Se está rodando localmente (localhost, IP local, ou rede 192.168.x.x)
-//   // conecta direto no ESP32 sem proxy
-//   const isLocal = 
-//     host === "localhost" ||
-//     host === "127.0.0.1" ||
-//     host.startsWith("192.168.") ||
-//     host.startsWith("10.") ||
-//     host.startsWith("172.");
-
-//   if (isLocal || !isSecure) {
-//     // Conecta direto — sem Mixed Content em HTTP ou rede local
-//     return `ws://${lockIp}:81`;
-//   }
-
-//   // HTTPS externo → proxy backend
-//   const base = getApiBaseUrl().replace(/^http/, "ws");
-//   return `${base}/api/v1/epi/ws/lock?lock_ip=${encodeURIComponent(lockIp)}`;
-// }
-
-
 function getLockWsUrl(lockIp: string): string {
-  // Sempre conecta direto no ESP32 (ws://).
-  // O totem e os clientes sempre estão na mesma rede local que o ESP32.
-  // Mixed Content deve ser habilitado via Chrome:
-  // Cadeado → Configurações do site → Conteúdo não seguro → Permitir
-  return `ws://${lockIp}:81`;
+  const host = window.location.hostname;
+  const isSecure = window.location.protocol === "https:";
+  
+  // Se está rodando localmente (localhost, IP local, ou rede 192.168.x.x)
+  // conecta direto no ESP32 sem proxy
+  const isLocal = 
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host.startsWith("192.168.") ||
+    host.startsWith("10.") ||
+    host.startsWith("172.");
+
+  if (isLocal || !isSecure) {
+    // Conecta direto — sem Mixed Content em HTTP ou rede local
+    return `ws://${lockIp}:81`;
+  }
+
+  // HTTPS externo → proxy backend
+  const base = getApiBaseUrl().replace(/^http/, "ws");
+  return `${base}/api/v1/epi/ws/lock?lock_ip=${encodeURIComponent(lockIp)}`;
 }
+
 
 // function getLockWsUrl(lockIp: string): string {
 //   const isSecure = window.location.protocol === "https:";
