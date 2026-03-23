@@ -5505,9 +5505,20 @@ const api = {
     };
   },
 
+  // saveEpiConfig: async (config: { required_ppe: string[] }): Promise<void> => {
+  //   await makeHttp().post(`${EPI}/config`, config);
+  // },
+
   saveEpiConfig: async (config: { required_ppe: string[] }): Promise<void> => {
-    await makeHttp().post(`${EPI}/config`, config);
-  },
+  // Converte ["gloves"] → { thermal_coat: false, gloves: true, helmet: false, ... }
+  const ALL_PPE = ["thermal_coat", "thermal_pants", "gloves", "helmet", "boots", "person"];
+  const body = Object.fromEntries(
+    ALL_PPE.map((cls) => [cls, config.required_ppe.includes(cls)])
+  );
+  // person sempre true — não é EPI, é detecção base
+  body["person"] = true;
+  await makeHttp().post(`${EPI}/config`, body);
+},
 
   startValidationSession: async (
     overrides: Record<string, unknown> = {},
