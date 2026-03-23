@@ -5444,27 +5444,36 @@ const EPI = "https://aihub.smartxhub.cloud/api/v1/epi";
 // }
 
 
-function getLockWsUrl(lockIp: string): string {
-  const host = window.location.hostname;
-  const isSecure = window.location.protocol === "https:";
+// function getLockWsUrl(lockIp: string): string {
+//   const host = window.location.hostname;
+//   const isSecure = window.location.protocol === "https:";
   
-  // Se está rodando localmente (localhost, IP local, ou rede 192.168.x.x)
-  // conecta direto no ESP32 sem proxy
-  const isLocal = 
-    host === "localhost" ||
-    host === "127.0.0.1" ||
-    host.startsWith("192.168.") ||
-    host.startsWith("10.") ||
-    host.startsWith("172.");
+//   // Se está rodando localmente (localhost, IP local, ou rede 192.168.x.x)
+//   // conecta direto no ESP32 sem proxy
+//   const isLocal = 
+//     host === "localhost" ||
+//     host === "127.0.0.1" ||
+//     host.startsWith("192.168.") ||
+//     host.startsWith("10.") ||
+//     host.startsWith("172.");
 
-  if (isLocal || !isSecure) {
-    // Conecta direto — sem Mixed Content em HTTP ou rede local
-    return `ws://${lockIp}:81`;
-  }
+//   if (isLocal || !isSecure) {
+//     // Conecta direto — sem Mixed Content em HTTP ou rede local
+//     return `ws://${lockIp}:81`;
+//   }
 
-  // HTTPS externo → proxy backend
-  const base = getApiBaseUrl().replace(/^http/, "ws");
-  return `${base}/api/v1/epi/ws/lock?lock_ip=${encodeURIComponent(lockIp)}`;
+//   // HTTPS externo → proxy backend
+//   const base = getApiBaseUrl().replace(/^http/, "ws");
+//   return `${base}/api/v1/epi/ws/lock?lock_ip=${encodeURIComponent(lockIp)}`;
+// }
+
+function getLockWsUrl(lockIp: string): string {
+  // Proxy Node.js — mesmo servidor que serve o front
+  // wss:// porque o Cloudflare/Nginx faz TLS por fora
+  const wsBase = window.location.origin
+    .replace("https://", "wss://")
+    .replace("http://", "ws://");
+  return `${wsBase}/ws/lock?lock_ip=${encodeURIComponent(lockIp)}`;
 }
 
 

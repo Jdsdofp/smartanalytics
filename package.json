@@ -27,6 +27,7 @@
     "axios": "^1.12.2",
     "express": "^4.21.2",
     "file-saver": "^2.0.5",
+    "http-proxy-middleware": "^3.0.5",
     "i18next": "^25.5.3",
     "i18next-browser-languagedetector": "^8.2.0",
     "jspdf": "2.5.1",
@@ -46,6 +47,7 @@
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.1.13",
     "use-debounce": "^10.0.6",
+    "ws": "^8.20.0",
     "xlsx": "0.18.5",
     "xlsx-js-style": "1.2.0"
   },
