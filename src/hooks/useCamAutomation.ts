@@ -7798,7 +7798,7 @@ export function useCamAutomation(): UseCamAutomationReturn {
     };
 
     poll(); // chamada imediata
-    const t = setInterval(poll, 3000);
+    const t = setInterval(poll, 30000);
     return () => clearInterval(t);
   }, [sysConfig.lockIpAddress, lockState.connected]);
 
