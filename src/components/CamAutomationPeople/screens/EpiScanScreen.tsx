@@ -6302,6 +6302,554 @@
 
 
 
+// // src/screens/EpiScanScreen/index.tsx
+// // Tela de verificação de EPI — modo vídeo contínuo via WebSocket
+// // ✅ Stream de vídeo ao vivo → YOLOv8 + InsightFace no backend (GPU)
+// // ✅ Bboxes + labels desenhados sobre o vídeo em tempo real
+// // ✅ Decisão por maioria de frames em X segundos
+// // ✅ Barra de progresso da janela de decisão
+// // ✅ Detecção de enquadramento corporal com MediaPipe
+
+// import { useEffect, useRef, useState, useCallback } from 'react';
+// import CameraView from '../components/CameraView';
+// import Stepper from '../components/Stepper';
+// import PoseOverlay from '../components/PoseOverlay';
+// import type { CameraHook } from '../../../hooks/useCamAutomation';
+// import { useBodyFramingDetectionLocal } from '../../../hooks/useBodyFramingDetectionLocal';
+// import {
+//   useEpiVideoStream,
+//   type EpiFrameResult,
+//   type EpiStreamDecision,
+// } from '../../../hooks/useEpiVideoStream';
+
+// export interface EpiScanState {
+//   status: 'idle' | 'capturing' | 'analyzing' | 'ok' | 'error';
+//   errorMsg?: string;
+//   captureUrl?: string | null;
+//   detectedEpi?: string[];
+// }
+
+// interface EpiScanScreenProps {
+//   epiScanState: EpiScanState;
+//   cameraHook: CameraHook;
+//   person: { name: string; photo?: string } | null;
+//   onCapture: () => void;
+//   onRetry: () => void;
+//   onCancel: () => void;
+//   enableAutoCapture?: boolean;
+//   autoCaptureDuration?: number;
+//   showPoseLandmarks?: boolean;
+//   showPoseSkeleton?: boolean;
+//   showPoseLabels?: boolean;
+//   // Config do stream de vídeo
+//   companyId?: number;
+//   windowSeconds?: number;
+//   streamFps?: number;
+//   apiBase?: string;
+//   /** Handler da decisão do WS stream — substitui onCapture para o fluxo de vídeo */
+//   onStreamDecision?: (decision: EpiStreamDecision) => void;
+// }
+
+// // ─── Labels PT ────────────────────────────────────────────────────────────────
+// const EPI_LABELS_PT: Record<string, string> = {
+//   helmet: 'Capacete', vest: 'Colete', gloves: 'Luvas', boots: 'Botas',
+//   thermal_coat: 'Jaqueta', thermal_pants: 'Calça Térmica',
+//   glasses: 'Óculos', mask: 'Máscara', apron: 'Avental', hardhat: 'Capacete',
+//   person: 'Pessoa',
+// };
+// const epiLabel = (k: string) => EPI_LABELS_PT[k] ?? k;
+
+// // ─── Cores por classe EPI ─────────────────────────────────────────────────────
+// const EPI_COLORS: Record<string, string> = {
+//   helmet: '#FACC15', hardhat: '#FACC15',
+//   thermal_coat: '#EF4444', thermal_pants: '#3B82F6',
+//   gloves: '#22C55E', boots: '#A855F7',
+//   vest: '#F97316', person: '#94A3B8',
+// };
+// const epiColor = (cls: string) => EPI_COLORS[cls] ?? '#60A5FA';
+
+// // ─── Canvas overlay com bboxes + labels em tempo real ────────────────────────
+// function DetectionOverlay({
+//   frame,
+//   containerRef,
+// }: {
+//   frame: EpiFrameResult | null;
+//   containerRef: React.RefObject<HTMLDivElement | null>;
+// }) {
+//   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+//   const draw = useCallback(() => {
+//     const canvas = canvasRef.current;
+//     const container = containerRef.current;
+//     if (!canvas || !container) return;
+
+//     const rect = container.getBoundingClientRect();
+//     canvas.width = rect.width;
+//     canvas.height = rect.height;
+
+//     const ctx = canvas.getContext('2d');
+//     if (!ctx) return;
+//     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+//     if (!frame) return;
+
+//     // Escala: frame original 1280x720 → container
+//     const frameW = 1280;
+//     const frameH = 720;
+//     const containerAspect = rect.width / rect.height;
+//     const frameAspect = frameW / frameH;
+
+//     let renderW: number, renderH: number, offsetX: number, offsetY: number;
+//     if (containerAspect > frameAspect) {
+//       renderH = rect.height; renderW = renderH * frameAspect;
+//       offsetX = (rect.width - renderW) / 2; offsetY = 0;
+//     } else {
+//       renderW = rect.width; renderH = renderW / frameAspect;
+//       offsetX = 0; offsetY = (rect.height - renderH) / 2;
+//     }
+
+//     const scaleX = renderW / frameW;
+//     const scaleY = renderH / frameH;
+//     const missing = new Set(frame.missing ?? []);
+
+//     // ── Detecções EPI ─────────────────────────────────────────────────────
+//     for (const det of frame.detections ?? []) {
+//       const cls = det.class_name ?? '';
+//       if (cls === 'person') continue;
+//       const b = det.bbox;
+//       if (!b) continue;
+
+//       const x = offsetX + b.x * scaleX;
+//       const y = offsetY + b.y * scaleY;
+//       const w = b.w * scaleX;
+//       const h = b.h * scaleY;
+//       const color = epiColor(cls);
+
+//       ctx.strokeStyle = color;
+//       ctx.lineWidth = 2.5;
+//       ctx.setLineDash(missing.has(cls) ? [6, 3] : []);
+//       ctx.strokeRect(x, y, w, h);
+//       ctx.setLineDash([]);
+
+//       const label = `${epiLabel(cls)} ${Math.round((det.confidence ?? 0) * 100)}%`;
+//       ctx.font = 'bold 13px monospace';
+//       const tw = ctx.measureText(label).width;
+//       const ly = y > 24 ? y - 22 : y + h + 2;
+
+//       ctx.fillStyle = color;
+//       ctx.globalAlpha = 0.88;
+//       ctx.fillRect(x, ly, tw + 10, 20);
+//       ctx.globalAlpha = 1;
+//       ctx.fillStyle = '#000';
+//       ctx.fillText(label, x + 5, ly + 14);
+//     }
+
+//     // ── Face bbox + nome ──────────────────────────────────────────────────
+//     if (frame.face_detected && frame.face_bbox) {
+//       const fb = frame.face_bbox;
+//       const fx = offsetX + fb.x * scaleX;
+//       const fy = offsetY + fb.y * scaleY;
+//       const fw = fb.w * scaleX;
+//       const fh = fb.h * scaleY;
+//       const faceColor = frame.face_recognized ? '#00FF88' : '#FF4444';
+
+//       ctx.strokeStyle = faceColor;
+//       ctx.lineWidth = 2.5;
+//       ctx.strokeRect(fx, fy, fw, fh);
+
+//       const fLabel = frame.face_person_code
+//         ? `${frame.face_person_code} ${Math.round(frame.face_confidence * 100)}%`
+//         : 'Desconhecido';
+
+//       ctx.font = 'bold 13px monospace';
+//       const ftw = ctx.measureText(fLabel).width;
+//       const fly = fy > 24 ? fy - 22 : fy + fh + 2;
+
+//       ctx.fillStyle = faceColor;
+//       ctx.globalAlpha = 0.88;
+//       ctx.fillRect(fx, fly, ftw + 10, 20);
+//       ctx.globalAlpha = 1;
+//       ctx.fillStyle = '#000';
+//       ctx.fillText(fLabel, fx + 5, fly + 14);
+//     }
+//   }, [frame, containerRef]);
+
+//   useEffect(() => { draw(); }, [draw]);
+
+//   useEffect(() => {
+//     const container = containerRef.current;
+//     if (!container) return;
+//     const ro = new ResizeObserver(() => draw());
+//     ro.observe(container);
+//     return () => ro.disconnect();
+//   }, [draw, containerRef]);
+
+//   return (
+//     <canvas ref={canvasRef} style={{
+//       position: 'absolute', top: 0, left: 0,
+//       width: '100%', height: '100%',
+//       pointerEvents: 'none', zIndex: 8,
+//     }} />
+//   );
+// }
+
+// // ─── Barra circular de progresso da janela ────────────────────────────────────
+// //@ts-ignore
+// function WindowProgressRing({ progress, seconds, remaining }: {
+//   progress: number;
+//   seconds: number;
+//   remaining: number;
+// }) {
+//   const r = 54;
+//   const circumference = 2 * Math.PI * r;
+//   const offset = circumference * (1 - progress);
+//   const color = progress > 0.8 ? '#00FF00' : progress > 0.5 ? '#FACC15' : '#60A5FA';
+
+//   return (
+//     <div style={{
+//       position: 'relative', width: '128px', height: '128px',
+//       display: 'flex', alignItems: 'center', justifyContent: 'center',
+//     }}>
+//       <svg style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}
+//         width="128" height="128">
+//         <circle cx="64" cy="64" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+//         <circle cx="64" cy="64" r={r} fill="none" stroke={color} strokeWidth="8"
+//           strokeDasharray={circumference} strokeDashoffset={offset}
+//           strokeLinecap="round"
+//           style={{ transition: 'stroke-dashoffset 120ms linear, stroke 300ms ease', filter: `drop-shadow(0 0 6px ${color}88)` }}
+//         />
+//       </svg>
+//       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+//         <div style={{ fontFamily: 'var(--font-head)', fontSize: '2rem', fontWeight: 700, color, lineHeight: 1, textShadow: `0 0 16px ${color}88` }}>
+//           {remaining.toFixed(1)}
+//         </div>
+//         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+//           seg
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// // ─────────────────────────────────────────────────────────────────────────────
+// // SCREEN PRINCIPAL
+// // ─────────────────────────────────────────────────────────────────────────────
+
+// export default function EpiScanScreen({
+//   epiScanState,
+//   cameraHook,
+//   person,
+//   onCapture,
+//   //@ts-ignore
+//   onRetry,
+//   onCancel,
+//   enableAutoCapture = true,
+//   showPoseLandmarks = true,
+//   showPoseSkeleton = true,
+//   showPoseLabels = false,
+//   companyId = 1,
+//   windowSeconds = 3,
+//   streamFps = 10,
+//   apiBase = 'https://aihub.smartxhub.cloud',
+//   onStreamDecision,
+// }: EpiScanScreenProps) {
+//   //@ts-ignore
+//   const { status: epiStatus, errorMsg, captureUrl, detectedEpi = [] } = epiScanState;
+//   const videoRef = useRef<HTMLVideoElement | null>(null);
+//   const containerRef = useRef<HTMLDivElement>(null);
+//   const [videoSize, setVideoSize] = useState({ width: 0, height: 0 });
+
+//   // ── EPI Video Stream ──────────────────────────────────────────────────────
+//   const stream = useEpiVideoStream({
+//     companyId,
+//     windowSeconds,
+//     fps: streamFps,
+//     apiBase,
+//     detectFaces: true,
+//   });
+
+//   // ── MediaPipe enquadramento ───────────────────────────────────────────────
+//   //@ts-ignore
+//   const { feedback, isWellFramed, landmarks } = useBodyFramingDetectionLocal({
+//     videoElement: videoRef.current,
+//     enabled: stream.status === 'idle' || stream.status === 'error',
+//   });
+
+//   // Obtém referência do vídeo
+//   useEffect(() => {
+//     const assignment = cameraHook.getAssignment('body1');
+//     if (assignment) {
+//       const video = document.querySelector('video[data-role="body1"]') as HTMLVideoElement;
+//       videoRef.current = video;
+//       if (video) {
+//         const update = () => setVideoSize({ width: video.videoWidth, height: video.videoHeight });
+//         video.addEventListener('loadedmetadata', update);
+//         if (video.readyState >= 2) update();
+//         return () => video.removeEventListener('loadedmetadata', update);
+//       }
+//     }
+//   }, [cameraHook]);
+
+//   // ── Auto-start stream quando bem enquadrado ───────────────────────────────
+//   const autoStartedRef = useRef(false);
+
+//   useEffect(() => {
+//     if (!enableAutoCapture) return;
+//     if (!isWellFramed) { autoStartedRef.current = false; return; }
+//     if (stream.status !== 'idle') return;
+//     if (autoStartedRef.current) return;
+//     if (!videoRef.current) return;
+
+//     // Pequeno delay para garantir que o vídeo está pronto
+//     const t = setTimeout(() => {
+//       if (videoRef.current && isWellFramed && stream.status === 'idle') {
+//         autoStartedRef.current = true;
+//         stream.startStream(videoRef.current);
+//       }
+//     }, 500);
+//     return () => clearTimeout(t);
+//   }, [isWellFramed, stream.status, enableAutoCapture]);
+
+//   // ── Quando decisão chega, chama onCapture com resultado ───────────────────
+//   // ── Quando decisão chega → usa onStreamDecision (novo fluxo WS) ou onCapture (fallback) ──
+//   const onStreamDecisionRef = useRef(onStreamDecision);
+//   onStreamDecisionRef.current = onStreamDecision;
+//   const onCaptureRef = useRef(onCapture);
+//   onCaptureRef.current = onCapture;
+
+//   useEffect(() => {
+//     if (!stream.decision || stream.status !== 'decided') return;
+//     if (onStreamDecisionRef.current) {
+//       // Novo fluxo: passa decisão completa para o hook pai navegar
+//       onStreamDecisionRef.current(stream.decision);
+//     } else {
+//       // Fallback: comportamento antigo
+//       onCaptureRef.current();
+//     }
+//   }, [stream.decision, stream.status]);
+
+//   // Cleanup ao sair da tela
+//   useEffect(() => {
+//     return () => { stream.stopStream(); };
+//   }, []);
+
+//   // ── Helpers UI ────────────────────────────────────────────────────────────
+//   const getFeedbackColor = () => {
+//     switch (feedback.status) {
+//       case 'well-framed': return 'var(--green)'; case 'too-close': return 'var(--red)';
+//       case 'partial': return 'var(--amber)'; case 'no-person': return 'var(--red)';
+//       case 'checking': return 'var(--blue)'; default: return 'var(--gray)';
+//     }
+//   };
+//   const getFeedbackIcon = () => {
+//     switch (feedback.status) {
+//       case 'well-framed': return '✓'; case 'too-close': return '←';
+//       case 'partial': return '⚠'; case 'no-person': return '👤';
+//       case 'checking': return '⏳'; default: return '•';
+//     }
+//   };
+
+//   const isStreaming = stream.status === 'streaming';
+//   const isDecided  = stream.status === 'decided';
+//   const isError    = stream.status === 'error' || stream.status === 'disconnected';
+//   const remaining  = Math.max(0, windowSeconds * (1 - stream.windowProgress));
+
+//   const camStatus = isStreaming ? 'scanning' : epiStatus === 'error' ? 'fail' : !isWellFramed ? 'warning' : 'idle';
+
+//   return (
+//     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '0.5rem 1rem', gap: '0.5rem', position: 'relative', overflow: 'hidden' }}>
+
+//       {/* Stepper */}
+//       <div style={{ width: '100%', display: 'flex', justifyContent: 'center', flexShrink: 0, zIndex: 10 }}>
+//         <Stepper currentStep="epi" compact />
+//       </div>
+
+//       {/* Nome + fps counter */}
+//       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+//         {person && (
+//           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--gray-light)', letterSpacing: '0.05em', margin: 0 }}>
+//             {person.name}
+//           </p>
+//         )}
+//         {isStreaming && (
+//           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(0,255,0,0.7)', background: 'rgba(0,255,0,0.08)', border: '1px solid rgba(0,255,0,0.2)', padding: '1px 6px', borderRadius: '4px' }}>
+//             ● {stream.frameCount} frames
+//           </span>
+//         )}
+//       </div>
+
+//       {/* Container câmera */}
+//       <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', minHeight: 0, overflow: 'hidden' }}>
+//         <div ref={containerRef} style={{ width: '100%', height: '100%', maxWidth: '600px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+
+//           <CameraView role="body1" cameraHook={cameraHook} scanning={isStreaming} captureUrl={captureUrl} status={camStatus as any} autoStart aspectRatio="9/16" dynamicSize={false} />
+
+//           {/* PoseOverlay — só quando idle */}
+//           {!isStreaming && !isDecided && landmarks && videoSize.width > 0 && (
+//             <PoseOverlay landmarks={landmarks} videoWidth={videoSize.width} videoHeight={videoSize.height} showPoints={showPoseLandmarks} showSkeleton={showPoseSkeleton} showLabels={showPoseLabels} lineColor={isWellFramed ? 'rgba(0,255,0,0.8)' : 'rgba(255,165,0,0.8)'} pointSize={5} lineWidth={2} />
+//           )}
+
+//           {/* Detection Overlay — bboxes + labels em tempo real */}
+//           {(isStreaming || isDecided) && stream.latestFrame && (
+//             <DetectionOverlay frame={stream.latestFrame} containerRef={containerRef} />
+//           )}
+
+//           {/* Botão cancelar */}
+//           <button onClick={onCancel} style={{ position: 'absolute', top: '1rem', right: '1rem', width: '44px', height: '44px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', background: 'rgba(33,40,54,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1.25rem', color: 'var(--gray-light)', transition: 'all 200ms ease', zIndex: 15 }}
+//             onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(220,38,38,0.85)'; e.currentTarget.style.color = '#fff'; }}
+//             onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(33,40,54,0.85)'; e.currentTarget.style.color = 'var(--gray-light)'; }}
+//           >✕</button>
+
+//           {/* Feedback enquadramento — só quando idle */}
+//           {!isStreaming && !isDecided && (
+//             <div style={{ position: 'absolute', top: '1rem', left: '50%', transform: 'translateX(-50%)', background: `${getFeedbackColor()}22`, backdropFilter: 'blur(12px)', border: `2px solid ${getFeedbackColor()}66`, borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', zIndex: 12, maxWidth: '90%' }}>
+//               <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `${getFeedbackColor()}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: getFeedbackColor(), fontWeight: 'bold' }}>
+//                 {getFeedbackIcon()}
+//               </div>
+//               <div style={{ flex: 1 }}>
+//                 <div style={{ fontFamily: 'var(--font-head)', fontSize: '0.85rem', fontWeight: 700, color: getFeedbackColor() }}>{feedback.message}</div>
+//                 {(feedback.missingParts?.length ?? 0) > 0 && (
+//                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)' }}>{feedback.missingParts?.join(' • ')}</div>
+//                 )}
+//               </div>
+//             </div>
+//           )}
+
+//           {/* ═══════════════════════════════════════════════════════════════ */}
+//           {/* PAINEL DE STREAMING — progresso + stats ao vivo                */}
+//           {/* ═══════════════════════════════════════════════════════════════ */}
+//           {isStreaming && stream.latestFrame && (
+//             <div style={{ position: 'absolute', top: '1rem', left: '50%', transform: 'translateX(-50%)', background: 'rgba(8,12,22,0.88)', backdropFilter: 'blur(16px)', border: '1px solid rgba(0,132,255,0.25)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', zIndex: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.4)', maxWidth: '90%' }}>
+
+//               {/* Anel de progresso da janela */}
+//               <WindowProgressRing progress={stream.windowProgress} seconds={windowSeconds} remaining={remaining} />
+
+//               {/* Stats ao vivo */}
+//               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+//                 {/* EPI compliance bar */}
+//                 <div>
+//                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+//                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>EPI</span>
+//                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: stream.sessionCompliantRate > 0.5 ? '#00C864' : '#FB923C' }}>
+//                       {Math.round(stream.sessionCompliantRate * 100)}%
+//                     </span>
+//                   </div>
+//                   <div style={{ width: '120px', height: '5px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
+//                     <div style={{ height: '100%', width: `${stream.sessionCompliantRate * 100}%`, background: stream.sessionCompliantRate > 0.5 ? '#00C864' : '#FB923C', borderRadius: '3px', transition: 'width 200ms ease' }} />
+//                   </div>
+//                 </div>
+
+//                 {/* Face rate bar */}
+//                 <div>
+//                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+//                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Face</span>
+//                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: stream.sessionFaceRate > 0.5 ? '#00C864' : '#EF4444' }}>
+//                       {Math.round(stream.sessionFaceRate * 100)}%
+//                     </span>
+//                   </div>
+//                   <div style={{ width: '120px', height: '5px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
+//                     <div style={{ height: '100%', width: `${stream.sessionFaceRate * 100}%`, background: stream.sessionFaceRate > 0.5 ? '#00C864' : '#EF4444', borderRadius: '3px', transition: 'width 200ms ease' }} />
+//                   </div>
+//                 </div>
+
+//                 {/* Pessoa identificada */}
+//                 {stream.latestFrame.face_person_code && (
+//                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#00FF88', marginTop: '2px' }}>
+//                     👤 {stream.latestFrame.face_person_code}
+//                   </div>
+//                 )}
+
+//                 {/* EPIs faltando */}
+//                 {stream.latestFrame.missing.length > 0 && (
+//                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', maxWidth: '140px' }}>
+//                     {stream.latestFrame.missing.map((item) => (
+//                       <span key={item} style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: '#FB923C', background: 'rgba(251,146,60,0.12)', border: '1px solid rgba(251,146,60,0.25)', padding: '1px 4px', borderRadius: '3px' }}>
+//                         ✗ {epiLabel(item)}
+//                       </span>
+//                     ))}
+//                   </div>
+//                 )}
+//               </div>
+//             </div>
+//           )}
+
+//           {/* Overlay de erro */}
+//           {isError && (
+//             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'rgba(220,38,38,0.15)', backdropFilter: 'blur(12px)', border: '2px solid rgba(220,38,38,0.4)', borderRadius: 'var(--radius-md)', padding: '1.5rem', textAlign: 'center', zIndex: 12, maxWidth: '80%' }}>
+//               <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⚠️</div>
+//               <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: '#EF4444', marginBottom: '0.25rem' }}>
+//                 {stream.error ?? 'Erro de conexão'}
+//               </div>
+//               <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>
+//                 Toque em Tentar Novamente
+//               </div>
+//             </div>
+//           )}
+
+//           {/* Botões de ação */}
+//           <div style={{ position: 'absolute', bottom: '1.5rem', left: '1rem', right: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', zIndex: 10 }}>
+
+//             {/* Botão principal */}
+//             {!isStreaming && !isDecided && (
+//               <button
+//                 onClick={() => {
+//                   if (videoRef.current) {
+//                     autoStartedRef.current = true;
+//                     stream.startStream(videoRef.current);
+//                   }
+//                 }}
+//                 disabled={!isWellFramed || stream.status === 'connecting'}
+//                 className="btn-primary"
+//                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '1rem', fontSize: '0.95rem', opacity: !isWellFramed ? 0.6 : 1, cursor: !isWellFramed ? 'not-allowed' : 'pointer', background: !isWellFramed ? 'rgba(100,116,139,0.9)' : 'rgba(0,132,255,0.9)', backdropFilter: 'blur(12px)', border: !isWellFramed ? '2px solid rgba(100,116,139,0.4)' : '2px solid rgba(0,132,255,0.4)' }}
+//               >
+//                 <span style={{ fontSize: '1.25rem' }}>{stream.status === 'connecting' ? '⏳' : !isWellFramed ? '⚠️' : '🎥'}</span>
+//                 <span>{stream.status === 'connecting' ? 'CONECTANDO...' : !isWellFramed ? 'AJUSTE SUA POSIÇÃO' : 'INICIAR VERIFICAÇÃO'}</span>
+//               </button>
+//             )}
+
+//             {isStreaming && (
+//               <button
+//                 onClick={() => stream.stopStream()}
+//                 className="btn-secondary"
+//                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '0.75rem', fontSize: '0.85rem', background: 'rgba(100,116,139,0.5)', backdropFilter: 'blur(12px)', border: '2px solid rgba(100,116,139,0.3)', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: 'rgba(255,255,255,0.7)' }}
+//               >
+//                 <span>⏹</span><span>CANCELAR ANÁLISE</span>
+//               </button>
+//             )}
+
+//             {isError && (
+//               <button
+//                 onClick={() => {
+//                   if (videoRef.current) {
+//                     autoStartedRef.current = true;
+//                     stream.startStream(videoRef.current);
+//                   }
+//                 }}
+//                 className="btn-primary"
+//                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '1rem', fontSize: '0.95rem', background: 'rgba(0,132,255,0.9)', backdropFilter: 'blur(12px)', border: '2px solid rgba(0,132,255,0.4)' }}
+//               >
+//                 <span>🔄</span><span>TENTAR NOVAMENTE</span>
+//               </button>
+//             )}
+
+//             {enableAutoCapture && stream.status === 'idle' && isWellFramed && (
+//               <div style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }}>
+//                 💡 Mantenha a posição — análise iniciará automaticamente
+//               </div>
+//             )}
+//           </div>
+
+//         </div>
+//       </div>
+
+//       <style>{`
+//         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+//       `}</style>
+//     </div>
+//   );
+// }
+
+
 // src/screens/EpiScanScreen/index.tsx
 // Tela de verificação de EPI — modo vídeo contínuo via WebSocket
 // ✅ Stream de vídeo ao vivo → YOLOv8 + InsightFace no backend (GPU)
@@ -6494,7 +7042,6 @@ function DetectionOverlay({
 }
 
 // ─── Barra circular de progresso da janela ────────────────────────────────────
-//@ts-ignore
 function WindowProgressRing({ progress, seconds, remaining }: {
   progress: number;
   seconds: number;
@@ -6540,7 +7087,6 @@ export default function EpiScanScreen({
   cameraHook,
   person,
   onCapture,
-  //@ts-ignore
   onRetry,
   onCancel,
   enableAutoCapture = true,
@@ -6553,7 +7099,6 @@ export default function EpiScanScreen({
   apiBase = 'https://aihub.smartxhub.cloud',
   onStreamDecision,
 }: EpiScanScreenProps) {
-  //@ts-ignore
   const { status: epiStatus, errorMsg, captureUrl, detectedEpi = [] } = epiScanState;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
