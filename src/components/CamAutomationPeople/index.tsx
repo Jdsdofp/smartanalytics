@@ -755,8 +755,8 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
             onCancel={handleGoIdle}
             onStreamDecision={handleEpiStreamDecision}
             companyId={mergedConfig.companyId}
-            windowSeconds={9} //
-            streamFps={15}
+            windowSeconds={9} // tempo
+            streamFps={15} // frames
             apiBase={mergedConfig.apiBase}
           />
         )}

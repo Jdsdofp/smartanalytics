@@ -109,7 +109,8 @@ export default function CameraView({
           // objectFit: 'cover',
           objectFit: role === 'face' ? 'cover' : 'contain',
           display: captureUrl ? 'none' : 'block',
-          transform: role === 'face' ? 'scaleX(-1)' : 'none',
+          // transform: role === 'face' ? 'scaleX(-1)' : 'none',
+          transform: (role === 'face' || role === 'body1') ? 'scaleX(-1)' : 'none',
         }}
       />
 
@@ -122,7 +123,8 @@ export default function CameraView({
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            transform: role === 'face' ? 'scaleX(-1)' : 'none',
+            // transform: role === 'face' ? 'scaleX(-1)' : 'none',
+            transform: (role === 'face' || role === 'body1') ? 'scaleX(-1)' : 'none',
           }}
         />
       )}
