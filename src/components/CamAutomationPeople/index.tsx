@@ -530,7 +530,7 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
           />
         )}
 
-        {screen === 'epi_scan' && (
+        {/* {screen === 'epi_scan' && (
           <EpiScanScreen
             epiScanState={adaptedEpiScanState}
             cameraHook={cameraHook}
@@ -541,7 +541,23 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
             onCancel={handleGoIdle}
             validationStream={validationStream}
           />
-        )}
+        )} */}
+
+        {screen === 'epi_scan' && (
+        <EpiScanScreen
+          epiScanState={adaptedEpiScanState}
+          cameraHook={cameraHook}
+          //@ts-ignore
+          person={session.person}
+          onCapture={handleCaptureEpi}
+          onRetry={handleRetryEpi}
+          onCancel={handleGoIdle}
+          companyId={mergedConfig.companyId}
+          windowSeconds={3}
+          streamFps={10}
+          apiBase={mergedConfig.apiBase}
+        />
+      )}
 
         {screen === 'access_granted' && (
           <AccessGrantedScreen
