@@ -7555,9 +7555,14 @@ function DetectionOverlay({
       ctx.lineWidth = 2.5;
       ctx.strokeRect(fx, fy, fw, fh);
 
-      const fLabel = frame.face_person_name
-        ? `${frame.frame.face_person_name} ${Math.round(frame.face_confidence * 100)}%`
-        : 'Desconhecido';
+      // const fLabel = frame.face_person_name
+      //   ? `${frame.frame.face_person_name} ${Math.round(frame.face_confidence * 100)}%`
+      //   : 'Desconhecido';
+
+      const fLabel = (frame as any).face_person_name
+        ?? (frame.face_person_code
+          ? `${frame.face_person_code} ${Math.round(frame.face_confidence * 100)}%`
+          : 'Desconhecido');
 
       ctx.font = 'bold 13px monospace';
       const ftw = ctx.measureText(fLabel).width;
@@ -7860,11 +7865,17 @@ export default function EpiScanScreen({
                 </div>
 
                 {/* Pessoa identificada */}
-                {stream.latestFrame.face_person_code && (
+                {/* {stream.latestFrame.face_person_code && (
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#00FF88', marginTop: '2px' }}>
                     👤 {stream.latestFrame.face_person_code}
                   </div>
-                )}
+                )} */}
+
+                {stream.latestFrame.face_person_code && (
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: '#00FF88', marginTop: '2px' }}>
+                      👤 {(stream.latestFrame as any).face_person_name ?? stream.latestFrame.face_person_code}
+                    </div>
+                  )}
 
                 {/* EPIs faltando */}
                 {stream.latestFrame.missing.length > 0 && (

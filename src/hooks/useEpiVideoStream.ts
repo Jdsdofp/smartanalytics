@@ -28,6 +28,7 @@ export interface EpiFrameResult {
   face_recognized: boolean;
   face_person_code: string | null;
   face_confidence: number;
+  face_person_name?: string | null;
   face_bbox: { x: number; y: number; w: number; h: number } | null;
   // Progresso da janela de decisão
   window_progress: number;    // 0.0 → 1.0
