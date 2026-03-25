@@ -7555,8 +7555,8 @@ function DetectionOverlay({
       ctx.lineWidth = 2.5;
       ctx.strokeRect(fx, fy, fw, fh);
 
-      const fLabel = frame.face_person_code
-        ? `${frame.face_person_code} ${Math.round(frame.face_confidence * 100)}%`
+      const fLabel = frame.face_person_name
+        ? `${frame.frame.face_person_name} ${Math.round(frame.face_confidence * 100)}%`
         : 'Desconhecido';
 
       ctx.font = 'bold 13px monospace';
