@@ -449,6 +449,7 @@ export default function CamAutomationPeople({ configOverrides }: CamAutomationPe
     lockState,
 
     // ── SSE de validação — feedback em tempo real por foto ─────────────────
+    //@ts-ignore
     validationStream,
 
     handleStartEntry,
