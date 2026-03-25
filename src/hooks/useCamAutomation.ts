@@ -8335,6 +8335,39 @@ export interface PeopleFilters {
 
 // ─── Tipos SSE de validação ───────────────────────────────────────────────────
 
+// export interface ValidationStreamEvent {
+//   session_uuid: string;
+//   photo_seq: number;
+//   photo_count_received: number;
+//   photo_count_required: number;
+//   session_complete: boolean;
+//   face_detected: boolean;
+//   face_confidence: number | null;
+//   face_person_code: string | null;
+//   epi_compliant: boolean;
+//   compliance_score: number;
+//   missing: string[];
+//   processing_ms: number;
+//   final_decision?: {
+//     access_decision: string;
+//     epi_compliant: boolean;
+//     face_confirmed: boolean;
+//     person_code?: string;
+//     person_name?: string;
+//   } | null;
+// }
+
+
+// Substitui o bloco de tipos SSE no useCamAutomation.ts
+// Cole este bloco no lugar do ValidationStreamEvent existente
+
+export interface EpiDetection {
+  class_name: string;
+  confidence: number;
+  bbox: { x: number; y: number; w: number; h: number };
+  source?: string;
+}
+
 export interface ValidationStreamEvent {
   session_uuid: string;
   photo_seq: number;
@@ -8344,9 +8377,13 @@ export interface ValidationStreamEvent {
   face_detected: boolean;
   face_confidence: number | null;
   face_person_code: string | null;
+  /** Bbox do rosto detectado {x, y, w, h} em pixels do frame original */
+  face_bbox?: { x: number; y: number; w: number; h: number } | null;
   epi_compliant: boolean;
   compliance_score: number;
   missing: string[];
+  /** Detecções com bbox — cada item tem class_name, confidence e bbox */
+  detections?: EpiDetection[];
   processing_ms: number;
   final_decision?: {
     access_decision: string;
