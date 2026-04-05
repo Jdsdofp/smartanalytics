@@ -33,6 +33,7 @@ export const menuItemsRaw: MenuItemProps[] = [
     label: 'Dashboard',
     path: '/'
   },
+  { label: 'EPI Camera Station', path: '/epi-station', icon: ShieldCheckIcon },
   {
     icon: CubeIcon,
     label: 'Assets Analytics',

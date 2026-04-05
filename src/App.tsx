@@ -29,6 +29,8 @@ import NotFound from './pages/404';
 import MN0400_332 from './pages/Analytics/Distribution/MN0400_332';
 import CamAutomation from './pages/CamAutomation';
 import AIPage from './pages/Analytics/AI';
+import EpiCameraStation from './pages/EpiCameraStation'  // ← adicionar
+
 
 function App() {
 
@@ -38,6 +40,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/analytics/ai" element={<PrivateRoute><AIPage /></PrivateRoute>} />
+      <Route path="/epi-station" element={<EpiCameraStation />} />
 
       {/* Rotas protegidas */}
       <Route
