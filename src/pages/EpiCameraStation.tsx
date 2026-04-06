@@ -371,7 +371,8 @@ import {
   UserIcon,
   BoltIcon,
   EyeIcon,
-  FaceSmileIcon
+  FaceSmileIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline'
 import { CheckIcon } from '@heroicons/react/24/solid'
 import EpiBodyFigure from '../components/EpiBodyFigure'
@@ -412,6 +413,8 @@ const EPI_LABEL: Record<string, string> = {
   helmet: 'Capacete', boots: 'Botas', gloves: 'Luvas',
   thermal_coat: 'Jaleco Térmico', thermal_pants: 'Calça Térmica', person: 'Pessoa',
 }
+
+
 
 // ─── HOOK ─────────────────────────────────────────────────────────────────────
 function useKioskStream() {
@@ -626,13 +629,28 @@ function IdleOverlay({ camError }: { camError: string }) {
 }
 
 // ─── STATUS BAR ───────────────────────────────────────────────────────────────
-function StatusBar({ phase, frame }: { phase: Phase; frame: FrameResult | null }) {
+function StatusBar({ phase, frame, hasMultipleCams, onSwitch }: {
+  phase: Phase; frame: FrameResult | null; hasMultipleCams?: boolean
+  onSwitch?: () => void
+}) {
   const scanning = phase === 'scanning'
   const progress = frame?.window_progress ?? 0
   const rate = frame?.session_compliant_rate ?? 0
   const rateColor = rate > 0.7 ? '#10B981' : rate > 0.4 ? '#F59E0B' : '#EF4444'
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* ── Botão trocar câmera ── */}
+      {hasMultipleCams && (
+        <button onClick={onSwitch} style={{
+          background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+          borderRadius: 8, padding: '4px 10px', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 5,
+          color: '#9CA3AF', fontSize: 11, fontFamily: 'monospace',
+        }}>
+          <ArrowPathIcon style={{ width: 13, height: 13 }} />
+          Trocar câmera
+        </button>
+      )}
       <ShieldCheckIcon style={{ width: 20, height: 20, color: '#60A5FA' }} />
       <span style={{ fontWeight: 700, fontSize: 15, color: '#F9FAFB', flex: 1 }}>EPI Check Station</span>
       {scanning && (
@@ -714,12 +732,46 @@ export default function EpiCameraStation() {
   const [vSize, setVSize] = useState({ w: 1280, h: 720 })
   const [oSize, setOSize] = useState({ w: 0, h: 0 })
 
-    // ── Controle do nome grande ──
+  // ── Controle de câmera ──
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment')
+  const [hasMultipleCams, setHasMultipleCams] = useState(false)
+
+  // ── Controle do nome grande ──
   const [showName, setShowName] = useState(false)
   const nameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastPersonRef = useRef<string | null>(null)
 
-    // Dispara quando face_recognized muda para true pela primeira vez
+  // Verifica se tem múltiplas câmeras
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+      const cams = devices.filter(d => d.kind === 'videoinput')
+      setHasMultipleCams(cams.length > 1)
+    }).catch(() => { })
+  }, [])
+
+
+  const switchCamera = useCallback(async () => {
+    const newMode = facingMode === 'environment' ? 'user' : 'environment'
+    setFacingMode(newMode)
+    // Para a câmera atual
+    if (videoRef.current?.srcObject) {
+      (videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop())
+    }
+    // Abre com o novo modo
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: newMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      })
+      if (videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play() }
+    } catch {
+      // fallback sem constraint de facing
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      if (videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play() }
+    }
+  }, [facingMode, videoRef])
+
+  // Dispara quando face_recognized muda para true pela primeira vez
   useEffect(() => {
     const personId = lastFrame?.face_person_code ?? lastFrame?.face_person_name ?? null
     if (phase === 'scanning' && lastFrame?.face_recognized && personId && personId !== lastPersonRef.current) {
@@ -759,9 +811,17 @@ export default function EpiCameraStation() {
           {(scanning || phase === 'idle') && camReady && <Overlay frame={lastFrame} vw={vSize.w} vh={vSize.h} ow={oSize.w} oh={oSize.h} />}
           {phase === 'idle' && <IdleOverlay camError={camError} />}
           {showResult && <ResultOverlay phase={phase} decision={decision} />}
-          {camReady && <StatusBar phase={phase} frame={lastFrame} />}
+          {camReady && (
+            <StatusBar
+              phase={phase}
+              frame={lastFrame}
+              hasMultipleCams={hasMultipleCams}
+              onSwitch={switchCamera}
+            />
+          )}
+
           {/* ── Nome da pessoa identificada — aparece sobre a câmera durante scan ── */}
-          {scanning &&  showName && lastFrame?.face_recognized && (
+          {scanning && showName && lastFrame?.face_recognized && (
             <div style={{
               position: 'absolute', bottom: 40, left: 0, right: 0,
               display: 'flex', flexDirection: 'column', alignItems: 'center',
