@@ -15,7 +15,7 @@ import headImg      from '../../assets/images/api/head.png'
 import handLeftImg  from '../../assets/images/api/hand_left.png'
 import handRightImg from '../../assets/images/api/hand_right.png'
 import bootsImg     from '../../assets/images/api/boots.png'
-
+//@ts-ignore
 interface EpiStatus {
   helmet:        boolean
   gloves:        boolean
@@ -90,18 +90,20 @@ export default function EpiBodyFigure({
   const { w, h } = SIZE_MAP[size]
   const det = detected ?? []
   const mis = missing  ?? []
+  
 
-  const status: EpiStatus = {
-    helmet:        det.includes('helmet')        && !mis.includes('helmet'),
-    gloves:        det.includes('gloves')        && !mis.includes('gloves'),
-    boots:         det.includes('boots')         && !mis.includes('boots'),
-    thermal_coat:  det.includes('thermal_coat')  && !mis.includes('thermal_coat'),
-    thermal_pants: det.includes('thermal_pants') && !mis.includes('thermal_pants'),
-  }
+  // const getStatus = (key: keyof EpiStatus): boolean | null => {
+  //   if (det.length === 0 && mis.length === 0) return null
+  //   return status[key]
+  // }
 
-  const getStatus = (key: keyof EpiStatus): boolean | null => {
-    if (det.length === 0 && mis.length === 0) return null
-    return status[key]
+    const EPI_KEYS = ['helmet', 'gloves', 'boots', 'thermal_coat', 'thermal_pants']
+  const hasInfo  = mis.length > 0 || det.some(d => EPI_KEYS.includes(d))
+
+
+  const getStatus = (key: string): boolean | null => {
+    if (!hasInfo) return null          // ⏳ ainda sem dados
+    return !mis.includes(key)          // true = OK, false = faltando
   }
 
   const helmetOk = getStatus('helmet')
@@ -110,8 +112,9 @@ export default function EpiBodyFigure({
   const coatOk   = getStatus('thermal_coat')
   const pantsOk  = getStatus('thermal_pants')
 
-  const allOk = [helmetOk, glovesOk, bootsOk, coatOk, pantsOk].every(s => s === true)
+  const allOk     = hasInfo && [helmetOk, glovesOk, bootsOk, coatOk, pantsOk].every(s => s === true)
   const anyMissing = [helmetOk, glovesOk, bootsOk, coatOk, pantsOk].some(s => s === false)
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
