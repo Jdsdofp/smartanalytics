@@ -28,6 +28,7 @@ export interface EpiFrameResult {
   face_recognized: boolean;
   face_person_code: string | null;
   face_confidence: number;
+  face_person_name?: string | null;
   face_bbox: { x: number; y: number; w: number; h: number } | null;
   // Progresso da janela de decisão
   window_progress: number;    // 0.0 → 1.0
@@ -92,11 +93,33 @@ export interface EpiVideoStreamConfig {
 // HELPER: resolve URL do WebSocket
 // ─────────────────────────────────────────────────────────────────────────────
 
-function getEpiStreamWsUrl(config: EpiVideoStreamConfig): string {
-  const base = (config.apiBase ?? "https://aihub.smartxhub.cloud")
-    .replace("https://", "wss://")
-    .replace("http://", "ws://");
+// function getEpiStreamWsUrl(config: EpiVideoStreamConfig): string {
+//   const base = (config.apiBase ?? "https://aihub.smartxhub.cloud")
+//     .replace("https://", "wss://")
+//     .replace("http://", "ws://");
 
+//   const params = new URLSearchParams({
+//     company_id: String(config.companyId),
+//     window_seconds: String(config.windowSeconds ?? 3),
+//     fps: String(config.fps ?? 10),
+//     confidence: String(config.confidence ?? 0.4),
+//     face_threshold: String(config.faceThreshold ?? 0.45),
+//     detect_faces: String(config.detectFaces ?? true),
+//   });
+
+//   return `${base}/api/v1/epi/ws/epi-stream?${params.toString()}`;
+// }
+
+function getEpiStreamWsUrl(config: EpiVideoStreamConfig): string {
+  const apiBase = config.apiBase ?? "https://aihub.smartxhub.cloud";
+  
+  // Força sempre wss:// — nunca ws:// em produção HTTPS
+  const base = apiBase
+    .replace(/^https?:\/\//, '')  // remove qualquer protocolo
+    .replace(/\/$/, '');           // remove trailing slash
+  
+  const wsBase = `wss://${base}`;
+  
   const params = new URLSearchParams({
     company_id: String(config.companyId),
     window_seconds: String(config.windowSeconds ?? 3),
@@ -105,8 +128,8 @@ function getEpiStreamWsUrl(config: EpiVideoStreamConfig): string {
     face_threshold: String(config.faceThreshold ?? 0.45),
     detect_faces: String(config.detectFaces ?? true),
   });
-
-  return `${base}/api/v1/epi/ws/epi-stream?${params.toString()}`;
+  
+  return `${wsBase}/api/v1/epi/ws/epi-stream?${params.toString()}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
