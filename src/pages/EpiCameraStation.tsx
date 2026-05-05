@@ -1163,43 +1163,43 @@ import { useTabletLayout } from '../hooks/useTabletLayout'
 import EpiBodyFigure from '../components/EpiBodyFigure'
 
 // ─── TIPOS ───────────────────────────────────────────────────────────────────
-type Direction    = 'ENTRY' | 'EXIT'
-type CamSource    = 'usb' | 'ip'
-type Phase        = 'idle' | 'scanning' | 'granted' | 'denied_epi' | 'denied_face'
+type Direction = 'ENTRY' | 'EXIT'
+type CamSource = 'usb' | 'ip'
+type Phase = 'idle' | 'scanning' | 'granted' | 'denied_epi' | 'denied_face'
 type ScanSubPhase = 'face_scan' | 'preparing' | 'epi_scan'
-type InitStatus   = 'unconfigured' | 'validating' | 'ready' | 'error'
+type InitStatus = 'unconfigured' | 'validating' | 'ready' | 'error'
 
 interface StationConfig {
-  companyId:       number
-  apiKey:          string
-  apiBase:         string
-  lockIp:          string
-  lockMs:          number
-  doorId:          string
-  zoneId:          string
-  camSource:       CamSource
-  camDeviceId:     string
-  camIpUrl:        string
+  companyId: number
+  apiKey: string
+  apiBase: string
+  lockIp: string
+  lockMs: number
+  doorId: string
+  zoneId: string
+  camSource: CamSource
+  camDeviceId: string
+  camIpUrl: string
   faceScanSeconds: number
-  epiScanSeconds:  number
+  epiScanSeconds: number
 }
 
 interface StationTheme {
-  colorPrimary:        string
-  colorPrimaryDark:    string
-  colorAccent:         string
-  colorFontTitle:      string
+  colorPrimary: string
+  colorPrimaryDark: string
+  colorAccent: string
+  colorFontTitle: string
   colorMenuBackground: string
-  colorHeaderBg:       string
-  logoUrl:             string | null
+  colorHeaderBg: string
+  logoUrl: string | null
 }
 
 interface StationCompany {
   company_id: number
-  full_name:  string
-  lang:       string
-  time_zone:  string
-  logo:       string | null
+  full_name: string
+  lang: string
+  time_zone: string
+  logo: string | null
 }
 
 interface Detection {
@@ -1227,17 +1227,17 @@ function defaultConfig(): StationConfig {
   const companyId = company?.details?.company_id ?? company?.id ?? 1
   return {
     companyId,
-    apiKey:          localStorage.getItem('epi_station_api_key') ?? '',
-    apiBase:         sessionStorage.getItem('apiEndpoint') ?? 'https://aihub.smartxhub.cloud',
-    lockIp:          sessionStorage.getItem('lockIp') ?? '192.168.68.100',
-    lockMs:          5000,
-    doorId:          'DOOR_CAMARA_FRIA_01',
-    zoneId:          '10',
-    camSource:       'usb',
-    camDeviceId:     '',
-    camIpUrl:        '',
+    apiKey: localStorage.getItem('epi_station_api_key') ?? '',
+    apiBase: sessionStorage.getItem('apiEndpoint') ?? 'https://aihub.smartxhub.cloud',
+    lockIp: sessionStorage.getItem('lockIp') ?? '192.168.68.100',
+    lockMs: 5000,
+    doorId: 'DOOR_CAMARA_FRIA_01',
+    zoneId: '10',
+    camSource: 'usb',
+    camDeviceId: '',
+    camIpUrl: '',
     faceScanSeconds: 8,
-    epiScanSeconds:  20,
+    epiScanSeconds: 20,
   }
 }
 
@@ -1245,7 +1245,7 @@ function loadConfig(): StationConfig {
   try {
     const s = localStorage.getItem(CONFIG_KEY)
     if (s) return { ...defaultConfig(), ...JSON.parse(s) }
-  } catch {}
+  } catch { }
   return defaultConfig()
 }
 
@@ -1257,13 +1257,13 @@ function saveConfig(cfg: StationConfig) {
 }
 
 const DEFAULT_THEME: StationTheme = {
-  colorPrimary:        '#3B82F6',
-  colorPrimaryDark:    '#1D4ED8',
-  colorAccent:         '#06B6D4',
-  colorFontTitle:      '#FFFFFF',
+  colorPrimary: '#3B82F6',
+  colorPrimaryDark: '#1D4ED8',
+  colorAccent: '#06B6D4',
+  colorFontTitle: '#FFFFFF',
   colorMenuBackground: '#1E293B',
-  colorHeaderBg:       '#0F172A',
-  logoUrl:             null,
+  colorHeaderBg: '#0F172A',
+  logoUrl: null,
 }
 
 const EPI_COLOR: Record<string, string> = {
@@ -1285,12 +1285,12 @@ const CFG = {
 
 // ─── HOOK: station init ───────────────────────────────────────────────────────
 function useStationInit(cfg: StationConfig) {
-  const [status, setStatus]   = useState<InitStatus>(() =>
+  const [status, setStatus] = useState<InitStatus>(() =>
     cfg.apiKey ? 'validating' : 'unconfigured'
   )
-  const [theme, setTheme]     = useState<StationTheme>(DEFAULT_THEME)
+  const [theme, setTheme] = useState<StationTheme>(DEFAULT_THEME)
   const [company, setCompany] = useState<StationCompany | null>(null)
-  const [error, setError]     = useState('')
+  const [error, setError] = useState('')
 
   const validate = useCallback(async (apiKey: string, apiBase: string) => {
     if (!apiKey) { setStatus('unconfigured'); return }
@@ -1306,7 +1306,7 @@ function useStationInit(cfg: StationConfig) {
         throw new Error(err.detail || `HTTP ${r.status}`)
       }
       const data = await r.json()
-      if (data.theme)   setTheme({ ...DEFAULT_THEME, ...data.theme })
+      if (data.theme) setTheme({ ...DEFAULT_THEME, ...data.theme })
       if (data.company) setCompany(data.company)
       setStatus('ready')
     } catch (e: unknown) {
@@ -1325,16 +1325,16 @@ function useStationInit(cfg: StationConfig) {
 
 // ─── HOOK: câmera ────────────────────────────────────────────────────────────
 function useCameraStream(cfg: StationConfig) {
-  const videoRef  = useRef<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [ready, setReady]     = useState(false)
-  const [error, setError]     = useState('')
+  const [ready, setReady] = useState(false)
+  const [error, setError] = useState('')
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
 
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices()
       .then(d => setDevices(d.filter(x => x.kind === 'videoinput')))
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   useEffect(() => {
@@ -1398,25 +1398,25 @@ function useKioskLogic(
   captureFrame: (q?: number) => Promise<Blob | null>,
   camReady: boolean,
 ) {
-  const wsRef               = useRef<WebSocket | null>(null)
-  const wsTimerRef          = useRef<ReturnType<typeof setInterval> | null>(null)
-  const resultTimerRef      = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const subPhaseTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const wsRef = useRef<WebSocket | null>(null)
+  const wsTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const resultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const subPhaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const mountedRef          = useRef(true)
-  const phaseRef            = useRef<Phase>('idle')
-  const subPhaseRef         = useRef<ScanSubPhase>('face_scan')
-  const faceIdentifiedRef   = useRef(false)
+  const mountedRef = useRef(true)
+  const phaseRef = useRef<Phase>('idle')
+  const subPhaseRef = useRef<ScanSubPhase>('face_scan')
+  const faceIdentifiedRef = useRef(false)
 
-  const [phase, setPhaseState]          = useState<Phase>('idle')
+  const [phase, setPhaseState] = useState<Phase>('idle')
   const [scanSubPhase, setScanSubPhase] = useState<ScanSubPhase>('face_scan')
   const [prepareCountdown, setPrepareCountdown] = useState(0)
-  const [lastFrame, setLastFrame]       = useState<FrameResult | null>(null)
-  const [decision, setDecision]         = useState<Decision | null>(null)
-  const [direction, setDirection]       = useState<Direction>('ENTRY')
-  const [lastMissing, setLastMissing]   = useState<string[]>([])
+  const [lastFrame, setLastFrame] = useState<FrameResult | null>(null)
+  const [decision, setDecision] = useState<Decision | null>(null)
+  const [direction, setDirection] = useState<Direction>('ENTRY')
+  const [lastMissing, setLastMissing] = useState<string[]>([])
 
-  const setPhase    = useCallback((p: Phase) => { phaseRef.current = p; setPhaseState(p) }, [])
+  const setPhase = useCallback((p: Phase) => { phaseRef.current = p; setPhaseState(p) }, [])
   const setSubPhase = useCallback((sp: ScanSubPhase) => { subPhaseRef.current = sp; setScanSubPhase(sp) }, [])
 
   const clearSubPhaseTimers = useCallback(() => {
@@ -1444,13 +1444,13 @@ function useKioskLogic(
   }, [stationCfg.apiKey])
 
   const buildWsParams = useCallback(() => new URLSearchParams({
-    company_id:     String(stationCfg.companyId),
+    company_id: String(stationCfg.companyId),
     window_seconds: String(CFG.window_seconds),
-    fps:            String(CFG.fps),
-    confidence:     String(CFG.confidence),
+    fps: String(CFG.fps),
+    confidence: String(CFG.confidence),
     face_threshold: String(CFG.face_threshold),
-    detect_faces:   String(CFG.detect_faces),
-    api_key:        stationCfg.apiKey,
+    detect_faces: String(CFG.detect_faces),
+    api_key: stationCfg.apiKey,
   }), [stationCfg])
 
   const startPreparing = useCallback((apiBase: string, onMsg: (ev: MessageEvent) => void) => {
@@ -1494,13 +1494,13 @@ function useKioskLogic(
       if (doorId) fd.append('door_id', doorId)
       if (zoneId) fd.append('zone_id', zoneId)
       fd.append('direction', dir)
-      fetch(`${apiBase}/api/v1/epi/door/open`, { method: 'POST', body: fd, headers: authHeaders() }).catch(() => {})
-    } catch {}
+      fetch(`${apiBase}/api/v1/epi/door/open`, { method: 'POST', body: fd, headers: authHeaders() }).catch(() => { })
+    } catch { }
     if (lockIp) {
       fetch(`http://${lockIp}/unlock`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ duration_ms: lockMs }),
-      }).catch(() => {})
+      }).catch(() => { })
     }
   }, [stationCfg, authHeaders])
 
@@ -1539,7 +1539,7 @@ function useKioskLogic(
           if (d.access_decision === 'GRANTED') triggerDoor(d, dir)
           resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
         }
-      } catch {}
+      } catch { }
     }
 
     subPhaseTimerRef.current = setTimeout(() => {
@@ -1581,7 +1581,7 @@ function useKioskLogic(
         const dets: Detection[] = data.detections ?? []
         if (dets.some(d => d.class_name === 'person' && d.confidence >= CFG.person_trigger_confidence) && phaseRef.current === 'idle')
           openScan('ENTRY')
-      } catch {}
+      } catch { }
     }, CFG.idle_check_interval_ms)
     return () => {
       mountedRef.current = false
@@ -1804,10 +1804,10 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
   devices: MediaDeviceInfo[]
   theme: StationTheme
 }) {
-  const [cfg, setCfg]           = useState<StationConfig>(loadConfig)
-  const [testing, setTesting]   = useState(false)
+  const [cfg, setCfg] = useState<StationConfig>(loadConfig)
+  const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<'ok' | 'fail' | null>(null)
-  const [tab, setTab]           = useState<'cam' | 'door' | 'api' | 'scan'>('cam')
+  const [tab, setTab] = useState<'cam' | 'door' | 'api' | 'scan'>('cam')
 
   const set = (k: keyof StationConfig, v: string | number) => setCfg(p => ({ ...p, [k]: v }))
   const handleSave = () => { saveConfig(cfg); onSave(cfg); onClose() }
@@ -1908,6 +1908,67 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
                 <label style={lbl}>Tempo aberta (ms)</label>
                 <input style={inp} type="number" value={cfg.lockMs} onChange={e => set('lockMs', parseInt(e.target.value) || 5000)} />
               </div>
+              <div style={{ marginTop: 4 }}>
+  <label style={lbl}>Debug</label>
+  <button
+    onClick={async () => {
+      if (!cfg.lockIp) return
+      setTesting(true); setTestResult(null)
+      try {
+        const r = await fetch(`http://${cfg.lockIp}/unlock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ duration_ms: cfg.lockMs }),
+          signal: AbortSignal.timeout(5000),
+        })
+        const data = await r.json().catch(() => ({}))
+        console.log('[DEBUG] ESP32 unlock response:', data)
+        setTestResult(r.ok ? 'ok' : 'fail')
+      } catch (e) {
+        console.error('[DEBUG] ESP32 unlock error:', e)
+        setTestResult('fail')
+      } finally {
+        setTesting(false)
+      }
+    }}
+    disabled={!cfg.lockIp || testing}
+    style={{
+      width: '100%',
+      padding: '10px 16px',
+      borderRadius: 8,
+      border: `1px solid ${testResult === 'ok' ? 'rgba(16,185,129,0.5)' : testResult === 'fail' ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.4)'}`,
+      background: testResult === 'ok'
+        ? 'rgba(16,185,129,0.12)'
+        : testResult === 'fail'
+          ? 'rgba(239,68,68,0.12)'
+          : 'rgba(245,158,11,0.1)',
+      color: testResult === 'ok' ? '#10B981' : testResult === 'fail' ? '#EF4444' : '#F59E0B',
+      cursor: cfg.lockIp && !testing ? 'pointer' : 'not-allowed',
+      fontSize: 13,
+      fontFamily: 'monospace',
+      fontWeight: 600,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      transition: 'all .2s',
+    }}
+  >
+    {testing
+      ? <><ArrowPathIcon style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} /> Abrindo...</>
+      : testResult === 'ok'
+        ? <><CheckCircleIcon style={{ width: 14, height: 14 }} /> Fechadura aberta! ({(cfg.lockMs / 1000).toFixed(1)}s)</>
+        : testResult === 'fail'
+          ? <><XCircleIcon style={{ width: 14, height: 14 }} /> Falhou — verifique o IP</>
+          : <><LockClosedIcon style={{ width: 14, height: 14 }} /> Abrir Fechadura ({(cfg.lockMs / 1000).toFixed(1)}s)</>
+    }
+  </button>
+  {cfg.lockIp && (
+    <div style={{ fontSize: 11, color: '#6B7280', fontFamily: 'monospace', marginTop: 4 }}>
+      POST http://{cfg.lockIp}/unlock · duration_ms: {cfg.lockMs}
+    </div>
+  )}
+</div>
             </>
           )}
 
@@ -2183,16 +2244,16 @@ export default function EpiCameraStation() {
   const [showConfig, setShowConfig] = useState(false)
   const { status, theme, company, error, validate } = useStationInit(stationCfg)
 
-  const layout   = useTabletLayout()
+  const layout = useTabletLayout()
   const isNarrow = layout.orientation === 'portrait' || layout.width < 600
 
-  const cam   = useCameraStream(stationCfg)
+  const cam = useCameraStream(stationCfg)
   const logic = useKioskLogic(stationCfg, cam.captureFrame, cam.ready && status === 'ready')
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [vSize, setVSize] = useState({ w: 1280, h: 720 })
   const [oSize, setOSize] = useState({ w: 0, h: 0 })
-  const [showName, setShowName]   = useState(false)
+  const [showName, setShowName] = useState(false)
   const nameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastPersonRef = useRef<string | null>(null)
 
@@ -2233,7 +2294,7 @@ export default function EpiCameraStation() {
   )
 
   // ── Kiosk ativo ──
-  const scanning   = logic.phase === 'scanning'
+  const scanning = logic.phase === 'scanning'
   const showResult = logic.phase !== 'idle' && logic.phase !== 'scanning'
   const showEpiSidebar = scanning && logic.scanSubPhase === 'epi_scan'
 
