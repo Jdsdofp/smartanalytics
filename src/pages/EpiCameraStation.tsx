@@ -1323,6 +1323,8 @@ function useStationInit(cfg: StationConfig) {
   return { status, theme, company, error, validate }
 }
 
+
+
 // ─── HOOK: câmera ────────────────────────────────────────────────────────────
 function useCameraStream(cfg: StationConfig) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -1799,6 +1801,7 @@ function ValidatingScreen() {
 
 // ─── MODAL CONFIG (modo kiosk ativo) ─────────────────────────────────────────
 function ConfigModal({ onClose, onSave, devices, theme }: {
+
   onClose: () => void
   onSave: (cfg: StationConfig) => void
   devices: MediaDeviceInfo[]
@@ -1808,6 +1811,46 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<'ok' | 'fail' | null>(null)
   const [tab, setTab] = useState<'cam' | 'door' | 'api' | 'scan'>('cam')
+
+  // ── ESP32 Monitor ──
+  const [esp32Log, setEsp32Log] = useState<{ ts: string; raw: string; event: string; state?: string; led?: string }[]>([])
+  const [esp32Status, setEsp32Status] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected')
+  const esp32WsRef = useRef<WebSocket | null>(null)
+  const logEndRef = useRef<HTMLDivElement>(null)
+
+  const connectEsp32Ws = useCallback(() => {
+    if (!cfg.lockIp) return
+    if (esp32WsRef.current) { esp32WsRef.current.close(); esp32WsRef.current = null }
+    setEsp32Status('connecting')
+    setEsp32Log([])
+    const ws = new WebSocket(`ws://${cfg.lockIp}:81`)
+    esp32WsRef.current = ws
+    ws.onopen = () => setEsp32Status('connected')
+    ws.onclose = () => setEsp32Status('disconnected')
+    ws.onerror = () => setEsp32Status('error')
+    ws.onmessage = (ev) => {
+      try {
+        const d = JSON.parse(ev.data)
+        const now = new Date().toLocaleTimeString('pt-BR', { hour12: false })
+        setEsp32Log(prev => [...prev.slice(-49), {
+          ts: now,
+          raw: ev.data,
+          event: d.event ?? '?',
+          state: d.lock_state ?? d.door_state,
+          led: d.led,
+        }])
+      } catch {
+        const now = new Date().toLocaleTimeString('pt-BR', { hour12: false })
+        setEsp32Log(prev => [...prev.slice(-49), { ts: now, raw: ev.data, event: 'raw' }])
+      }
+    }
+  }, [cfg.lockIp])
+
+  // Auto-scroll log
+  useEffect(() => { logEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [esp32Log])
+
+  // Fecha WS ao desmontar
+  useEffect(() => () => { esp32WsRef.current?.close() }, [])
 
   const set = (k: keyof StationConfig, v: string | number) => setCfg(p => ({ ...p, [k]: v }))
   const handleSave = () => { saveConfig(cfg); onSave(cfg); onClose() }
@@ -1908,67 +1951,7 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
                 <label style={lbl}>Tempo aberta (ms)</label>
                 <input style={inp} type="number" value={cfg.lockMs} onChange={e => set('lockMs', parseInt(e.target.value) || 5000)} />
               </div>
-              <div style={{ marginTop: 4 }}>
-  <label style={lbl}>Debug</label>
-  <button
-    onClick={async () => {
-      if (!cfg.lockIp) return
-      setTesting(true); setTestResult(null)
-      try {
-        const r = await fetch(`http://${cfg.lockIp}/unlock`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ duration_ms: cfg.lockMs }),
-          signal: AbortSignal.timeout(5000),
-        })
-        const data = await r.json().catch(() => ({}))
-        console.log('[DEBUG] ESP32 unlock response:', data)
-        setTestResult(r.ok ? 'ok' : 'fail')
-      } catch (e) {
-        console.error('[DEBUG] ESP32 unlock error:', e)
-        setTestResult('fail')
-      } finally {
-        setTesting(false)
-      }
-    }}
-    disabled={!cfg.lockIp || testing}
-    style={{
-      width: '100%',
-      padding: '10px 16px',
-      borderRadius: 8,
-      border: `1px solid ${testResult === 'ok' ? 'rgba(16,185,129,0.5)' : testResult === 'fail' ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.4)'}`,
-      background: testResult === 'ok'
-        ? 'rgba(16,185,129,0.12)'
-        : testResult === 'fail'
-          ? 'rgba(239,68,68,0.12)'
-          : 'rgba(245,158,11,0.1)',
-      color: testResult === 'ok' ? '#10B981' : testResult === 'fail' ? '#EF4444' : '#F59E0B',
-      cursor: cfg.lockIp && !testing ? 'pointer' : 'not-allowed',
-      fontSize: 13,
-      fontFamily: 'monospace',
-      fontWeight: 600,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      transition: 'all .2s',
-    }}
-  >
-    {testing
-      ? <><ArrowPathIcon style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} /> Abrindo...</>
-      : testResult === 'ok'
-        ? <><CheckCircleIcon style={{ width: 14, height: 14 }} /> Fechadura aberta! ({(cfg.lockMs / 1000).toFixed(1)}s)</>
-        : testResult === 'fail'
-          ? <><XCircleIcon style={{ width: 14, height: 14 }} /> Falhou — verifique o IP</>
-          : <><LockClosedIcon style={{ width: 14, height: 14 }} /> Abrir Fechadura ({(cfg.lockMs / 1000).toFixed(1)}s)</>
-    }
-  </button>
-  {cfg.lockIp && (
-    <div style={{ fontSize: 11, color: '#6B7280', fontFamily: 'monospace', marginTop: 4 }}>
-      POST http://{cfg.lockIp}/unlock · duration_ms: {cfg.lockMs}
-    </div>
-  )}
-</div>
+
             </>
           )}
 
@@ -1989,6 +1972,149 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
                 <div style={{ fontSize: 11, color: '#6B7280', fontFamily: 'monospace', marginTop: 4 }}>
                   WS: {cfg.apiBase.replace(/^http/, 'ws')}/api/v1/epi/ws/epi-stream
                 </div>
+              </div>
+              {/* ── ESP32 WebSocket Monitor ── */}
+              <div style={{ marginTop: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <label style={lbl}>Monitor ESP32</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {/* Indicador de status */}
+                    <span style={{
+                      display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontFamily: 'monospace',
+                      color: esp32Status === 'connected' ? '#10B981' : esp32Status === 'connecting' ? '#F59E0B' : esp32Status === 'error' ? '#EF4444' : '#6B7280'
+                    }}>
+                      <span style={{
+                        width: 7, height: 7, borderRadius: '50%', display: 'inline-block',
+                        background: esp32Status === 'connected' ? '#10B981' : esp32Status === 'connecting' ? '#F59E0B' : esp32Status === 'error' ? '#EF4444' : '#374151',
+                        boxShadow: esp32Status === 'connected' ? '0 0 6px #10B981' : esp32Status === 'connecting' ? '0 0 6px #F59E0B' : 'none',
+                        animation: esp32Status === 'connecting' ? 'pulse 1s ease-in-out infinite' : 'none',
+                      }} />
+                      {{ disconnected: 'OFFLINE', connecting: 'CONECTANDO', connected: 'ONLINE', error: 'ERRO' }[esp32Status]}
+                    </span>
+                    <button
+                      onClick={esp32Status === 'connected' || esp32Status === 'connecting'
+                        ? () => { esp32WsRef.current?.close(); setEsp32Status('disconnected') }
+                        : connectEsp32Ws
+                      }
+                      disabled={!cfg.lockIp}
+                      style={{
+                        background: esp32Status === 'connected' ? 'rgba(239,68,68,0.1)' : 'rgba(59,130,246,0.12)',
+                        border: `1px solid ${esp32Status === 'connected' ? 'rgba(239,68,68,0.4)' : 'rgba(59,130,246,0.35)'}`,
+                        borderRadius: 6, padding: '3px 10px', cursor: cfg.lockIp ? 'pointer' : 'not-allowed',
+                        color: esp32Status === 'connected' ? '#EF4444' : '#60A5FA',
+                        fontSize: 11, fontFamily: 'monospace', fontWeight: 600,
+                      }}
+                    >
+                      {esp32Status === 'connected' || esp32Status === 'connecting' ? 'Desconectar' : 'Conectar WS'}
+                    </button>
+                    {esp32Log.length > 0 && (
+                      <button onClick={() => setEsp32Log([])} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', color: '#6B7280', fontSize: 11, fontFamily: 'monospace' }}>
+                        Limpar
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Log terminal */}
+                <div style={{
+                  background: '#060A10', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10,
+                  padding: '10px 12px', height: 160, overflowY: 'auto', fontFamily: 'monospace', fontSize: 11,
+                  display: 'flex', flexDirection: 'column', gap: 3,
+                }}>
+                  {esp32Log.length === 0 ? (
+                    <div style={{ color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: 4 }}>
+                      <span style={{ fontSize: 18 }}>📡</span>
+                      <span>{esp32Status === 'disconnected' ? 'Clique em "Conectar WS" para ouvir o ESP32' : 'Aguardando mensagens...'}</span>
+                    </div>
+                  ) : esp32Log.map((entry, i) => {
+                    const eventColor: Record<string, string> = {
+                      connected: '#10B981', status: '#60A5FA', unlocked: '#F59E0B',
+                      locked: '#8B5CF6', raw: '#9CA3AF',
+                    }
+                    const color = eventColor[entry.event] ?? '#9CA3AF'
+                    return (
+                      <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', lineHeight: 1.5 }}>
+                        <span style={{ color: '#374151', flexShrink: 0 }}>{entry.ts}</span>
+                        <span style={{
+                          background: `${color}20`, color, border: `1px solid ${color}40`,
+                          borderRadius: 4, padding: '0 5px', fontSize: 10, flexShrink: 0, fontWeight: 700,
+                        }}>
+                          {entry.event.toUpperCase()}
+                        </span>
+                        <span style={{ color: '#9CA3AF', wordBreak: 'break-all' }}>{entry.raw}</span>
+                      </div>
+                    )
+                  })}
+                  <div ref={logEndRef} />
+                </div>
+                {cfg.lockIp && (
+                  <div style={{ fontSize: 10, color: '#374151', fontFamily: 'monospace', marginTop: 4 }}>
+                    ws://{cfg.lockIp}:81
+                  </div>
+                )}
+              </div>
+
+
+              <div style={{ marginTop: 4 }}>
+                <label style={lbl}>Debug</label>
+                <button
+                  onClick={async () => {
+                    if (!cfg.lockIp) return
+                    setTesting(true); setTestResult(null)
+                    try {
+                      const r = await fetch(`http://${cfg.lockIp}/unlock`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ duration_ms: cfg.lockMs }),
+                        signal: AbortSignal.timeout(5000),
+                      })
+                      const data = await r.json().catch(() => ({}))
+                      console.log('[DEBUG] ESP32 unlock response:', data)
+                      setTestResult(r.ok ? 'ok' : 'fail')
+                    } catch (e) {
+                      console.error('[DEBUG] ESP32 unlock error:', e)
+                      setTestResult('fail')
+                    } finally {
+                      setTesting(false)
+                    }
+                  }}
+                  disabled={!cfg.lockIp || testing}
+                  style={{
+                    width: '100%',
+                    padding: '10px 16px',
+                    borderRadius: 8,
+                    border: `1px solid ${testResult === 'ok' ? 'rgba(16,185,129,0.5)' : testResult === 'fail' ? 'rgba(239,68,68,0.5)' : 'rgba(245,158,11,0.4)'}`,
+                    background: testResult === 'ok'
+                      ? 'rgba(16,185,129,0.12)'
+                      : testResult === 'fail'
+                        ? 'rgba(239,68,68,0.12)'
+                        : 'rgba(245,158,11,0.1)',
+                    color: testResult === 'ok' ? '#10B981' : testResult === 'fail' ? '#EF4444' : '#F59E0B',
+                    cursor: cfg.lockIp && !testing ? 'pointer' : 'not-allowed',
+                    fontSize: 13,
+                    fontFamily: 'monospace',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    transition: 'all .2s',
+                  }}
+                >
+                  {testing
+                    ? <><ArrowPathIcon style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} /> Abrindo...</>
+                    : testResult === 'ok'
+                      ? <><CheckCircleIcon style={{ width: 14, height: 14 }} /> Fechadura aberta! ({(cfg.lockMs / 1000).toFixed(1)}s)</>
+                      : testResult === 'fail'
+                        ? <><XCircleIcon style={{ width: 14, height: 14 }} /> Falhou — verifique o IP</>
+                        : <><LockClosedIcon style={{ width: 14, height: 14 }} /> Abrir Fechadura ({(cfg.lockMs / 1000).toFixed(1)}s)</>
+                  }
+                </button>
+                {cfg.lockIp && (
+                  <div style={{ fontSize: 11, color: '#6B7280', fontFamily: 'monospace', marginTop: 4 }}>
+                    POST http://{cfg.lockIp}/unlock · duration_ms: {cfg.lockMs}
+                  </div>
+                )}
               </div>
             </>
           )}
