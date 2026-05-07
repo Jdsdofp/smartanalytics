@@ -1447,7 +1447,7 @@ function useKioskLogic(
 
   const buildWsParams = useCallback(() => new URLSearchParams({
     company_id: String(stationCfg.companyId),
-    window_seconds: String(CFG.window_seconds),
+    window_seconds: String(stationCfg.epiScanSeconds),
     fps: String(CFG.fps),
     confidence: String(CFG.confidence),
     face_threshold: String(CFG.face_threshold),
@@ -1547,7 +1547,7 @@ function useKioskLogic(
     subPhaseTimerRef.current = setTimeout(() => {
       if (!mountedRef.current || phaseRef.current !== 'scanning') return
       if (subPhaseRef.current === 'face_scan') startPreparing(apiBase, handleWsMessage)
-    }, CFG.face_scan_seconds * 1000)
+    }, stationCfg.faceScanSeconds * 1000)
 
     const wsBase = apiBase.replace(/^http/, 'ws')
     const ws = new WebSocket(`${wsBase}/api/v1/epi/ws/epi-stream?${buildWsParams()}`)
