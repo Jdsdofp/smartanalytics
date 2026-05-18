@@ -1402,6 +1402,7 @@ function useKioskLogic(
 ) {
   const wsRef = useRef<WebSocket | null>(null)
   const wsTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const lastMissingRef = useRef<string[]>([])
   const resultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const subPhaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -1506,6 +1507,62 @@ function useKioskLogic(
     }
   }, [stationCfg, authHeaders])
 
+    const saveRecognitionEvent = useCallback(async (
+    d: Decision,
+    dir: Direction,
+    lastMissingItems: string[],
+  ) => {
+    const { apiBase, companyId, apiKey, zoneId } = stationCfg
+    try {
+      const detNames = new Set(
+        ['helmet','thermal_coat','thermal_pants','gloves','boots']
+          .filter(n => !lastMissingItems.includes(n))
+      )
+      const epiRequired = 5
+      const epiDetected = epiRequired - lastMissingItems.length
+
+      const payload = {
+        zone_id:              parseInt(zoneId) || null,
+        person_code:          d.person_code   ?? null,
+        person_name:          d.person_name   ?? null,
+        face_recognized:      d.face_rate >= 0.5,
+        face_confidence:      Math.round(d.face_rate * 10000) / 10000,
+        epi_coat:   detNames.has('thermal_coat'),
+        epi_pants:  detNames.has('thermal_pants'),
+        epi_gloves: detNames.has('gloves'),
+        epi_cap:    detNames.has('helmet'),
+        epi_boots:  detNames.has('boots'),
+        epi_total_required:  epiRequired,
+        epi_total_detected:  Math.max(0, epiDetected),
+        epi_compliant:       d.access_decision === 'GRANTED',
+        epi_units_required:  epiRequired,
+        epi_units_detected:  Math.max(0, epiDetected),
+        epi_units_missing:   Math.max(0, lastMissingItems.length),
+        compliance_score:    Math.round(d.compliance_rate * 10000) / 10000,
+        compliance_detail:   { missing: lastMissingItems, direction: dir },
+        exposure_accumulated_min: 0,
+        exposure_limit_min:       100,
+        exposure_exceeded:        false,
+        access_decision:   d.access_decision,
+        denial_reason:     d.access_decision !== 'GRANTED' ? d.access_decision : null,
+        door_command_sent: d.access_decision === 'GRANTED',
+        processing_time_ms: Math.round(stationCfg.epiScanSeconds * 1000),
+        source: 'SMARTX_VISION',
+      }
+
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+      if (apiKey) headers['X-API-Key'] = apiKey
+
+      await fetch(
+        `${apiBase}/api/v1/epi/access/recognition-events?company_id=${companyId}`,
+        { method: 'POST', headers, body: JSON.stringify(payload) }
+      )
+    } catch (e) {
+      console.warn('[EpiStation] saveRecognitionEvent falhou:', e)
+    }
+  }, [stationCfg])
+
+
   const openScan = useCallback((dir: Direction) => {
     if (!mountedRef.current || phaseRef.current === 'scanning') return
     closeScan()
@@ -1521,7 +1578,8 @@ function useKioskLogic(
         if (msg.type === 'frame_result') {
           const fr = msg as FrameResult
           setLastFrame(fr)
-          if (fr.missing) setLastMissing(fr.missing)
+          // if (fr.missing) setLastMissing(fr.missing)
+          if (fr.missing) { setLastMissing(fr.missing); lastMissingRef.current = fr.missing }
           if (fr.face_recognized && !faceIdentifiedRef.current && subPhaseRef.current === 'face_scan') {
             faceIdentifiedRef.current = true
             clearTimeout(subPhaseTimerRef.current!)
@@ -1540,6 +1598,7 @@ function useKioskLogic(
           setPhase(p)
           if (d.access_decision === 'GRANTED') triggerDoor(d, dir)
           resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+          saveRecognitionEvent(d, dir, lastMissingRef.current)
         }
       } catch { }
     }
@@ -1563,6 +1622,39 @@ function useKioskLogic(
     }
     ws.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
   }, [closeScan, setPhase, setSubPhase, startPreparing, goIdle, captureFrame, triggerDoor, stationCfg, buildWsParams])
+
+  // Conecta no WebSocket do controlador IoT e dispara scan quando botão externo é pressionado
+  useEffect(() => {
+    if (!stationCfg.lockIp) return
+    let ws: WebSocket | null = null
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+    let destroyed = false
+
+    const connect = () => {
+      if (destroyed) return
+      try {
+        ws = new WebSocket(`ws://${stationCfg.lockIp}:81`)
+        ws.onmessage = (e) => {
+          try {
+            const msg = JSON.parse(e.data)
+            if (msg.event === 'start_recognition' && phaseRef.current === 'idle')
+              openScan('ENTRY')
+          } catch { }
+        }
+        ws.onclose = () => {
+          if (!destroyed) reconnectTimer = setTimeout(connect, 5000)
+        }
+        ws.onerror = () => ws?.close()
+      } catch { }
+    }
+
+    connect()
+    return () => {
+      destroyed = true
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      ws?.close()
+    }
+  }, [stationCfg.lockIp, openScan])
 
   useEffect(() => {
     if (!camReady) return
