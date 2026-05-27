@@ -2814,7 +2814,10 @@
       
       "charts": {
         "depreciation": "Análise de Depreciação",
-        "coverage": "Seguro e Garantia Expirando"
+        "coverage": "Seguro e Garantia Expirando",
+        "originalValue": "Valor Original",
+        "currentValue": "Valor Atual",
+        "total": "Total"
       },
       
       "costCenterPerformance": {
@@ -2893,6 +2896,204 @@
         "complianceReport": "Relatório de Conformidade",
         "assetInventory": "Inventário de Ativos",
         "generate": "Gerar"
+      },
+      "availability": {
+        "breadcrumb": "Relatórios › Disponibilidade de Ativos",
+        "title": "Relatório de Disponibilidade de Ativos",
+        "subtitle": "Rastreie localizações, condições e agendamentos de manutenção",
+        "refresh": "Atualizar",
+        "export": "Exportar",
+        "searchPlaceholder": "Buscar por código, nome, categoria, localização...",
+        "filters": "Filtros",
+        "showing": "Exibindo",
+        "to": "a",
+        "of": "de",
+        "records": "registros",
+        "show": "Mostrar:",
+        "filterPanel": {
+          "site": "Site Atual",
+          "allSites": "Todos os Sites",
+          "area": "Área Atual",
+          "selectArea": "Selecionar Área",
+          "selectSiteFirst": "Selecione um Site primeiro",
+          "location": "Localização Atual",
+          "selectZone": "Selecionar Zona",
+          "selectAreaFirst": "Selecione uma Área primeiro",
+          "type": "Tipo",
+          "allTypes": "Todos os Tipos",
+          "category": "Categoria",
+          "custody": "Custódia",
+          "nothingSelected": "Nenhum selecionado",
+          "dateRange": "Filtros de Período",
+          "searchBy": "Buscar Por",
+          "dateInterval": "Intervalo de Data",
+          "dateTo": "até",
+          "applyFilter": "Aplicar Filtro",
+          "clearAll": "Limpar Tudo",
+          "searchOptions": {
+            "lastSeen": "ÚLTIMA LEITURA",
+            "createdOn": "CRIADO EM",
+            "modifiedOn": "MODIFICADO EM",
+            "expirationDate": "DATA DE EXPIRAÇÃO",
+            "nextService": "PRÓXIMO SERVIÇO",
+            "warrantyDate": "DATA DE GARANTIA",
+            "insuranceDate": "DATA DE SEGURO"
+          }
+        },
+        "table": {
+          "name": "Nome",
+          "lastSeen": "Última Leitura",
+          "category": "Categoria",
+          "condition": "Condição",
+          "custodyAssigned": "Custódia",
+          "currentLocation": "Localização Atual",
+          "nextService": "Próximo Serviço",
+          "expirationDate": "Data de Expiração",
+          "warrantyEnds": "Fim de Garantia",
+          "serviceEnds": "Fim de Serviço",
+          "insuredEnds": "Fim de Seguro"
+        },
+        "loading": {
+          "title": "Carregando dados de ativos...",
+          "subtitle": "Aguarde um momento"
+        },
+        "error": "Erro ao carregar dados",
+        "pagination": {
+          "page": "Página",
+          "of": "de",
+          "goTo": "Ir para:"
+        },
+        "noResults": {
+          "title": "Nenhum registro encontrado",
+          "subtitle": "Tente ajustar os critérios de busca ou filtros para encontrar o que procura.",
+          "clearFilters": "Limpar Filtros"
+        },
+        "exportModal": {
+          "title": "Exportar Disponibilidade de Ativos",
+          "subtitle": "Escolha o formato e escopo dos dados para exportar",
+          "filteredResults": "Resultados Filtrados",
+          "allData": "Todos os Dados",
+          "records": "registros",
+          "infoFiltered": "Resultados Filtrados:",
+          "infoFilteredDesc": "Exporta apenas os dados visíveis com base na busca e filtros atuais",
+          "infoAll": "Todos os Dados:",
+          "infoAllDesc": "Exporta o conjunto completo de dados ({{total}} registros)"
+        }
+      },
+      "gpsMap": {
+        "title": "Visualização do Mapa GPS",
+        "assetTracking": "Rastreamento de Ativos",
+        "errorLoading": "Erro ao carregar dados",
+        "filters": "Filtros",
+        "currentSite": "Site Atual",
+        "allSites": "Todos os Sites",
+        "category": "Categoria",
+        "allCategories": "Todas as Categorias",
+        "custody": "Custódia",
+        "allCustodies": "Todas as Custódias",
+        "searchLabel": "Buscar por Código ou Nome",
+        "searchPlaceholder": "Digite para buscar...",
+        "loading": "Carregando...",
+        "applyFilters": "Aplicar Filtros",
+        "refresh": "Atualizar",
+        "exportCSV": "Exportar CSV",
+        "stats": {
+          "totalAssets": "Total de Ativos",
+          "withGPS": "Com GPS",
+          "active": "Ativo",
+          "alarmed": "Em Alarme",
+          "gpsCoverage": "Cobertura GPS"
+        },
+        "legend": {
+          "title": "Legenda de Status",
+          "activeCompliant": "Ativo e Conforme",
+          "needsAttention": "Necessita Atenção",
+          "criticalAlarmed": "Crítico / Em Alarme",
+          "inactive": "Inativo"
+        }
+      },
+      "financialGrid": {
+        "title": "Detalhes Financeiros de Ativos",
+        "subtitle": "Informações financeiras completas de todos os ativos",
+        "refresh": "Atualizar",
+        "export": "Exportar",
+        "searchPlaceholder": "Buscar por código, nome, categoria, departamento...",
+        "filters": "Filtros",
+        "showing": "Exibindo",
+        "to": "a",
+        "of": "de",
+        "assets": "ativos",
+        "show": "Mostrar:",
+        "goTo": "Ir para:",
+        "page": "Página",
+        "filterPanel": {
+          "status": "Status",
+          "allStatus": "Todos os Status",
+          "active": "Ativo",
+          "inactive": "Inativo",
+          "insurance": "Seguro",
+          "allInsurance": "Todos os Seguros",
+          "expired": "Expirado",
+          "depreciation": "Depreciação",
+          "allAssets": "Todos os Ativos",
+          "enabled": "Habilitado",
+          "disabled": "Desabilitado",
+          "clearAll": "Limpar Tudo",
+          "locationFilters": "Filtros de Localização",
+          "site": "Site",
+          "allSites": "Todos os Sites",
+          "area": "Área",
+          "allAreas": "Todas as Áreas",
+          "zone": "Zona",
+          "allZones": "Todas as Zonas"
+        },
+        "table": {
+          "assetCode": "Código",
+          "assetName": "Nome",
+          "site": "Site",
+          "area": "Área",
+          "zone": "Zona",
+          "category": "Categoria",
+          "department": "Departamento",
+          "purchaseCost": "Custo de Compra",
+          "insurance": "Seguro",
+          "status": "Status"
+        },
+        "loading": {
+          "title": "Carregando detalhes de ativos...",
+          "subtitle": "Aguarde enquanto buscamos os dados"
+        },
+        "error": {
+          "title": "Erro ao carregar dados",
+          "message": "Falha ao buscar dados de ativos"
+        },
+        "noResults": {
+          "title": "Nenhum ativo encontrado",
+          "subtitle": "Tente ajustar os critérios de busca ou filtros para encontrar o que procura.",
+          "clearFilters": "Limpar Filtros"
+        },
+        "exportModal": {
+          "title": "Exportar Dados de Ativos",
+          "subtitle": "Escolha o formato e escopo dos dados para exportar",
+          "filteredResults": "Resultados Filtrados",
+          "allData": "Todos os Dados",
+          "infoFiltered": "Resultados Filtrados:",
+          "infoFilteredDesc": "Exporta apenas os dados visíveis com base na busca e filtros atuais",
+          "infoAll": "Todos os Dados:",
+          "infoAllDesc": "Exporta o conjunto completo de dados ({{total}} ativos)"
+        },
+        "pdf": {
+          "title": "Relatório Financeiro de Ativos",
+          "exportDate": "Data de Exportação:",
+          "scope": "Escopo:",
+          "filteredResults": "Resultados Filtrados",
+          "allAssets": "Todos os Ativos",
+          "totalAssets": "Total de Ativos:",
+          "filtersApplied": "Filtros Aplicados:",
+          "page": "Página",
+          "of": "de",
+          "generated": "Gerado:"
+        }
       }
     },
     
@@ -2915,6 +3116,7 @@
       "currencyK": "${{value}}K",
       "currencyM": "${{value}}M",
       "assets": "{{count}} ativos",
+      "assetsUnit": "ativos",
       "days": "{{count}} dias"
     }
   }

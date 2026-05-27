@@ -2765,7 +2765,10 @@
       
       "charts": {
         "depreciation": "Depreciation Analysis",
-        "coverage": "Insurance & Warranty Expiring"
+        "coverage": "Insurance & Warranty Expiring",
+        "originalValue": "Original Value",
+        "currentValue": "Current Value",
+        "total": "Total"
       },
       
       "costCenterPerformance": {
@@ -2844,9 +2847,207 @@
         "complianceReport": "Compliance Report",
         "assetInventory": "Asset Inventory",
         "generate": "Generate"
+      },
+      "availability": {
+        "breadcrumb": "Reports › Asset Availability",
+        "title": "Asset Availability Report",
+        "subtitle": "Track asset locations, conditions, and maintenance schedules",
+        "refresh": "Refresh",
+        "export": "Export",
+        "searchPlaceholder": "Search by asset code, name, category, location...",
+        "filters": "Filters",
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "records": "records",
+        "show": "Show:",
+        "filterPanel": {
+          "site": "Current Site",
+          "allSites": "All Sites",
+          "area": "Current Area",
+          "selectArea": "Select Area",
+          "selectSiteFirst": "Select Site first",
+          "location": "Current Location",
+          "selectZone": "Select Zone",
+          "selectAreaFirst": "Select Area first",
+          "type": "Type",
+          "allTypes": "All Types",
+          "category": "Category",
+          "custody": "Custody",
+          "nothingSelected": "Nothing selected",
+          "dateRange": "Date Range Filters",
+          "searchBy": "Search By",
+          "dateInterval": "Date Interval",
+          "dateTo": "to",
+          "applyFilter": "Apply Filter",
+          "clearAll": "Clear All",
+          "searchOptions": {
+            "lastSeen": "LAST SEEN",
+            "createdOn": "CREATED ON",
+            "modifiedOn": "MODIFIED ON",
+            "expirationDate": "EXPIRATION DATE",
+            "nextService": "NEXT SERVICE",
+            "warrantyDate": "WARRANTY DATE",
+            "insuranceDate": "INSURANCE DATE"
+          }
+        },
+        "table": {
+          "name": "Name",
+          "lastSeen": "Last Seen",
+          "category": "Category",
+          "condition": "Condition",
+          "custodyAssigned": "Custody Assigned",
+          "currentLocation": "Current Location",
+          "nextService": "Next Service",
+          "expirationDate": "Expiration Date",
+          "warrantyEnds": "Warranty Ends",
+          "serviceEnds": "Service Ends",
+          "insuredEnds": "Insured Ends"
+        },
+        "loading": {
+          "title": "Loading asset data...",
+          "subtitle": "Please wait a moment"
+        },
+        "error": "Error loading data",
+        "pagination": {
+          "page": "Page",
+          "of": "of",
+          "goTo": "Go to:"
+        },
+        "noResults": {
+          "title": "No matching records found",
+          "subtitle": "Try adjusting your search or filter criteria to find what you're looking for.",
+          "clearFilters": "Clear Filters"
+        },
+        "exportModal": {
+          "title": "Export Asset Availability",
+          "subtitle": "Choose the format and scope of data to export",
+          "filteredResults": "Filtered Results",
+          "allData": "All Data",
+          "records": "records",
+          "infoFiltered": "Filtered Results:",
+          "infoFilteredDesc": "Exports only visible data based on current search and filters",
+          "infoAll": "All Data:",
+          "infoAllDesc": "Exports complete dataset ({{total}} records)"
+        }
+      },
+      "gpsMap": {
+        "title": "GPS Map View",
+        "assetTracking": "Asset Tracking",
+        "errorLoading": "Error loading data",
+        "filters": "Filters",
+        "currentSite": "Current Site",
+        "allSites": "All Sites",
+        "category": "Category",
+        "allCategories": "All Categories",
+        "custody": "Custody",
+        "allCustodies": "All Custodies",
+        "searchLabel": "Search by Code or Name",
+        "searchPlaceholder": "Type to search...",
+        "loading": "Loading...",
+        "applyFilters": "Apply Filters",
+        "refresh": "Refresh",
+        "exportCSV": "Export CSV",
+        "stats": {
+          "totalAssets": "Total Assets",
+          "withGPS": "With GPS",
+          "active": "Active",
+          "alarmed": "Alarmed",
+          "gpsCoverage": "GPS Coverage"
+        },
+        "legend": {
+          "title": "Status Legend",
+          "activeCompliant": "Active & Compliant",
+          "needsAttention": "Needs Attention",
+          "criticalAlarmed": "Critical / Alarmed",
+          "inactive": "Inactive"
+        }
+      },
+      "financialGrid": {
+        "title": "Asset Financial Details",
+        "subtitle": "Complete financial information for all assets",
+        "refresh": "Refresh",
+        "export": "Export",
+        "searchPlaceholder": "Search by code, name, category, department...",
+        "filters": "Filters",
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "assets": "assets",
+        "show": "Show:",
+        "goTo": "Go to:",
+        "page": "Page",
+        "filterPanel": {
+          "status": "Status",
+          "allStatus": "All Status",
+          "active": "Active",
+          "inactive": "Inactive",
+          "insurance": "Insurance",
+          "allInsurance": "All Insurance",
+          "expired": "Expired",
+          "depreciation": "Depreciation",
+          "allAssets": "All Assets",
+          "enabled": "Enabled",
+          "disabled": "Disabled",
+          "clearAll": "Clear All",
+          "locationFilters": "Location Filters",
+          "site": "Site",
+          "allSites": "All Sites",
+          "area": "Area",
+          "allAreas": "All Areas",
+          "zone": "Zone",
+          "allZones": "All Zones"
+        },
+        "table": {
+          "assetCode": "Asset Code",
+          "assetName": "Asset Name",
+          "site": "Site",
+          "area": "Area",
+          "zone": "Zone",
+          "category": "Category",
+          "department": "Department",
+          "purchaseCost": "Purchase Cost",
+          "insurance": "Insurance",
+          "status": "Status"
+        },
+        "loading": {
+          "title": "Loading asset details...",
+          "subtitle": "Please wait while we fetch the data"
+        },
+        "error": {
+          "title": "Error loading data",
+          "message": "Failed to fetch asset data"
+        },
+        "noResults": {
+          "title": "No assets found",
+          "subtitle": "Try adjusting your search or filter criteria to find what you're looking for.",
+          "clearFilters": "Clear Filters"
+        },
+        "exportModal": {
+          "title": "Export Asset Data",
+          "subtitle": "Choose the format and scope of data to export",
+          "filteredResults": "Filtered Results",
+          "allData": "All Data",
+          "infoFiltered": "Filtered Results:",
+          "infoFilteredDesc": "Exports only visible data based on current search and filters",
+          "infoAll": "All Data:",
+          "infoAllDesc": "Exports complete dataset ({{total}} assets)"
+        },
+        "pdf": {
+          "title": "Asset Financial Report",
+          "exportDate": "Export Date:",
+          "scope": "Scope:",
+          "filteredResults": "Filtered Results",
+          "allAssets": "All Assets",
+          "totalAssets": "Total Assets:",
+          "filtersApplied": "Filters Applied:",
+          "page": "Page",
+          "of": "of",
+          "generated": "Generated:"
+        }
       }
     },
-    
+
     "exports": {
       "title": "Export Data",
       "subtitle": "Download data in various formats",
@@ -2866,6 +3067,7 @@
       "currencyK": "${{value}}K",
       "currencyM": "${{value}}M",
       "assets": "{{count}} assets",
+      "assetsUnit": "assets",
       "days": "{{count}} days"
     }
   }

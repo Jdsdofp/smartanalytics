@@ -791,7 +791,7 @@
 //                 type="text"
 //                 value={searchTerm}
 //                 onChange={(e) => handleSearch(e.target.value)}
-//                 placeholder="Search by code, name, category, department..."
+//                 placeholder={t(`${fg}.searchPlaceholder`)}
 //                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
 //               />
 //             </div>
@@ -806,7 +806,7 @@
 //               }`}
 //             >
 //               <FunnelIcon className="w-5 h-5" />
-//               <span className="text-sm font-medium">Filters</span>
+//               <span className="text-sm font-medium">{t(`${fg}.filters`)}</span>
 //               {Object.keys(filters).length > 0 && (
 //                 <span className="px-2 py-0.5 bg-primary-500 text-white text-xs rounded-full">
 //                   {Object.keys(filters).length}
@@ -900,7 +900,7 @@
 //           </div>
           
 //           <div className="flex items-center gap-2">
-//             <label className="text-sm text-gray-600">Show:</label>
+//             <label className="text-sm text-gray-600">{t(`${fg}.show`)}</label>
 //             <select
 //               value={itemsPerPage}
 //               onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
@@ -998,7 +998,7 @@
 //           <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
 //             <div className="flex flex-col items-center">
 //               <div className="animate-spin rounded-full h-10 w-10 border-b-3 border-primary-500"></div>
-//               <p className="text-sm text-gray-600 mt-2">Loading...</p>
+//               <p className="text-sm text-gray-600 mt-2">{t(`${fg}.loading.title`)}</p>
 //             </div>
 //           </div>
 //         )}
@@ -1058,7 +1058,7 @@
 
 //             {/* Quick Jump */}
 //             <div className="flex items-center gap-2">
-//               <label className="text-sm text-gray-600">Go to:</label>
+//               <label className="text-sm text-gray-600">{t(`${fg}.goTo`)}</label>
 //               <input
 //                 type="number"
 //                 min={1}
@@ -1125,7 +1125,7 @@
 //                 <div className="flex items-center justify-between">
 //                   <div className="flex items-center gap-3">
 //                     <ArrowDownTrayIcon className="w-6 h-6 text-white" />
-//                     <h3 className="text-lg font-bold text-white">Export Asset Data</h3>
+//                     <h3 className="text-lg font-bold text-white">{t(`${fg}.exportModal.title`)}</h3>
 //                   </div>
 //                   <button
 //                     onClick={() => setShowExportModal(false)}
@@ -1157,7 +1157,7 @@
 //                     </div>
 //                     <div className="text-center">
 //                       <div className="font-semibold text-gray-900 text-sm">Excel (CSV)</div>
-//                       <div className="text-xs text-gray-600 mt-1">Filtered Results</div>
+//                       <div className="text-xs text-gray-600 mt-1">{t(`${fg}.exportModal.filteredResults`)}</div>
 //                       <div className="text-xs text-primary-600 font-medium mt-1">
 //                         {sortedData.length} assets
 //                       </div>
@@ -1177,7 +1177,7 @@
 //                     </div>
 //                     <div className="text-center">
 //                       <div className="font-semibold text-gray-900 text-sm">Excel (CSV)</div>
-//                       <div className="text-xs text-gray-600 mt-1">All Data</div>
+//                       <div className="text-xs text-gray-600 mt-1">{t(`${fg}.exportModal.allData`)}</div>
 //                       <div className="text-xs text-primary-600 font-medium mt-1">
 //                         {assetDetails.pagination.total} assets
 //                       </div>
@@ -1197,7 +1197,7 @@
 //                     </div>
 //                     <div className="text-center">
 //                       <div className="font-semibold text-gray-900 text-sm">PDF Report</div>
-//                       <div className="text-xs text-gray-600 mt-1">Filtered Results</div>
+//                       <div className="text-xs text-gray-600 mt-1">{t(`${fg}.exportModal.filteredResults`)}</div>
 //                       <div className="text-xs text-primary-600 font-medium mt-1">
 //                         {sortedData.length} assets
 //                       </div>
@@ -1217,7 +1217,7 @@
 //                     </div>
 //                     <div className="text-center">
 //                       <div className="font-semibold text-gray-900 text-sm">PDF Report</div>
-//                       <div className="text-xs text-gray-600 mt-1">All Data</div>
+//                       <div className="text-xs text-gray-600 mt-1">{t(`${fg}.exportModal.allData`)}</div>
 //                       <div className="text-xs text-primary-600 font-medium mt-1">
 //                         {assetDetails.pagination.total} assets
 //                       </div>
@@ -1253,9 +1253,9 @@
 // src/components/AssetManagement/DataGrid/AssetFinancialGrid.tsx
 import React, { useEffect, useState } from 'react';
 import useAssetManagement from '../../../hooks/useAssetManagement';
-import { 
-  MagnifyingGlassIcon, 
-  FunnelIcon, 
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
   ArrowPathIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -1273,6 +1273,7 @@ import * as XLSX from 'xlsx';
 //@ts-ignore
 import { saveAs } from 'file-saver';
 import { useCompany } from '../../../hooks/useCompany';
+import { useTranslation } from 'react-i18next';
 
 interface AssetDetailsTableProps {
   initialFilters?: {
@@ -1310,6 +1311,8 @@ const getApiBaseUrl = (): string => {
 };
 
 const AssetFinancialGrid: React.FC<AssetDetailsTableProps> = ({ initialFilters }) => {
+  const { t } = useTranslation();
+  const fg = 'assetManagement.reports.financialGrid';
   const { assetDetails } = useAssetManagement();
   const {logo} = useCompany()
   const [filters, setFilters] = useState(initialFilters || {});
@@ -1638,7 +1641,7 @@ function normalizeBase64Image(base64: string): string {
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(255, 255, 255);
-    doc.text('Asset Financial Report', logo ? 60 : 15, 25);
+    doc.text(t(`${fg}.pdf.title`), logo ? 60 : 15, 25);
     currentY = 28;
 
     doc.setDrawColor(255, 255, 255);
@@ -1652,19 +1655,19 @@ function normalizeBase64Image(base64: string): string {
 
     let col1Y = currentY;
     doc.setFont('helvetica', 'bold');
-    doc.text('Export Date:', 15, col1Y);
+    doc.text(t(`${fg}.pdf.exportDate`), 15, col1Y);
     doc.setFont('helvetica', 'normal');
-    doc.text(new Date().toLocaleString('pt-BR'), 43, col1Y);
+    doc.text(new Date().toLocaleString(), 43, col1Y);
     col1Y += 5;
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Scope:', 15, col1Y);
+    doc.text(t(`${fg}.pdf.scope`), 15, col1Y);
     doc.setFont('helvetica', 'normal');
-    doc.text(scope === 'filtered' ? 'Filtered Results' : 'All Assets', 43, col1Y);
+    doc.text(scope === 'filtered' ? t(`${fg}.pdf.filteredResults`) : t(`${fg}.pdf.allAssets`), 43, col1Y);
     col1Y += 5;
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Total Assets:', 15, col1Y);
+    doc.text(t(`${fg}.pdf.totalAssets`), 15, col1Y);
     doc.setFont('helvetica', 'normal');
     doc.text(data.length.toLocaleString(), 43, col1Y);
 
@@ -1674,7 +1677,7 @@ function normalizeBase64Image(base64: string): string {
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(107, 114, 128);
-      doc.text(`Filters Applied: ${Object.keys(filters).length}`, 15, currentY);
+      doc.text(`${t(`${fg}.pdf.filtersApplied`)} ${Object.keys(filters).length}`, 15, currentY);
       currentY += 3;
     }
 
@@ -1693,7 +1696,7 @@ function normalizeBase64Image(base64: string): string {
     ]);
 
     autoTable(doc, {
-      head: [['Code', 'Name', 'Site', 'Area', 'Category', 'Cost', 'Insurance', 'Status']],
+      head: [[t(`${fg}.table.assetCode`), t(`${fg}.table.assetName`), t(`${fg}.table.site`), t(`${fg}.table.area`), t(`${fg}.table.category`), t(`${fg}.table.purchaseCost`), t(`${fg}.table.insurance`), t(`${fg}.table.status`)]],
       body: tableData,
       startY: currentY,
       theme: 'striped',
@@ -1737,11 +1740,11 @@ function normalizeBase64Image(base64: string): string {
       
       doc.setFontSize(8);
       doc.setTextColor(107, 114, 128);
-      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.getWidth() / 2, pageHeight - 8, { align: 'center' });
-      
+      doc.text(`${t(`${fg}.pdf.page`)} ${i} ${t(`${fg}.pdf.of`)} ${pageCount}`, doc.internal.pageSize.getWidth() / 2, pageHeight - 8, { align: 'center' });
+
       doc.setFontSize(7);
-      doc.text(`Generated: ${new Date().toLocaleDateString('pt-BR')} | SmartX Asset Management`, 15, pageHeight - 8);
-      doc.text(`Total: ${data.length} assets`, doc.internal.pageSize.getWidth() - 15, pageHeight - 8, { align: 'right' });
+      doc.text(`${t(`${fg}.pdf.generated`)} ${new Date().toLocaleDateString()} | SmartX Asset Management`, 15, pageHeight - 8);
+      doc.text(`Total: ${data.length} ${t(`${fg}.assets`)}`, doc.internal.pageSize.getWidth() - 15, pageHeight - 8, { align: 'right' });
     }
 
     doc.save(`asset-financial-${scope}-${new Date().toISOString().split('T')[0]}.pdf`);
@@ -1807,8 +1810,8 @@ function normalizeBase64Image(base64: string): string {
       <div className="bg-white rounded-xl shadow-sm p-12">
         <div className="flex flex-col items-center justify-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-500 mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading asset details...</p>
-          <p className="text-gray-500 text-sm mt-2">Please wait while we fetch the data</p>
+          <p className="text-gray-600 font-medium">{t(`${fg}.loading.title`)}</p>
+          <p className="text-gray-500 text-sm mt-2">{t(`${fg}.loading.subtitle`)}</p>
         </div>
       </div>
     );
@@ -1823,7 +1826,7 @@ function normalizeBase64Image(base64: string): string {
               <XMarkIcon className="h-5 w-5 text-red-500" />
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-800 font-medium">Error loading data</p>
+              <p className="text-sm text-red-800 font-medium">{t(`${fg}.error.title`)}</p>
               <p className="text-sm text-red-700 mt-1">{assetDetails.error}</p>
             </div>
           </div>
@@ -1838,9 +1841,9 @@ function normalizeBase64Image(base64: string): string {
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Asset Financial Details</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t(`${fg}.title`)}</h2>
             <p className="text-sm text-gray-600 mt-1">
-              Complete financial information for all assets
+              {t(`${fg}.subtitle`)}
             </p>
           </div>
           
@@ -1851,15 +1854,15 @@ function normalizeBase64Image(base64: string): string {
               className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               <ArrowPathIcon className={`w-4 h-4 ${assetDetails.loading ? 'animate-spin' : ''}`} />
-              <span className="text-sm font-medium">Refresh</span>
+              <span className="text-sm font-medium">{t(`${fg}.refresh`)}</span>
             </button>
-            
+
             <button
               onClick={() => setShowExportModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
             >
               <ArrowDownTrayIcon className="w-4 h-4" />
-              <span className="text-sm font-medium">Export</span>
+              <span className="text-sm font-medium">{t(`${fg}.export`)}</span>
             </button>
           </div>
         </div>
@@ -1874,7 +1877,7 @@ function normalizeBase64Image(base64: string): string {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
-                placeholder="Search by code, name, category, department..."
+                placeholder={t(`${fg}.searchPlaceholder`)}
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               />
             </div>
@@ -1889,7 +1892,7 @@ function normalizeBase64Image(base64: string): string {
               }`}
             >
               <FunnelIcon className="w-5 h-5" />
-              <span className="text-sm font-medium">Filters</span>
+              <span className="text-sm font-medium">{t(`${fg}.filters`)}</span>
               {Object.keys(filters).length > 0 && (
                 <span className="px-2 py-0.5 bg-primary-500 text-white text-xs rounded-full">
                   {Object.keys(filters).length}
@@ -1905,7 +1908,7 @@ function normalizeBase64Image(base64: string): string {
                 {/* Active Status Filter */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Status
+                    {t(`${fg}.filterPanel.status`)}
                   </label>
                   <select
                     onChange={(e) => {
@@ -1916,16 +1919,16 @@ function normalizeBase64Image(base64: string): string {
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
                   >
-                    <option value="">All Status</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
+                    <option value="">{t(`${fg}.filterPanel.allStatus`)}</option>
+                    <option value="Active">{t(`${fg}.filterPanel.active`)}</option>
+                    <option value="Inactive">{t(`${fg}.filterPanel.inactive`)}</option>
                   </select>
                 </div>
 
                 {/* Insurance Status Filter */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Insurance
+                    {t(`${fg}.filterPanel.insurance`)}
                   </label>
                   <select
                     onChange={(e) => {
@@ -1936,16 +1939,16 @@ function normalizeBase64Image(base64: string): string {
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
                   >
-                    <option value="">All Insurance</option>
-                    <option value="Active">Active</option>
-                    <option value="Expired">Expired</option>
+                    <option value="">{t(`${fg}.filterPanel.allInsurance`)}</option>
+                    <option value="Active">{t(`${fg}.filterPanel.active`)}</option>
+                    <option value="Expired">{t(`${fg}.filterPanel.expired`)}</option>
                   </select>
                 </div>
 
                 {/* Depreciation Filter */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Depreciation
+                    {t(`${fg}.filterPanel.depreciation`)}
                   </label>
                   <select
                     onChange={(e) => {
@@ -1956,9 +1959,9 @@ function normalizeBase64Image(base64: string): string {
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
                   >
-                    <option value="">All Assets</option>
-                    <option value="1">Enabled</option>
-                    <option value="0">Disabled</option>
+                    <option value="">{t(`${fg}.filterPanel.allAssets`)}</option>
+                    <option value="1">{t(`${fg}.filterPanel.enabled`)}</option>
+                    <option value="0">{t(`${fg}.filterPanel.disabled`)}</option>
                   </select>
                 </div>
 
@@ -1968,7 +1971,7 @@ function normalizeBase64Image(base64: string): string {
                     onClick={clearFilters}
                     className="w-full px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
                   >
-                    Clear All
+                    {t(`${fg}.filterPanel.clearAll`)}
                   </button>
                 </div>
               </div>
@@ -1978,14 +1981,14 @@ function normalizeBase64Image(base64: string): string {
                 <div className="flex items-center gap-2 mb-3">
                   <MapPinIcon className="w-4 h-4 text-primary-600" />
                   <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                    Location Filters
+                    {t(`${fg}.filterPanel.locationFilters`)}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Site Filter */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
-                      Site
+                      {t(`${fg}.filterPanel.site`)}
                     </label>
                     <select
                       onChange={(e) => {
@@ -1996,7 +1999,7 @@ function normalizeBase64Image(base64: string): string {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                     >
-                      <option value="">All Sites</option>
+                      <option value="">{t(`${fg}.filterPanel.allSites`)}</option>
                       {uniqueSites.map(site => (
                         <option key={site} value={site}>{site}</option>
                       ))}
@@ -2006,7 +2009,7 @@ function normalizeBase64Image(base64: string): string {
                   {/* Area Filter */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
-                      Area
+                      {t(`${fg}.filterPanel.area`)}
                     </label>
                     <select
                       onChange={(e) => {
@@ -2017,7 +2020,7 @@ function normalizeBase64Image(base64: string): string {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                     >
-                      <option value="">All Areas</option>
+                      <option value="">{t(`${fg}.filterPanel.allAreas`)}</option>
                       {uniqueAreas.map(area => (
                         <option key={area} value={area}>{area}</option>
                       ))}
@@ -2027,7 +2030,7 @@ function normalizeBase64Image(base64: string): string {
                   {/* Zone Filter */}
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
-                      Zone
+                      {t(`${fg}.filterPanel.zone`)}
                     </label>
                     <select
                       onChange={(e) => {
@@ -2038,7 +2041,7 @@ function normalizeBase64Image(base64: string): string {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                     >
-                      <option value="">All Zones</option>
+                      <option value="">{t(`${fg}.filterPanel.allZones`)}</option>
                       {uniqueZones.map(zone => (
                         <option key={zone} value={zone}>{zone}</option>
                       ))}
@@ -2053,13 +2056,13 @@ function normalizeBase64Image(base64: string): string {
         {/* Results Summary */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
           <div className="text-sm text-gray-600">
-            Showing <span className="font-semibold text-gray-900">{startItem}</span> to{' '}
-            <span className="font-semibold text-gray-900">{endItem}</span> of{' '}
-            <span className="font-semibold text-gray-900">{assetDetails.pagination.total}</span> assets
+            {t(`${fg}.showing`)} <span className="font-semibold text-gray-900">{startItem}</span> {t(`${fg}.to`)}{' '}
+            <span className="font-semibold text-gray-900">{endItem}</span> {t(`${fg}.of`)}{' '}
+            <span className="font-semibold text-gray-900">{assetDetails.pagination.total}</span> {t(`${fg}.assets`)}
           </div>
           
           <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-600">Show:</label>
+            <label className="text-sm text-gray-600">{t(`${fg}.show`)}</label>
             <select
               value={itemsPerPage}
               onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
@@ -2080,16 +2083,16 @@ function normalizeBase64Image(base64: string): string {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
               <tr>
-                <SortHeader field="asset_code">Asset Code</SortHeader>
-                <SortHeader field="asset_name">Asset Name</SortHeader>
-                <SortHeader field="location_site_current_name">Site</SortHeader>
-                <SortHeader field="location_area_current_description">Area</SortHeader>
-                <SortHeader field="location_zone_current_description">Zone</SortHeader>
-                <SortHeader field="category">Category</SortHeader>
-                <SortHeader field="department">Department</SortHeader>
-                <SortHeader field="purchase_cost">Purchase Cost</SortHeader>
-                <SortHeader field="insurance_status">Insurance</SortHeader>
-                <SortHeader field="active_status">Status</SortHeader>
+                <SortHeader field="asset_code">{t(`${fg}.table.assetCode`)}</SortHeader>
+                <SortHeader field="asset_name">{t(`${fg}.table.assetName`)}</SortHeader>
+                <SortHeader field="location_site_current_name">{t(`${fg}.table.site`)}</SortHeader>
+                <SortHeader field="location_area_current_description">{t(`${fg}.table.area`)}</SortHeader>
+                <SortHeader field="location_zone_current_description">{t(`${fg}.table.zone`)}</SortHeader>
+                <SortHeader field="category">{t(`${fg}.table.category`)}</SortHeader>
+                <SortHeader field="department">{t(`${fg}.table.department`)}</SortHeader>
+                <SortHeader field="purchase_cost">{t(`${fg}.table.purchaseCost`)}</SortHeader>
+                <SortHeader field="insurance_status">{t(`${fg}.table.insurance`)}</SortHeader>
+                <SortHeader field="active_status">{t(`${fg}.table.status`)}</SortHeader>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -2157,7 +2160,7 @@ function normalizeBase64Image(base64: string): string {
           <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
             <div className="flex flex-col items-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-3 border-primary-500"></div>
-              <p className="text-sm text-gray-600 mt-2">Loading...</p>
+              <p className="text-sm text-gray-600 mt-2">{t(`${fg}.loading.title`)}</p>
             </div>
           </div>
         )}
@@ -2168,7 +2171,7 @@ function normalizeBase64Image(base64: string): string {
         <div className="bg-white rounded-xl shadow-sm p-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-gray-600">
-              Page <span className="font-semibold text-gray-900">{currentPage}</span> of{' '}
+              {t(`${fg}.page`)} <span className="font-semibold text-gray-900">{currentPage}</span> {t(`${fg}.of`)}{' '}
               <span className="font-semibold text-gray-900">{totalPages}</span>
             </div>
 
@@ -2211,7 +2214,7 @@ function normalizeBase64Image(base64: string): string {
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Go to:</label>
+              <label className="text-sm text-gray-600">{t(`${fg}.goTo`)}</label>
               <input
                 type="number"
                 min={1}
@@ -2247,15 +2250,15 @@ function normalizeBase64Image(base64: string): string {
                 d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
               />
             </svg>
-            <h3 className="mt-4 text-lg font-semibold text-gray-900">No assets found</h3>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">{t(`${fg}.noResults.title`)}</h3>
             <p className="mt-2 text-sm text-gray-500">
-              Try adjusting your search or filter criteria to find what you're looking for.
+              {t(`${fg}.noResults.subtitle`)}
             </p>
             <button
               onClick={clearFilters}
               className="mt-6 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm font-medium"
             >
-              Clear Filters
+              {t(`${fg}.noResults.clearFilters`)}
             </button>
           </div>
         </div>
@@ -2278,7 +2281,7 @@ function normalizeBase64Image(base64: string): string {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <ArrowDownTrayIcon className="w-6 h-6 text-white" />
-                    <h3 className="text-lg font-bold text-white">Export Asset Data</h3>
+                    <h3 className="text-lg font-bold text-white">{t(`${fg}.exportModal.title`)}</h3>
                   </div>
                   <button
                     onClick={() => setShowExportModal(false)}
@@ -2292,7 +2295,7 @@ function normalizeBase64Image(base64: string): string {
               {/* Content */}
               <div className="px-6 py-6">
                 <p className="text-sm text-gray-600 mb-6">
-                  Choose the format and scope of data to export
+                  {t(`${fg}.exportModal.subtitle`)}
                 </p>
 
                 {/* Export Options Grid */}
@@ -2310,7 +2313,7 @@ function normalizeBase64Image(base64: string): string {
                     </div>
                     <div className="text-center">
                       <div className="font-semibold text-gray-900 text-sm">Excel (CSV)</div>
-                      <div className="text-xs text-gray-600 mt-1">Filtered Results</div>
+                      <div className="text-xs text-gray-600 mt-1">{t(`${fg}.exportModal.filteredResults`)}</div>
                       <div className="text-xs text-primary-600 font-medium mt-1">
                         {sortedData.length} assets
                       </div>
@@ -2330,7 +2333,7 @@ function normalizeBase64Image(base64: string): string {
                     </div>
                     <div className="text-center">
                       <div className="font-semibold text-gray-900 text-sm">Excel (CSV)</div>
-                      <div className="text-xs text-gray-600 mt-1">All Data</div>
+                      <div className="text-xs text-gray-600 mt-1">{t(`${fg}.exportModal.allData`)}</div>
                       <div className="text-xs text-primary-600 font-medium mt-1">
                         {assetDetails.pagination.total} assets
                       </div>
@@ -2350,7 +2353,7 @@ function normalizeBase64Image(base64: string): string {
                     </div>
                     <div className="text-center">
                       <div className="font-semibold text-gray-900 text-sm">PDF Report</div>
-                      <div className="text-xs text-gray-600 mt-1">Filtered Results</div>
+                      <div className="text-xs text-gray-600 mt-1">{t(`${fg}.exportModal.filteredResults`)}</div>
                       <div className="text-xs text-primary-600 font-medium mt-1">
                         {sortedData.length} assets
                       </div>
@@ -2370,7 +2373,7 @@ function normalizeBase64Image(base64: string): string {
                     </div>
                     <div className="text-center">
                       <div className="font-semibold text-gray-900 text-sm">PDF Report</div>
-                      <div className="text-xs text-gray-600 mt-1">All Data</div>
+                      <div className="text-xs text-gray-600 mt-1">{t(`${fg}.exportModal.allData`)}</div>
                       <div className="text-xs text-primary-600 font-medium mt-1">
                         {assetDetails.pagination.total} assets
                       </div>
@@ -2385,9 +2388,9 @@ function normalizeBase64Image(base64: string): string {
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     <div className="text-xs text-blue-800">
-                      <strong>Filtered Results:</strong> Exports only visible data based on current search and filters
+                      <strong>{t(`${fg}.exportModal.infoFiltered`)}</strong> {t(`${fg}.exportModal.infoFilteredDesc`)}
                       <br />
-                      <strong>All Data:</strong> Exports complete dataset ({assetDetails.pagination.total} assets)
+                      <strong>{t(`${fg}.exportModal.infoAll`)}</strong> {t(`${fg}.exportModal.infoAllDesc`, { total: assetDetails.pagination.total })}
                     </div>
                   </div>
                 </div>

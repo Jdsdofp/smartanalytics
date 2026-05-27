@@ -56,7 +56,7 @@ export default function AssetManagement() {
           formatter: function (params: any) {
             const total = charts.department.reduce((sum: number, item: any) => sum + item.value, 0);
             const percentage = ((params[0].value / total) * 100).toFixed(1);
-            return `${params[0].name}<br/>${params[0].value} (${percentage}%)`;
+            return `${params[0].name}<br/>${params[0].value.toLocaleString()} ${t('assetManagement.common.assetsUnit')} (${percentage}%)`;
           }
         },
         grid: {
@@ -110,7 +110,7 @@ export default function AssetManagement() {
           trigger: 'axis',
           axisPointer: { type: 'shadow' },
           formatter: function (params: any) {
-            return params[0].name + '<br/>$' + (params[0].value / 1000).toFixed(0) + 'K';
+            return params[0].name + '<br/>$' + (params[0].value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 }) + 'K';
           }
         },
         xAxis: {
@@ -122,7 +122,7 @@ export default function AssetManagement() {
           type: 'value',
           axisLabel: {
             formatter: function (value: any) {
-              return '$' + (value / 1000).toFixed(0) + 'K';
+              return '$' + (value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 }) + 'K';
             }
           }
         },
@@ -140,7 +140,7 @@ export default function AssetManagement() {
             show: true,
             position: 'top',
             formatter: function (params: any) {
-              return '$' + (params.value / 1000).toFixed(0) + 'K';
+              return '$' + (params.value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 }) + 'K';
             }
           }
         }],
@@ -168,7 +168,7 @@ export default function AssetManagement() {
           formatter: function (params: any) {
             const total = charts.costCenter.reduce((sum: number, item: any) => sum + item.value, 0);
             const percentage = ((params[0].value / total) * 100).toFixed(1);
-            return `${params[0].name}<br/>${params[0].value} assets (${percentage}%)`;
+            return `${params[0].name}<br/>${params[0].value.toLocaleString()} ${t('assetManagement.common.assetsUnit')} (${percentage}%)`;
           }
         },
         grid: {
@@ -339,10 +339,10 @@ const initInvestmentChart = () => {
         formatter: function (params: any) {
           let result = `${params[0].name}<br/>`;
           params.forEach((item: any) => {
-            result += `${item.seriesName}: $${(item.value / 1000).toFixed(0)}K<br/>`;
+            result += `${item.seriesName}: $${(item.value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}K<br/>`;
           });
           const total = params.reduce((sum: number, item: any) => sum + item.value, 0);
-          result += `<strong>Total: $${(total / 1000).toFixed(0)}K</strong>`;
+          result += `<strong>${t('assetManagement.financial.charts.total')}: $${(total / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}K</strong>`;
           return result;
         }
       },
@@ -427,8 +427,21 @@ const initInvestmentChart = () => {
       const chart = echarts.init(chartDepreciationRef.current);
 
       chart.setOption({
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        legend: { data: ['Original Value', 'Current Value'], bottom: 10 },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          formatter: function (params: any) {
+            let result = `${params[0].name}<br/>`;
+            params.forEach((item: any) => {
+              result += `${item.marker}${item.seriesName}: $${(item.value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}K<br/>`;
+            });
+            return result;
+          }
+        },
+        legend: {
+          data: [t('assetManagement.financial.charts.originalValue'), t('assetManagement.financial.charts.currentValue')],
+          bottom: 10
+        },
         xAxis: {
           type: 'category',
           data: charts.depreciation.categories,
@@ -436,20 +449,40 @@ const initInvestmentChart = () => {
         },
         yAxis: {
           type: 'value',
-          axisLabel: { formatter: '${value/1000}K' }
+          axisLabel: {
+            formatter: function (value: number) {
+              return '$' + (value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 }) + 'K';
+            }
+          }
         },
         series: [
           {
-            name: 'Original Value',
+            name: t('assetManagement.financial.charts.originalValue'),
             type: 'bar',
             data: charts.depreciation.original,
-            itemStyle: { color: '#FF9500' }
+            itemStyle: { color: '#FF9500' },
+            label: {
+              show: true,
+              position: 'top',
+              formatter: function (params: any) {
+                return params.value > 0 ? '$' + (params.value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 }) + 'K' : '';
+              },
+              fontSize: 10
+            }
           },
           {
-            name: 'Current Value',
+            name: t('assetManagement.financial.charts.currentValue'),
             type: 'bar',
             data: charts.depreciation.current,
-            itemStyle: { color: '#2DD36F' }
+            itemStyle: { color: '#2DD36F' },
+            label: {
+              show: true,
+              position: 'top',
+              formatter: function (params: any) {
+                return params.value > 0 ? '$' + (params.value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 }) + 'K' : '';
+              },
+              fontSize: 10
+            }
           }
         ],
         grid: { left: '10%', right: '5%', bottom: '20%' }

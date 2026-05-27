@@ -2780,7 +2780,10 @@
       
       "charts": {
         "depreciation": "Análisis de Depreciación",
-        "coverage": "Seguro y Garantía por Vencer"
+        "coverage": "Seguro y Garantía por Vencer",
+        "originalValue": "Valor Original",
+        "currentValue": "Valor Actual",
+        "total": "Total"
       },
       
       "costCenterPerformance": {
@@ -2859,9 +2862,207 @@
         "complianceReport": "Informe de Cumplimiento",
         "assetInventory": "Inventario de Activos",
         "generate": "Generar"
+      },
+      "availability": {
+        "breadcrumb": "Informes › Disponibilidad de Activos",
+        "title": "Informe de Disponibilidad de Activos",
+        "subtitle": "Rastree ubicaciones, condiciones y cronogramas de mantenimiento",
+        "refresh": "Actualizar",
+        "export": "Exportar",
+        "searchPlaceholder": "Buscar por código, nombre, categoría, ubicación...",
+        "filters": "Filtros",
+        "showing": "Mostrando",
+        "to": "a",
+        "of": "de",
+        "records": "registros",
+        "show": "Mostrar:",
+        "filterPanel": {
+          "site": "Sitio Actual",
+          "allSites": "Todos los Sitios",
+          "area": "Área Actual",
+          "selectArea": "Seleccionar Área",
+          "selectSiteFirst": "Seleccione un Sitio primero",
+          "location": "Ubicación Actual",
+          "selectZone": "Seleccionar Zona",
+          "selectAreaFirst": "Seleccione un Área primero",
+          "type": "Tipo",
+          "allTypes": "Todos los Tipos",
+          "category": "Categoría",
+          "custody": "Custodia",
+          "nothingSelected": "Nada seleccionado",
+          "dateRange": "Filtros de Rango de Fecha",
+          "searchBy": "Buscar Por",
+          "dateInterval": "Intervalo de Fecha",
+          "dateTo": "hasta",
+          "applyFilter": "Aplicar Filtro",
+          "clearAll": "Limpiar Todo",
+          "searchOptions": {
+            "lastSeen": "ÚLTIMA VEZ VISTO",
+            "createdOn": "CREADO EL",
+            "modifiedOn": "MODIFICADO EL",
+            "expirationDate": "FECHA DE EXPIRACIÓN",
+            "nextService": "PRÓXIMO SERVICIO",
+            "warrantyDate": "FECHA DE GARANTÍA",
+            "insuranceDate": "FECHA DE SEGURO"
+          }
+        },
+        "table": {
+          "name": "Nombre",
+          "lastSeen": "Última Lectura",
+          "category": "Categoría",
+          "condition": "Condición",
+          "custodyAssigned": "Custodia",
+          "currentLocation": "Ubicación Actual",
+          "nextService": "Próximo Servicio",
+          "expirationDate": "Fecha de Expiración",
+          "warrantyEnds": "Fin de Garantía",
+          "serviceEnds": "Fin de Servicio",
+          "insuredEnds": "Fin de Seguro"
+        },
+        "loading": {
+          "title": "Cargando datos de activos...",
+          "subtitle": "Espere un momento"
+        },
+        "error": "Error al cargar datos",
+        "pagination": {
+          "page": "Página",
+          "of": "de",
+          "goTo": "Ir a:"
+        },
+        "noResults": {
+          "title": "No se encontraron registros",
+          "subtitle": "Intente ajustar los criterios de búsqueda o filtros.",
+          "clearFilters": "Limpiar Filtros"
+        },
+        "exportModal": {
+          "title": "Exportar Disponibilidad de Activos",
+          "subtitle": "Elija el formato y el alcance de los datos a exportar",
+          "filteredResults": "Resultados Filtrados",
+          "allData": "Todos los Datos",
+          "records": "registros",
+          "infoFiltered": "Resultados Filtrados:",
+          "infoFilteredDesc": "Exporta solo los datos visibles basados en la búsqueda y filtros actuales",
+          "infoAll": "Todos los Datos:",
+          "infoAllDesc": "Exporta el conjunto completo de datos ({{total}} registros)"
+        }
+      },
+      "gpsMap": {
+        "title": "Vista del Mapa GPS",
+        "assetTracking": "Seguimiento de Activos",
+        "errorLoading": "Error al cargar datos",
+        "filters": "Filtros",
+        "currentSite": "Sitio Actual",
+        "allSites": "Todos los Sitios",
+        "category": "Categoría",
+        "allCategories": "Todas las Categorías",
+        "custody": "Custodia",
+        "allCustodies": "Todas las Custodias",
+        "searchLabel": "Buscar por Código o Nombre",
+        "searchPlaceholder": "Escriba para buscar...",
+        "loading": "Cargando...",
+        "applyFilters": "Aplicar Filtros",
+        "refresh": "Actualizar",
+        "exportCSV": "Exportar CSV",
+        "stats": {
+          "totalAssets": "Total de Activos",
+          "withGPS": "Con GPS",
+          "active": "Activo",
+          "alarmed": "En Alarma",
+          "gpsCoverage": "Cobertura GPS"
+        },
+        "legend": {
+          "title": "Leyenda de Estado",
+          "activeCompliant": "Activo y Conforme",
+          "needsAttention": "Necesita Atención",
+          "criticalAlarmed": "Crítico / En Alarma",
+          "inactive": "Inactivo"
+        }
+      },
+      "financialGrid": {
+        "title": "Detalles Financieros de Activos",
+        "subtitle": "Información financiera completa de todos los activos",
+        "refresh": "Actualizar",
+        "export": "Exportar",
+        "searchPlaceholder": "Buscar por código, nombre, categoría, departamento...",
+        "filters": "Filtros",
+        "showing": "Mostrando",
+        "to": "a",
+        "of": "de",
+        "assets": "activos",
+        "show": "Mostrar:",
+        "goTo": "Ir a:",
+        "page": "Página",
+        "filterPanel": {
+          "status": "Estado",
+          "allStatus": "Todos los Estados",
+          "active": "Activo",
+          "inactive": "Inactivo",
+          "insurance": "Seguro",
+          "allInsurance": "Todos los Seguros",
+          "expired": "Expirado",
+          "depreciation": "Depreciación",
+          "allAssets": "Todos los Activos",
+          "enabled": "Habilitado",
+          "disabled": "Deshabilitado",
+          "clearAll": "Limpiar Todo",
+          "locationFilters": "Filtros de Ubicación",
+          "site": "Sitio",
+          "allSites": "Todos los Sitios",
+          "area": "Área",
+          "allAreas": "Todas las Áreas",
+          "zone": "Zona",
+          "allZones": "Todas las Zonas"
+        },
+        "table": {
+          "assetCode": "Código",
+          "assetName": "Nombre",
+          "site": "Sitio",
+          "area": "Área",
+          "zone": "Zona",
+          "category": "Categoría",
+          "department": "Departamento",
+          "purchaseCost": "Costo de Compra",
+          "insurance": "Seguro",
+          "status": "Estado"
+        },
+        "loading": {
+          "title": "Cargando detalles de activos...",
+          "subtitle": "Por favor espere mientras obtenemos los datos"
+        },
+        "error": {
+          "title": "Error al cargar datos",
+          "message": "Error al obtener datos de activos"
+        },
+        "noResults": {
+          "title": "No se encontraron activos",
+          "subtitle": "Intente ajustar los criterios de búsqueda o filtros para encontrar lo que busca.",
+          "clearFilters": "Limpiar Filtros"
+        },
+        "exportModal": {
+          "title": "Exportar Datos de Activos",
+          "subtitle": "Elija el formato y alcance de los datos a exportar",
+          "filteredResults": "Resultados Filtrados",
+          "allData": "Todos los Datos",
+          "infoFiltered": "Resultados Filtrados:",
+          "infoFilteredDesc": "Exporta solo los datos visibles basados en la búsqueda y filtros actuales",
+          "infoAll": "Todos los Datos:",
+          "infoAllDesc": "Exporta el conjunto completo de datos ({{total}} activos)"
+        },
+        "pdf": {
+          "title": "Informe Financiero de Activos",
+          "exportDate": "Fecha de Exportación:",
+          "scope": "Alcance:",
+          "filteredResults": "Resultados Filtrados",
+          "allAssets": "Todos los Activos",
+          "totalAssets": "Total de Activos:",
+          "filtersApplied": "Filtros Aplicados:",
+          "page": "Página",
+          "of": "de",
+          "generated": "Generado:"
+        }
       }
     },
-    
+
     "exports": {
       "title": "Exportar Datos",
       "subtitle": "Descargar datos en varios formatos",
@@ -2881,6 +3082,7 @@
       "currencyK": "${{value}}K",
       "currencyM": "${{value}}M",
       "assets": "{{count}} activos",
+      "assetsUnit": "activos",
       "days": "{{count}} días"
     }
   }

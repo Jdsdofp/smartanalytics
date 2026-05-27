@@ -20,6 +20,7 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 //@ts-ignore
 import { saveAs } from 'file-saver';
+import { useTranslation } from 'react-i18next';
 import { useCompany } from '../../../hooks/useCompany';
 import useAssetAvailability from '../../../hooks/useAssetAvailability';
 
@@ -58,6 +59,8 @@ const getApiBaseUrl = (): string => {
 };
 
 const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFilters }) => {
+  const { t } = useTranslation();
+  const av = 'assetManagement.reports.availability';
   const { logo, companyId } = useCompany();
 
   // Use the custom hook
@@ -658,7 +661,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
               <XMarkIcon className="h-5 w-5 text-red-500" />
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-800 font-medium">Error loading data</p>
+              <p className="text-sm text-red-800 font-medium">{t(`${av}.error`)}</p>
               <p className="text-sm text-red-700 mt-1">{error}</p>
             </div>
           </div>
@@ -679,11 +682,11 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                 <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
               </svg>
-              <span>Reports › <strong>Asset Availability</strong></span>
+              <span dangerouslySetInnerHTML={{ __html: t(`${av}.breadcrumb`).replace('›', '› <strong>').replace(/([^>]+)$/, '$1</strong>') }} />
             </div>
-            <h2 className="text-xl font-bold text-gray-900">Asset Availability Report</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t(`${av}.title`)}</h2>
             <p className="text-sm text-gray-600 mt-1">
-              Track asset locations, conditions, and maintenance schedules
+              {t(`${av}.subtitle`)}
             </p>
           </div>
 
@@ -694,7 +697,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
               className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span className="text-sm font-medium">Refresh</span>
+              <span className="text-sm font-medium">{t(`${av}.refresh`)}</span>
             </button>
 
             <button
@@ -702,7 +705,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
               className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
             >
               <ArrowDownTrayIcon className="w-4 h-4" />
-              <span className="text-sm font-medium">Export</span>
+              <span className="text-sm font-medium">{t(`${av}.export`)}</span>
             </button>
           </div>
         </div>
@@ -717,7 +720,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 type="text"
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
-                placeholder="Search by asset code, name, category, location..."
+                placeholder={t(`${av}.searchPlaceholder`)}
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               />
             </div>
@@ -731,7 +734,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 }`}
             >
               <FunnelIcon className="w-5 h-5" />
-              <span className="text-sm font-medium">Filters</span>
+              <span className="text-sm font-medium">{t(`${av}.filters`)}</span>
               {Object.keys(filters).length > 0 && (
                 <span className="px-2 py-0.5 bg-primary-500 text-white text-xs rounded-full">
                   {Object.keys(filters).length}
@@ -747,14 +750,14 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 {/* Site Filter - HIERÁRQUICO */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Current Site
+                    {t(`${av}.filterPanel.site`)}
                   </label>
                   <select
                     value={filters.sites?.[0] || ''}
                     onChange={handleSiteChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                   >
-                    <option value="">All Sites</option>
+                    <option value="">{t(`${av}.filterPanel.allSites`)}</option>
                     {uniqueSites.map(site => (
                       <option key={site} value={site}>{site}</option>
                     ))}
@@ -764,7 +767,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 {/* Area Filter - HIERÁRQUICO (habilitado apenas se Site foi selecionado) */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Current Area
+                    {t(`${av}.filterPanel.area`)}
                   </label>
                   <select
                     value={filters.areas?.[0] || ''}
@@ -773,7 +776,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
                     <option value="">
-                      {selectedSiteId ? 'Select Area' : 'Select Site first'}
+                      {selectedSiteId ? t(`${av}.filterPanel.selectArea`) : t(`${av}.filterPanel.selectSiteFirst`)}
                     </option>
                     {hierarchicalAreas.map(area => (
                       <option key={area.id} value={area.name}>{area.name}</option>
@@ -784,7 +787,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 {/* Zone Filter - HIERÁRQUICO (habilitado apenas se Area foi selecionada) */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Current Location
+                    {t(`${av}.filterPanel.location`)}
                   </label>
                   <select
                     value={filters.zones?.[0] || ''}
@@ -793,7 +796,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                   >
                     <option value="">
-                      {selectedAreaId ? 'Select Zone' : 'Select Area first'}
+                      {selectedAreaId ? t(`${av}.filterPanel.selectZone`) : t(`${av}.filterPanel.selectAreaFirst`)}
                     </option>
                     {hierarchicalZones.map(zone => (
                       <option key={zone.id} value={zone.name}>{zone.name}</option>
@@ -804,7 +807,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 {/* Type Filter */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Type
+                    {t(`${av}.filterPanel.type`)}
                   </label>
                   <select
                     value={filters.types?.[0] || ''}
@@ -816,7 +819,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                   >
-                    <option value="">All Types</option>
+                    <option value="">{t(`${av}.filterPanel.allTypes`)}</option>
                     {uniqueTypes.map(type => (
                       <option key={type} value={type}>{type}</option>
                     ))}
@@ -826,7 +829,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 {/* Category Filter */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Category
+                    {t(`${av}.filterPanel.category`)}
                   </label>
                   <select
                     value={filters.categories?.[0] || ''}
@@ -838,7 +841,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                   >
-                    <option value="">Nothing selected</option>
+                    <option value="">{t(`${av}.filterPanel.nothingSelected`)}</option>
                     {uniqueCategories.map(category => (
                       <option key={category} value={category}>{category}</option>
                     ))}
@@ -848,7 +851,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 {/* Custody Filter */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Custody
+                    {t(`${av}.filterPanel.custody`)}
                   </label>
                   <select
                     value={filters.custody?.[0] || ''}
@@ -860,7 +863,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                   >
-                    <option value="">Nothing selected</option>
+                    <option value="">{t(`${av}.filterPanel.nothingSelected`)}</option>
                     {uniqueCustody.map(custody => (
                       <option key={custody} value={custody}>{custody}</option>
                     ))}
@@ -873,32 +876,32 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 <div className="flex items-center gap-2 mb-3">
                   <CalendarIcon className="w-4 h-4 text-primary-600" />
                   <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                    Date Range Filters
+                    {t(`${av}.filterPanel.dateRange`)}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-end">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
-                      Search By
+                      {t(`${av}.filterPanel.searchBy`)}
                     </label>
                     <select
                       value={searchBy}
                       onChange={(e) => setSearchBy(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm"
                     >
-                      <option value="LAST_SEEN">LAST SEEN</option>
-                      <option value="CREATED_ON">CREATED ON</option>
-                      <option value="MODIFIED_ON">MODIFIED ON</option>
-                      <option value="EXPIRATION_DATE">EXPIRATION DATE</option>
-                      <option value="NEXT_SERVICE">NEXT SERVICE</option>
-                      <option value="WARRANTY_DATE">WARRANTY DATE</option>
-                      <option value="INSURANCE_DATE">INSURANCE DATE</option>
+                      <option value="LAST_SEEN">{t(`${av}.filterPanel.searchOptions.lastSeen`)}</option>
+                      <option value="CREATED_ON">{t(`${av}.filterPanel.searchOptions.createdOn`)}</option>
+                      <option value="MODIFIED_ON">{t(`${av}.filterPanel.searchOptions.modifiedOn`)}</option>
+                      <option value="EXPIRATION_DATE">{t(`${av}.filterPanel.searchOptions.expirationDate`)}</option>
+                      <option value="NEXT_SERVICE">{t(`${av}.filterPanel.searchOptions.nextService`)}</option>
+                      <option value="WARRANTY_DATE">{t(`${av}.filterPanel.searchOptions.warrantyDate`)}</option>
+                      <option value="INSURANCE_DATE">{t(`${av}.filterPanel.searchOptions.insuranceDate`)}</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-2">
-                      Date Interval
+                      {t(`${av}.filterPanel.dateInterval`)}
                     </label>
                     <input
                       type="datetime-local"
@@ -909,7 +912,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                   </div>
 
                   <div className="text-center text-sm text-gray-600 pb-2">
-                    to
+                    {t(`${av}.filterPanel.dateTo`)}
                   </div>
 
                   <div>
@@ -943,7 +946,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                       onClick={applyFilters}
                       className="w-full px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm font-medium"
                     >
-                      Apply Filter
+                      {t(`${av}.filterPanel.applyFilter`)}
                     </button>
                   </div>
 
@@ -955,7 +958,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                       onClick={clearFilters}
                       className="w-full px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
                     >
-                      Clear All
+                      {t(`${av}.filterPanel.clearAll`)}
                     </button>
                   </div>
                 </div>
@@ -967,13 +970,13 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
         {/* Results Summary */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
           <div className="text-sm text-gray-600">
-            Showing <span className="font-semibold text-gray-900">{startItem}</span> to{' '}
-            <span className="font-semibold text-gray-900">{endItem}</span> of{' '}
-            <span className="font-semibold text-gray-900">{pagination.total}</span> records
+            {t(`${av}.showing`)} <span className="font-semibold text-gray-900">{startItem}</span> {t(`${av}.to`)}{' '}
+            <span className="font-semibold text-gray-900">{endItem}</span> {t(`${av}.of`)}{' '}
+            <span className="font-semibold text-gray-900">{pagination.total}</span> {t(`${av}.records`)}
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-sm text-gray-600">Show:</label>
+            <label className="text-sm text-gray-600">{t(`${av}.show`)}</label>
             <select
               value={itemsPerPage}
               onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
@@ -1007,8 +1010,8 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
               </div>
 
               <div className="mt-6 text-center bg-white/90 backdrop-blur-sm rounded-lg px-6 py-3 shadow-lg">
-                <p className="text-gray-900 font-semibold text-base">Loading asset data...</p>
-                <p className="text-gray-600 text-sm mt-1">Please wait a moment</p>
+                <p className="text-gray-900 font-semibold text-base">{t(`${av}.loading.title`)}</p>
+                <p className="text-gray-600 text-sm mt-1">{t(`${av}.loading.subtitle`)}</p>
               </div>
             </div>
           </div>
@@ -1020,19 +1023,19 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0 z-10">
                   <tr>
-                    <SortHeader field="asset_name">Name</SortHeader>
-                    <SortHeader field="last_seen">Last Seen</SortHeader>
-                    <SortHeader field="category_name">Category</SortHeader>
-                    <SortHeader field="condition_name">Condition</SortHeader>
-                    <SortHeader field="custody_name">Custody Assigned</SortHeader>
+                    <SortHeader field="asset_name">{t(`${av}.table.name`)}</SortHeader>
+                    <SortHeader field="last_seen">{t(`${av}.table.lastSeen`)}</SortHeader>
+                    <SortHeader field="category_name">{t(`${av}.table.category`)}</SortHeader>
+                    <SortHeader field="condition_name">{t(`${av}.table.condition`)}</SortHeader>
+                    <SortHeader field="custody_name">{t(`${av}.table.custodyAssigned`)}</SortHeader>
                     <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-700 uppercase tracking-wide">
-                      Current Location
+                      {t(`${av}.table.currentLocation`)}
                     </th>
-                    <SortHeader field="next_service">Next Service</SortHeader>
-                    <SortHeader field="expiration_date">Expiration Date</SortHeader>
-                    <SortHeader field="warranty_ends">Warranty Ends</SortHeader>
-                    <SortHeader field="service_ends">Service Ends</SortHeader>
-                    <SortHeader field="insured_ends">Insured Ends</SortHeader>
+                    <SortHeader field="next_service">{t(`${av}.table.nextService`)}</SortHeader>
+                    <SortHeader field="expiration_date">{t(`${av}.table.expirationDate`)}</SortHeader>
+                    <SortHeader field="warranty_ends">{t(`${av}.table.warrantyEnds`)}</SortHeader>
+                    <SortHeader field="service_ends">{t(`${av}.table.serviceEnds`)}</SortHeader>
+                    <SortHeader field="insured_ends">{t(`${av}.table.insuredEnds`)}</SortHeader>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -1101,7 +1104,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
         <div className={`bg-white rounded-xl shadow-sm p-4 transition-opacity duration-200 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-gray-600">
-              Page <span className="font-semibold text-gray-900">{currentPage}</span> of{' '}
+              {t(`${av}.pagination.page`)} <span className="font-semibold text-gray-900">{currentPage}</span> {t(`${av}.pagination.of`)}{' '}
               <span className="font-semibold text-gray-900">{totalPages}</span>
             </div>
 
@@ -1142,7 +1145,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Go to:</label>
+              <label className="text-sm text-gray-600">{t(`${av}.pagination.goTo`)}</label>
               <input
                 type="number"
                 min={1}
@@ -1166,15 +1169,15 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
         <div className="bg-white rounded-xl shadow-sm p-12">
           <div className="text-center">
             <ExclamationTriangleIcon className="mx-auto h-16 w-16 text-gray-400" />
-            <h3 className="mt-4 text-lg font-semibold text-gray-900">No matching records found</h3>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">{t(`${av}.noResults.title`)}</h3>
             <p className="mt-2 text-sm text-gray-500">
-              Try adjusting your search or filter criteria to find what you're looking for.
+              {t(`${av}.noResults.subtitle`)}
             </p>
             <button
               onClick={clearFilters}
               className="mt-6 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm font-medium"
             >
-              Clear Filters
+              {t(`${av}.noResults.clearFilters`)}
             </button>
           </div>
         </div>
@@ -1194,7 +1197,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <ArrowDownTrayIcon className="w-6 h-6 text-white" />
-                    <h3 className="text-lg font-bold text-white">Export Asset Availability</h3>
+                    <h3 className="text-lg font-bold text-white">{t(`${av}.exportModal.title`)}</h3>
                   </div>
                   <button
                     onClick={() => setShowExportModal(false)}
@@ -1207,7 +1210,7 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
 
               <div className="px-6 py-6">
                 <p className="text-sm text-gray-600 mb-6">
-                  Choose the format and scope of data to export
+                  {t(`${av}.exportModal.subtitle`)}
                 </p>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -1223,9 +1226,9 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     </div>
                     <div className="text-center">
                       <div className="font-semibold text-gray-900 text-sm">Excel (XLSX)</div>
-                      <div className="text-xs text-gray-600 mt-1">Filtered Results</div>
+                      <div className="text-xs text-gray-600 mt-1">{t(`${av}.exportModal.filteredResults`)}</div>
                       <div className="text-xs text-primary-600 font-medium mt-1">
-                        {sortedData.length} records
+                        {sortedData.length} {t(`${av}.exportModal.records`)}
                       </div>
                     </div>
                   </button>
@@ -1242,9 +1245,9 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     </div>
                     <div className="text-center">
                       <div className="font-semibold text-gray-900 text-sm">Excel (XLSX)</div>
-                      <div className="text-xs text-gray-600 mt-1">All Data</div>
+                      <div className="text-xs text-gray-600 mt-1">{t(`${av}.exportModal.allData`)}</div>
                       <div className="text-xs text-primary-600 font-medium mt-1">
-                        {pagination.total} records
+                        {pagination.total} {t(`${av}.exportModal.records`)}
                       </div>
                     </div>
                   </button>
@@ -1261,9 +1264,9 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     </div>
                     <div className="text-center">
                       <div className="font-semibold text-gray-900 text-sm">PDF Report</div>
-                      <div className="text-xs text-gray-600 mt-1">Filtered Results</div>
+                      <div className="text-xs text-gray-600 mt-1">{t(`${av}.exportModal.filteredResults`)}</div>
                       <div className="text-xs text-primary-600 font-medium mt-1">
-                        {sortedData.length} records
+                        {sortedData.length} {t(`${av}.exportModal.records`)}
                       </div>
                     </div>
                   </button>
@@ -1280,9 +1283,9 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                     </div>
                     <div className="text-center">
                       <div className="font-semibold text-gray-900 text-sm">PDF Report</div>
-                      <div className="text-xs text-gray-600 mt-1">All Data</div>
+                      <div className="text-xs text-gray-600 mt-1">{t(`${av}.exportModal.allData`)}</div>
                       <div className="text-xs text-primary-600 font-medium mt-1">
-                        {pagination.total} records
+                        {pagination.total} {t(`${av}.exportModal.records`)}
                       </div>
                     </div>
                   </button>
@@ -1294,9 +1297,9 @@ const AssetAvailabilityGrid: React.FC<AssetAvailabilityGridProps> = ({ initialFi
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     <div className="text-xs text-blue-800">
-                      <strong>Filtered Results:</strong> Exports only visible data based on current search and filters
+                      <strong>{t(`${av}.exportModal.infoFiltered`)}</strong> {t(`${av}.exportModal.infoFilteredDesc`)}
                       <br />
-                      <strong>All Data:</strong> Exports complete dataset ({pagination.total} records)
+                      <strong>{t(`${av}.exportModal.infoAll`)}</strong> {t(`${av}.exportModal.infoAllDesc`, { total: pagination.total })}
                     </div>
                   </div>
                 </div>

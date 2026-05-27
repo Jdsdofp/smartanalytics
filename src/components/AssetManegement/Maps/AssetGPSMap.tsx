@@ -10,6 +10,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 import { MapPinIcon, ArrowDownTrayIcon, ArrowPathIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 import { useAssetMaps } from '../../../hooks/useAssetMaps';
+import { useTranslation } from 'react-i18next';
 
 // Tipos
 interface Asset {
@@ -36,6 +37,8 @@ interface AssetGPSMapProps {
 }
 
 const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
+  const { t } = useTranslation();
+  const gm = 'assetManagement.reports.gpsMap';
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerClusterRef = useRef<L.MarkerClusterGroup | null>(null);
@@ -323,7 +326,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2 text-gray-600 text-sm">
               <MapPinIcon className="w-4 h-4" />
-              <span>Asset Tracking</span>
+              <span>{t(`${gm}.assetTracking`)}</span>
             </div>
             <button
               onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
@@ -337,13 +340,13 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
               )}
             </button>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">GPS Map View</h2>
+          <h2 className="text-xl font-bold text-gray-900">{t(`${gm}.title`)}</h2>
           
           {/* Erro da API */}
           {apiError && (
             <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
               <div className="flex-1">
-                <p className="text-xs text-red-800 font-semibold">Erro ao carregar dados</p>
+                <p className="text-xs text-red-800 font-semibold">{t(`${gm}.errorLoading`)}</p>
                 <p className="text-xs text-red-600 mt-1">{apiError}</p>
               </div>
               <button 
@@ -366,13 +369,13 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
           }}
         >
           <div className="text-xs font-bold uppercase text-gray-600 mb-4 tracking-wide">
-            Filters
+            {t(`${gm}.filters`)}
           </div>
 
           {/* Site */}
           <div className="mb-4">
             <label className="block text-xs font-semibold text-gray-900 mb-1.5">
-              Current Site
+              {t(`${gm}.currentSite`)}
             </label>
             <select
               className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-500"
@@ -380,7 +383,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
               onChange={(e) => setFilters({ ...filters, site: e.target.value })}
               disabled={apiLoading}
             >
-              <option value="">All Sites</option>
+              <option value="">{t(`${gm}.allSites`)}</option>
               {filterOptions?.sites.map(site => (
                 <option key={site.id} value={site.name}>{site.name}</option>
               ))}
@@ -390,7 +393,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
           {/* Category */}
           <div className="mb-4">
             <label className="block text-xs font-semibold text-gray-900 mb-1.5">
-              Category
+              {t(`${gm}.category`)}
             </label>
             <select
               className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-500"
@@ -398,7 +401,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
               onChange={(e) => setFilters({ ...filters, category: e.target.value })}
               disabled={apiLoading}
             >
-              <option value="">All Categories</option>
+              <option value="">{t(`${gm}.allCategories`)}</option>
               {filterOptions?.categories.map(category => (
                 <option key={category.id} value={category.name}>{category.name}</option>
               ))}
@@ -408,7 +411,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
           {/* Custody */}
           <div className="mb-4">
             <label className="block text-xs font-semibold text-gray-900 mb-1.5">
-              Custody
+              {t(`${gm}.custody`)}
             </label>
             <select
               className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-500"
@@ -416,7 +419,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
               onChange={(e) => setFilters({ ...filters, custody: e.target.value })}
               disabled={apiLoading}
             >
-              <option value="">All Custodies</option>
+              <option value="">{t(`${gm}.allCustodies`)}</option>
               {filterOptions?.custodies.map(custody => (
                 <option key={custody.id} value={custody.name}>{custody.name}</option>
               ))}
@@ -426,12 +429,12 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
           {/* Search */}
           <div className="mb-4">
             <label className="block text-xs font-semibold text-gray-900 mb-1.5">
-              Search by Code or Name
+              {t(`${gm}.searchLabel`)}
             </label>
             <input
               type="text"
               className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-500"
-              placeholder="Type to search..."
+              placeholder={t(`${gm}.searchPlaceholder`)}
               value={filters.searchText}
               onChange={(e) => setFilters({ ...filters, searchText: e.target.value })}
               disabled={apiLoading}
@@ -447,12 +450,12 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
             {loading || apiLoading ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>Loading...</span>
+                <span>{t(`${gm}.loading`)}</span>
               </>
             ) : (
               <>
                 <MapPinIcon className="w-4 h-4" />
-                <span>Apply Filters</span>
+                <span>{t(`${gm}.applyFilters`)}</span>
               </>
             )}
           </button>
@@ -463,7 +466,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white p-3 rounded-lg border border-gray-200">
               <div className="text-[11px] font-semibold text-gray-600 uppercase mb-1">
-                Total Assets
+                {t(`${gm}.stats.totalAssets`)}
               </div>
               <div className="text-2xl font-bold text-primary-500">
                 {apiStats?.total_assets || stats.total}
@@ -472,7 +475,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
 
             <div className="bg-white p-3 rounded-lg border border-gray-200">
               <div className="text-[11px] font-semibold text-gray-600 uppercase mb-1">
-                With GPS
+                {t(`${gm}.stats.withGPS`)}
               </div>
               <div className="text-2xl font-bold text-primary-500">
                 {apiStats?.assets_with_gps || stats.onMap}
@@ -481,7 +484,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
 
             <div className="bg-white p-3 rounded-lg border border-gray-200">
               <div className="text-[11px] font-semibold text-gray-600 uppercase mb-1">
-                Active
+                {t(`${gm}.stats.active`)}
               </div>
               <div className="text-2xl font-bold text-green-600">
                 {apiStats?.active_assets || stats.active}
@@ -490,7 +493,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
 
             <div className="bg-white p-3 rounded-lg border border-gray-200">
               <div className="text-[11px] font-semibold text-gray-600 uppercase mb-1">
-                Alarmed
+                {t(`${gm}.stats.alarmed`)}
               </div>
               <div className="text-2xl font-bold text-red-600">
                 {apiStats?.alarmed_assets || stats.alarmed}
@@ -502,7 +505,7 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
           {apiStats && (
             <div className="mt-3 bg-white p-3 rounded-lg border border-gray-200">
               <div className="text-[11px] font-semibold text-gray-600 uppercase mb-2">
-                GPS Coverage
+                {t(`${gm}.stats.gpsCoverage`)}
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-200 rounded-full h-2">
@@ -530,40 +533,40 @@ const AssetGPSMap = ({ companyId = 10 }: AssetGPSMapProps) => {
             className="px-4 py-3 bg-blue-600 text-white rounded-lg text-sm font-semibold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ArrowPathIcon className={`w-4 h-4 ${(loading || apiLoading) ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
+            <span>{t(`${gm}.refresh`)}</span>
           </button>
-          
+
           <button
             onClick={exportToCSV}
             disabled={filteredAssets.length === 0}
             className="px-4 py-3 bg-green-600 text-white rounded-lg text-sm font-semibold shadow-lg hover:bg-green-700 transition-all flex items-center gap-2 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ArrowDownTrayIcon className="w-4 h-4" />
-            <span>Export CSV</span>
+            <span>{t(`${gm}.exportCSV`)}</span>
           </button>
         </div>
 
         {/* Legend */}
         <div className="absolute bottom-5 left-5 z-[1000] bg-white p-4 rounded-lg shadow-lg">
           <div className="text-xs font-bold uppercase text-gray-600 mb-3">
-            Status Legend
+            {t(`${gm}.legend.title`)}
           </div>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow"></div>
-              <span className="text-xs text-gray-700">Active & Compliant</span>
+              <span className="text-xs text-gray-700">{t(`${gm}.legend.activeCompliant`)}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-yellow-500 border-2 border-white shadow"></div>
-              <span className="text-xs text-gray-700">Needs Attention</span>
+              <span className="text-xs text-gray-700">{t(`${gm}.legend.needsAttention`)}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow"></div>
-              <span className="text-xs text-gray-700">Critical / Alarmed</span>
+              <span className="text-xs text-gray-700">{t(`${gm}.legend.criticalAlarmed`)}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-gray-500 border-2 border-white shadow"></div>
-              <span className="text-xs text-gray-700">Inactive</span>
+              <span className="text-xs text-gray-700">{t(`${gm}.legend.inactive`)}</span>
             </div>
           </div>
         </div>
