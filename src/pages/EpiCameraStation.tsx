@@ -1592,8 +1592,9 @@ function useKioskLogic(
         ws.onmessage = (e) => {
           try {
             const msg = JSON.parse(e.data)
-            if (msg.event === 'start_recognition' && phaseRef.current === 'idle')
-              openScan('ENTRY')
+            if (phaseRef.current !== 'idle') return
+            if (msg.event === 'start_recognition') openScan('ENTRY')
+            if (msg.event === 'unlocked') openScan('EXIT')
           } catch { }
         }
         ws.onclose = () => {
