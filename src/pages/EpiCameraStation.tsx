@@ -1156,7 +1156,6 @@ import {
   UserIcon, BoltIcon, EyeIcon, FaceSmileIcon, ArrowPathIcon,
   Cog6ToothIcon, LockClosedIcon, SignalIcon,
   ArrowRightOnRectangleIcon, ArrowLeftOnRectangleIcon,
-  KeyIcon, BuildingOfficeIcon, WifiIcon,
 } from '@heroicons/react/24/outline'
 import { CheckIcon } from '@heroicons/react/24/solid'
 import { useTabletLayout } from '../hooks/useTabletLayout'
@@ -1167,8 +1166,6 @@ type Direction = 'ENTRY' | 'EXIT'
 type CamSource = 'usb' | 'ip'
 type Phase = 'idle' | 'scanning' | 'granted' | 'denied_epi' | 'denied_face'
 type ScanSubPhase = 'face_scan' | 'preparing' | 'epi_scan'
-type InitStatus = 'unconfigured' | 'validating' | 'ready' | 'error'
-
 interface StationConfig {
   companyId: number
   apiKey: string
@@ -1282,48 +1279,6 @@ const CFG = {
   person_trigger_confidence: 0.3,
   face_scan_seconds: 8, prepare_seconds: 4,
 }
-
-// ─── HOOK: station init ───────────────────────────────────────────────────────
-function useStationInit(cfg: StationConfig) {
-  const [status, setStatus] = useState<InitStatus>(() =>
-    cfg.apiKey ? 'validating' : 'unconfigured'
-  )
-  const [theme, setTheme] = useState<StationTheme>(DEFAULT_THEME)
-  const [company, setCompany] = useState<StationCompany | null>(null)
-  const [error, setError] = useState('')
-
-  const validate = useCallback(async (apiKey: string, apiBase: string) => {
-    if (!apiKey) { setStatus('unconfigured'); return }
-    setStatus('validating')
-    setError('')
-    try {
-      const r = await fetch(`${apiBase}/station/init`, {
-        headers: { 'X-API-Key': apiKey },
-        signal: AbortSignal.timeout(8000),
-      })
-      if (!r.ok) {
-        const err = await r.json().catch(() => ({}))
-        throw new Error(err.detail || `HTTP ${r.status}`)
-      }
-      const data = await r.json()
-      if (data.theme) setTheme({ ...DEFAULT_THEME, ...data.theme })
-      if (data.company) setCompany(data.company)
-      setStatus('ready')
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Erro ao validar token')
-      setStatus('error')
-    }
-  }, [])
-
-  useEffect(() => {
-    if (cfg.apiKey) validate(cfg.apiKey, cfg.apiBase)
-    else setStatus('unconfigured')
-  }, [])
-
-  return { status, theme, company, error, validate }
-}
-
-
 
 // ─── HOOK: câmera ────────────────────────────────────────────────────────────
 function useCameraStream(cfg: StationConfig) {
@@ -1659,239 +1614,17 @@ function useKioskLogic(
   useEffect(() => {
     if (!camReady) return
     mountedRef.current = true
-    const timer = setInterval(async () => {
-      if (!mountedRef.current || phaseRef.current !== 'idle') return
-      const blob = await captureFrame(0.6); if (!blob) return
-      try {
-        const fd = new FormData()
-        fd.append('file', blob, 'frame.jpg')
-        fd.append('confidence', String(CFG.confidence))
-        fd.append('detect_faces', 'false')
-        const r = await fetch(
-          `${stationCfg.apiBase}/api/v1/epi/detect/frame?company_id=${stationCfg.companyId}`,
-          { method: 'POST', body: fd, headers: authHeaders() as Record<string, string> }
-        )
-        const data = await r.json()
-        const dets: Detection[] = data.detections ?? []
-        if (dets.some(d => d.class_name === 'person' && d.confidence >= CFG.person_trigger_confidence) && phaseRef.current === 'idle')
-          openScan('ENTRY')
-      } catch { }
-    }, CFG.idle_check_interval_ms)
     return () => {
       mountedRef.current = false
-      clearInterval(timer)
       closeScan()
       if (resultTimerRef.current) clearTimeout(resultTimerRef.current)
     }
-  }, [camReady, captureFrame, openScan, closeScan, stationCfg, authHeaders])
+  }, [camReady, closeScan])
 
   return { phase, scanSubPhase, prepareCountdown, lastFrame, decision, direction, openScan, goIdle, lastMissing }
 }
 
-// ─── TELA DE SETUP ────────────────────────────────────────────────────────────
-function SetupScreen({ onSave, initError }: {
-  onSave: (cfg: StationConfig) => void
-  initError: string
-}) {
-  const [cfg, setCfg] = useState<StationConfig>(loadConfig)
-  const [validating, setValidating] = useState(false)
-  const [localError, setLocalError] = useState('')
-
-  const set = (k: keyof StationConfig, v: string | number) =>
-    setCfg(p => ({ ...p, [k]: v }))
-
-  const handleSave = async () => {
-    if (!cfg.apiKey.trim()) { setLocalError('Token obrigatório'); return }
-    if (!cfg.apiBase.trim()) { setLocalError('URL da API obrigatória'); return }
-    setValidating(true); setLocalError('')
-    try {
-      const r = await fetch(`${cfg.apiBase}/station/init`, {
-        headers: { 'X-API-Key': cfg.apiKey },
-        signal: AbortSignal.timeout(8000),
-      })
-      if (!r.ok) {
-        const err = await r.json().catch(() => ({}))
-        throw new Error(err.detail || `HTTP ${r.status}`)
-      }
-      saveConfig(cfg)
-      onSave(cfg)
-    } catch (e: unknown) {
-      setLocalError(e instanceof Error ? e.message : 'Erro ao validar token')
-    } finally {
-      setValidating(false)
-    }
-  }
-
-  const inp: React.CSSProperties = {
-    width: '100%', background: '#F8FAFC', border: '1.5px solid #E2E8F0',
-    borderRadius: 10, color: '#1E293B', padding: '10px 14px',
-    fontSize: 14, outline: 'none', boxSizing: 'border-box',
-    fontFamily: 'monospace', transition: 'border-color .2s',
-  }
-  const lbl: React.CSSProperties = {
-    fontSize: 11, color: '#64748B', fontWeight: 600,
-    textTransform: 'uppercase', letterSpacing: '0.08em',
-    marginBottom: 6, display: 'block',
-  }
-
-  return (
-    <div style={{
-      width: '100%', height: '100vh', background: '#F1F5F9',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: "'DM Sans', system-ui, sans-serif",
-    }}>
-      <style>{`
-        @keyframes fadeUp { from { opacity:0; transform:translateY(24px) } to { opacity:1; transform:translateY(0) } }
-        @keyframes pulse  { 0%,100% { opacity:.6 } 50% { opacity:1 } }
-        .setup-inp:focus { border-color: #3B82F6 !important; background: #fff !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.12) }
-      `}</style>
-
-      <div style={{
-        background: '#fff', borderRadius: 20, width: '100%', maxWidth: 480,
-        boxShadow: '0 20px 60px rgba(15,23,42,0.12)', overflow: 'hidden',
-        animation: 'fadeUp .5s cubic-bezier(.34,1.56,.64,1)',
-      }}>
-        {/* Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%)',
-          padding: '32px 32px 28px',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-        }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16,
-            background: 'rgba(59,130,246,0.2)', border: '1.5px solid rgba(59,130,246,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <ShieldCheckIcon style={{ width: 28, height: 28, color: '#60A5FA' }} />
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#F8FAFC', letterSpacing: '-0.02em' }}>
-              EPI Camera Station
-            </div>
-            <div style={{ fontSize: 13, color: '#94A3B8', marginTop: 4 }}>
-              Configure esta máquina para começar
-            </div>
-          </div>
-        </div>
-
-        {/* Erro de init anterior */}
-        {(initError || localError) && (
-          <div style={{
-            margin: '16px 24px 0', padding: '10px 14px',
-            background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
-            borderRadius: 10, fontSize: 13, color: '#DC2626',
-            display: 'flex', alignItems: 'center', gap: 8,
-          }}>
-            <XCircleIcon style={{ width: 16, height: 16, flexShrink: 0 }} />
-            {localError || initError}
-          </div>
-        )}
-
-        {/* Campos */}
-        <div style={{ padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-          <div>
-            <label style={lbl}>
-              <KeyIcon style={{ width: 12, height: 12, display: 'inline', marginRight: 4 }} />
-              API Key da Máquina *
-            </label>
-            <input
-              className="setup-inp" style={inp} type="password"
-              value={cfg.apiKey}
-              onChange={e => set('apiKey', e.target.value)}
-              placeholder="Token gerado no painel..."
-            />
-            {cfg.apiKey && (
-              <div style={{ fontSize: 11, color: '#10B981', fontFamily: 'monospace', marginTop: 4 }}>
-                ✓ {cfg.apiKey.slice(0, 8)}...{cfg.apiKey.slice(-4)}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label style={lbl}>
-              <WifiIcon style={{ width: 12, height: 12, display: 'inline', marginRight: 4 }} />
-              URL da API Vision *
-            </label>
-            <input
-              className="setup-inp" style={inp}
-              value={cfg.apiBase}
-              onChange={e => set('apiBase', e.target.value)}
-              placeholder="https://aihub.smartxhub.cloud"
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={lbl}>
-                <BuildingOfficeIcon style={{ width: 12, height: 12, display: 'inline', marginRight: 4 }} />
-                Company ID
-              </label>
-              <input
-                className="setup-inp" style={inp} type="number"
-                value={cfg.companyId}
-                onChange={e => set('companyId', parseInt(e.target.value) || 1)}
-              />
-            </div>
-            <div>
-              <label style={lbl}>
-                <LockClosedIcon style={{ width: 12, height: 12, display: 'inline', marginRight: 4 }} />
-                IP Fechadura
-              </label>
-              <input
-                className="setup-inp" style={inp}
-                value={cfg.lockIp}
-                onChange={e => set('lockIp', e.target.value)}
-                placeholder="192.168.68.100"
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={handleSave}
-            disabled={validating}
-            style={{
-              width: '100%', padding: '13px', borderRadius: 12, border: 'none',
-              background: validating ? '#94A3B8' : 'linear-gradient(135deg,#1D4ED8,#3B82F6)',
-              color: '#fff', fontSize: 15, fontWeight: 700, cursor: validating ? 'not-allowed' : 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              transition: 'all .2s', marginTop: 4,
-            }}
-          >
-            {validating
-              ? <><ArrowPathIcon style={{ width: 16, height: 16, animation: 'spin 1s linear infinite' }} /> Validando...</>
-              : <><CheckIcon style={{ width: 16, height: 16 }} /> Ativar Estação</>
-            }
-          </button>
-        </div>
-
-        <div style={{ padding: '0 28px 20px', textAlign: 'center', fontSize: 11, color: '#94A3B8' }}>
-          O token é gerado no painel SmartX Vision · Portaria
-        </div>
-      </div>
-
-      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-    </div>
-  )
-}
-
-// ─── VALIDATING SCREEN ────────────────────────────────────────────────────────
-function ValidatingScreen() {
-  return (
-    <div style={{
-      width: '100%', height: '100vh', background: '#0A0F1A',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      gap: 16, fontFamily: "'DM Sans', system-ui, sans-serif",
-    }}>
-      <ShieldCheckIcon style={{ width: 48, height: 48, color: '#3B82F6', animation: 'pulse 1.5s ease-in-out infinite' }} />
-      <div style={{ fontSize: 18, fontWeight: 600, color: '#F8FAFC' }}>Validando estação...</div>
-      <div style={{ fontSize: 13, color: '#64748B' }}>Conectando ao servidor Vision</div>
-      <style>{`@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}`}</style>
-    </div>
-  )
-}
-
-// ─── MODAL CONFIG (modo kiosk ativo) ─────────────────────────────────────────
+// ─── MODAL CONFIG ────────────────────────────────────────────────────────────
 function ConfigModal({ onClose, onSave, devices, theme }: {
 
   onClose: () => void
@@ -2460,13 +2193,14 @@ function EpiSidebar({ frame, isNarrow }: { frame: FrameResult | null; isNarrow: 
 export default function EpiCameraStation() {
   const [stationCfg, setStationCfg] = useState<StationConfig>(loadConfig)
   const [showConfig, setShowConfig] = useState(false)
-  const { status, theme, company, error, validate } = useStationInit(stationCfg)
+  const theme = DEFAULT_THEME
+  const company: StationCompany | null = null
 
   const layout = useTabletLayout()
   const isNarrow = layout.orientation === 'portrait' || layout.width < 600
 
   const cam = useCameraStream(stationCfg)
-  const logic = useKioskLogic(stationCfg, cam.captureFrame, cam.ready && status === 'ready')
+  const logic = useKioskLogic(stationCfg, cam.captureFrame, cam.ready)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const [vSize, setVSize] = useState({ w: 1280, h: 720 })
@@ -2499,19 +2233,9 @@ export default function EpiCameraStation() {
 
   const handleSaveConfig = (cfg: StationConfig) => {
     setStationCfg(cfg)
-    validate(cfg.apiKey, cfg.apiBase)
   }
 
-  // ── Telas de inicialização ──
-  if (status === 'unconfigured') return (
-    <SetupScreen onSave={cfg => { setStationCfg(cfg); validate(cfg.apiKey, cfg.apiBase) }} initError={error} />
-  )
-  if (status === 'validating') return <ValidatingScreen />
-  if (status === 'error') return (
-    <SetupScreen onSave={cfg => { setStationCfg(cfg); validate(cfg.apiKey, cfg.apiBase) }} initError={error} />
-  )
 
-  // ── Kiosk ativo ──
   const scanning = logic.phase === 'scanning'
   const showResult = logic.phase !== 'idle' && logic.phase !== 'scanning'
   const showEpiSidebar = scanning && logic.scanSubPhase === 'epi_scan'
