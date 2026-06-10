@@ -1526,6 +1526,63 @@ function useKioskLogic(
     setSubPhase('face_scan')
     const { apiBase } = stationCfg
 
+    // Fluxo EXIT: só reconhecimento facial, sem EPI scan
+    if (dir === 'EXIT') {
+      const handleWsMessageExit = (ev: MessageEvent) => {
+        if (!mountedRef.current) return
+        try {
+          const msg = JSON.parse(ev.data as string)
+          if (msg.type !== 'frame_result') return
+          const fr = msg as FrameResult
+          setLastFrame(fr)
+          if (fr.face_recognized && !faceIdentifiedRef.current) {
+            faceIdentifiedRef.current = true
+            clearTimeout(subPhaseTimerRef.current!)
+            subPhaseTimerRef.current = setTimeout(() => {
+              if (!mountedRef.current || phaseRef.current !== 'scanning') return
+              const d: Decision = {
+                access_decision: 'GRANTED',
+                compliance_rate: 1,
+                face_rate: fr.face_confidence,
+                person_code: fr.face_person_code,
+                person_name: fr.face_person_name,
+                total_frames: 1,
+              }
+              closeScan(); setDecision(d); setPhase('granted')
+              triggerDoor(d, dir)
+              saveRecognitionEvent(d, dir, [])
+              resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+            }, 600)
+          }
+        } catch { }
+      }
+
+      // Timeout: se não identificar rosto → DENIED_FACE
+      subPhaseTimerRef.current = setTimeout(() => {
+        if (!mountedRef.current || phaseRef.current !== 'scanning') return
+        const d: Decision = { access_decision: 'DENIED_FACE', compliance_rate: 0, face_rate: 0, total_frames: 0 }
+        closeScan(); setDecision(d); setPhase('denied_face')
+        saveRecognitionEvent(d, dir, [])
+        resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+      }, stationCfg.faceScanSeconds * 1000)
+
+      const wsBase = apiBase.replace(/^http/, 'ws')
+      const ws = new WebSocket(`${wsBase}/api/v1/epi/ws/epi-stream?${buildWsParams()}`)
+      wsRef.current = ws
+      ws.onmessage = handleWsMessageExit
+      ws.onopen = () => {
+        const interval = Math.round(1000 / CFG.fps)
+        wsTimerRef.current = setInterval(async () => {
+          if (ws.readyState !== WebSocket.OPEN) return
+          const blob = await captureFrame(0.8)
+          if (blob && ws.readyState === WebSocket.OPEN) ws.send(blob)
+        }, interval)
+      }
+      ws.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
+      return
+    }
+
+    // Fluxo ENTRY: face_scan → preparing → epi_scan
     const handleWsMessage = (ev: MessageEvent) => {
       if (!mountedRef.current) return
       try {
@@ -1533,7 +1590,6 @@ function useKioskLogic(
         if (msg.type === 'frame_result') {
           const fr = msg as FrameResult
           setLastFrame(fr)
-          // if (fr.missing) setLastMissing(fr.missing)
           if (fr.missing) { setLastMissing(fr.missing); lastMissingRef.current = fr.missing }
           if (fr.face_recognized && !faceIdentifiedRef.current && subPhaseRef.current === 'face_scan') {
             faceIdentifiedRef.current = true
@@ -1576,7 +1632,7 @@ function useKioskLogic(
       }, interval)
     }
     ws.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
-  }, [closeScan, setPhase, setSubPhase, startPreparing, goIdle, captureFrame, triggerDoor, stationCfg, buildWsParams])
+  }, [closeScan, setPhase, setSubPhase, startPreparing, goIdle, captureFrame, triggerDoor, saveRecognitionEvent, stationCfg, buildWsParams])
 
   // Conecta no WebSocket do controlador IoT e dispara scan quando botão externo é pressionado
   useEffect(() => {
@@ -1594,7 +1650,7 @@ function useKioskLogic(
             const msg = JSON.parse(e.data)
             if (phaseRef.current !== 'idle') return
             if (msg.event === 'start_recognition') openScan('ENTRY')
-            if (msg.event === 'unlocked') openScan('EXIT')
+            if (msg.event === 'button_press') openScan('EXIT')
           } catch { }
         }
         ws.onclose = () => {
