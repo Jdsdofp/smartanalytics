@@ -1179,6 +1179,7 @@ interface StationConfig {
   camIpUrl: string
   faceScanSeconds: number
   epiScanSeconds: number
+  prepareSeconds: number
 }
 
 interface StationTheme {
@@ -1235,6 +1236,7 @@ function defaultConfig(): StationConfig {
     camIpUrl: '',
     faceScanSeconds: 8,
     epiScanSeconds: 20,
+    prepareSeconds: 10,
   }
 }
 
@@ -1277,7 +1279,7 @@ const CFG = {
   face_threshold: 0.45, detect_faces: true,
   result_show_ms: 5000, idle_check_interval_ms: 1500,
   person_trigger_confidence: 0.3,
-  face_scan_seconds: 8, prepare_seconds: 4,
+  face_scan_seconds: 8, prepare_seconds: 10,
 }
 
 // ─── HOOK: câmera ────────────────────────────────────────────────────────────
@@ -1414,7 +1416,7 @@ function useKioskLogic(
   const startPreparing = useCallback((apiBase: string, onMsg: (ev: MessageEvent) => void) => {
     clearSubPhaseTimers()
     setSubPhase('preparing')
-    setPrepareCountdown(CFG.prepare_seconds)
+    setPrepareCountdown(stationCfg.prepareSeconds)
     countdownIntervalRef.current = setInterval(() => {
       setPrepareCountdown(p => {
         if (p <= 1) { clearInterval(countdownIntervalRef.current!); countdownIntervalRef.current = null; return 0 }
@@ -1439,8 +1441,8 @@ function useKioskLogic(
         }, iv2)
       }
       ws2.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
-    }, CFG.prepare_seconds * 1000)
-  }, [clearSubPhaseTimers, setSubPhase, captureFrame, buildWsParams])
+    }, stationCfg.prepareSeconds * 1000)
+  }, [clearSubPhaseTimers, setSubPhase, captureFrame, buildWsParams, stationCfg.prepareSeconds])
 
   const triggerDoor = useCallback((d: Decision, dir: Direction) => {
     const { apiBase, doorId, zoneId, lockIp, lockMs } = stationCfg
@@ -1557,15 +1559,7 @@ function useKioskLogic(
         } catch { }
       }
 
-      // Timeout: se não identificar rosto → DENIED_FACE
-      subPhaseTimerRef.current = setTimeout(() => {
-        if (!mountedRef.current || phaseRef.current !== 'scanning') return
-        const d: Decision = { access_decision: 'DENIED_FACE', compliance_rate: 0, face_rate: 0, total_frames: 0 }
-        closeScan(); setDecision(d); setPhase('denied_face')
-        saveRecognitionEvent(d, dir, [])
-        resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
-      }, stationCfg.faceScanSeconds * 1000)
-
+      // Sem timeout: a tela permanece aguardando até o rosto ser identificado
       const wsBase = apiBase.replace(/^http/, 'ws')
       const ws = new WebSocket(`${wsBase}/api/v1/epi/ws/epi-stream?${buildWsParams()}`)
       wsRef.current = ws
@@ -2010,6 +2004,10 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
               <div>
                 <label style={lbl}>Janela de verificação EPI (s)</label>
                 <input style={inp} type="number" value={cfg.epiScanSeconds} onChange={e => set('epiScanSeconds', parseInt(e.target.value) || 20)} min={5} max={60} />
+              </div>
+              <div>
+                <label style={lbl}>Tempo para colocar a balaclava (s)</label>
+                <input style={inp} type="number" value={cfg.prepareSeconds} onChange={e => set('prepareSeconds', parseInt(e.target.value) || 10)} min={3} max={30} />
               </div>
             </>
           )}
