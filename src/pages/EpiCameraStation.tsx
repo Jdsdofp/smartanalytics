@@ -1528,18 +1528,30 @@ function useKioskLogic(
     setSubPhase('face_scan')
     const { apiBase } = stationCfg
 
-    // Fluxo EXIT: só reconhecimento facial, sem EPI scan
+    // Fluxo EXIT: só reconhecimento facial via HTTP polling (sem handshake WS)
     if (dir === 'EXIT') {
-      const handleWsMessageExit = (ev: MessageEvent) => {
-        if (!mountedRef.current) return
+      const pollInterval = Math.round(1000 / CFG.fps)
+
+      const poll = async () => {
+        if (!mountedRef.current || phaseRef.current !== 'scanning') return
+        const blob = await captureFrame(0.8)
+        if (!blob) return
         try {
-          const msg = JSON.parse(ev.data as string)
-          if (msg.type !== 'frame_result') return
-          const fr = msg as FrameResult
+          const fd = new FormData()
+          fd.append('file', blob, 'frame.jpg')
+          fd.append('confidence', String(CFG.confidence))
+          fd.append('detect_faces', 'true')
+          fd.append('face_threshold', String(CFG.face_threshold))
+          const r = await fetch(
+            `${apiBase}/api/v1/epi/detect/frame?company_id=${stationCfg.companyId}`,
+            { method: 'POST', body: fd, headers: authHeaders() }
+          )
+          const data = await r.json()
+          const fr: FrameResult = { ...data, window_progress: 0, session_compliant_rate: 1 }
           setLastFrame(fr)
           if (fr.face_recognized && !faceIdentifiedRef.current) {
             faceIdentifiedRef.current = true
-            clearTimeout(subPhaseTimerRef.current!)
+            if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
             subPhaseTimerRef.current = setTimeout(() => {
               if (!mountedRef.current || phaseRef.current !== 'scanning') return
               const d: Decision = {
@@ -1559,20 +1571,8 @@ function useKioskLogic(
         } catch { }
       }
 
-      // Sem timeout: a tela permanece aguardando até o rosto ser identificado
-      const wsBase = apiBase.replace(/^http/, 'ws')
-      const ws = new WebSocket(`${wsBase}/api/v1/epi/ws/epi-stream?${buildWsParams()}`)
-      wsRef.current = ws
-      ws.onmessage = handleWsMessageExit
-      ws.onopen = () => {
-        const interval = Math.round(1000 / CFG.fps)
-        wsTimerRef.current = setInterval(async () => {
-          if (ws.readyState !== WebSocket.OPEN) return
-          const blob = await captureFrame(0.8)
-          if (blob && ws.readyState === WebSocket.OPEN) ws.send(blob)
-        }, interval)
-      }
-      ws.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
+      // Inicia polling imediatamente — sem aguardar handshake
+      wsTimerRef.current = setInterval(poll, pollInterval)
       return
     }
 
