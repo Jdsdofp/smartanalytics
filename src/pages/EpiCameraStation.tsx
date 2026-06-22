@@ -38,8 +38,6 @@ interface StationConfig {
   faceScanSeconds: number
   epiScanSeconds: number
   prepareSeconds: number
-  entryDelayMs: number
-  exitDelayMs: number
 }
 
 interface StationTheme {
@@ -97,8 +95,6 @@ function defaultConfig(): StationConfig {
     faceScanSeconds: 8,
     epiScanSeconds: 20,
     prepareSeconds: 10,
-    entryDelayMs: 2000,
-    exitDelayMs: 2000,
   }
 }
 
@@ -275,23 +271,19 @@ function useKioskLogic(
     return h
   }, [stationCfg.apiKey])
   //@ts-ignore
-  const startDoorCountdown = useCallback((d: Decision, dir: Direction, delayMs: number, onOpen: () => void) => {
+  const startDoorCountdown = useCallback((openFn: () => void) => {
     clearDoorDelay()
-    const secs = Math.ceil(delayMs / 1000)
+    console.log('[startDoorCountdown] chamando openFn, lockIp:', stationCfg.lockIp, 'lockMs:', stationCfg.lockMs)
+    openFn()
+    const secs = Math.ceil(stationCfg.lockMs / 1000)
     setDoorCountdown(secs)
-    if (secs > 0) {
-      doorCountdownIntervalRef.current = setInterval(() => {
-        setDoorCountdown(p => {
-          if (p <= 1) { clearInterval(doorCountdownIntervalRef.current!); doorCountdownIntervalRef.current = null; return 0 }
-          return p - 1
-        })
-      }, 1000)
-    }
-    doorDelayTimerRef.current = setTimeout(() => {
-      if (!mountedRef.current) return
-      onOpen()
-    }, delayMs)
-  }, [clearDoorDelay])
+    doorCountdownIntervalRef.current = setInterval(() => {
+      setDoorCountdown(p => {
+        if (p <= 1) { clearInterval(doorCountdownIntervalRef.current!); doorCountdownIntervalRef.current = null; return 0 }
+        return p - 1
+      })
+    }, 1000)
+  }, [clearDoorDelay, stationCfg.lockMs])
 
   const buildWsParams = useCallback(() => new URLSearchParams({
     company_id: String(stationCfg.companyId),
@@ -351,7 +343,7 @@ function useKioskLogic(
 
   const triggerDoor = useCallback((d: Decision, dir: Direction) => {
   const { lockIp, lockMs, doorId, zoneId, apiBase } = stationCfg
-    
+    console.log('[triggerDoor] dir:', dir, 'lockIp:', lockIp, 'lockMs:', lockMs)
     // Abre o ESP32 diretamente
     if (lockIp) {
       fetch(`http://${lockIp}/unlock`, {
@@ -608,7 +600,7 @@ function useKioskLogic(
               }
               closeScan(); setDecision(d); setPhase('granted')
               saveRecognitionEvent(d, dir, [])
-              startDoorCountdown(d, dir, stationCfg.exitDelayMs, () => triggerDoor(d, dir))
+              startDoorCountdown(() => triggerDoor(d, dir))
               resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
             }, 600)
           }
@@ -660,7 +652,7 @@ function useKioskLogic(
             : d.access_decision === 'DENIED_EPI' ? 'denied_epi' : 'denied_face'
           setPhase(p)
           if (d.access_decision === 'GRANTED')
-            startDoorCountdown(d, dir, stationCfg.entryDelayMs, () => triggerDoor(d, dir))
+            startDoorCountdown(() => triggerDoor(d, dir))
           resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
           saveRecognitionEvent(d, dir, lastMissingRef.current)
         }
@@ -1069,20 +1061,6 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
                 <label style={lbl}>Tempo para colocar a balaclava (s)</label>
                 <input style={inp} type="number" value={cfg.prepareSeconds} onChange={e => set('prepareSeconds', parseInt(e.target.value) || 10)} min={3} max={30} />
               </div>
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 12, marginTop: 4 }}>
-                <label style={{ ...lbl, color: '#F59E0B' }}>⏱ Delay para abrir a porta</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 6 }}>
-                  <div>
-                    <label style={lbl}>Entrada (s)</label>
-                    <input style={inp} type="number" value={(cfg.entryDelayMs ?? 2000) / 1000} onChange={e => set('entryDelayMs', (parseFloat(e.target.value) || 2) * 1000)} min={0} max={30} step={0.5} />
-                  </div>
-                  <div>
-                    <label style={lbl}>Saída (s)</label>
-                    <input style={inp} type="number" value={(cfg.exitDelayMs ?? 2000) / 1000} onChange={e => set('exitDelayMs', (parseFloat(e.target.value) || 2) * 1000)} min={0} max={30} step={0.5} />
-                  </div>
-                </div>
-                <div style={{ fontSize: 10, color: '#6B7280', fontFamily: 'monospace', marginTop: 4 }}>Tempo de espera após aprovação até abrir a fechadura</div>
-              </div>
             </>
           )}
         </div>
@@ -1166,8 +1144,8 @@ function ResultOverlay({ phase, decision, direction, hasLock, missing, doorCount
       {granted && hasLock && (
         <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 20, fontSize: 12, color: '#86EFAC', fontFamily: 'monospace' }}>
           {doorCountdown > 0
-            ? <><ArrowPathIcon style={{ width: 12, height: 12, animation: 'spin 1s linear infinite' }} /> Abrindo em {doorCountdown}s...</>
-            : <><LockClosedIcon style={{ width: 12, height: 12 }} /> Fechadura aberta</>
+            ? <><LockClosedIcon style={{ width: 12, height: 12 }} /> Fechadura aberta · fechando em {doorCountdown}s</>
+            : <><LockClosedIcon style={{ width: 12, height: 12 }} /> Fechadura fechada</>
           }
         </div>
       )}
