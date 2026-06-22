@@ -223,6 +223,7 @@ function useKioskLogic(
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const doorDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const doorCountdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const iotWsRef = useRef<WebSocket | null>(null)
   const mountedRef = useRef(true)
   const phaseRef = useRef<Phase>('idle')
   const subPhaseRef = useRef<ScanSubPhase>('face_scan')
@@ -270,10 +271,9 @@ function useKioskLogic(
     if (stationCfg.apiKey) h['X-API-Key'] = stationCfg.apiKey
     return h
   }, [stationCfg.apiKey])
-  //@ts-ignore
   const startDoorCountdown = useCallback((openFn: () => void) => {
-    clearDoorDelay()
-    console.log('[startDoorCountdown] chamando openFn, lockIp:', stationCfg.lockIp, 'lockMs:', stationCfg.lockMs)
+    // Limpa só o countdown visual, não o doorDelayTimerRef (que é usado pelo triggerDoor para fechar)
+    if (doorCountdownIntervalRef.current) { clearInterval(doorCountdownIntervalRef.current); doorCountdownIntervalRef.current = null }
     openFn()
     const secs = Math.ceil(stationCfg.lockMs / 1000)
     setDoorCountdown(secs)
@@ -283,7 +283,7 @@ function useKioskLogic(
         return p - 1
       })
     }, 1000)
-  }, [clearDoorDelay, stationCfg.lockMs])
+  }, [stationCfg.lockMs])
 
   const buildWsParams = useCallback(() => new URLSearchParams({
     company_id: String(stationCfg.companyId),
@@ -342,29 +342,25 @@ function useKioskLogic(
   // }, [stationCfg, authHeaders])
 
   const triggerDoor = useCallback((d: Decision, dir: Direction) => {
-  const { lockIp, lockMs, doorId, zoneId, apiBase } = stationCfg
+    const { lockIp, lockMs } = stationCfg
     console.log('[triggerDoor] dir:', dir, 'lockIp:', lockIp, 'lockMs:', lockMs)
-    // Abre o ESP32 diretamente
-    if (lockIp) {
-      fetch(`http://${lockIp}/unlock`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ duration_ms: lockMs }),
-      }).catch(() => {})
+
+    // Envia unlock via WebSocket (evita Mixed Content de HTTPS → HTTP)
+    const sendWs = (payload: object) => {
+      const ws = iotWsRef.current
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(payload))
+      }
     }
 
-    // Registra no backend (fire-and-forget, sem bloquear)
-    try {
-      const fd = new FormData()
-      if (d.person_code) fd.append('person_code', d.person_code)
-      if (d.person_name) fd.append('person_name', d.person_name)
-      fd.append('reason', dir === 'ENTRY' ? 'EPI_COMPLIANT_ENTRY' : 'EXIT')
-      if (doorId) fd.append('door_id', doorId)
-      if (zoneId) fd.append('zone_id', zoneId)
-      fd.append('direction', dir)
-      fetch(`${apiBase}/api/v1/epi/access/door/open`, { method: 'POST', body: fd, headers: authHeaders() }).catch(() => {})
-    } catch {}
-  }, [stationCfg, authHeaders])
+    // Abre a porta agora
+    sendWs({ command: 'unlock', duration_ms: lockMs })
+
+    // Fecha a porta após lockMs
+    doorDelayTimerRef.current = setTimeout(() => {
+      sendWs({ command: 'lock' })
+    }, lockMs)
+  }, [stationCfg])
 
     const saveRecognitionEvent = useCallback(async (
     d: Decision,
@@ -691,6 +687,7 @@ function useKioskLogic(
       if (destroyed) return
       try {
         ws = new WebSocket(`ws://${stationCfg.lockIp}:81`)
+        iotWsRef.current = ws
         ws.onmessage = (e) => {
           try {
             const msg = JSON.parse(e.data)
@@ -700,6 +697,7 @@ function useKioskLogic(
           } catch { }
         }
         ws.onclose = () => {
+          iotWsRef.current = null
           if (!destroyed) reconnectTimer = setTimeout(connect, 5000)
         }
         ws.onerror = () => ws?.close()
