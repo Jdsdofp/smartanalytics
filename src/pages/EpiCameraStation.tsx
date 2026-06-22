@@ -38,6 +38,8 @@ interface StationConfig {
   faceScanSeconds: number
   epiScanSeconds: number
   prepareSeconds: number
+  entryDelayMs: number
+  exitDelayMs: number
 }
 
 interface StationTheme {
@@ -95,6 +97,8 @@ function defaultConfig(): StationConfig {
     faceScanSeconds: 8,
     epiScanSeconds: 20,
     prepareSeconds: 10,
+    entryDelayMs: 2000,
+    exitDelayMs: 2000,
   }
 }
 
@@ -221,6 +225,8 @@ function useKioskLogic(
   const resultTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const subPhaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const doorDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const doorCountdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const mountedRef = useRef(true)
   const phaseRef = useRef<Phase>('idle')
   const subPhaseRef = useRef<ScanSubPhase>('face_scan')
@@ -229,6 +235,7 @@ function useKioskLogic(
   const [phase, setPhaseState] = useState<Phase>('idle')
   const [scanSubPhase, setScanSubPhase] = useState<ScanSubPhase>('face_scan')
   const [prepareCountdown, setPrepareCountdown] = useState(0)
+  const [doorCountdown, setDoorCountdown] = useState(0)
   const [lastFrame, setLastFrame] = useState<FrameResult | null>(null)
   const [decision, setDecision] = useState<Decision | null>(null)
   const [direction, setDirection] = useState<Direction>('ENTRY')
@@ -242,6 +249,12 @@ function useKioskLogic(
     if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null }
   }, [])
 
+  const clearDoorDelay = useCallback(() => {
+    if (doorDelayTimerRef.current) { clearTimeout(doorDelayTimerRef.current); doorDelayTimerRef.current = null }
+    if (doorCountdownIntervalRef.current) { clearInterval(doorCountdownIntervalRef.current); doorCountdownIntervalRef.current = null }
+    setDoorCountdown(0)
+  }, [])
+
   const closeScan = useCallback(() => {
     if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
     if (wsRef.current) { wsRef.current.close(); wsRef.current = null }
@@ -250,16 +263,35 @@ function useKioskLogic(
 
   const goIdle = useCallback(() => {
     closeScan()
+    clearDoorDelay()
     setPhase('idle'); setLastFrame(null); setDecision(null)
     setSubPhase('face_scan'); setPrepareCountdown(0)
     faceIdentifiedRef.current = false
-  }, [closeScan, setPhase, setSubPhase])
+  }, [closeScan, clearDoorDelay, setPhase, setSubPhase])
 
   const authHeaders = useCallback(() => {
     const h: Record<string, string> = {}
     if (stationCfg.apiKey) h['X-API-Key'] = stationCfg.apiKey
     return h
   }, [stationCfg.apiKey])
+  //@ts-ignore
+  const startDoorCountdown = useCallback((d: Decision, dir: Direction, delayMs: number, onOpen: () => void) => {
+    clearDoorDelay()
+    const secs = Math.ceil(delayMs / 1000)
+    setDoorCountdown(secs)
+    if (secs > 0) {
+      doorCountdownIntervalRef.current = setInterval(() => {
+        setDoorCountdown(p => {
+          if (p <= 1) { clearInterval(doorCountdownIntervalRef.current!); doorCountdownIntervalRef.current = null; return 0 }
+          return p - 1
+        })
+      }, 1000)
+    }
+    doorDelayTimerRef.current = setTimeout(() => {
+      if (!mountedRef.current) return
+      onOpen()
+    }, delayMs)
+  }, [clearDoorDelay])
 
   const buildWsParams = useCallback(() => new URLSearchParams({
     company_id: String(stationCfg.companyId),
@@ -533,16 +565,12 @@ function useKioskLogic(
         try {
           const fd = new FormData()
           fd.append('file', blob, 'frame.jpg')
+          fd.append('confidence', String(CFG.confidence))
+          fd.append('detect_faces', 'true')
           fd.append('face_threshold', String(CFG.face_threshold))
-          // fd.append('file', blob, 'frame.jpg')
-          // fd.append('confidence', String(CFG.confidence))
-          // fd.append('detect_faces', 'true')
-          // fd.append('face_threshold', String(CFG.face_threshold))
-          
-          const r = await fetch(
-            // `${apiBase}/api/v1/epi/detect/frame?company_id=${stationCfg.companyId}`,
-            `${apiBase}/api/v1/epi/detect/face?company_id=${stationCfg.companyId}`,
 
+          const r = await fetch(
+            `${apiBase}/api/v1/epi/detect/frame?company_id=${stationCfg.companyId}`,
             { method: 'POST', body: fd, headers: authHeaders() }
           )
           const data = await r.json()
@@ -572,8 +600,8 @@ function useKioskLogic(
                 total_frames: 1,
               }
               closeScan(); setDecision(d); setPhase('granted')
-              triggerDoor(d, dir)
               saveRecognitionEvent(d, dir, [])
+              startDoorCountdown(d, dir, stationCfg.exitDelayMs, () => triggerDoor(d, dir))
               resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
             }, 600)
           }
@@ -615,7 +643,8 @@ function useKioskLogic(
           const p: Phase = d.access_decision === 'GRANTED' ? 'granted'
             : d.access_decision === 'DENIED_EPI' ? 'denied_epi' : 'denied_face'
           setPhase(p)
-          if (d.access_decision === 'GRANTED') triggerDoor(d, dir)
+          if (d.access_decision === 'GRANTED')
+            startDoorCountdown(d, dir, stationCfg.entryDelayMs, () => triggerDoor(d, dir))
           resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
           saveRecognitionEvent(d, dir, lastMissingRef.current)
         }
@@ -640,7 +669,7 @@ function useKioskLogic(
       }, interval)
     }
     ws.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
-  }, [closeScan, setPhase, setSubPhase, startPreparing, goIdle, captureFrame, triggerDoor, saveRecognitionEvent, stationCfg, buildWsParams])
+  }, [closeScan, setPhase, setSubPhase, startPreparing, goIdle, captureFrame, triggerDoor, saveRecognitionEvent, startDoorCountdown, stationCfg, buildWsParams])
 
 
   // Conecta no WebSocket do controlador IoT e dispara scan quando botão externo é pressionado
@@ -687,7 +716,7 @@ function useKioskLogic(
     }
   }, [camReady, closeScan])
 
-  return { phase, scanSubPhase, prepareCountdown, lastFrame, decision, direction, openScan, goIdle, lastMissing }
+  return { phase, scanSubPhase, prepareCountdown, doorCountdown, lastFrame, decision, direction, openScan, goIdle, lastMissing }
 }
 
 // ─── MODAL CONFIG ────────────────────────────────────────────────────────────
@@ -1024,6 +1053,20 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
                 <label style={lbl}>Tempo para colocar a balaclava (s)</label>
                 <input style={inp} type="number" value={cfg.prepareSeconds} onChange={e => set('prepareSeconds', parseInt(e.target.value) || 10)} min={3} max={30} />
               </div>
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 12, marginTop: 4 }}>
+                <label style={{ ...lbl, color: '#F59E0B' }}>⏱ Delay para abrir a porta</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 6 }}>
+                  <div>
+                    <label style={lbl}>Entrada (s)</label>
+                    <input style={inp} type="number" value={(cfg.entryDelayMs ?? 2000) / 1000} onChange={e => set('entryDelayMs', (parseFloat(e.target.value) || 2) * 1000)} min={0} max={30} step={0.5} />
+                  </div>
+                  <div>
+                    <label style={lbl}>Saída (s)</label>
+                    <input style={inp} type="number" value={(cfg.exitDelayMs ?? 2000) / 1000} onChange={e => set('exitDelayMs', (parseFloat(e.target.value) || 2) * 1000)} min={0} max={30} step={0.5} />
+                  </div>
+                </div>
+                <div style={{ fontSize: 10, color: '#6B7280', fontFamily: 'monospace', marginTop: 4 }}>Tempo de espera após aprovação até abrir a fechadura</div>
+              </div>
             </>
           )}
         </div>
@@ -1066,7 +1109,7 @@ function Overlay({ frame, vw, vh, ow, oh }: { frame: FrameResult | null; vw: num
   )
 }
 
-function ResultOverlay({ phase, decision, direction, hasLock, missing }: { phase: Phase; decision: Decision | null; direction: Direction; hasLock: boolean; missing: string[] }) {
+function ResultOverlay({ phase, decision, direction, hasLock, missing, doorCountdown }: { phase: Phase; decision: Decision | null; direction: Direction; hasLock: boolean; missing: string[]; doorCountdown: number }) {
   const granted = phase === 'granted'; const deniedEpi = phase === 'denied_epi'
   const color = granted ? '#10B981' : '#EF4444'
   const bg = granted ? 'rgba(6,78,59,0.96)' : 'rgba(69,10,10,0.96)'
@@ -1074,7 +1117,7 @@ function ResultOverlay({ phase, decision, direction, hasLock, missing }: { phase
   const title = granted ? (direction === 'ENTRY' ? 'ACESSO LIBERADO' : 'SAÍDA REGISTRADA') : deniedEpi ? 'EPI INCOMPLETO' : 'FACE NÃO IDENTIFICADA'
   return (
     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: bg, backdropFilter: 'blur(8px)', padding: 16 }}>
-      <style>{`@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
+      <style>{`@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.5)}50%{box-shadow:0 0 0 12px rgba(16,185,129,0)}}`}</style>
       <div style={{ marginBottom: 16, filter: `drop-shadow(0 0 40px ${color})`, animation: 'pop .5s cubic-bezier(.34,1.56,.64,1)' }}>
         <Icon style={{ width: 80, height: 80, color }} />
       </div>
@@ -1106,7 +1149,10 @@ function ResultOverlay({ phase, decision, direction, hasLock, missing }: { phase
       )}
       {granted && hasLock && (
         <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 20, fontSize: 12, color: '#86EFAC', fontFamily: 'monospace' }}>
-          <LockClosedIcon style={{ width: 12, height: 12 }} /> Fechadura aberta
+          {doorCountdown > 0
+            ? <><ArrowPathIcon style={{ width: 12, height: 12, animation: 'spin 1s linear infinite' }} /> Abrindo em {doorCountdown}s...</>
+            : <><LockClosedIcon style={{ width: 12, height: 12 }} /> Fechadura aberta</>
+          }
         </div>
       )}
     </div>
@@ -1329,7 +1375,7 @@ export default function EpiCameraStation() {
         )}
 
         {showResult && (
-          <ResultOverlay phase={logic.phase} decision={logic.decision} direction={logic.direction} hasLock={!!stationCfg.lockIp} missing={logic.lastMissing} />
+          <ResultOverlay phase={logic.phase} decision={logic.decision} direction={logic.direction} hasLock={!!stationCfg.lockIp} missing={logic.lastMissing} doorCountdown={logic.doorCountdown} />
         )}
 
         {cam.ready && (
