@@ -302,9 +302,34 @@ function useKioskLogic(
     }, stationCfg.prepareSeconds * 1000)
   }, [clearSubPhaseTimers, setSubPhase, captureFrame, buildWsParams, stationCfg.prepareSeconds])
 
+  // const triggerDoor = useCallback((d: Decision, dir: Direction) => {
+  //   //@ts-ignore
+  //   const { apiBase, doorId, zoneId, lockIp, lockMs } = stationCfg
+  //   try {
+  //     const fd = new FormData()
+  //     if (d.person_code) fd.append('person_code', d.person_code)
+  //     if (d.person_name) fd.append('person_name', d.person_name)
+  //     fd.append('reason', dir === 'ENTRY' ? 'EPI_COMPLIANT_ENTRY' : 'EXIT')
+  //     if (doorId) fd.append('door_id', doorId)
+  //     if (zoneId) fd.append('zone_id', zoneId)
+  //     fd.append('direction', dir)
+  //     fetch(`${apiBase}/api/v1/epi/access/door/open`, { method: 'POST', body: fd, headers: authHeaders() }).catch(() => { })
+  //   } catch { }
+  // }, [stationCfg, authHeaders])
+
   const triggerDoor = useCallback((d: Decision, dir: Direction) => {
-    //@ts-ignore
-    const { apiBase, doorId, zoneId, lockIp, lockMs } = stationCfg
+  const { lockIp, lockMs, doorId, zoneId, apiBase } = stationCfg
+    
+    // Abre o ESP32 diretamente
+    if (lockIp) {
+      fetch(`http://${lockIp}/unlock`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration_ms: lockMs }),
+      }).catch(() => {})
+    }
+
+    // Registra no backend (fire-and-forget, sem bloquear)
     try {
       const fd = new FormData()
       if (d.person_code) fd.append('person_code', d.person_code)
@@ -313,8 +338,8 @@ function useKioskLogic(
       if (doorId) fd.append('door_id', doorId)
       if (zoneId) fd.append('zone_id', zoneId)
       fd.append('direction', dir)
-      fetch(`${apiBase}/api/v1/epi/access/door/open`, { method: 'POST', body: fd, headers: authHeaders() }).catch(() => { })
-    } catch { }
+      fetch(`${apiBase}/api/v1/epi/access/door/open`, { method: 'POST', body: fd, headers: authHeaders() }).catch(() => {})
+    } catch {}
   }, [stationCfg, authHeaders])
 
     const saveRecognitionEvent = useCallback(async (
