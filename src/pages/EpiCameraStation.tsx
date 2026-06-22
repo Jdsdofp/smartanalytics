@@ -575,12 +575,19 @@ function useKioskLogic(
           )
           const data = await r.json()
 
+          // A API retorna faces como array: data.faces[0].recognized
+          const topFace = data.faces?.[0]
           const fr: FrameResult = {
             ...data,
             compliant: true,
             missing: [],
             window_progress: 0,
             session_compliant_rate: 1,
+            face_detected:    !!topFace,
+            face_recognized:  topFace?.recognized  ?? false,
+            face_confidence:  topFace?.confidence  ?? 0,
+            face_person_code: topFace?.person_code ?? undefined,
+            face_person_name: topFace?.person_name ?? undefined,
           }
 
           setLastFrame(fr)
@@ -624,7 +631,16 @@ function useKioskLogic(
       try {
         const msg = JSON.parse(ev.data as string)
         if (msg.type === 'frame_result') {
-          const fr = msg as FrameResult
+          const raw = msg as FrameResult & { faces?: { recognized: boolean; person_code?: string; person_name?: string; confidence?: number }[] }
+          const topFace = raw.faces?.[0]
+          const fr: FrameResult = {
+            ...raw,
+            face_detected:    raw.face_detected    ?? !!topFace,
+            face_recognized:  raw.face_recognized  ?? topFace?.recognized  ?? false,
+            face_confidence:  raw.face_confidence  ?? topFace?.confidence  ?? 0,
+            face_person_code: raw.face_person_code ?? topFace?.person_code ?? undefined,
+            face_person_name: raw.face_person_name ?? topFace?.person_name ?? undefined,
+          }
           setLastFrame(fr)
           if (fr.missing) { setLastMissing(fr.missing); lastMissingRef.current = fr.missing }
           if (fr.face_recognized && !faceIdentifiedRef.current && subPhaseRef.current === 'face_scan') {
