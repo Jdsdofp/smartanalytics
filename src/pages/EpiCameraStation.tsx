@@ -378,6 +378,122 @@ function useKioskLogic(
   }, [stationCfg])
 
 
+  // const openScan = useCallback((dir: Direction) => {
+  //   if (!mountedRef.current || phaseRef.current === 'scanning') return
+  //   closeScan()
+  //   setPhase('scanning'); setLastFrame(null); setDirection(dir); setLastMissing([])
+  //   faceIdentifiedRef.current = false
+  //   setSubPhase('face_scan')
+  //   const { apiBase } = stationCfg
+
+  //   // Fluxo EXIT: só reconhecimento facial via HTTP polling (sem handshake WS)
+  //   if (dir === 'EXIT') {
+  //     const pollInterval = Math.round(1000 / CFG.fps)
+
+  //     const poll = async () => {
+  //       if (!mountedRef.current || phaseRef.current !== 'scanning') return
+  //       const blob = await captureFrame(0.8)
+  //       if (!blob) return
+  //       try {
+  //         const fd = new FormData()
+  //         fd.append('file', blob, 'frame.jpg')
+  //         fd.append('confidence', String(CFG.confidence))
+  //         fd.append('detect_faces', 'true')
+  //         fd.append('face_threshold', String(CFG.face_threshold))
+  //         const r = await fetch(
+  //           `${apiBase}/api/v1/epi/detect/frame?company_id=${stationCfg.companyId}`,
+  //           { method: 'POST', body: fd, headers: authHeaders() }
+  //         )
+  //         const data = await r.json()
+  //         const fr: FrameResult = { ...data, window_progress: 0, session_compliant_rate: 1 }
+  //         setLastFrame(fr)
+  //         if (fr.face_recognized && !faceIdentifiedRef.current) {
+  //           faceIdentifiedRef.current = true
+  //           if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
+  //           subPhaseTimerRef.current = setTimeout(() => {
+  //             if (!mountedRef.current || phaseRef.current !== 'scanning') return
+  //             const d: Decision = {
+  //               access_decision: 'GRANTED',
+  //               compliance_rate: 1,
+  //               face_rate: fr.face_confidence,
+  //               person_code: fr.face_person_code,
+  //               person_name: fr.face_person_name,
+  //               total_frames: 1,
+  //             }
+  //             closeScan(); setDecision(d); setPhase('granted')
+  //             triggerDoor(d, dir)
+  //             saveRecognitionEvent(d, dir, [])
+  //             resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+  //           }, 600)
+  //         }
+  //       } catch { }
+  //     }
+
+  //     // Inicia polling imediatamente — sem aguardar handshake
+  //     // Lock evita sobreposição de fetches quando a resposta demora mais que o intervalo
+  //     let polling = false
+  //     const guardedPoll = async () => {
+  //       if (polling) return
+  //       polling = true
+  //       try { await poll() } finally { polling = false }
+  //     }
+  //     wsTimerRef.current = setInterval(guardedPoll, pollInterval)
+  //     return
+  //   }
+
+  //   // Fluxo ENTRY: face_scan → preparing → epi_scan
+  //   const handleWsMessage = (ev: MessageEvent) => {
+  //     if (!mountedRef.current) return
+  //     try {
+  //       const msg = JSON.parse(ev.data as string)
+  //       if (msg.type === 'frame_result') {
+  //         const fr = msg as FrameResult
+  //         setLastFrame(fr)
+  //         if (fr.missing) { setLastMissing(fr.missing); lastMissingRef.current = fr.missing }
+  //         if (fr.face_recognized && !faceIdentifiedRef.current && subPhaseRef.current === 'face_scan') {
+  //           faceIdentifiedRef.current = true
+  //           clearTimeout(subPhaseTimerRef.current!)
+  //           subPhaseTimerRef.current = setTimeout(() => {
+  //             if (!mountedRef.current || phaseRef.current !== 'scanning') return
+  //             startPreparing(apiBase, handleWsMessage)
+  //           }, 800)
+  //         }
+  //       }
+  //       if (msg.type === 'decision') {
+  //         if (subPhaseRef.current !== 'epi_scan') return
+  //         const d = msg as Decision
+  //         closeScan(); setDecision(d)
+  //         const p: Phase = d.access_decision === 'GRANTED' ? 'granted'
+  //           : d.access_decision === 'DENIED_EPI' ? 'denied_epi' : 'denied_face'
+  //         setPhase(p)
+  //         if (d.access_decision === 'GRANTED') triggerDoor(d, dir)
+  //         resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+  //         saveRecognitionEvent(d, dir, lastMissingRef.current)
+  //       }
+  //     } catch { }
+  //   }
+
+  //   subPhaseTimerRef.current = setTimeout(() => {
+  //     if (!mountedRef.current || phaseRef.current !== 'scanning') return
+  //     if (subPhaseRef.current === 'face_scan') startPreparing(apiBase, handleWsMessage)
+  //   }, stationCfg.faceScanSeconds * 1000)
+
+  //   const wsBase = apiBase.replace(/^http/, 'ws')
+  //   const ws = new WebSocket(`${wsBase}/api/v1/epi/ws/epi-stream?${buildWsParams()}`)
+  //   wsRef.current = ws
+  //   ws.onmessage = handleWsMessage
+  //   ws.onopen = () => {
+  //     const interval = Math.round(1000 / CFG.fps)
+  //     wsTimerRef.current = setInterval(async () => {
+  //       if (ws.readyState !== WebSocket.OPEN) return
+  //       const blob = await captureFrame(0.8)
+  //       if (blob && ws.readyState === WebSocket.OPEN) ws.send(blob)
+  //     }, interval)
+  //   }
+  //   ws.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
+  // }, [closeScan, setPhase, setSubPhase, startPreparing, goIdle, captureFrame, triggerDoor, saveRecognitionEvent, stationCfg, buildWsParams])
+
+
   const openScan = useCallback((dir: Direction) => {
     if (!mountedRef.current || phaseRef.current === 'scanning') return
     closeScan()
@@ -386,7 +502,7 @@ function useKioskLogic(
     setSubPhase('face_scan')
     const { apiBase } = stationCfg
 
-    // Fluxo EXIT: só reconhecimento facial via HTTP polling (sem handshake WS)
+    // ─── Fluxo EXIT: só reconhecimento facial via HTTP polling ───
     if (dir === 'EXIT') {
       const pollInterval = Math.round(1000 / CFG.fps)
 
@@ -400,16 +516,30 @@ function useKioskLogic(
           fd.append('confidence', String(CFG.confidence))
           fd.append('detect_faces', 'true')
           fd.append('face_threshold', String(CFG.face_threshold))
+          
+          // DICA: Se o seu backend tiver uma rota só de face, mude de /detect/frame para /detect/face
           const r = await fetch(
             `${apiBase}/api/v1/epi/detect/frame?company_id=${stationCfg.companyId}`,
             { method: 'POST', body: fd, headers: authHeaders() }
           )
           const data = await r.json()
-          const fr: FrameResult = { ...data, window_progress: 0, session_compliant_rate: 1 }
+          
+          // CORREÇÃO: Força o frame de saída a constar como complacente de EPI 
+          // para evitar que o JSON com "compliant: false" trave a tela exigindo EPIs na Saída
+          const fr: FrameResult = { 
+            ...data, 
+            compliant: true, 
+            missing: [], 
+            window_progress: 0, 
+            session_compliant_rate: 1 
+          }
+          
           setLastFrame(fr)
+          
           if (fr.face_recognized && !faceIdentifiedRef.current) {
             faceIdentifiedRef.current = true
             if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
+            
             subPhaseTimerRef.current = setTimeout(() => {
               if (!mountedRef.current || phaseRef.current !== 'scanning') return
               const d: Decision = {
@@ -429,8 +559,6 @@ function useKioskLogic(
         } catch { }
       }
 
-      // Inicia polling imediatamente — sem aguardar handshake
-      // Lock evita sobreposição de fetches quando a resposta demora mais que o intervalo
       let polling = false
       const guardedPoll = async () => {
         if (polling) return
@@ -441,7 +569,7 @@ function useKioskLogic(
       return
     }
 
-    // Fluxo ENTRY: face_scan → preparing → epi_scan
+    // ─── Fluxo ENTRY: face_scan → preparing → epi_scan ───
     const handleWsMessage = (ev: MessageEvent) => {
       if (!mountedRef.current) return
       try {
@@ -492,6 +620,7 @@ function useKioskLogic(
     }
     ws.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
   }, [closeScan, setPhase, setSubPhase, startPreparing, goIdle, captureFrame, triggerDoor, saveRecognitionEvent, stationCfg, buildWsParams])
+
 
   // Conecta no WebSocket do controlador IoT e dispara scan quando botão externo é pressionado
   useEffect(() => {
