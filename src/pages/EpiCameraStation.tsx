@@ -517,23 +517,38 @@ function useKioskLogic(
             { method: 'POST', body: fd, headers: authHeaders() }
           )
           const data = await r.json()
-          
-          // CORREÇÃO: Força o frame de saída a constar como complacente de EPI 
-          // para evitar que o JSON com "compliant: false" trave a tela exigindo EPIs na Saída
-          const fr: FrameResult = { 
-            ...data, 
-            compliant: true, 
-            missing: [], 
-            window_progress: 0, 
-            session_compliant_rate: 1 
+          console.log('[EXIT poll] status:', r.status, 'data:', data)
+
+          // Normaliza campos da resposta — o endpoint de face pode usar nomes diferentes
+          const faceRecognized: boolean =
+            data.face_recognized ?? data.recognized ?? false
+          const faceConfidence: number =
+            data.face_confidence ?? data.confidence ?? 0
+          const facePersonCode: string | undefined =
+            data.face_person_code ?? data.person_code
+          const facePersonName: string | undefined =
+            data.face_person_name ?? data.person_name
+
+          const fr: FrameResult = {
+            ...data,
+            face_recognized:  faceRecognized,
+            face_confidence:  faceConfidence,
+            face_person_code: facePersonCode,
+            face_person_name: facePersonName,
+            face_detected:    data.face_detected ?? faceRecognized,
+            compliant: true,
+            missing: [],
+            window_progress: 0,
+            session_compliant_rate: 1,
           }
-          
+
           setLastFrame(fr)
-          
+          console.log('[EXIT poll] face_recognized:', fr.face_recognized, 'faceIdentified:', faceIdentifiedRef.current)
+
           if (fr.face_recognized && !faceIdentifiedRef.current) {
             faceIdentifiedRef.current = true
             if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
-            
+
             subPhaseTimerRef.current = setTimeout(() => {
               if (!mountedRef.current || phaseRef.current !== 'scanning') return
               const d: Decision = {
@@ -550,7 +565,7 @@ function useKioskLogic(
               resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
             }, 600)
           }
-        } catch { }
+        } catch (e) { console.warn('[EXIT poll] erro fetch:', e) }
       }
 
       let polling = false
