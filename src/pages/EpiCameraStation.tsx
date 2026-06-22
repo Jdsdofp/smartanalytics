@@ -303,6 +303,7 @@ function useKioskLogic(
   }, [clearSubPhaseTimers, setSubPhase, captureFrame, buildWsParams, stationCfg.prepareSeconds])
 
   const triggerDoor = useCallback((d: Decision, dir: Direction) => {
+    //@ts-ignore
     const { apiBase, doorId, zoneId, lockIp, lockMs } = stationCfg
     try {
       const fd = new FormData()
@@ -312,14 +313,8 @@ function useKioskLogic(
       if (doorId) fd.append('door_id', doorId)
       if (zoneId) fd.append('zone_id', zoneId)
       fd.append('direction', dir)
-      fetch(`${apiBase}/api/v1/epi/door/open`, { method: 'POST', body: fd, headers: authHeaders() }).catch(() => { })
+      fetch(`${apiBase}/api/v1/epi/access/door/open`, { method: 'POST', body: fd, headers: authHeaders() }).catch(() => { })
     } catch { }
-    if (lockIp) {
-      fetch(`http://${lockIp}/unlock`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ duration_ms: lockMs }),
-      }).catch(() => { })
-    }
   }, [stationCfg, authHeaders])
 
     const saveRecognitionEvent = useCallback(async (
@@ -517,9 +512,8 @@ function useKioskLogic(
           fd.append('detect_faces', 'true')
           fd.append('face_threshold', String(CFG.face_threshold))
           
-          // DICA: Se o seu backend tiver uma rota só de face, mude de /detect/frame para /detect/face
           const r = await fetch(
-            `${apiBase}/api/v1/epi/detect/frame?company_id=${stationCfg.companyId}`,
+            `${apiBase}/api/v1/epi/detect/face?company_id=${stationCfg.companyId}`,
             { method: 'POST', body: fd, headers: authHeaders() }
           )
           const data = await r.json()
