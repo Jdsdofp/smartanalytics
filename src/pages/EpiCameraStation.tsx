@@ -610,7 +610,7 @@ function useKioskLogic(
               closeScan(); setDecision(d); setPhase('granted')
               saveRecognitionEvent(d, dir, [])
               startDoorCountdown(() => triggerDoor(d, dir))
-              resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+              resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs))
             }, 600)
           }
         } catch (e) { console.warn('[EXIT poll] erro fetch:', e) }
@@ -662,7 +662,7 @@ function useKioskLogic(
           setPhase(p)
           if (d.access_decision === 'GRANTED')
             startDoorCountdown(() => triggerDoor(d, dir))
-          resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+          resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs))
           saveRecognitionEvent(d, dir, lastMissingRef.current)
         }
       } catch { }
