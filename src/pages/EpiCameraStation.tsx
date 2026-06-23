@@ -720,10 +720,14 @@ function useKioskLogic(
 
             // Eventos de porta — sempre monitorados
             if (msg.event === 'door_closed') {
+              // Para o countdown e trava imediatamente
               if (doorDelayTimerRef.current) { clearTimeout(doorDelayTimerRef.current); doorDelayTimerRef.current = null }
               if (doorCountdownIntervalRef.current) { clearInterval(doorCountdownIntervalRef.current); doorCountdownIntervalRef.current = null }
               setDoorCountdown(0)
               setDoorAlert(null)
+              // Envia lock agora (WS + HTTP fallback)
+              if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ action: 'close' }))
+              if (stationCfg.lockIp) fetch(`http://${stationCfg.lockIp}/close`, { method: 'POST' }).catch(() => {})
             }
             if (msg.event === 'door_open_timeout') {
               setDoorAlert('open_timeout')
