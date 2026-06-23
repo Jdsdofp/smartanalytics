@@ -223,6 +223,7 @@ function useKioskLogic(
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const doorDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const doorCountdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const iotWsRef = useRef<WebSocket | null>(null)
   const mountedRef = useRef(true)
   const phaseRef = useRef<Phase>('idle')
   const subPhaseRef = useRef<ScanSubPhase>('face_scan')
@@ -342,6 +343,8 @@ function useKioskLogic(
 
   const triggerDoor = useCallback((d: Decision, dir: Direction) => {
     const { lockIp, lockMs, doorId, zoneId, apiBase } = stationCfg
+
+    // Abre via HTTP
     if (lockIp) {
       fetch(`http://${lockIp}/unlock`, {
         method: 'POST',
@@ -349,6 +352,17 @@ function useKioskLogic(
         body: JSON.stringify({ duration_ms: lockMs }),
       }).catch(() => {})
     }
+
+    // Fecha via WebSocket após lockMs (evita Mixed Content HTTPS→HTTP)
+    if (doorDelayTimerRef.current) clearTimeout(doorDelayTimerRef.current)
+    doorDelayTimerRef.current = setTimeout(() => {
+      const ws = iotWsRef.current
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: 'close' }))
+      }
+    }, lockMs)
+
+    // Registra no backend (fire-and-forget)
     try {
       const fd = new FormData()
       if (d.person_code) fd.append('person_code', d.person_code)
@@ -686,6 +700,7 @@ function useKioskLogic(
       if (destroyed) return
       try {
         ws = new WebSocket(`ws://${stationCfg.lockIp}:81`)
+        iotWsRef.current = ws
         ws.onmessage = (e) => {
           try {
             const msg = JSON.parse(e.data)
@@ -695,6 +710,7 @@ function useKioskLogic(
           } catch { }
         }
         ws.onclose = () => {
+          iotWsRef.current = null
           if (!destroyed) reconnectTimer = setTimeout(connect, 5000)
         }
         ws.onerror = () => ws?.close()
