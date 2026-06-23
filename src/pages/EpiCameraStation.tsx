@@ -237,6 +237,7 @@ function useKioskLogic(
   const [decision, setDecision] = useState<Decision | null>(null)
   const [direction, setDirection] = useState<Direction>('ENTRY')
   const [lastMissing, setLastMissing] = useState<string[]>([])
+  const [doorAlert, setDoorAlert] = useState<'open_timeout' | null>(null)
 
   const setPhase = useCallback((p: Phase) => { phaseRef.current = p; setPhaseState(p) }, [])
   const setSubPhase = useCallback((sp: ScanSubPhase) => { subPhaseRef.current = sp; setScanSubPhase(sp) }, [])
@@ -261,6 +262,7 @@ function useKioskLogic(
   const goIdle = useCallback(() => {
     closeScan()
     clearDoorDelay()
+    setDoorAlert(null)
     setPhase('idle'); setLastFrame(null); setDecision(null)
     setSubPhase('face_scan'); setPrepareCountdown(0)
     faceIdentifiedRef.current = false
@@ -709,9 +711,23 @@ function useKioskLogic(
         ws.onmessage = (e) => {
           try {
             const msg = JSON.parse(e.data)
-            if (phaseRef.current !== 'idle') return
-            if (msg.event === 'start_recognition') openScan('ENTRY')
-            if (msg.event === 'button_press') openScan('EXIT')
+
+            // Eventos de scan — só quando idle
+            if (phaseRef.current === 'idle') {
+              if (msg.event === 'start_recognition') openScan('ENTRY')
+              if (msg.event === 'button_press') openScan('EXIT')
+            }
+
+            // Eventos de porta — sempre monitorados
+            if (msg.event === 'door_closed') {
+              if (doorDelayTimerRef.current) { clearTimeout(doorDelayTimerRef.current); doorDelayTimerRef.current = null }
+              if (doorCountdownIntervalRef.current) { clearInterval(doorCountdownIntervalRef.current); doorCountdownIntervalRef.current = null }
+              setDoorCountdown(0)
+              setDoorAlert(null)
+            }
+            if (msg.event === 'door_open_timeout') {
+              setDoorAlert('open_timeout')
+            }
           } catch { }
         }
         ws.onclose = () => {
@@ -740,7 +756,7 @@ function useKioskLogic(
     }
   }, [camReady, closeScan])
 
-  return { phase, scanSubPhase, prepareCountdown, doorCountdown, lastFrame, decision, direction, openScan, goIdle, lastMissing }
+  return { phase, scanSubPhase, prepareCountdown, doorCountdown, doorAlert, lastFrame, decision, direction, openScan, goIdle, lastMissing }
 }
 
 // ─── MODAL CONFIG ────────────────────────────────────────────────────────────
@@ -1272,7 +1288,20 @@ function ScanPhaseInstruction({ subPhase, countdown, frame, theme }: { subPhase:
 
 function EpiSidebar({ frame, isNarrow }: { frame: FrameResult | null; isNarrow: boolean }) {
   const lastValidRef = useRef<FrameResult | null>(null)
-  if (frame && (frame.detections.length > 0 || frame.missing.length > 0)) lastValidRef.current = frame
+  if (frame) {
+    const prev = lastValidRef.current
+    const hasEpi = frame.detections.length > 0 || frame.missing.length > 0
+    if (hasEpi || frame.face_recognized) {
+      // Preserva info do rosto reconhecido mesmo quando frames de EPI chegam sem reconhecimento
+      lastValidRef.current = {
+        ...frame,
+        face_recognized:  frame.face_recognized  || (prev?.face_recognized  ?? false),
+        face_person_name: frame.face_recognized  ? frame.face_person_name   : prev?.face_person_name,
+        face_person_code: frame.face_recognized  ? frame.face_person_code   : prev?.face_person_code,
+        face_confidence:  frame.face_recognized  ? frame.face_confidence    : (prev?.face_confidence ?? 0),
+      }
+    }
+  }
   const f = lastValidRef.current
   const detected = f?.detections.map(d => d.class_name) ?? []
   const missing = f?.missing ?? []
@@ -1390,6 +1419,14 @@ export default function EpiCameraStation() {
 
         {cam.ready && (
           <StatusBar phase={logic.phase} scanSubPhase={logic.scanSubPhase} frame={logic.lastFrame} direction={logic.direction} company={company} theme={theme} onConfig={() => setShowConfig(true)} />
+        )}
+
+        {logic.doorAlert === 'open_timeout' && (
+          <div style={{ position: 'absolute', top: 44, left: 0, right: 0, zIndex: 20, background: 'rgba(220,38,38,0.97)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '10px 20px', borderBottom: '2px solid rgba(239,68,68,0.6)' }}>
+            <ShieldExclamationIcon style={{ width: 20, height: 20, color: '#fff', flexShrink: 0 }} />
+            <span style={{ color: '#fff', fontWeight: 800, fontSize: 14, fontFamily: 'monospace', letterSpacing: '0.05em' }}>ATENÇÃO — PORTA ABERTA</span>
+            <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontFamily: 'monospace' }}>A porta não foi fechada após o tempo limite</span>
+          </div>
         )}
 
         {scanning && logic.scanSubPhase !== 'epi_scan' && (
