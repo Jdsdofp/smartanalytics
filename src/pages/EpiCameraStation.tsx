@@ -229,6 +229,7 @@ function useKioskLogic(
   const phaseRef = useRef<Phase>('idle')
   const subPhaseRef = useRef<ScanSubPhase>('face_scan')
   const faceIdentifiedRef = useRef(false)
+  const identifiedPersonRef = useRef<{ name?: string; code?: string } | null>(null)
 
   const [phase, setPhaseState] = useState<Phase>('idle')
   const [scanSubPhase, setScanSubPhase] = useState<ScanSubPhase>('face_scan')
@@ -267,6 +268,7 @@ function useKioskLogic(
     setPhase('idle'); setLastFrame(null); setDecision(null)
     setSubPhase('face_scan'); setPrepareCountdown(0)
     faceIdentifiedRef.current = false
+    identifiedPersonRef.current = null
   }, [closeScan, clearDoorDelay, setPhase, setSubPhase])
 
   const authHeaders = useCallback(() => {
@@ -603,6 +605,7 @@ function useKioskLogic(
 
           if (fr.face_recognized && !faceIdentifiedRef.current) {
             faceIdentifiedRef.current = true
+            identifiedPersonRef.current = { name: fr.face_person_name, code: fr.face_person_code }
             if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
 
             subPhaseTimerRef.current = setTimeout(() => {
@@ -654,6 +657,7 @@ function useKioskLogic(
           if (fr.missing) { setLastMissing(fr.missing); lastMissingRef.current = fr.missing }
           if (fr.face_recognized && !faceIdentifiedRef.current && subPhaseRef.current === 'face_scan') {
             faceIdentifiedRef.current = true
+            identifiedPersonRef.current = { name: fr.face_person_name, code: fr.face_person_code }
             clearTimeout(subPhaseTimerRef.current!)
             subPhaseTimerRef.current = setTimeout(() => {
               if (!mountedRef.current || phaseRef.current !== 'scanning') return
@@ -779,7 +783,7 @@ function useKioskLogic(
     }
   }, [camReady, closeScan])
 
-  return { phase, scanSubPhase, prepareCountdown, doorCountdown, doorAlert, lastFrame, decision, direction, openScan, goIdle, lastMissing }
+  return { phase, scanSubPhase, prepareCountdown, doorCountdown, doorAlert, lastFrame, decision, direction, openScan, goIdle, lastMissing, identifiedPerson: identifiedPersonRef.current }
 }
 
 // ─── MODAL CONFIG ────────────────────────────────────────────────────────────
@@ -1309,23 +1313,8 @@ function ScanPhaseInstruction({ subPhase, countdown, frame, theme }: { subPhase:
   )
 }
 
-function EpiSidebar({ frame, isNarrow }: { frame: FrameResult | null; isNarrow: boolean }) {
-  const lastValidRef = useRef<FrameResult | null>(null)
-  if (frame) {
-    const prev = lastValidRef.current
-    const hasEpi = frame.detections.length > 0 || frame.missing.length > 0
-    if (hasEpi || frame.face_recognized) {
-      // Preserva info do rosto reconhecido mesmo quando frames de EPI chegam sem reconhecimento
-      lastValidRef.current = {
-        ...frame,
-        face_recognized:  frame.face_recognized  || (prev?.face_recognized  ?? false),
-        face_person_name: frame.face_recognized  ? frame.face_person_name   : prev?.face_person_name,
-        face_person_code: frame.face_recognized  ? frame.face_person_code   : prev?.face_person_code,
-        face_confidence:  frame.face_recognized  ? frame.face_confidence    : (prev?.face_confidence ?? 0),
-      }
-    }
-  }
-  const f = lastValidRef.current
+function EpiSidebar({ frame, isNarrow, identifiedPerson }: { frame: FrameResult | null; isNarrow: boolean; identifiedPerson: { name?: string; code?: string } | null }) {
+  const f = frame
   const detected = f?.detections.map(d => d.class_name) ?? []
   const missing = f?.missing ?? []
   const rate = f?.session_compliant_rate ?? 0
@@ -1350,15 +1339,22 @@ function EpiSidebar({ frame, isNarrow }: { frame: FrameResult | null; isNarrow: 
   return (
     <div style={{ width: 220, background: 'rgba(10,15,26,0.92)', backdropFilter: 'blur(12px)', borderLeft: '1px solid rgba(255,255,255,0.07)', padding: '60px 12px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, overflowY: 'auto' }}>
       <EpiBodyFigure detected={detected} missing={missing} size="md" showLabels={true} />
-      <div style={{ width: '100%', padding: '8px 10px', background: frame?.face_recognized ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${frame?.face_recognized ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 3 }}>
-          {frame?.face_recognized ? <FaceSmileIcon style={{ width: 22, height: 22, color: '#10B981' }} /> : frame?.face_detected ? <UserIcon style={{ width: 22, height: 22, color: '#F59E0B' }} /> : <UserIcon style={{ width: 22, height: 22, color: '#6B7280' }} />}
-        </div>
-        <div style={{ fontSize: 11, color: frame?.face_recognized ? '#86EFAC' : '#6B7280', fontFamily: 'monospace' }}>
-          {frame?.face_recognized ? (frame.face_person_name ?? frame.face_person_code ?? 'Identificado') : frame?.face_detected ? 'Identificando...' : 'Sem face'}
-        </div>
-        {frame?.face_recognized && <div style={{ fontSize: 10, color: '#10B981', fontFamily: 'monospace', marginTop: 2 }}>{Math.round((frame.face_confidence ?? 0) * 100)}% conf.</div>}
-      </div>
+      {(() => {
+        const knownName = identifiedPerson?.name ?? identifiedPerson?.code
+        const isKnown = !!knownName || !!frame?.face_recognized
+        const displayName = frame?.face_person_name ?? frame?.face_person_code ?? knownName
+        return (
+          <div style={{ width: '100%', padding: '8px 10px', background: isKnown ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${isKnown ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 3 }}>
+              {isKnown ? <FaceSmileIcon style={{ width: 22, height: 22, color: '#10B981' }} /> : frame?.face_detected ? <UserIcon style={{ width: 22, height: 22, color: '#F59E0B' }} /> : <UserIcon style={{ width: 22, height: 22, color: '#6B7280' }} />}
+            </div>
+            <div style={{ fontSize: 11, color: isKnown ? '#86EFAC' : '#6B7280', fontFamily: 'monospace' }}>
+              {isKnown ? (displayName ?? 'Identificado') : frame?.face_detected ? 'Identificando...' : 'Sem face'}
+            </div>
+            {frame?.face_recognized && <div style={{ fontSize: 10, color: '#10B981', fontFamily: 'monospace', marginTop: 2 }}>{Math.round((frame.face_confidence ?? 0) * 100)}% conf.</div>}
+          </div>
+        )
+      })()}
       <div style={{ width: '100%', padding: '8px', textAlign: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10 }}>
         <div style={{ fontSize: 10, color: '#6B7280', fontFamily: 'monospace', textTransform: 'uppercase', marginBottom: 2 }}>Conformidade</div>
         <div style={{ fontSize: 28, fontWeight: 800, color: rate > 0.7 ? '#10B981' : rate > 0.4 ? '#F59E0B' : '#EF4444' }}>{Math.round(rate * 100)}%</div>
@@ -1445,11 +1441,52 @@ export default function EpiCameraStation() {
         )}
 
         {logic.doorAlert === 'open_timeout' && (
-          <div style={{ position: 'absolute', top: 44, left: 0, right: 0, zIndex: 20, background: 'rgba(220,38,38,0.97)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '10px 20px', borderBottom: '2px solid rgba(239,68,68,0.6)' }}>
-            <ShieldExclamationIcon style={{ width: 20, height: 20, color: '#fff', flexShrink: 0 }} />
-            <span style={{ color: '#fff', fontWeight: 800, fontSize: 14, fontFamily: 'monospace', letterSpacing: '0.05em' }}>ATENÇÃO — PORTA ABERTA</span>
-            <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontFamily: 'monospace' }}>A porta não foi fechada após o tempo limite</span>
-          </div>
+          <>
+            <style>{`
+              @keyframes doorAlertPulse {
+                0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.7), inset 0 0 60px rgba(239,68,68,0.15); }
+                50% { opacity: 0.88; box-shadow: 0 0 0 8px rgba(239,68,68,0), inset 0 0 80px rgba(239,68,68,0.3); }
+              }
+              @keyframes doorAlertIcon {
+                0%,100% { transform: scale(1) rotate(0deg); }
+                20% { transform: scale(1.25) rotate(-8deg); }
+                40% { transform: scale(1.25) rotate(8deg); }
+                60% { transform: scale(1.1) rotate(-4deg); }
+                80% { transform: scale(1.1) rotate(4deg); }
+              }
+              @keyframes doorAlertText {
+                0%,100% { letter-spacing: 0.08em; }
+                50% { letter-spacing: 0.14em; }
+              }
+            `}</style>
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 20, pointerEvents: 'none',
+              border: '4px solid rgba(239,68,68,0.9)',
+              boxShadow: 'inset 0 0 80px rgba(239,68,68,0.2)',
+              animation: 'doorAlertPulse 1.4s ease-in-out infinite',
+              borderRadius: 0,
+            }} />
+            <div style={{
+              position: 'absolute', top: 44, left: 0, right: 0, zIndex: 21,
+              background: 'linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%)',
+              backdropFilter: 'blur(12px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14,
+              padding: '14px 24px',
+              borderBottom: '3px solid #fca5a5',
+              boxShadow: '0 4px 32px rgba(239,68,68,0.6)',
+            }}>
+              <ShieldExclamationIcon style={{ width: 32, height: 32, color: '#fca5a5', flexShrink: 0, animation: 'doorAlertIcon 1.4s ease-in-out infinite' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                <span style={{ color: '#fff', fontWeight: 900, fontSize: 'clamp(16px,3vw,22px)', fontFamily: 'monospace', letterSpacing: '0.08em', animation: 'doorAlertText 1.4s ease-in-out infinite' }}>
+                  ⚠ PORTA ABERTA ⚠
+                </span>
+                <span style={{ color: '#fca5a5', fontSize: 12, fontFamily: 'monospace', fontWeight: 600 }}>
+                  A porta não foi fechada após o tempo limite
+                </span>
+              </div>
+              <ShieldExclamationIcon style={{ width: 32, height: 32, color: '#fca5a5', flexShrink: 0, animation: 'doorAlertIcon 1.4s ease-in-out infinite' }} />
+            </div>
+          </>
         )}
 
         {scanning && logic.scanSubPhase !== 'epi_scan' && (
@@ -1473,10 +1510,10 @@ export default function EpiCameraStation() {
           </div>
         )}
 
-        {showEpiSidebar && isNarrow && <EpiSidebar frame={logic.lastFrame} isNarrow={true} />}
+        {showEpiSidebar && isNarrow && <EpiSidebar frame={logic.lastFrame} isNarrow={true} identifiedPerson={logic.identifiedPerson} />}
       </div>
 
-      {showEpiSidebar && !isNarrow && <EpiSidebar frame={logic.lastFrame} isNarrow={false} />}
+      {showEpiSidebar && !isNarrow && <EpiSidebar frame={logic.lastFrame} isNarrow={false} identifiedPerson={logic.identifiedPerson} />}
     </div>
   )
 }
