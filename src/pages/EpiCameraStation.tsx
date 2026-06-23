@@ -345,6 +345,7 @@ function useKioskLogic(
     const { lockIp, lockMs, doorId, zoneId, apiBase } = stationCfg
 
     // Abre via HTTP
+    console.log('[triggerDoor] abrindo porta, lockIp:', lockIp, 'lockMs:', lockMs)
     if (lockIp) {
       fetch(`http://${lockIp}/unlock`, {
         method: 'POST',
@@ -353,12 +354,16 @@ function useKioskLogic(
       }).catch(() => {})
     }
 
-    // Fecha via WebSocket após lockMs (evita Mixed Content HTTPS→HTTP)
+    // Fecha a porta após lockMs — tenta WS e HTTP em paralelo
     if (doorDelayTimerRef.current) clearTimeout(doorDelayTimerRef.current)
     doorDelayTimerRef.current = setTimeout(() => {
+      console.log('[close door] lockMs expirou, tentando fechar. iotWs:', iotWsRef.current?.readyState)
       const ws = iotWsRef.current
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ action: 'close' }))
+      }
+      if (lockIp) {
+        fetch(`http://${lockIp}/close`, { method: 'POST' }).catch(() => {})
       }
     }, lockMs)
 
@@ -610,7 +615,7 @@ function useKioskLogic(
               closeScan(); setDecision(d); setPhase('granted')
               saveRecognitionEvent(d, dir, [])
               startDoorCountdown(() => triggerDoor(d, dir))
-              resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs))
+              resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs) + 500)
             }, 600)
           }
         } catch (e) { console.warn('[EXIT poll] erro fetch:', e) }
@@ -662,7 +667,7 @@ function useKioskLogic(
           setPhase(p)
           if (d.access_decision === 'GRANTED')
             startDoorCountdown(() => triggerDoor(d, dir))
-          resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs))
+          resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs) + 500)
           saveRecognitionEvent(d, dir, lastMissingRef.current)
         }
       } catch { }
