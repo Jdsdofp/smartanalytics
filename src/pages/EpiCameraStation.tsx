@@ -224,6 +224,7 @@ function useKioskLogic(
   const doorDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const doorCountdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const iotWsRef = useRef<WebSocket | null>(null)
+  const doorOpenAlertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mountedRef = useRef(true)
   const phaseRef = useRef<Phase>('idle')
   const subPhaseRef = useRef<ScanSubPhase>('face_scan')
@@ -719,10 +720,14 @@ function useKioskLogic(
             }
 
             // Eventos de porta — sempre monitorados
+            const clearDoorOpenAlertTimer = () => {
+              if (doorOpenAlertTimerRef.current) { clearTimeout(doorOpenAlertTimerRef.current); doorOpenAlertTimerRef.current = null }
+            }
             if (msg.event === 'door_closed') {
               // Para o countdown e trava imediatamente
               if (doorDelayTimerRef.current) { clearTimeout(doorDelayTimerRef.current); doorDelayTimerRef.current = null }
               if (doorCountdownIntervalRef.current) { clearInterval(doorCountdownIntervalRef.current); doorCountdownIntervalRef.current = null }
+              clearDoorOpenAlertTimer()
               setDoorCountdown(0)
               setDoorAlert(null)
               // Envia lock agora (WS + HTTP fallback)
@@ -730,7 +735,21 @@ function useKioskLogic(
               if (stationCfg.lockIp) fetch(`http://${stationCfg.lockIp}/close`, { method: 'POST' }).catch(() => {})
             }
             if (msg.event === 'door_open_timeout') {
+              clearDoorOpenAlertTimer()
               setDoorAlert('open_timeout')
+            }
+            // status com door_state open → inicia timer local se ainda não há alerta pendente
+            if (msg.event === 'status' && msg.door_state === 'open') {
+              if (!doorOpenAlertTimerRef.current) {
+                const timeoutMs = (msg.door_open_timeout_s ?? 30) * 1000
+                doorOpenAlertTimerRef.current = setTimeout(() => {
+                  doorOpenAlertTimerRef.current = null
+                  setDoorAlert('open_timeout')
+                }, timeoutMs)
+              }
+            }
+            if (msg.event === 'status' && msg.door_state === 'closed') {
+              clearDoorOpenAlertTimer()
             }
           } catch { }
         }
