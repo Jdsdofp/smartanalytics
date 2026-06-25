@@ -548,6 +548,7 @@ function useKioskLogic(
 
   const openScan = useCallback((dir: Direction) => {
     if (!mountedRef.current || phaseRef.current === 'scanning') return
+    if (resultTimerRef.current) { clearTimeout(resultTimerRef.current); resultTimerRef.current = null }
     closeScan()
     setPhase('scanning'); setLastFrame(null); setDirection(dir); setLastMissing([])
     faceIdentifiedRef.current = false
