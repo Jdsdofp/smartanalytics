@@ -617,8 +617,8 @@ function useKioskLogic(
               if (personCode) insidePersonsRef.current.delete(personCode)
               closeScan(); setDecision(d); setPhase('granted')
               saveRecognitionEvent(d, dir, [])
-              startDoorCountdown(() => triggerDoor(d, dir))
-              resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs) + 500)
+              // Saída: apenas registra, não abre a porta
+              resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
             }, 600)
           }
         } catch (e) { console.warn('[EXIT poll] erro fetch:', e) }
