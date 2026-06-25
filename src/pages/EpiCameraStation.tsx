@@ -225,6 +225,8 @@ function useKioskLogic(
   const doorCountdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const iotWsRef = useRef<WebSocket | null>(null)
   const doorOpenAlertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const exitTriggerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const insidePersonsRef = useRef<Set<string>>(new Set())
   const mountedRef = useRef(true)
   const phaseRef = useRef<Phase>('idle')
   const subPhaseRef = useRef<ScanSubPhase>('face_scan')
@@ -358,19 +360,6 @@ function useKioskLogic(
         body: JSON.stringify({ duration_ms: lockMs }),
       }).catch(() => {})
     }
-
-    // Fecha a porta após lockMs — tenta WS e HTTP em paralelo
-    if (doorDelayTimerRef.current) clearTimeout(doorDelayTimerRef.current)
-    doorDelayTimerRef.current = setTimeout(() => {
-      console.log('[close door] lockMs expirou, tentando fechar. iotWs:', iotWsRef.current?.readyState)
-      const ws = iotWsRef.current
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ action: 'close' }))
-      }
-      if (lockIp) {
-        fetch(`http://${lockIp}/close`, { method: 'POST' }).catch(() => {})
-      }
-    }, lockMs)
 
     // Registra no backend (fire-and-forget)
     try {
@@ -604,20 +593,26 @@ function useKioskLogic(
           setLastFrame(fr)
 
           if (fr.face_recognized && !faceIdentifiedRef.current) {
+            const personCode = fr.face_person_code
+            // Só concede saída se a pessoa tem registro de entrada
+            if (!personCode || !insidePersonsRef.current.has(personCode)) return
+
             faceIdentifiedRef.current = true
-            identifiedPersonRef.current = { name: fr.face_person_name, code: fr.face_person_code }
+            identifiedPersonRef.current = { name: fr.face_person_name, code: personCode }
             if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
 
-            subPhaseTimerRef.current = setTimeout(() => {
+            exitTriggerTimerRef.current = setTimeout(() => {
+              exitTriggerTimerRef.current = null
               if (!mountedRef.current || phaseRef.current !== 'scanning') return
               const d: Decision = {
                 access_decision: 'GRANTED',
                 compliance_rate: 1,
                 face_rate: fr.face_confidence,
-                person_code: fr.face_person_code,
+                person_code: personCode,
                 person_name: fr.face_person_name,
                 total_frames: 1,
               }
+              insidePersonsRef.current.delete(personCode)
               closeScan(); setDecision(d); setPhase('granted')
               saveRecognitionEvent(d, dir, [])
               startDoorCountdown(() => triggerDoor(d, dir))
@@ -672,8 +667,10 @@ function useKioskLogic(
           const p: Phase = d.access_decision === 'GRANTED' ? 'granted'
             : d.access_decision === 'DENIED_EPI' ? 'denied_epi' : 'denied_face'
           setPhase(p)
-          if (d.access_decision === 'GRANTED')
+          if (d.access_decision === 'GRANTED') {
+            if (d.person_code) insidePersonsRef.current.add(d.person_code)
             startDoorCountdown(() => triggerDoor(d, dir))
+          }
           resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs) + 500)
           saveRecognitionEvent(d, dir, lastMissingRef.current)
         }
@@ -728,29 +725,18 @@ function useKioskLogic(
               if (doorOpenAlertTimerRef.current) { clearTimeout(doorOpenAlertTimerRef.current); doorOpenAlertTimerRef.current = null }
             }
             if (msg.event === 'door_closed') {
-              // Para o countdown e trava imediatamente
-              if (doorDelayTimerRef.current) { clearTimeout(doorDelayTimerRef.current); doorDelayTimerRef.current = null }
+              // Cancela qualquer trigger de saída pendente e para o countdown visual
+              if (exitTriggerTimerRef.current) { clearTimeout(exitTriggerTimerRef.current); exitTriggerTimerRef.current = null }
               if (doorCountdownIntervalRef.current) { clearInterval(doorCountdownIntervalRef.current); doorCountdownIntervalRef.current = null }
               clearDoorOpenAlertTimer()
               setDoorCountdown(0)
               setDoorAlert(null)
-              // Envia lock agora (WS + HTTP fallback)
+              // Envia lock (WS + HTTP fallback)
               if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ action: 'close' }))
               if (stationCfg.lockIp) fetch(`http://${stationCfg.lockIp}/close`, { method: 'POST' }).catch(() => {})
             }
-            if (msg.event === 'door_open_timeout') {
-              clearDoorOpenAlertTimer()
+            if (msg.event === 'buzzer_on') {
               setDoorAlert('open_timeout')
-            }
-            // status com door_state open → inicia timer local se ainda não há alerta pendente
-            if (msg.event === 'status' && msg.door_state === 'open') {
-              if (!doorOpenAlertTimerRef.current) {
-                const timeoutMs = (msg.door_open_timeout_s ?? 30) * 1000
-                doorOpenAlertTimerRef.current = setTimeout(() => {
-                  doorOpenAlertTimerRef.current = null
-                  setDoorAlert('open_timeout')
-                }, timeoutMs)
-              }
             }
             if (msg.event === 'status' && msg.door_state === 'closed') {
               clearDoorOpenAlertTimer()
