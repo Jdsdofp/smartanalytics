@@ -594,8 +594,9 @@ function useKioskLogic(
 
           if (fr.face_recognized && !faceIdentifiedRef.current) {
             const personCode = fr.face_person_code
-            // Só concede saída se a pessoa tem registro de entrada
-            if (!personCode || !insidePersonsRef.current.has(personCode)) return
+            // Só bloqueia saída se há pessoas registradas dentro E esta não está entre elas
+            const hasTrackedPersons = insidePersonsRef.current.size > 0
+            if (personCode && hasTrackedPersons && !insidePersonsRef.current.has(personCode)) return
 
             faceIdentifiedRef.current = true
             identifiedPersonRef.current = { name: fr.face_person_name, code: personCode }
@@ -612,7 +613,7 @@ function useKioskLogic(
                 person_name: fr.face_person_name,
                 total_frames: 1,
               }
-              insidePersonsRef.current.delete(personCode)
+              if (personCode) insidePersonsRef.current.delete(personCode)
               closeScan(); setDecision(d); setPhase('granted')
               saveRecognitionEvent(d, dir, [])
               startDoorCountdown(() => triggerDoor(d, dir))
