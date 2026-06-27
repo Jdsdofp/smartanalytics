@@ -348,7 +348,7 @@ function useKioskLogic(
   //   } catch { }
   // }, [stationCfg, authHeaders])
 
-  const triggerDoor = useCallback((d: Decision, dir: Direction): Promise<number | null> => {
+  const triggerDoor = useCallback((d: Decision): Promise<number | null> => {
     const { lockIp, lockMs, doorId, zoneId, apiBase, companyId, apiKey } = stationCfg
 
     // Abre via HTTP (ESP32)
@@ -631,18 +631,35 @@ function useKioskLogic(
                 const { apiBase, companyId, apiKey } = stationCfg
                 const headers: Record<string, string> = { 'Content-Type': 'application/json' }
                 if (apiKey) headers['X-API-Key'] = apiKey
-                // Busca sessão ativa da pessoa e fecha
-                fetch(`${apiBase}/api/v1/epi/access/exposure?company_id=${companyId}&person_code=${personCode}&active_only=true&limit=1`, { headers })
-                  .then(r => r.ok ? r.json() : [])
-                  .then((sessions: { id: number }[]) => {
-                    if (sessions.length > 0) {
-                      fetch(`${apiBase}/api/v1/epi/access/exposure/${sessions[0].id}/close?company_id=${companyId}`, {
+                // Busca sessão ativa pelo endpoint dedicado (sem filtro de data)
+                const getUrl = `${apiBase}/api/v1/epi/access/exposure/active/${personCode}?company_id=${companyId}`
+                console.log('[EXIT exposure] GET', getUrl)
+                fetch(getUrl, { headers })
+                  .then(r => {
+                    console.log('[EXIT exposure] GET status:', r.status)
+                    return r.ok ? r.json() : null
+                  })
+                  .then((session: { id: number } | null) => {
+                    console.log('[EXIT exposure] sessão ativa:', session)
+                    if (session?.id) {
+                      const closeUrl = `${apiBase}/api/v1/epi/access/exposure/${session.id}/close?company_id=${companyId}`
+                      const body = { status: 'COMPLETED', exit_face_confirmed: true }
+                      console.log('[EXIT exposure] POST close', closeUrl, body)
+                      fetch(closeUrl, {
                         method: 'POST', headers,
-                        body: JSON.stringify({ status: 'COMPLETED', exit_face_confirmed: true }),
-                      }).catch(() => {})
+                        body: JSON.stringify(body),
+                      })
+                        .then(r => {
+                          console.log('[EXIT exposure] close status:', r.status)
+                          return r.ok ? r.json() : null
+                        })
+                        .then(data => console.log('[EXIT exposure] close response:', data))
+                        .catch(e => console.error('[EXIT exposure] close erro:', e))
+                    } else {
+                      console.warn('[EXIT exposure] nenhuma sessão ativa encontrada para', personCode)
                     }
                   })
-                  .catch(() => {})
+                  .catch(e => console.error('[EXIT exposure] GET erro:', e))
               }
 
               resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
@@ -699,7 +716,7 @@ function useKioskLogic(
           if (d.access_decision === 'GRANTED') {
             if (d.person_code) insidePersonsRef.current.add(d.person_code)
             startDoorCountdown(async () => {
-              const doorEventId = await triggerDoor(d, dir)
+              const doorEventId = await triggerDoor(d)
               // Abre sessão de exposição NR-36
               if (d.person_code) {
                 const { apiBase, companyId, apiKey, doorId, zoneId } = stationCfg
