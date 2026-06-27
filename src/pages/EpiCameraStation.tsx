@@ -720,24 +720,27 @@ function useKioskLogic(
         if (msg.type === 'decision') {
           if (subPhaseRef.current !== 'epi_scan') return
           const d = msg as Decision
-          closeScan(); setDecision(d)
+          const personCode = d.person_code ?? identifiedPersonRef.current?.code ?? null
+          const personName = d.person_name ?? identifiedPersonRef.current?.name ?? null
+          const enrichedD: Decision = { ...d, person_code: personCode ?? undefined, person_name: personName ?? undefined }
+          closeScan(); setDecision(enrichedD)
           const p: Phase = d.access_decision === 'GRANTED' ? 'granted'
             : d.access_decision === 'DENIED_EPI' ? 'denied_epi' : 'denied_face'
           setPhase(p)
           if (d.access_decision === 'GRANTED') {
-            if (d.person_code) insidePersonsRef.current.add(d.person_code)
+            if (personCode) insidePersonsRef.current.add(personCode)
             startDoorCountdown(async () => {
-              const doorEventId = await triggerDoor(d)
+              const doorEventId = await triggerDoor(enrichedD)
               // Abre sessão de exposição NR-36
-              if (d.person_code) {
+              if (personCode) {
                 const { apiBase, companyId, apiKey, doorId, zoneId } = stationCfg
                 const headers: Record<string, string> = { 'Content-Type': 'application/json' }
                 if (apiKey) headers['X-API-Key'] = apiKey
                 fetch(`${apiBase}/api/v1/epi/access/exposure/open?company_id=${companyId}`, {
                   method: 'POST', headers,
                   body: JSON.stringify({
-                    person_code: d.person_code,
-                    person_name: d.person_name ?? null,
+                    person_code: personCode,
+                    person_name: personName ?? null,
                     door_code: doorId || 'DOOR_DEFAULT',
                     zone_id: zoneId ? parseInt(zoneId) : null,
                     entry_validation_id: doorEventId,
@@ -747,7 +750,7 @@ function useKioskLogic(
             })
           }
           resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs) + 500)
-          saveRecognitionEvent(d, dir, lastMissingRef.current)
+          saveRecognitionEvent(enrichedD, dir, lastMissingRef.current)
         }
       } catch { }
     }
