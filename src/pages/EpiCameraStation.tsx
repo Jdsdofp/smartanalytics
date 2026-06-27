@@ -348,10 +348,10 @@ function useKioskLogic(
   //   } catch { }
   // }, [stationCfg, authHeaders])
 
-  const triggerDoor = useCallback((d: Decision, dir: Direction) => {
-    const { lockIp, lockMs, doorId, zoneId, apiBase } = stationCfg
+  const triggerDoor = useCallback((d: Decision, dir: Direction): Promise<number | null> => {
+    const { lockIp, lockMs, doorId, zoneId, apiBase, companyId, apiKey } = stationCfg
 
-    // Abre via HTTP
+    // Abre via HTTP (ESP32)
     console.log('[triggerDoor] abrindo porta, lockIp:', lockIp, 'lockMs:', lockMs)
     if (lockIp) {
       fetch(`http://${lockIp}/unlock`, {
@@ -361,18 +361,26 @@ function useKioskLogic(
       }).catch(() => {})
     }
 
-    // Registra no backend (fire-and-forget)
-    try {
-      const fd = new FormData()
-      if (d.person_code) fd.append('person_code', d.person_code)
-      if (d.person_name) fd.append('person_name', d.person_name)
-      fd.append('reason', dir === 'ENTRY' ? 'EPI_COMPLIANT_ENTRY' : 'EXIT')
-      if (doorId) fd.append('door_id', doorId)
-      if (zoneId) fd.append('zone_id', zoneId)
-      fd.append('direction', dir)
-      fetch(`${apiBase}/api/v1/epi/access/door/open`, { method: 'POST', body: fd, headers: authHeaders() }).catch(() => {})
-    } catch {}
-  }, [stationCfg, authHeaders])
+    // Registra door_event no backend e retorna o id gerado
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (apiKey) headers['X-API-Key'] = apiKey
+
+    const payload = {
+      door_code: doorId || 'DOOR_DEFAULT',
+      door_action: 'OPEN',
+      person_code: d.person_code ?? null,
+      person_name: d.person_name ?? null,
+      zone_id: zoneId ? parseInt(zoneId) : null,
+    }
+
+    return fetch(
+      `${apiBase}/api/v1/epi/access/door-events?company_id=${companyId}`,
+      { method: 'POST', headers, body: JSON.stringify(payload) }
+    )
+      .then(r => r.ok ? r.json() : null)
+      .then(data => data?.id ?? null)
+      .catch(() => null)
+  }, [stationCfg])
 
     const saveRecognitionEvent = useCallback(async (
     d: Decision,
@@ -603,7 +611,7 @@ function useKioskLogic(
             identifiedPersonRef.current = { name: fr.face_person_name, code: personCode }
             if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
 
-            exitTriggerTimerRef.current = setTimeout(() => {
+            exitTriggerTimerRef.current = setTimeout(async () => {
               exitTriggerTimerRef.current = null
               if (!mountedRef.current || phaseRef.current !== 'scanning') return
               const d: Decision = {
@@ -617,7 +625,26 @@ function useKioskLogic(
               if (personCode) insidePersonsRef.current.delete(personCode)
               closeScan(); setDecision(d); setPhase('granted')
               saveRecognitionEvent(d, dir, [])
-              // Saída: apenas registra, não abre a porta
+
+              // Fecha sessão de exposição NR-36
+              if (personCode) {
+                const { apiBase, companyId, apiKey } = stationCfg
+                const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+                if (apiKey) headers['X-API-Key'] = apiKey
+                // Busca sessão ativa da pessoa e fecha
+                fetch(`${apiBase}/api/v1/epi/access/exposure?company_id=${companyId}&person_code=${personCode}&active_only=true&limit=1`, { headers })
+                  .then(r => r.ok ? r.json() : [])
+                  .then((sessions: { id: number }[]) => {
+                    if (sessions.length > 0) {
+                      fetch(`${apiBase}/api/v1/epi/access/exposure/${sessions[0].id}/close?company_id=${companyId}`, {
+                        method: 'POST', headers,
+                        body: JSON.stringify({ status: 'COMPLETED', exit_face_confirmed: true }),
+                      }).catch(() => {})
+                    }
+                  })
+                  .catch(() => {})
+              }
+
               resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
             }, 600)
           }
@@ -671,7 +698,25 @@ function useKioskLogic(
           setPhase(p)
           if (d.access_decision === 'GRANTED') {
             if (d.person_code) insidePersonsRef.current.add(d.person_code)
-            startDoorCountdown(() => triggerDoor(d, dir))
+            startDoorCountdown(async () => {
+              const doorEventId = await triggerDoor(d, dir)
+              // Abre sessão de exposição NR-36
+              if (d.person_code) {
+                const { apiBase, companyId, apiKey, doorId, zoneId } = stationCfg
+                const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+                if (apiKey) headers['X-API-Key'] = apiKey
+                fetch(`${apiBase}/api/v1/epi/access/exposure/open?company_id=${companyId}`, {
+                  method: 'POST', headers,
+                  body: JSON.stringify({
+                    person_code: d.person_code,
+                    person_name: d.person_name ?? null,
+                    door_code: doorId || 'DOOR_DEFAULT',
+                    zone_id: zoneId ? parseInt(zoneId) : null,
+                    entry_validation_id: doorEventId,
+                  }),
+                }).catch(() => {})
+              }
+            })
           }
           resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs) + 500)
           saveRecognitionEvent(d, dir, lastMissingRef.current)
