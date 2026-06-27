@@ -772,7 +772,11 @@ function useKioskLogic(
     const connect = () => {
       if (destroyed) return
       try {
-        ws = new WebSocket(`ws://${stationCfg.lockIp}:81`)
+        // Usa proxy do servidor quando em HTTPS para evitar Mixed Content
+        const iotWsUrl = window.location.protocol === 'https:'
+          ? `wss://${window.location.host}/ws/lock?lock_ip=${stationCfg.lockIp}`
+          : `ws://${stationCfg.lockIp}:81`
+        ws = new WebSocket(iotWsUrl)
         iotWsRef.current = ws
         ws.onmessage = (e) => {
           try {
