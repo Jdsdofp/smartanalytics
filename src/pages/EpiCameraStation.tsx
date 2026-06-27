@@ -323,12 +323,23 @@ function useKioskLogic(
       ws2.onmessage = onMsg
       ws2.onopen = () => {
         const iv2 = Math.round(1000 / CFG.fps)
+        let sending = false
         wsTimerRef.current = setInterval(async () => {
-          if (ws2.readyState !== WebSocket.OPEN) return
-          const blob = await captureFrame(0.8)
-          if (blob && ws2.readyState === WebSocket.OPEN) ws2.send(blob)
+          if (ws2.readyState !== WebSocket.OPEN || sending) return
+          sending = true
+          try {
+            const blob = await captureFrame(0.8)
+            if (blob && ws2.readyState === WebSocket.OPEN) ws2.send(blob)
+          } finally { sending = false }
         }, iv2)
       }
+      // Timeout de segurança: se o backend não enviar decision, volta ao idle
+      const epiTimeoutMs = (stationCfg.epiScanSeconds + 8) * 1000
+      subPhaseTimerRef.current = setTimeout(() => {
+        if (!mountedRef.current || phaseRef.current !== 'scanning') return
+        console.warn('[EPI scan] timeout de segurança atingido, voltando ao idle')
+        goIdle()
+      }, epiTimeoutMs)
       ws2.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
     }, stationCfg.prepareSeconds * 1000)
   }, [clearSubPhaseTimers, setSubPhase, captureFrame, buildWsParams, stationCfg.prepareSeconds])
@@ -752,10 +763,14 @@ function useKioskLogic(
     ws.onmessage = handleWsMessage
     ws.onopen = () => {
       const interval = Math.round(1000 / CFG.fps)
+      let sending = false
       wsTimerRef.current = setInterval(async () => {
-        if (ws.readyState !== WebSocket.OPEN) return
-        const blob = await captureFrame(0.8)
-        if (blob && ws.readyState === WebSocket.OPEN) ws.send(blob)
+        if (ws.readyState !== WebSocket.OPEN || sending) return
+        sending = true
+        try {
+          const blob = await captureFrame(0.8)
+          if (blob && ws.readyState === WebSocket.OPEN) ws.send(blob)
+        } finally { sending = false }
       }, interval)
     }
     ws.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
@@ -772,11 +787,7 @@ function useKioskLogic(
     const connect = () => {
       if (destroyed) return
       try {
-        // Usa proxy do servidor quando em HTTPS para evitar Mixed Content
-        const iotWsUrl = window.location.protocol === 'https:'
-          ? `wss://${window.location.host}/ws/lock?lock_ip=${stationCfg.lockIp}`
-          : `ws://${stationCfg.lockIp}:81`
-        ws = new WebSocket(iotWsUrl)
+        ws = new WebSocket(`ws://${stationCfg.lockIp}:81`)
         iotWsRef.current = ws
         ws.onmessage = (e) => {
           try {
