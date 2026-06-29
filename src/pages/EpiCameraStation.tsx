@@ -292,15 +292,19 @@ function useKioskLogic(
     }, 1000)
   }, [stationCfg.lockMs])
 
-  const buildWsParams = useCallback(() => new URLSearchParams({
-    company_id: String(stationCfg.companyId),
-    window_seconds: String(stationCfg.epiScanSeconds),
-    fps: String(CFG.fps),
-    confidence: String(CFG.confidence),
-    face_threshold: String(CFG.face_threshold),
-    detect_faces: String(CFG.detect_faces),
-    api_key: stationCfg.apiKey,
-  }), [stationCfg])
+  const buildWsParams = useCallback(() => {
+    const p = new URLSearchParams({
+      company_id: String(stationCfg.companyId),
+      window_seconds: String(stationCfg.epiScanSeconds),
+      fps: String(CFG.fps),
+      confidence: String(CFG.confidence),
+      face_threshold: String(CFG.face_threshold),
+      detect_faces: String(CFG.detect_faces),
+      api_key: stationCfg.apiKey,
+    })
+    if (stationCfg.zoneId) p.set('zone_id', String(stationCfg.zoneId))
+    return p
+  }, [stationCfg])
 
   const startPreparing = useCallback((apiBase: string, onMsg: (ev: MessageEvent) => void) => {
     clearSubPhaseTimers()
