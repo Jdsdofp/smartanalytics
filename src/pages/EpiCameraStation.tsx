@@ -22,7 +22,7 @@ import EpiBodyFigure from '../components/EpiBodyFigure'
 // ─── TIPOS ───────────────────────────────────────────────────────────────────
 type Direction = 'ENTRY' | 'EXIT'
 type CamSource = 'usb' | 'ip'
-type Phase = 'idle' | 'scanning' | 'granted' | 'denied_epi' | 'denied_face'
+type Phase = 'idle' | 'scanning' | 'granted' | 'denied_epi' | 'denied_face' | 'denied_presence'
 type ScanSubPhase = 'face_scan' | 'preparing' | 'epi_scan'
 interface StationConfig {
   companyId: number
@@ -242,6 +242,7 @@ function useKioskLogic(
   const [direction, setDirection] = useState<Direction>('ENTRY')
   const [lastMissing, setLastMissing] = useState<string[]>([])
   const [doorAlert, setDoorAlert] = useState<'open_timeout' | null>(null)
+  const [presenceMessage, setPresenceMessage] = useState('')
 
   const setPhase = useCallback((p: Phase) => { phaseRef.current = p; setPhaseState(p) }, [])
   const setSubPhase = useCallback((sp: ScanSubPhase) => { subPhaseRef.current = sp; setScanSubPhase(sp) }, [])
@@ -267,7 +268,7 @@ function useKioskLogic(
     closeScan()
     clearDoorDelay()
     setDoorAlert(null)
-    setPhase('idle'); setLastFrame(null); setDecision(null)
+    setPhase('idle'); setLastFrame(null); setDecision(null); setPresenceMessage('')
     setSubPhase('face_scan'); setPrepareCountdown(0)
     faceIdentifiedRef.current = false
     identifiedPersonRef.current = null
@@ -278,6 +279,18 @@ function useKioskLogic(
     if (stationCfg.apiKey) h['X-API-Key'] = stationCfg.apiKey
     return h
   }, [stationCfg.apiKey])
+
+  const checkPresence = useCallback(async (personCode: string): Promise<boolean> => {
+    try {
+      const r = await fetch(
+        `${stationCfg.apiBase}/api/v1/epi/access/presence/${personCode}?company_id=${stationCfg.companyId}`,
+        { headers: authHeaders() }
+      )
+      if (!r.ok) return false
+      const data = await r.json()
+      return !!(data?.inside)
+    } catch { return false }
+  }, [stationCfg.apiBase, stationCfg.companyId, authHeaders])
   const startDoorCountdown = useCallback((openFn: () => void) => {
     // Limpa só o countdown visual, não o doorDelayTimerRef (que é usado pelo triggerDoor para fechar)
     if (doorCountdownIntervalRef.current) { clearInterval(doorCountdownIntervalRef.current); doorCountdownIntervalRef.current = null }
@@ -618,9 +631,19 @@ function useKioskLogic(
 
           if (fr.face_recognized && !faceIdentifiedRef.current) {
             const personCode = fr.face_person_code
-            // Só bloqueia saída se há pessoas registradas dentro E esta não está entre elas
-            const hasTrackedPersons = insidePersonsRef.current.size > 0
-            if (personCode && hasTrackedPersons && !insidePersonsRef.current.has(personCode)) return
+            // Anti-passback: bloqueia EXIT se pessoa não tem entrada ativa no banco
+            if (personCode) {
+              const isInside = await checkPresence(personCode)
+              if (!isInside) {
+                if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
+                closeScan()
+                setPresenceMessage('Nenhuma entrada ativa registrada. Realize a entrada antes da saída.')
+                setDecision({ access_decision: 'DENIED_FACE', compliance_rate: 0, face_rate: fr.face_confidence, person_code: personCode, person_name: fr.face_person_name, total_frames: 0 })
+                setPhase('denied_presence')
+                resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+                return
+              }
+            }
 
             faceIdentifiedRef.current = true
             identifiedPersonRef.current = { name: fr.face_person_name, code: personCode }
@@ -715,8 +738,20 @@ function useKioskLogic(
             faceIdentifiedRef.current = true
             identifiedPersonRef.current = { name: fr.face_person_name, code: fr.face_person_code }
             clearTimeout(subPhaseTimerRef.current!)
-            subPhaseTimerRef.current = setTimeout(() => {
+            subPhaseTimerRef.current = setTimeout(async () => {
               if (!mountedRef.current || phaseRef.current !== 'scanning') return
+              // Anti-passback: bloqueia ENTRY se pessoa já está dentro
+              if (fr.face_person_code) {
+                const isInside = await checkPresence(fr.face_person_code)
+                if (isInside) {
+                  closeScan()
+                  setPresenceMessage('Você já está dentro. Registre a saída antes de entrar novamente.')
+                  setDecision({ access_decision: 'DENIED_FACE', compliance_rate: 0, face_rate: fr.face_confidence, person_code: fr.face_person_code, person_name: fr.face_person_name, total_frames: 0 })
+                  setPhase('denied_presence')
+                  resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+                  return
+                }
+              }
               startPreparing(apiBase, handleWsMessage)
             }, 800)
           }
@@ -781,7 +816,7 @@ function useKioskLogic(
       }, interval)
     }
     ws.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
-  }, [closeScan, setPhase, setSubPhase, startPreparing, goIdle, captureFrame, triggerDoor, saveRecognitionEvent, startDoorCountdown, stationCfg, buildWsParams])
+  }, [closeScan, setPhase, setSubPhase, startPreparing, goIdle, captureFrame, triggerDoor, saveRecognitionEvent, startDoorCountdown, stationCfg, buildWsParams, checkPresence])
 
 
   // Conecta no WebSocket do controlador IoT e dispara scan quando botão externo é pressionado
@@ -855,7 +890,7 @@ function useKioskLogic(
     }
   }, [camReady, closeScan])
 
-  return { phase, scanSubPhase, prepareCountdown, doorCountdown, doorAlert, lastFrame, decision, direction, openScan, goIdle, lastMissing, identifiedPerson: identifiedPersonRef.current }
+  return { phase, scanSubPhase, prepareCountdown, doorCountdown, doorAlert, lastFrame, decision, direction, openScan, goIdle, lastMissing, presenceMessage, identifiedPerson: identifiedPersonRef.current }
 }
 
 // ─── MODAL CONFIG ────────────────────────────────────────────────────────────
@@ -1234,12 +1269,12 @@ function Overlay({ frame, vw, vh, ow, oh }: { frame: FrameResult | null; vw: num
   )
 }
 
-function ResultOverlay({ phase, decision, direction, hasLock, missing, doorCountdown }: { phase: Phase; decision: Decision | null; direction: Direction; hasLock: boolean; missing: string[]; doorCountdown: number }) {
-  const granted = phase === 'granted'; const deniedEpi = phase === 'denied_epi'
+function ResultOverlay({ phase, decision, direction, hasLock, missing, doorCountdown, presenceMessage }: { phase: Phase; decision: Decision | null; direction: Direction; hasLock: boolean; missing: string[]; doorCountdown: number; presenceMessage?: string }) {
+  const granted = phase === 'granted'; const deniedEpi = phase === 'denied_epi'; const deniedPresence = phase === 'denied_presence'
   const color = granted ? '#10B981' : '#EF4444'
-  const bg = granted ? 'rgba(6,78,59,0.96)' : 'rgba(69,10,10,0.96)'
+  const bg = granted ? 'rgba(6,78,59,0.96)' : deniedPresence ? 'rgba(55,10,100,0.96)' : 'rgba(69,10,10,0.96)'
   const Icon = granted ? CheckCircleIcon : deniedEpi ? ShieldExclamationIcon : XCircleIcon
-  const title = granted ? (direction === 'ENTRY' ? 'ACESSO LIBERADO' : 'SAÍDA REGISTRADA') : deniedEpi ? 'EPI INCOMPLETO' : 'FACE NÃO IDENTIFICADA'
+  const title = granted ? (direction === 'ENTRY' ? 'ACESSO LIBERADO' : 'SAÍDA REGISTRADA') : deniedEpi ? 'EPI INCOMPLETO' : deniedPresence ? (direction === 'ENTRY' ? 'ENTRADA BLOQUEADA' : 'SAÍDA BLOQUEADA') : 'FACE NÃO IDENTIFICADA'
   return (
     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: bg, backdropFilter: 'blur(8px)', padding: 16 }}>
       <style>{`@keyframes pop{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.5)}50%{box-shadow:0 0 0 12px rgba(16,185,129,0)}}`}</style>
@@ -1250,6 +1285,11 @@ function ResultOverlay({ phase, decision, direction, hasLock, missing, doorCount
       {(decision?.person_name || decision?.person_code) && (
         <div style={{ fontSize: 'clamp(16px,3vw,22px)', color: '#E5E7EB', marginBottom: 16, animation: 'slideUp .4s ease .2s both', display: 'flex', alignItems: 'center', gap: 8 }}>
           <UserIcon style={{ width: 20, height: 20 }} />{decision.person_name ?? decision.person_code}
+        </div>
+      )}
+      {deniedPresence && presenceMessage && (
+        <div style={{ fontSize: 'clamp(13px,2.5vw,17px)', color: '#E9D5FF', marginBottom: 16, animation: 'slideUp .4s ease .25s both', textAlign: 'center', maxWidth: 380, padding: '10px 20px', background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.4)', borderRadius: 12 }}>
+          {presenceMessage}
         </div>
       )}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', animation: 'slideUp .4s ease .3s both' }}>
@@ -1505,7 +1545,7 @@ export default function EpiCameraStation() {
         )}
 
         {showResult && (
-          <ResultOverlay phase={logic.phase} decision={logic.decision} direction={logic.direction} hasLock={!!stationCfg.lockIp} missing={logic.lastMissing} doorCountdown={logic.doorCountdown} />
+          <ResultOverlay phase={logic.phase} decision={logic.decision} direction={logic.direction} hasLock={!!stationCfg.lockIp} missing={logic.lastMissing} doorCountdown={logic.doorCountdown} presenceMessage={logic.presenceMessage} />
         )}
 
         {cam.ready && (
