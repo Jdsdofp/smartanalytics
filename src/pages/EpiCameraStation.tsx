@@ -664,6 +664,21 @@ function useKioskLogic(
               closeScan(); setDecision(d); setPhase('granted')
               saveRecognitionEvent(d, dir, [])
 
+              // Registra sessão de saída em vision_validation_sessions
+              {
+                const _h: Record<string, string> = { 'Content-Type': 'application/json' }
+                if (stationCfg.apiKey) _h['X-API-Key'] = stationCfg.apiKey
+                fetch(
+                  `${stationCfg.apiBase}/api/v1/epi/access/sessions/exit?company_id=${stationCfg.companyId}`,
+                  { method: 'POST', headers: _h, body: JSON.stringify({
+                    person_code: personCode ?? null,
+                    person_name: fr.face_person_name ?? null,
+                    face_confidence: fr.face_confidence,
+                    zone_id: stationCfg.zoneId ? parseInt(stationCfg.zoneId) : null,
+                  })}
+                ).catch(() => {})
+              }
+
               // Fecha sessão de exposição NR-36
               if (personCode) {
                 const { apiBase, companyId, apiKey } = stationCfg
