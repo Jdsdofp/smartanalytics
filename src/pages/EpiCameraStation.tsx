@@ -232,6 +232,8 @@ function useKioskLogic(
   const subPhaseRef = useRef<ScanSubPhase>('face_scan')
   const faceIdentifiedRef = useRef(false)
   const identifiedPersonRef = useRef<{ name?: string; code?: string } | null>(null)
+  const lastExitFaceBlobRef = useRef<Blob | null>(null)
+  const lastEntryFaceBlobRef = useRef<Blob | null>(null)
 
   const [phase, setPhaseState] = useState<Phase>('idle')
   const [scanSubPhase, setScanSubPhase] = useState<ScanSubPhase>('face_scan')
@@ -599,6 +601,7 @@ function useKioskLogic(
         if (!mountedRef.current || phaseRef.current !== 'scanning') return
         const blob = await captureFrame(0.8)
         if (!blob) return
+        lastExitFaceBlobRef.current = blob
         try {
           const fd = new FormData()
           fd.append('file', blob, 'frame.jpg')
@@ -664,18 +667,19 @@ function useKioskLogic(
               closeScan(); setDecision(d); setPhase('granted')
               saveRecognitionEvent(d, dir, [])
 
-              // Registra sessão de saída em vision_validation_sessions
+              // Registra sessão de saída em vision_validation_sessions (com foto facial)
               {
-                const _h: Record<string, string> = { 'Content-Type': 'application/json' }
+                const _h: Record<string, string> = {}
                 if (stationCfg.apiKey) _h['X-API-Key'] = stationCfg.apiKey
+                const _fd = new FormData()
+                if (personCode) _fd.append('person_code', personCode)
+                if (fr.face_person_name) _fd.append('person_name', fr.face_person_name)
+                _fd.append('face_confidence', String(fr.face_confidence))
+                if (stationCfg.zoneId) _fd.append('zone_id', stationCfg.zoneId)
+                if (lastExitFaceBlobRef.current) _fd.append('photo', lastExitFaceBlobRef.current, 'exit_face.jpg')
                 fetch(
                   `${stationCfg.apiBase}/api/v1/epi/access/sessions/exit?company_id=${stationCfg.companyId}`,
-                  { method: 'POST', headers: _h, body: JSON.stringify({
-                    person_code: personCode ?? null,
-                    person_name: fr.face_person_name ?? null,
-                    face_confidence: fr.face_confidence,
-                    zone_id: stationCfg.zoneId ? parseInt(stationCfg.zoneId) : null,
-                  })}
+                  { method: 'POST', headers: _h, body: _fd }
                 ).catch(() => {})
               }
 
@@ -752,6 +756,7 @@ function useKioskLogic(
           if (fr.face_recognized && !faceIdentifiedRef.current && subPhaseRef.current === 'face_scan') {
             faceIdentifiedRef.current = true
             identifiedPersonRef.current = { name: fr.face_person_name, code: fr.face_person_code }
+            captureFrame(0.92).then(b => { if (b) lastEntryFaceBlobRef.current = b }).catch(() => {})
             clearTimeout(subPhaseTimerRef.current!)
             subPhaseTimerRef.current = setTimeout(async () => {
               if (!mountedRef.current || phaseRef.current !== 'scanning') return
@@ -805,6 +810,26 @@ function useKioskLogic(
           }
           resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, Math.max(CFG.result_show_ms, stationCfg.lockMs) + 500)
           saveRecognitionEvent(enrichedD, dir, lastMissingRef.current)
+
+          // Envia foto facial de ENTRADA capturada no ws1 para o backend
+          if (lastEntryFaceBlobRef.current) {
+            const _blob = lastEntryFaceBlobRef.current
+            lastEntryFaceBlobRef.current = null
+            // Aguarda 2s para o backend criar a sessão antes de enviar a foto
+            setTimeout(() => {
+              const _h: Record<string, string> = {}
+              if (stationCfg.apiKey) _h['X-API-Key'] = stationCfg.apiKey
+              const _fd = new FormData()
+              if (personCode) _fd.append('person_code', personCode)
+              _fd.append('face_confidence', String(d.face_rate ?? 0))
+              if (stationCfg.zoneId) _fd.append('zone_id', stationCfg.zoneId)
+              _fd.append('photo', _blob, 'entry_face.jpg')
+              fetch(
+                `${stationCfg.apiBase}/api/v1/epi/access/sessions/entry-face?company_id=${stationCfg.companyId}`,
+                { method: 'POST', headers: _h, body: _fd }
+              ).catch(() => {})
+            }, 2500)
+          }
         }
       } catch { }
     }
