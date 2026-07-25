@@ -591,6 +591,8 @@ function useKioskLogic(
     closeScan()
     setPhase('scanning'); setLastFrame(null); setDirection(dir); setLastMissing([])
     faceIdentifiedRef.current = false
+    lastEntryFaceBlobRef.current = null
+    lastExitFaceBlobRef.current = null
     setSubPhase('face_scan')
     const { apiBase } = stationCfg
 
@@ -754,10 +756,16 @@ function useKioskLogic(
           }
           setLastFrame(fr)
           if (fr.missing) { setLastMissing(fr.missing); lastMissingRef.current = fr.missing }
+          // Tenta capturar a foto de entrada em todo frame com face reconhecida, até
+          // conseguir um blob válido — captureFrame pode retornar null momentaneamente
+          // (video.readyState < 2) logo após o fim de um scan anterior, e sem retry a
+          // foto de entrada nunca era enviada nesses casos.
+          if (fr.face_recognized && subPhaseRef.current === 'face_scan' && !lastEntryFaceBlobRef.current) {
+            captureFrame(0.92).then(b => { if (b) lastEntryFaceBlobRef.current = b }).catch(() => {})
+          }
           if (fr.face_recognized && !faceIdentifiedRef.current && subPhaseRef.current === 'face_scan') {
             faceIdentifiedRef.current = true
             identifiedPersonRef.current = { name: fr.face_person_name, code: fr.face_person_code }
-            captureFrame(0.92).then(b => { if (b) lastEntryFaceBlobRef.current = b }).catch(() => {})
             clearTimeout(subPhaseTimerRef.current!)
             subPhaseTimerRef.current = setTimeout(async () => {
               if (!mountedRef.current || phaseRef.current !== 'scanning') return
