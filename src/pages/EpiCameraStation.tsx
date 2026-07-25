@@ -73,6 +73,7 @@ interface Decision {
   access_decision: 'GRANTED' | 'DENIED_EPI' | 'DENIED_FACE'
   compliance_rate: number; face_rate: number
   person_code?: string; person_name?: string; total_frames: number
+  session_id?: number
 }
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
@@ -821,6 +822,7 @@ function useKioskLogic(
               if (stationCfg.apiKey) _h['X-API-Key'] = stationCfg.apiKey
               const _fd = new FormData()
               if (personCode) _fd.append('person_code', personCode)
+              if (d.session_id != null) _fd.append('session_id', String(d.session_id))
               _fd.append('face_confidence', String(d.face_rate ?? 0))
               if (stationCfg.zoneId) _fd.append('zone_id', stationCfg.zoneId)
               _fd.append('photo', _blob, 'entry_face.jpg')
