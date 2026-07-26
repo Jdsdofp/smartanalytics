@@ -88,7 +88,7 @@ function defaultConfig(): StationConfig {
     apiBase: sessionStorage.getItem('apiEndpoint') ?? 'https://aihub.smartxhub.cloud',
     lockIp: sessionStorage.getItem('lockIp') ?? '192.168.68.100',
     lockMs: 5000,
-    doorId: 'DOOR_CAMARA_FRIA_01',
+    doorId: 'VI-5111',
     zoneId: '10',
     camSource: 'usb',
     camDeviceId: '',
@@ -319,6 +319,7 @@ function useKioskLogic(
       api_key: stationCfg.apiKey,
     })
     if (stationCfg.zoneId) p.set('zone_id', String(stationCfg.zoneId))
+    if (stationCfg.doorId) p.set('door_code', stationCfg.doorId)
     return p
   }, [stationCfg])
 
@@ -679,6 +680,7 @@ function useKioskLogic(
                 if (fr.face_person_name) _fd.append('person_name', fr.face_person_name)
                 _fd.append('face_confidence', String(fr.face_confidence))
                 if (stationCfg.zoneId) _fd.append('zone_id', stationCfg.zoneId)
+                if (stationCfg.doorId) _fd.append('door_code', stationCfg.doorId)
                 if (lastExitFaceBlobRef.current) _fd.append('photo', lastExitFaceBlobRef.current, 'exit_face.jpg')
                 fetch(
                   `${stationCfg.apiBase}/api/v1/epi/access/sessions/exit?company_id=${stationCfg.companyId}`,
