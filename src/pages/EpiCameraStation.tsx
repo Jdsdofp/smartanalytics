@@ -89,7 +89,7 @@ function defaultConfig(): StationConfig {
     lockIp: sessionStorage.getItem('lockIp') ?? '192.168.68.100',
     lockMs: 5000,
     doorId: 'VI-5111',
-    zoneId: '10',
+    zoneId: '425145',
     camSource: 'usb',
     camDeviceId: '',
     camIpUrl: '',
@@ -672,21 +672,26 @@ function useKioskLogic(
               saveRecognitionEvent(d, dir, [])
 
               // Registra sessão de saída em vision_validation_sessions (com foto facial)
-              {
-                const _h: Record<string, string> = {}
-                if (stationCfg.apiKey) _h['X-API-Key'] = stationCfg.apiKey
-                const _fd = new FormData()
-                if (personCode) _fd.append('person_code', personCode)
-                if (fr.face_person_name) _fd.append('person_name', fr.face_person_name)
-                _fd.append('face_confidence', String(fr.face_confidence))
-                if (stationCfg.zoneId) _fd.append('zone_id', stationCfg.zoneId)
-                if (stationCfg.doorId) _fd.append('door_code', stationCfg.doorId)
-                if (lastExitFaceBlobRef.current) _fd.append('photo', lastExitFaceBlobRef.current, 'exit_face.jpg')
-                fetch(
-                  `${stationCfg.apiBase}/api/v1/epi/access/sessions/exit?company_id=${stationCfg.companyId}`,
-                  { method: 'POST', headers: _h, body: _fd }
-                ).catch(() => {})
-              }
+              // — captura o session_id retornado para vincular à sessão de exposição.
+              const exitSessionIdPromise: Promise<number | null> = (async () => {
+                try {
+                  const _h: Record<string, string> = {}
+                  if (stationCfg.apiKey) _h['X-API-Key'] = stationCfg.apiKey
+                  const _fd = new FormData()
+                  if (personCode) _fd.append('person_code', personCode)
+                  if (fr.face_person_name) _fd.append('person_name', fr.face_person_name)
+                  _fd.append('face_confidence', String(fr.face_confidence))
+                  if (stationCfg.zoneId) _fd.append('zone_id', stationCfg.zoneId)
+                  if (stationCfg.doorId) _fd.append('door_code', stationCfg.doorId)
+                  if (lastExitFaceBlobRef.current) _fd.append('photo', lastExitFaceBlobRef.current, 'exit_face.jpg')
+                  const _r = await fetch(
+                    `${stationCfg.apiBase}/api/v1/epi/access/sessions/exit?company_id=${stationCfg.companyId}`,
+                    { method: 'POST', headers: _h, body: _fd }
+                  )
+                  const _data = _r.ok ? await _r.json() : null
+                  return _data?.session_id ?? null
+                } catch { return null }
+              })()
 
               // Fecha sessão de exposição NR-36
               if (personCode) {
@@ -701,11 +706,12 @@ function useKioskLogic(
                     console.log('[EXIT exposure] GET status:', r.status)
                     return r.ok ? r.json() : null
                   })
-                  .then((session: { id: number } | null) => {
+                  .then(async (session: { id: number } | null) => {
                     console.log('[EXIT exposure] sessão ativa:', session)
                     if (session?.id) {
+                      const exitSessionId = await exitSessionIdPromise
                       const closeUrl = `${apiBase}/api/v1/epi/access/exposure/${session.id}/close?company_id=${companyId}`
-                      const body = { status: 'COMPLETED', exit_face_confirmed: true }
+                      const body = { status: 'COMPLETED', exit_face_confirmed: true, exit_session_id: exitSessionId }
                       console.log('[EXIT exposure] POST close', closeUrl, body)
                       fetch(closeUrl, {
                         method: 'POST', headers,
@@ -814,6 +820,7 @@ function useKioskLogic(
                     door_code: doorId || 'DOOR_DEFAULT',
                     zone_id: zoneId ? parseInt(zoneId) : null,
                     entry_validation_id: doorEventId,
+                    entry_session_id: enrichedD.session_id ?? null,
                   }),
                 }).catch(() => {})
               }
