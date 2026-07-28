@@ -856,7 +856,18 @@ function useKioskLogic(
 
     subPhaseTimerRef.current = setTimeout(() => {
       if (!mountedRef.current || phaseRef.current !== 'scanning') return
-      if (subPhaseRef.current === 'face_scan') startPreparing(apiBase, handleWsMessage)
+      // Se ainda está em face_scan aqui, é porque ninguém foi reconhecido a
+      // tempo (o reconhecimento, quando acontece, limpa este timer antes —
+      // ver clearTimeout logo acima do startPreparing em handleWsMessage).
+      // Antes isso caía direto pro epi_scan mesmo sem identidade confirmada,
+      // permitindo liberação de acesso com person_code nulo (rosto coberto
+      // por balaclava ainda "detectado", só não reconhecido).
+      if (subPhaseRef.current === 'face_scan') {
+        closeScan()
+        setDecision({ access_decision: 'DENIED_FACE', compliance_rate: 0, face_rate: 0, total_frames: 0 })
+        setPhase('denied_face')
+        resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+      }
     }, stationCfg.faceScanSeconds * 1000)
 
     const wsBase = apiBase.replace(/^http/, 'ws')
