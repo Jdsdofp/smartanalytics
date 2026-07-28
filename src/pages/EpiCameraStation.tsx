@@ -602,6 +602,21 @@ function useKioskLogic(
     if (dir === 'EXIT') {
       const pollInterval = Math.round(1000 / CFG.fps)
 
+      // Sem isso, se o rosto nunca for reconhecido (ex: balaclava), o polling
+      // ficava rodando pra sempre sem nunca mostrar bloqueio nem voltar ao
+      // idle — mesma falha que existia na entrada, só que aqui nem tinha
+      // timer nenhum (a saída usa polling HTTP, não WS).
+      subPhaseTimerRef.current = setTimeout(() => {
+        if (!mountedRef.current || phaseRef.current !== 'scanning') return
+        if (!faceIdentifiedRef.current) {
+          if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
+          closeScan()
+          setDecision({ access_decision: 'DENIED_FACE', compliance_rate: 0, face_rate: 0, total_frames: 0 })
+          setPhase('denied_face')
+          resultTimerRef.current = setTimeout(() => { if (mountedRef.current) goIdle() }, CFG.result_show_ms)
+        }
+      }, stationCfg.faceScanSeconds * 1000)
+
       const poll = async () => {
         if (!mountedRef.current || phaseRef.current !== 'scanning') return
         const blob = await captureFrame(0.8)
