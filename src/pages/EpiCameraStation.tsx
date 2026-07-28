@@ -308,7 +308,7 @@ function useKioskLogic(
     }, 1000)
   }, [stationCfg.lockMs])
 
-  const buildWsParams = useCallback(() => {
+  const buildWsParams = useCallback((mode: 'face' | 'epi') => {
     const p = new URLSearchParams({
       company_id: String(stationCfg.companyId),
       window_seconds: String(stationCfg.epiScanSeconds),
@@ -317,6 +317,7 @@ function useKioskLogic(
       face_threshold: String(CFG.face_threshold),
       detect_faces: String(CFG.detect_faces),
       api_key: stationCfg.apiKey,
+      mode,
     })
     if (stationCfg.zoneId) p.set('zone_id', String(stationCfg.zoneId))
     if (stationCfg.doorId) p.set('door_code', stationCfg.doorId)
@@ -339,7 +340,7 @@ function useKioskLogic(
       if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
       if (wsRef.current) { wsRef.current.close(); wsRef.current = null }
       const wsBase2 = apiBase.replace(/^http/, 'ws')
-      const ws2 = new WebSocket(`${wsBase2}/api/v1/epi/ws/epi-stream?${buildWsParams()}`)
+      const ws2 = new WebSocket(`${wsBase2}/api/v1/epi/ws/epi-stream?${buildWsParams('epi')}`)
       wsRef.current = ws2
       ws2.onmessage = onMsg
       ws2.onopen = () => {
@@ -859,7 +860,7 @@ function useKioskLogic(
     }, stationCfg.faceScanSeconds * 1000)
 
     const wsBase = apiBase.replace(/^http/, 'ws')
-    const ws = new WebSocket(`${wsBase}/api/v1/epi/ws/epi-stream?${buildWsParams()}`)
+    const ws = new WebSocket(`${wsBase}/api/v1/epi/ws/epi-stream?${buildWsParams('face')}`)
     wsRef.current = ws
     ws.onmessage = handleWsMessage
     ws.onopen = () => {
