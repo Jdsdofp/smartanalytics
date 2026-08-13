@@ -19,6 +19,42 @@ import { CheckIcon } from '@heroicons/react/24/solid'
 import { useTabletLayout } from '../hooks/useTabletLayout'
 import EpiBodyFigure from '../components/EpiBodyFigure'
 
+// ─── DEBUG LOG (capturado em memória — tablets de kiosk não têm devtools) ─────
+interface DebugLogEntry { ts: string; level: 'log' | 'warn' | 'error'; msg: string }
+const DEBUG_LOG_MAX = 300
+let debugLogBuf: DebugLogEntry[] = []
+const debugLogSubs = new Set<() => void>()
+function stringifyArg(a: unknown): string {
+  if (typeof a === 'string') return a
+  if (a instanceof Error) return `${a.name}: ${a.message}`
+  try { return JSON.stringify(a) } catch { return String(a) }
+}
+function pushDebugLog(level: DebugLogEntry['level'], args: unknown[]) {
+  const entry: DebugLogEntry = {
+    ts: new Date().toLocaleTimeString('pt-BR', { hour12: false }),
+    level, msg: args.map(stringifyArg).join(' '),
+  }
+  debugLogBuf = [...debugLogBuf, entry]
+  if (debugLogBuf.length > DEBUG_LOG_MAX) debugLogBuf = debugLogBuf.slice(-DEBUG_LOG_MAX)
+  debugLogSubs.forEach(fn => fn())
+}
+let debugLogInstalled = false
+function installDebugLogCapture() {
+  if (debugLogInstalled) return
+  debugLogInstalled = true
+  const origLog = console.log, origWarn = console.warn, origError = console.error
+  console.log = (...a: unknown[]) => { pushDebugLog('log', a); origLog(...a) }
+  console.warn = (...a: unknown[]) => { pushDebugLog('warn', a); origWarn(...a) }
+  console.error = (...a: unknown[]) => { pushDebugLog('error', a); origError(...a) }
+  window.addEventListener('error', (ev) => {
+    pushDebugLog('error', [`[window.onerror] ${ev.message}`, ev.filename ? `@${ev.filename}:${ev.lineno}` : ''])
+  })
+  window.addEventListener('unhandledrejection', (ev) => {
+    pushDebugLog('error', ['[unhandledrejection]', ev.reason])
+  })
+}
+installDebugLogCapture()
+
 // ─── TIPOS ───────────────────────────────────────────────────────────────────
 type Direction = 'ENTRY' | 'EXIT'
 type CamSource = 'usb' | 'ip'
@@ -38,6 +74,7 @@ interface StationConfig {
   faceScanSeconds: number
   epiScanSeconds: number
   prepareSeconds: number
+  lowBandwidthMode: boolean
 }
 
 interface StationTheme {
@@ -96,6 +133,7 @@ function defaultConfig(): StationConfig {
     faceScanSeconds: 8,
     epiScanSeconds: 20,
     prepareSeconds: 10,
+    lowBandwidthMode: false,
   }
 }
 
@@ -141,6 +179,46 @@ const CFG = {
   face_scan_seconds: 8, prepare_seconds: 10,
 }
 
+// ─── DETECÇÃO DE REDE MÓVEL / ECONOMIA DE DADOS ───────────────────────────────
+// Network Information API — disponível em Chromium (Android/tablets kiosk),
+// sem suporte no Safari/iOS (Apple bloqueia por privacidade). Nesses casos a
+// tela cai no fallback manual (stationCfg.lowBandwidthMode, configurável no setup).
+interface NetworkInformation {
+  type?: string
+  effectiveType?: string
+  saveData?: boolean
+}
+function isCellularConnection(): boolean {
+  try {
+    const nav = navigator as Navigator & {
+      connection?: NetworkInformation
+      mozConnection?: NetworkInformation
+      webkitConnection?: NetworkInformation
+    }
+    const conn = nav.connection ?? nav.mozConnection ?? nav.webkitConnection
+    if (!conn) return false
+    if (conn.saveData) return true
+    if (conn.type) return conn.type === 'cellular'
+    if (conn.effectiveType) return ['slow-2g', '2g', '3g'].includes(conn.effectiveType)
+    return false
+  } catch { return false }
+}
+
+// Parâmetros efetivos de captura/streaming — reduzidos automaticamente em rede
+// celular (detectada) ou quando o usuário força "Modo economia de dados" na
+// config do totem (necessário em iOS, onde a Network Information API não existe).
+function getAdaptiveScanConfig(stationCfg: StationConfig) {
+  const lowBandwidth = stationCfg.lowBandwidthMode || isCellularConnection()
+  return {
+    lowBandwidth,
+    fps: lowBandwidth ? 6 : CFG.fps,
+    frameQuality: lowBandwidth ? 0.5 : 0.8,
+    entryPhotoQuality: lowBandwidth ? 0.75 : 0.92,
+    videoWidth: lowBandwidth ? 640 : 1280,
+    videoHeight: lowBandwidth ? 360 : 720,
+  }
+}
+
 // ─── HOOK: câmera ────────────────────────────────────────────────────────────
 function useCameraStream(cfg: StationConfig) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -168,10 +246,11 @@ function useCameraStream(cfg: StationConfig) {
             if (active) setReady(true)
           }
         } else {
+          const { videoWidth, videoHeight } = getAdaptiveScanConfig(cfg)
           const constraints: MediaStreamConstraints = {
             video: cfg.camDeviceId
-              ? { deviceId: { exact: cfg.camDeviceId }, width: { ideal: 1280 }, height: { ideal: 720 } }
-              : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'environment' },
+              ? { deviceId: { exact: cfg.camDeviceId }, width: { ideal: videoWidth }, height: { ideal: videoHeight } }
+              : { width: { ideal: videoWidth }, height: { ideal: videoHeight }, facingMode: 'environment' },
             audio: false,
           }
           let stream: MediaStream
@@ -312,7 +391,7 @@ function useKioskLogic(
     const p = new URLSearchParams({
       company_id: String(stationCfg.companyId),
       window_seconds: String(stationCfg.epiScanSeconds),
-      fps: String(CFG.fps),
+      fps: String(getAdaptiveScanConfig(stationCfg).fps),
       confidence: String(CFG.confidence),
       face_threshold: String(CFG.face_threshold),
       detect_faces: String(CFG.detect_faces),
@@ -342,27 +421,40 @@ function useKioskLogic(
       const wsBase2 = apiBase.replace(/^http/, 'ws')
       const ws2 = new WebSocket(`${wsBase2}/api/v1/epi/ws/epi-stream?${buildWsParams('epi')}`)
       wsRef.current = ws2
+      let framesSent2 = 0
+      const epiScanStartedAt = Date.now()
       ws2.onmessage = onMsg
       ws2.onopen = () => {
-        const iv2 = Math.round(1000 / CFG.fps)
+        const adaptive = getAdaptiveScanConfig(stationCfg)
+        console.log('[EPI scan] ws2 aberto, iniciando envio de frames', adaptive)
+        const iv2 = Math.round(1000 / adaptive.fps)
         let sending = false
         wsTimerRef.current = setInterval(async () => {
           if (ws2.readyState !== WebSocket.OPEN || sending) return
           sending = true
           try {
-            const blob = await captureFrame(0.8)
-            if (blob && ws2.readyState === WebSocket.OPEN) ws2.send(blob)
+            const blob = await captureFrame(adaptive.frameQuality)
+            if (blob && ws2.readyState === WebSocket.OPEN) { ws2.send(blob); framesSent2++ }
           } finally { sending = false }
         }, iv2)
       }
+      ws2.onerror = () => { console.error('[EPI scan] ws2 erro de conexão') }
       // Timeout de segurança: se o backend não enviar decision, volta ao idle
       const epiTimeoutMs = (stationCfg.epiScanSeconds + 8) * 1000
       subPhaseTimerRef.current = setTimeout(() => {
         if (!mountedRef.current || phaseRef.current !== 'scanning') return
-        console.warn('[EPI scan] timeout de segurança atingido, voltando ao idle')
+        console.warn('[EPI scan] timeout de segurança atingido, voltando ao idle', {
+          framesEnviados: framesSent2,
+          wsReadyState: ws2.readyState,
+          msDesdeAbertura: Date.now() - epiScanStartedAt,
+          epiTimeoutMs,
+        })
         goIdle()
       }, epiTimeoutMs)
-      ws2.onclose = () => { if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null } }
+      ws2.onclose = (ev) => {
+        console.log('[EPI scan] ws2 fechado', { code: ev.code, reason: ev.reason, framesEnviados: framesSent2 })
+        if (wsTimerRef.current) { clearInterval(wsTimerRef.current); wsTimerRef.current = null }
+      }
     }, stationCfg.prepareSeconds * 1000)
   }, [clearSubPhaseTimers, setSubPhase, captureFrame, buildWsParams, stationCfg.prepareSeconds])
 
@@ -600,7 +692,8 @@ function useKioskLogic(
 
     // ─── Fluxo EXIT: só reconhecimento facial via HTTP polling ───
     if (dir === 'EXIT') {
-      const pollInterval = Math.round(1000 / CFG.fps)
+      const adaptiveExit = getAdaptiveScanConfig(stationCfg)
+      const pollInterval = Math.round(1000 / adaptiveExit.fps)
 
       // Sem isso, se o rosto nunca for reconhecido (ex: balaclava), o polling
       // ficava rodando pra sempre sem nunca mostrar bloqueio nem voltar ao
@@ -619,7 +712,7 @@ function useKioskLogic(
 
       const poll = async () => {
         if (!mountedRef.current || phaseRef.current !== 'scanning') return
-        const blob = await captureFrame(0.8)
+        const blob = await captureFrame(adaptiveExit.frameQuality)
         if (!blob) return
         lastExitFaceBlobRef.current = blob
         try {
@@ -785,7 +878,7 @@ function useKioskLogic(
           // (video.readyState < 2) logo após o fim de um scan anterior, e sem retry a
           // foto de entrada nunca era enviada nesses casos.
           if (fr.face_recognized && subPhaseRef.current === 'face_scan' && !lastEntryFaceBlobRef.current) {
-            captureFrame(0.92).then(b => { if (b) lastEntryFaceBlobRef.current = b }).catch(() => {})
+            captureFrame(getAdaptiveScanConfig(stationCfg).entryPhotoQuality).then(b => { if (b) lastEntryFaceBlobRef.current = b }).catch(() => {})
           }
           if (fr.face_recognized && !faceIdentifiedRef.current && subPhaseRef.current === 'face_scan') {
             faceIdentifiedRef.current = true
@@ -810,6 +903,7 @@ function useKioskLogic(
           }
         }
         if (msg.type === 'decision') {
+          console.log('[decision] recebida do backend', { fase: subPhaseRef.current, access_decision: msg.access_decision, compliance_rate: msg.compliance_rate, face_rate: msg.face_rate })
           if (subPhaseRef.current !== 'epi_scan') return
           const d = msg as Decision
           const personCode = d.person_code ?? identifiedPersonRef.current?.code ?? null
@@ -866,7 +960,13 @@ function useKioskLogic(
             }, 2500)
           }
         }
-      } catch { }
+      } catch (e) {
+        // Antes engolia qualquer erro aqui em silêncio — se o processamento
+        // da mensagem WS (decisão, abertura de porta, etc.) explodir, isso
+        // é a diferença entre "trava e volta pro idle sem explicação" e
+        // dar pra ver a causa na aba de Logs das configurações.
+        console.error('[handleWsMessage] erro processando mensagem WS:', e, ev.data)
+      }
     }
 
     subPhaseTimerRef.current = setTimeout(() => {
@@ -890,13 +990,14 @@ function useKioskLogic(
     wsRef.current = ws
     ws.onmessage = handleWsMessage
     ws.onopen = () => {
-      const interval = Math.round(1000 / CFG.fps)
+      const adaptiveFace = getAdaptiveScanConfig(stationCfg)
+      const interval = Math.round(1000 / adaptiveFace.fps)
       let sending = false
       wsTimerRef.current = setInterval(async () => {
         if (ws.readyState !== WebSocket.OPEN || sending) return
         sending = true
         try {
-          const blob = await captureFrame(0.8)
+          const blob = await captureFrame(adaptiveFace.frameQuality)
           if (blob && ws.readyState === WebSocket.OPEN) ws.send(blob)
         } finally { sending = false }
       }, interval)
@@ -990,13 +1091,27 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
   const [cfg, setCfg] = useState<StationConfig>(loadConfig)
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<'ok' | 'fail' | null>(null)
-  const [tab, setTab] = useState<'cam' | 'door' | 'api' | 'scan'>('cam')
+  const [tab, setTab] = useState<'cam' | 'door' | 'api' | 'scan' | 'logs'>('cam')
 
   // ── ESP32 Monitor ──
   const [esp32Log, setEsp32Log] = useState<{ ts: string; raw: string; event: string; state?: string; led?: string }[]>([])
   const [esp32Status, setEsp32Status] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected')
   const esp32WsRef = useRef<WebSocket | null>(null)
   const logEndRef = useRef<HTMLDivElement>(null)
+
+  // ── Debug log (console + erros capturados globalmente) ──
+  const [debugLog, setDebugLog] = useState<DebugLogEntry[]>(debugLogBuf)
+  useEffect(() => {
+    const onUpdate = () => setDebugLog([...debugLogBuf])
+    debugLogSubs.add(onUpdate)
+    onUpdate()
+    return () => { debugLogSubs.delete(onUpdate) }
+  }, [])
+  const copyDebugLog = () => {
+    const text = debugLog.map(e => `[${e.ts}] ${e.level.toUpperCase()} ${e.msg}`).join('\n')
+    navigator.clipboard?.writeText(text).catch(() => {})
+  }
+  const clearDebugLog = () => { debugLogBuf = []; setDebugLog([]) }
 
   const connectEsp32Ws = useCallback(() => {
     if (!cfg.lockIp) return
@@ -1074,7 +1189,7 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
         </div>
 
         <div style={{ display: 'flex', gap: 4, padding: '10px 16px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          {([['cam', '📷 Câmera'], ['door', '🔒 Fechadura'], ['api', '🌐 API'], ['scan', '⚙️ Scan']] as [typeof tab, string][]).map(([id, label]) => (
+          {([['cam', '📷 Câmera'], ['door', '🔒 Fechadura'], ['api', '🌐 API'], ['scan', '⚙️ Scan'], ['logs', '🐞 Logs']] as [typeof tab, string][]).map(([id, label]) => (
             <button key={id} style={tabBtn(tab === id)} onClick={() => setTab(id)}>{label}</button>
           ))}
         </div>
@@ -1312,6 +1427,61 @@ function ConfigModal({ onClose, onSave, devices, theme }: {
               <div>
                 <label style={lbl}>Tempo para colocar a balaclava (s)</label>
                 <input style={inp} type="number" value={cfg.prepareSeconds} onChange={e => set('prepareSeconds', parseInt(e.target.value) || 10)} min={3} max={30} />
+              </div>
+              <div>
+                <label style={{ ...lbl, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={cfg.lowBandwidthMode}
+                    onChange={e => setCfg(p => ({ ...p, lowBandwidthMode: e.target.checked }))}
+                    style={{ width: 15, height: 15, cursor: 'pointer' }}
+                  />
+                  Modo economia de dados
+                </label>
+                <div style={{ fontSize: 10, color: '#6B7280', marginTop: 4, lineHeight: 1.5 }}>
+                  Reduz resolução/fps/qualidade dos frames enviados (menos consumo em rede móvel).
+                  Em Android/Chrome isso é detectado automaticamente quando o tablet está em dados
+                  móveis{isCellularConnection() ? ' — rede celular detectada agora' : ''}; no iOS/Safari
+                  não há como detectar, então marque manualmente se for o caso.
+                </div>
+              </div>
+            </>
+          )}
+
+          {tab === 'logs' && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <label style={{ ...lbl, marginBottom: 0 }}>Console &amp; erros ({debugLog.length})</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button onClick={copyDebugLog} disabled={!debugLog.length} style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.35)', borderRadius: 6, padding: '3px 10px', cursor: debugLog.length ? 'pointer' : 'not-allowed', color: '#60A5FA', fontSize: 11, fontFamily: 'monospace' }}>Copiar</button>
+                  <button onClick={clearDebugLog} disabled={!debugLog.length} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '3px 10px', cursor: debugLog.length ? 'pointer' : 'not-allowed', color: '#6B7280', fontSize: 11, fontFamily: 'monospace' }}>Limpar</button>
+                </div>
+              </div>
+              <div style={{
+                background: '#060A10', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10,
+                padding: '10px 12px', height: 320, overflowY: 'auto', fontFamily: 'monospace', fontSize: 11,
+                display: 'flex', flexDirection: 'column', gap: 3,
+              }}>
+                {debugLog.length === 0 ? (
+                  <div style={{ color: '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontSize: 18 }}>🐞</span>
+                    <span>Nenhum log ainda — os erros de console e falhas não tratadas aparecem aqui em tempo real.</span>
+                  </div>
+                ) : [...debugLog].reverse().map((e, i) => {
+                  const color = e.level === 'error' ? '#EF4444' : e.level === 'warn' ? '#F59E0B' : '#9CA3AF'
+                  return (
+                    <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', lineHeight: 1.5 }}>
+                      <span style={{ color: '#374151', flexShrink: 0 }}>{e.ts}</span>
+                      <span style={{ background: `${color}20`, color, border: `1px solid ${color}40`, borderRadius: 4, padding: '0 5px', fontSize: 10, flexShrink: 0, fontWeight: 700 }}>
+                        {e.level.toUpperCase()}
+                      </span>
+                      <span style={{ color: '#D1D5DB', wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>{e.msg}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <div style={{ fontSize: 10, color: '#374151', fontFamily: 'monospace' }}>
+                Fica só na memória da aba — some se recarregar a página. Use "Copiar" pra colar em algum lugar antes de recarregar.
               </div>
             </>
           )}
